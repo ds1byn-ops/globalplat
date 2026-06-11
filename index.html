@@ -847,4 +847,31 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 </script>
 
 </body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  // 2. 내 슈파베이스 정보 설정
+  const supabaseUrl = "https://qfncxamqeiyxkbjxwtoi.supabase.co"
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE"
+  
+  // 3. 연결 클라이언트 만들기
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
+
+  // 4. 실제로 데이터를 저장하는 함수
+  async function saveDataToSupabase() {
+    const { data, error } = await supabaseClient
+      .from('test_table') // 우리가 만든 테이블 이름
+      .insert([
+        { content: '우와아아 드디어 성공했다!! 🎉' } // 방금 만든 content 컬럼에 들어갈 내용
+      ])
+
+    if (error) {
+      alert('실패 😭: ' + error.message)
+    } else {
+      alert('성공! 슈파베이스에 데이터가 잘 들어갔어! 😎')
+    }
+  }
+</script>
+
+<button onclick="saveDataToSupabase()">슈파베이스로 데이터 보내기 🚀</button>
 </html>
