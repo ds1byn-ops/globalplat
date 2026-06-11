@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Follow Korea — 백오피스</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1B3E;--navy2:#162550;--teal:#1D9E75;--teal2:#E1F5EE;--teal3:#9FE1CB;
+  --gold:#C9A84C;--gold2:#FAEEDA;--rose:#C8556A;--rose2:#FDECEA;
+  --amber:#BA7517;--amber2:#FAEEDA;--purple:#534AB7;--purple2:#EEEDFE;
+  --gray1:#F4F6F9;--gray2:#E8ECF2;--gray3:#8A9BB5;--gray4:#4A5568;
+  --white:#fff;--dark:#1A2744;--green:#1A7B4E;--green2:#E6F5EE;
+  --shadow:0 2px 16px rgba(13,27,62,.07);--radius:10px;
+}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--gray1);color:var(--dark)}
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:210px;background:var(--navy2);padding:1rem 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-brand{padding:.5rem 1.1rem 1rem}
+.brand-logo{font-size:1rem;font-weight:700;color:#fff}
+.brand-logo span{color:var(--teal3)}
+.brand-sub{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:.15rem}
+.s-section{font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:1px;padding:.65rem 1.1rem .22rem;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.58rem 1.1rem;color:rgba(255,255,255,.55);font-size:.78rem;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{border-left:3px solid var(--teal3);background:rgba(29,158,117,.08)}
+.ni{font-size:.95rem;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--rose);color:#fff;font-size:.58rem;padding:.1rem .42rem;border-radius:10px;font-weight:700}
+
+/* MAIN */
+.main{flex:1;overflow-x:hidden}
+.topbar{background:#fff;padding:.72rem 1.4rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray2);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:.75rem}
+.topbar-title{font-size:1rem;font-weight:700;color:var(--navy)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-label{font-size:.7rem;color:var(--teal);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:.7rem}
+.admin-badge{background:var(--navy);color:var(--teal3);font-size:.72rem;padding:.25rem .7rem;border-radius:20px;font-weight:600}
+.content{padding:1.2rem 1.4rem}
+.page{display:none}.page.active{display:block}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.1rem}
+.stat-card{background:#fff;border-radius:var(--radius);padding:.85rem 1rem;border:1px solid var(--gray2);box-shadow:var(--shadow)}
+.stat-label{font-size:.68rem;color:var(--gray3);margin-bottom:.22rem;letter-spacing:.2px}
+.stat-num{font-size:1.5rem;font-weight:700;color:var(--navy)}
+.stat-delta{font-size:.65rem;margin-top:.15rem}
+.delta-up{color:var(--teal)}.delta-dn{color:var(--rose)}
+
+/* CARD */
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray2);box-shadow:var(--shadow);overflow:hidden;margin-bottom:.9rem}
+.card-header{padding:.75rem 1.1rem;border-bottom:1px solid var(--gray2);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:.88rem;font-weight:700;color:var(--navy)}
+.card-meta{font-size:.72rem;color:var(--gray3)}
+.card-action{font-size:.74rem;color:var(--teal);cursor:pointer;background:none;border:none;font-family:inherit;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{font-size:.7rem;color:var(--gray3);font-weight:600;padding:.55rem 1rem;background:var(--gray1);border-bottom:1px solid var(--gray2);text-align:left;white-space:nowrap}
+td{font-size:.78rem;padding:.65rem 1rem;border-bottom:1px solid var(--gray2);color:var(--dark);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFC}
+.badge{display:inline-block;padding:.16rem .55rem;border-radius:20px;font-size:.66rem;font-weight:600}
+.b-green{background:var(--teal2);color:var(--teal)}
+.b-amber{background:var(--amber2);color:var(--amber)}
+.b-rose{background:var(--rose2);color:var(--rose)}
+.b-purple{background:var(--purple2);color:var(--purple)}
+.b-navy{background:var(--gray2);color:var(--gray4)}
+
+/* CHART */
+.bar-chart{padding:.7rem 1.1rem}
+.bc-row{display:flex;align-items:center;gap:.65rem;margin-bottom:.5rem}
+.bc-label{font-size:.72rem;color:var(--gray4);width:90px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-bg{flex:1;background:var(--gray1);border-radius:4px;height:9px;overflow:hidden}
+.bc-fill{height:100%;border-radius:4px;transition:width .7s ease}
+.bc-val{font-size:.7rem;font-weight:600;width:50px;text-align:right;flex-shrink:0}
+
+/* REVENUE CHART */
+.rev-chart{padding:.9rem 1.1rem;overflow-x:auto}
+.rev-bars{display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:.4rem}
+.rev-bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;min-width:30px}
+.rev-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s;cursor:pointer;position:relative}
+.rev-bar:hover .rev-tooltip{display:block}
+.rev-tooltip{display:none;position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:.6rem;padding:.18rem .5rem;border-radius:4px;white-space:nowrap}
+.rev-month{font-size:.68rem;color:var(--gray3);margin-top:.3rem}
+.rev-legend{display:flex;gap:.9rem;margin-top:.5rem}
+.rev-leg-item{display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--gray4)}
+.rev-leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* KOL TABLE */
+.kol-row{display:flex;align-items:center;gap:.85rem;padding:.7rem 0;border-bottom:1px solid var(--gray2)}
+.kol-row:last-child{border-bottom:none}
+.kol-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#fff}
+.kol-name{font-size:.82rem;font-weight:700;color:var(--dark);margin-bottom:.12rem}
+.kol-platform{font-size:.68rem;color:var(--gray3)}
+.kol-stat{text-align:right;flex-shrink:0}
+.kol-patients{font-size:.85rem;font-weight:700;color:var(--teal)}
+.kol-conv{font-size:.68rem;color:var(--gray3)}
+.kol-commission{font-size:.78rem;font-weight:600;color:var(--amber)}
+
+/* HOSPITAL TABLE */
+.hosp-status-bar{display:flex;gap:3px;width:80px;height:6px}
+.hsb-fill{height:100%;border-radius:2px;background:var(--teal)}
+.hsb-empty{height:100%;border-radius:2px;background:var(--gray2)}
+
+/* FILTER */
+.filter-row{display:flex;gap:.55rem;margin-bottom:.9rem;flex-wrap:wrap;align-items:center}
+.fi{border:1.5px solid var(--gray2);border-radius:8px;padding:.4rem .65rem;font-size:.76rem;color:var(--dark);outline:none;font-family:inherit;background:#fff;transition:border .15s}
+.fi:focus{border-color:var(--teal)}
+.btn{padding:.4rem .85rem;border-radius:8px;font-size:.74rem;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:#0f6e56}
+.btn-outline{background:#fff;color:var(--dark);border:1.5px solid var(--gray2)}.btn-outline:hover{border-color:var(--navy)}
+.btn-sm-rose{background:var(--rose2);color:var(--rose);border:none;border-radius:6px;padding:.22rem .55rem;font-size:.68rem;cursor:pointer;font-family:inherit}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--navy);color:#fff;padding:.5rem 1.1rem;border-radius:20px;font-size:.74rem;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* NOTIFICATION */
+.notif-item{display:flex;gap:.75rem;padding:.75rem 1.1rem;border-bottom:1px solid var(--gray2);align-items:flex-start}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.3rem}
+.notif-text{font-size:.8rem;color:var(--dark);line-height:1.5}
+.notif-time{font-size:.68rem;color:var(--gray3);margin-top:.18rem}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">Follow<span>Korea</span></div>
+    <div class="brand-sub">운영팀 백오피스</div>
+  </div>
+
+  <div class="s-section">대시보드</div>
+  <button class="nav-item active" onclick="showPage('overview',this)"><span class="ni">📊</span>전체 현황</button>
+  <button class="nav-item" onclick="showPage('revenue',this)"><span class="ni">💹</span>매출·재무</button>
+
+  <div class="s-section">운영 관리</div>
+  <button class="nav-item" onclick="showPage('hospitals',this)"><span class="ni">🏥</span>병원 관리</button>
+  <button class="nav-item" onclick="showPage('patients-bo',this)"><span class="ni">👥</span>환자 CRM<span class="nbadge">5</span></button>
+  <button class="nav-item" onclick="showPage('coordinators',this)"><span class="ni">🎯</span>코디 배정</button>
+  <button class="nav-item" onclick="showPage('complaints',this)"><span class="ni">⚠️</span>컴플레인<span class="nbadge">2</span></button>
+
+  <div class="s-section">마케팅</div>
+  <button class="nav-item" onclick="showPage('kol',this)"><span class="ni">📱</span>왕홍·KOL</button>
+  <button class="nav-item" onclick="showPage('campaigns',this)"><span class="ni">📣</span>캠페인</button>
+
+  <div class="s-section">정산</div>
+  <button class="nav-item" onclick="showPage('settlement',this)"><span class="ni">💰</span>정산 관리</button>
+
+  <div style="flex:1"></div>
+  <div class="s-section">시스템</div>
+  <button class="nav-item" onclick="toast('설정 페이지')"><span class="ni">⚙️</span>설정</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbar-title">전체 현황</div>
+      <div class="live-dot"></div>
+      <div class="live-label">LIVE</div>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:.74rem;color:var(--gray3)">2026-06-09 09:41</span>
+      <span class="admin-badge">ADMIN · 팔로우코리아</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">오늘 전체 예약</div>
+          <div class="stat-num">42</div>
+          <div class="stat-delta delta-up">↑ 8 전일 대비</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">활성 병원</div>
+          <div class="stat-num">30</div>
+          <div class="stat-delta" style="color:var(--gray3)">계약 7 · 협의 14</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">등록 왕홍</div>
+          <div class="stat-num">5</div>
+          <div class="stat-delta delta-up">↑ 2 이번달</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">이번달 환자</div>
+          <div class="stat-num">389</div>
+          <div class="stat-delta delta-up">↑ 18% MoM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">이번달 매출</div>
+          <div class="stat-num" style="font-size:1.2rem;color:var(--teal)">₩3,240만</div>
+          <div class="stat-delta delta-up">↑ 22% MoM</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:.9rem">
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">알림</div><button class="card-action" onclick="toast('전체 읽음 처리')">전체 읽음</button></div>
+            <div id="notif-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">국가별 환자 분포</div></div>
+            <div class="bar-chart" id="country-chart-bo"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">최근 예약 (전체 병원)</div><button class="card-action" onclick="showPage('patients-bo',document.querySelectorAll('.nav-item')[4])">전체 보기</button></div>
+            <table>
+              <thead><tr><th>예약번호</th><th>환자</th><th>병원</th><th>시술</th><th>상태</th></tr></thead>
+              <tbody id="recent-res-tbody"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">BM별 매출 현황</div></div>
+            <div class="bar-chart" id="bm-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="page" id="page-revenue">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:.9rem">
+        <div class="stat-card"><div class="stat-label">6월 누계 매출</div><div class="stat-num" style="color:var(--teal)">₩3,240만</div><div class="stat-delta delta-up">↑ 22%</div></div>
+        <div class="stat-card"><div class="stat-label">수수료 수익</div><div class="stat-num">₩2,100만</div><div class="stat-delta" style="color:var(--gray3)">평균 8.5%</div></div>
+        <div class="stat-card"><div class="stat-label">코디 서비스</div><div class="stat-num">₩840만</div><div class="stat-delta delta-up">↑ 35%</div></div>
+        <div class="stat-card"><div class="stat-label">미정산 잔액</div><div class="stat-num" style="color:var(--amber)">₩420만</div><div class="stat-delta" style="color:var(--amber)">12건 대기</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">월별 매출 추이 (2026)</div><div class="card-meta">단위: 만원</div></div>
+        <div class="rev-chart">
+          <div class="rev-bars" id="rev-bars"></div>
+          <div style="display:flex;justify-content:space-around" id="rev-months"></div>
+          <div class="rev-legend">
+            <div class="rev-leg-item"><div class="rev-leg-dot" style="background:var(--teal)"></div>B2C 수수료</div>
+            <div class="rev-leg-item"><div class="rev-leg-dot" style="background:var(--amber)"></div>코디 서비스</div>
+            <div class="rev-leg-item"><div class="rev-leg-dot" style="background:var(--purple)"></div>VVIP</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">병원별 매출 기여</div></div>
+        <div class="bar-chart" id="hosp-rev-chart"></div>
+      </div>
+    </div>
+
+    <!-- HOSPITALS -->
+    <div class="page" id="page-hospitals">
+      <div class="filter-row">
+        <input class="fi" placeholder="병원명 검색..." id="hosp-search" oninput="filterHospitals()">
+        <select class="fi" id="hosp-status-filter" onchange="filterHospitals()">
+          <option value="">전체 상태</option>
+          <option value="계약완료">계약완료</option>
+          <option value="협의중">협의중</option>
+          <option value="미정">미정</option>
+        </select>
+        <select class="fi" onchange="">
+          <option>전체 과목</option><option>피부과</option><option>성형외과</option>
+          <option>줄기세포</option><option>산부인과</option><option>한방</option>
+        </select>
+        <button class="btn btn-teal" onclick="toast('신규 병원 등록')">+ 병원 등록</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">파트너 병원 목록</div>
+          <div class="card-meta" id="hosp-count">전체 0곳</div>
+        </div>
+        <table>
+          <thead><tr><th>병원명</th><th>과목</th><th>지역</th><th>수수료율</th><th>이번달 예약</th><th>이행률</th><th>상태</th><th>액션</th></tr></thead>
+          <tbody id="hosp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PATIENTS BO -->
+    <div class="page" id="page-patients-bo">
+      <div class="filter-row">
+        <input class="fi" placeholder="이름·국적·채널 검색..." style="flex:1" id="pat-bo-search" oninput="filterPatientsBo()">
+        <select class="fi"><option>전체 국적</option><option>중국</option><option>베트남</option><option>태국</option><option>말레이시아</option></select>
+        <select class="fi"><option>전체 채널</option><option>왕홍</option><option>SNS</option><option>직접</option></select>
+        <button class="btn btn-outline" onclick="toast('CSV 내보내기')">📥 내보내기</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">전체 환자 CRM</div><div class="card-meta" id="pat-bo-count"></div></div>
+        <table>
+          <thead><tr><th>환자</th><th>국적</th><th>유입 채널</th><th>첫 방문</th><th>총 방문</th><th>마지막 시술</th><th>누적 결제</th><th>상태</th><th>액션</th></tr></thead>
+          <tbody id="pat-bo-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- KOL -->
+    <div class="page" id="page-kol">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:.9rem">
+        <div class="stat-card"><div class="stat-label">등록 왕홍</div><div class="stat-num">5</div><div class="stat-delta delta-up">↑ 2 이번달</div></div>
+        <div class="stat-card"><div class="stat-label">왕홍 유입 환자</div><div class="stat-num">218</div><div class="stat-delta delta-up">56% 전체 중</div></div>
+        <div class="stat-card"><div class="stat-label">왕홍 수수료 지급</div><div class="stat-num" style="color:var(--amber)">₩540만</div><div class="stat-delta" style="color:var(--gray3)">이번달 누계</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">왕홍·KOL 현황</div><button class="card-action" onclick="toast('왕홍 등록')">+ 등록</button></div>
+        <div style="padding:.4rem 1.1rem" id="kol-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">채널별 성과 비교</div></div>
+        <div class="bar-chart" id="kol-chart"></div>
+      </div>
+    </div>
+
+    <!-- COORDINATORS -->
+    <div class="page" id="page-coordinators">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem">
+        <div class="stat-card"><div class="stat-label">활성 코디</div><div class="stat-num">4</div></div>
+        <div class="stat-card"><div class="stat-label">오늘 배정</div><div class="stat-num">12</div></div>
+        <div class="stat-card"><div class="stat-label">평균 만족도</div><div class="stat-num">4.9★</div></div>
+      </div>
+      <div style="margin-top:.9rem" class="card">
+        <div class="card-header"><div class="card-title">코디네이터 배정 현황</div></div>
+        <table>
+          <thead><tr><th>코디</th><th>언어</th><th>오늘 담당</th><th>이번달 케이스</th><th>만족도</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td><strong>이메이</strong></td><td><span class="badge b-green">中文</span> <span class="badge b-navy">EN</span></td><td>5명</td><td>42건</td><td style="color:var(--gold)">★ 4.9</td><td><span class="badge b-green">활성</span></td></tr>
+            <tr><td><strong>Nguyen Thi</strong></td><td><span class="badge b-purple">Việt</span> <span class="badge b-navy">EN</span></td><td>4명</td><td>31건</td><td style="color:var(--gold)">★ 4.8</td><td><span class="badge b-green">활성</span></td></tr>
+            <tr><td><strong>김지수</strong></td><td><span class="badge b-amber">ภาษาไทย</span> <span class="badge b-navy">EN</span></td><td>3명</td><td>18건</td><td style="color:var(--gold)">★ 4.7</td><td><span class="badge b-green">활성</span></td></tr>
+            <tr><td><strong>Park Minsu</strong></td><td><span class="badge b-navy">Bahasa</span> <span class="badge b-navy">EN</span></td><td>0명</td><td>8건</td><td style="color:var(--gold)">★ 4.8</td><td><span class="badge b-amber">대기</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMPLAINTS -->
+    <div class="page" id="page-complaints">
+      <div class="card">
+        <div class="card-header"><div class="card-title">컴플레인 목록</div><div class="card-meta">미처리 2건</div></div>
+        <table>
+          <thead><tr><th>접수일</th><th>환자</th><th>병원</th><th>내용</th><th>담당</th><th>상태</th><th>액션</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>2026-06-08</td>
+              <td>🇨🇳 Wang Fang</td>
+              <td>강남 루체 피부과</td>
+              <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">시술 후 예상보다 회복이 느립니다...</td>
+              <td>이메이</td>
+              <td><span class="badge b-amber">처리중</span></td>
+              <td><button class="btn btn-outline" style="font-size:.68rem;padding:.25rem .55rem" onclick="toast('상세 보기')">상세</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-07</td>
+              <td>🇻🇳 Linh N.</td>
+              <td>신사 글로우 피부과</td>
+              <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">예약 변경 요청이 반영되지 않았어요...</td>
+              <td>미배정</td>
+              <td><span class="badge b-rose">미처리</span></td>
+              <td><button class="btn btn-teal" style="font-size:.68rem;padding:.25rem .55rem" onclick="toast('담당자 배정')">배정</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="page" id="page-campaigns">
+      <div class="card">
+        <div class="card-header"><div class="card-title">진행중 캠페인</div><button class="card-action" onclick="toast('캠페인 생성')">+ 신규</button></div>
+        <table>
+          <thead><tr><th>캠페인명</th><th>채널</th><th>기간</th><th>UTM</th><th>유입</th><th>전환</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td><strong>6월 레이저 프로모</strong></td><td>샤오홍슈</td><td>06/01~06/30</td><td>utm_xhs_laser</td><td>2,841</td><td><strong style="color:var(--teal)">134</strong></td><td><span class="badge b-green">진행중</span></td></tr>
+            <tr><td><strong>왕홍 이메이 협업</strong></td><td>도우인</td><td>06/05~06/20</td><td>utm_dy_imei</td><td>1,203</td><td><strong style="color:var(--teal)">58</strong></td><td><span class="badge b-green">진행중</span></td></tr>
+            <tr><td><strong>베트남 필러 캠페인</strong></td><td>Facebook</td><td>05/15~06/15</td><td>utm_fb_vn</td><td>892</td><td><strong style="color:var(--teal)">41</strong></td><td><span class="badge b-amber">마감예정</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTLEMENT -->
+    <div class="page" id="page-settlement">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:.9rem">
+        <div class="stat-card"><div class="stat-label">정산 완료</div><div class="stat-num" style="color:var(--teal)">₩2,820만</div></div>
+        <div class="stat-card"><div class="stat-label">대기 중</div><div class="stat-num" style="color:var(--amber)">₩420만</div></div>
+        <div class="stat-card"><div class="stat-label">왕홍 수수료</div><div class="stat-num">₩540만</div></div>
+        <div class="stat-card"><div class="stat-label">코디 수수료</div><div class="stat-num">₩280만</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">병원별 정산 현황</div><button class="card-action" onclick="toast('일괄 정산 처리')">일괄 정산</button></div>
+        <table>
+          <thead><tr><th>병원</th><th>이번달 케이스</th><th>총 시술금액</th><th>수수료율</th><th>팔로우코리아 수수료</th><th>정산상태</th><th>액션</th></tr></thead>
+          <tbody>
+            <tr><td><strong>강남 루체 피부과</strong></td><td>42건</td><td>₩12,600,000</td><td>10%</td><td style="color:var(--teal);font-weight:700">₩1,260,000</td><td><span class="badge b-green">완료</span></td><td><button class="btn-sm-rose" onclick="toast('내역 보기')">내역</button></td></tr>
+            <tr><td><strong>청담 플러스 피부과</strong></td><td>31건</td><td>₩9,300,000</td><td>12%</td><td style="color:var(--teal);font-weight:700">₩1,116,000</td><td><span class="badge b-amber">대기</span></td><td><button class="btn btn-teal" style="font-size:.68rem;padding:.25rem .55rem" onclick="toast('정산 처리')">정산</button></td></tr>
+            <tr><td><strong>압구정 아이디 성형</strong></td><td>18건</td><td>₩32,400,000</td><td>8%</td><td style="color:var(--teal);font-weight:700">₩2,592,000</td><td><span class="badge b-green">완료</span></td><td><button class="btn-sm-rose" onclick="toast('내역 보기')">내역</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────────────
+const HOSPITALS_BO = [
+  {name:'강남 루체 피부과',cat:'피부과',area:'강남',rate:'10%',bookings:42,rate_pct:89,status:'계약완료'},
+  {name:'압구정 아이디 성형',cat:'성형외과',area:'압구정',rate:'8%',bookings:18,rate_pct:94,status:'계약완료'},
+  {name:'신사 글로우 피부과',cat:'피부과',area:'신사',rate:'12%',bookings:31,rate_pct:82,status:'계약완료'},
+  {name:'강남 메디 한의원',cat:'한방',area:'강남',rate:'10%',bookings:14,rate_pct:78,status:'계약완료'},
+  {name:'청담 플러스 피부과',cat:'피부과',area:'청담',rate:'10%',bookings:24,rate_pct:91,status:'계약완료'},
+  {name:'JD피부성형센터',cat:'피부과',area:'강남',rate:'9%',bookings:0,rate_pct:0,status:'계약완료'},
+  {name:'드림성형외과',cat:'성형외과',area:'강남',rate:'8%',bookings:0,rate_pct:0,status:'계약완료'},
+  {name:'GV성형외과',cat:'성형외과',area:'강남',rate:'-',bookings:0,rate_pct:0,status:'협의중'},
+  {name:'강남다움의원',cat:'피부과',area:'강남',rate:'-',bookings:0,rate_pct:0,status:'협의중'},
+  {name:'차움',cat:'종합',area:'청담',rate:'-',bookings:0,rate_pct:0,status:'협의중'},
+];
+
+const PATIENTS_BO = [
+  {name:'Liu Fang',flag:'🇨🇳',nat:'중국',channel:'왕홍(도우인)',first:'2025-10-12',visits:4,last:'울쎄라',total:'₩2,100,000',status:'VIP'},
+  {name:'Xiao Mei',flag:'🇨🇳',nat:'중국',channel:'왕홍(샤오홍슈)',first:'2025-12-01',visits:3,last:'레이저토닝',total:'₩680,000',status:'재방문'},
+  {name:'Wang Fang',flag:'🇨🇳',nat:'중국',channel:'왕홍(위챗)',first:'2026-01-15',visits:2,last:'피코레이저',total:'₩520,000',status:'재방문'},
+  {name:'Linh Nguyen',flag:'🇻🇳',nat:'베트남',channel:'SNS',first:'2026-03-20',visits:1,last:'필러',total:'₩350,000',status:'신규'},
+  {name:'Suda Teeraset',flag:'🇹🇭',nat:'태국',channel:'직접',first:'2026-05-08',visits:1,last:'보톡스',total:'₩150,000',status:'신규'},
+  {name:'Aishah Rahim',flag:'🇲🇾',nat:'말레이시아',channel:'SNS',first:'2026-04-11',visits:1,last:'스킨부스터',total:'₩250,000',status:'신규'},
+  {name:'Nguyen Thi Ha',flag:'🇻🇳',nat:'베트남',channel:'왕홍(도우인)',first:'2025-11-22',visits:2,last:'리쥬란',total:'₩760,000',status:'재방문'},
+];
+
+const KOLS = [
+  {name:'이메이(李美)',platform:'도우인·샤오홍슈',bg:'#C8556A',patients:89,conv:'18%',commission:'₩178,000'},
+  {name:'XiaoHua',platform:'샤오홍슈',bg:'#534AB7',patients:64,conv:'15%',commission:'₩128,000'},
+  {name:'K-Beauty_VN',platform:'틱톡(베트남)',bg:'#1D9E75',patients:38,conv:'12%',commission:'₩76,000'},
+  {name:'Dr_Skin_TH',platform:'인스타그램(태국)',bg:'#BA7517',patients:19,conv:'9%',commission:'₩38,000'},
+  {name:'GlobalMed',platform:'유튜브',bg:'#0D1B3E',patients:8,conv:'6%',commission:'₩16,000'},
+];
+
+const RECENT_RES = [
+  {id:'FK-28341',patient:'🇨🇳 Xiao Mei',hospital:'강남 루체',proc:'레이저토닝',status:'confirmed'},
+  {id:'FK-28342',patient:'🇻🇳 Linh N.',hospital:'강남 루체',proc:'필러',status:'confirmed'},
+  {id:'FK-28343',patient:'🇹🇭 Suda T.',hospital:'강남 루체',proc:'보톡스',status:'pending'},
+  {id:'FK-28344',patient:'🇨🇳 Wang F.',hospital:'청담 플러스',proc:'피코레이저',status:'completed'},
+  {id:'FK-28345',patient:'🇲🇾 Aishah',hospital:'신사 글로우',proc:'스킨부스터',status:'confirmed'},
+];
+
+const STATUS_CLS = {confirmed:'b-green',pending:'b-amber',completed:'b-purple',cancelled:'b-rose'};
+const STATUS_LBL = {confirmed:'확정',pending:'대기',completed:'완료',cancelled:'취소'};
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderNotifications();
+renderCountryChart();
+renderBmChart();
+renderRecentRes();
+renderHospitals(HOSPITALS_BO);
+renderPatientsBo(PATIENTS_BO);
+renderKols();
+renderKolChart();
+renderRevChart();
+renderHospRevChart();
+
+function renderNotifications() {
+  const items = [
+    {color:'var(--rose)',text:'FK-28343 보톡스 예약 — 확정 대기 중',time:'5분 전'},
+    {color:'var(--amber)',text:'청담 플러스 이번달 정산 미처리 (₩1,116,000)',time:'1시간 전'},
+    {color:'var(--teal)',text:'K-Beauty_VN 왕홍 계약 갱신 요청',time:'3시간 전'},
+    {color:'var(--purple)',text:'Liu Fang VVIP 재방문 예약 완료',time:'어제'},
+  ];
+  document.getElementById('notif-list').innerHTML = items.map(n=>`
+    <div class="notif-item">
+      <div class="notif-dot" style="background:${n.color}"></div>
+      <div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div>
+    </div>`).join('');
+}
+
+function renderCountryChart() {
+  const data=[{l:'중국',v:58,c:'var(--rose)'},{l:'베트남',v:22,c:'var(--teal)'},{l:'태국',v:11,c:'var(--amber)'},{l:'말레이시아',v:9,c:'var(--purple)'}];
+  document.getElementById('country-chart-bo').innerHTML = data.map(d=>`
+    <div class="bc-row">
+      <div class="bc-label">${d.l}</div>
+      <div class="bc-bg"><div class="bc-fill" style="width:${d.v}%;background:${d.c}"></div></div>
+      <div class="bc-val" style="color:${d.c}">${d.v}%</div>
+    </div>`).join('');
+}
+
+function renderBmChart() {
+  const data=[{l:'B2C 수수료',v:2100,c:'var(--teal)'},{l:'코디 서비스',v:840,c:'var(--amber)'},{l:'VVIP',v:300,c:'var(--purple)'}];
+  const max=2100;
+  document.getElementById('bm-chart').innerHTML = data.map(d=>`
+    <div class="bc-row">
+      <div class="bc-label">${d.l}</div>
+      <div class="bc-bg"><div class="bc-fill" style="width:${(d.v/max*100).toFixed(0)}%;background:${d.c}"></div></div>
+      <div class="bc-val" style="color:${d.c}">₩${(d.v/100).toFixed(0)}만</div>
+    </div>`).join('');
+}
+
+function renderRecentRes() {
+  document.getElementById('recent-res-tbody').innerHTML = RECENT_RES.map(r=>`
+    <tr>
+      <td style="font-size:.7rem;color:var(--purple);font-weight:600">${r.id}</td>
+      <td>${r.patient}</td>
+      <td style="font-size:.74rem">${r.hospital}</td>
+      <td style="font-size:.74rem">${r.proc}</td>
+      <td><span class="badge ${STATUS_CLS[r.status]}">${STATUS_LBL[r.status]}</span></td>
+    </tr>`).join('');
+}
+
+function renderHospitals(list) {
+  document.getElementById('hosp-count').textContent = `전체 ${list.length}곳`;
+  document.getElementById('hosp-tbody').innerHTML = list.map(h=>{
+    const bars = Array(10).fill('').map((_,i)=>
+      `<div class="${i < Math.round(h.rate_pct/10) ? 'hsb-fill' : 'hsb-empty'}" style="flex:1;${i < Math.round(h.rate_pct/10)?'':''}"></div>`).join('');
+    const sc = h.status==='계약완료'?'b-green':h.status==='협의중'?'b-amber':'b-navy';
+    return `<tr>
+      <td><strong>${h.name}</strong></td>
+      <td>${h.cat}</td>
+      <td>${h.area}</td>
+      <td style="font-weight:600;color:var(--teal)">${h.rate}</td>
+      <td style="text-align:center"><strong>${h.bookings}</strong>건</td>
+      <td><div class="hosp-status-bar" style="display:flex;gap:2px;width:60px;height:6px">${bars}</div><div style="font-size:.65rem;color:var(--gray3);margin-top:2px">${h.rate_pct}%</div></td>
+      <td><span class="badge ${sc}">${h.status}</span></td>
+      <td><button class="btn btn-outline" style="font-size:.66rem;padding:.22rem .5rem" onclick="toast('${h.name} 상세')">상세</button></td>
+    </tr>`;}).join('');
+}
+
+function filterHospitals() {
+  const q = document.getElementById('hosp-search').value.toLowerCase();
+  const st = document.getElementById('hosp-status-filter').value;
+  renderHospitals(HOSPITALS_BO.filter(h=>(!q||h.name.toLowerCase().includes(q))&&(!st||h.status===st)));
+}
+
+function renderPatientsBo(list) {
+  document.getElementById('pat-bo-count').textContent = `총 ${list.length}명`;
+  const sc={VIP:'b-purple',재방문:'b-green',신규:'b-navy'};
+  document.getElementById('pat-bo-tbody').innerHTML = list.map(p=>`
+    <tr>
+      <td><span style="margin-right:.3rem">${p.flag}</span><strong>${p.name}</strong></td>
+      <td>${p.nat}</td>
+      <td><span style="font-size:.7rem;background:var(--purple2);color:var(--purple);padding:.14rem .45rem;border-radius:10px">${p.channel}</span></td>
+      <td style="font-size:.74rem">${p.first}</td>
+      <td style="text-align:center;font-weight:700">${p.visits}회</td>
+      <td style="font-size:.74rem">${p.last}</td>
+      <td style="font-weight:700;color:var(--teal)">${p.total}</td>
+      <td><span class="badge ${sc[p.status]||'b-navy'}">${p.status}</span></td>
+      <td><button class="btn btn-outline" style="font-size:.66rem;padding:.22rem .5rem" onclick="toast('${p.name} CRM')">보기</button></td>
+    </tr>`).join('');
+}
+
+function filterPatientsBo() {
+  const q = document.getElementById('pat-bo-search').value.toLowerCase();
+  renderPatientsBo(PATIENTS_BO.filter(p=>!q||p.name.toLowerCase().includes(q)||p.nat.includes(q)||p.channel.includes(q)));
+}
+
+function renderKols() {
+  document.getElementById('kol-list').innerHTML = KOLS.map(k=>`
+    <div class="kol-row">
+      <div class="kol-avatar" style="background:${k.bg}">${k.name[0]}</div>
+      <div style="flex:1">
+        <div class="kol-name">${k.name}</div>
+        <div class="kol-platform">${k.platform}</div>
+      </div>
+      <div class="kol-stat">
+        <div class="kol-patients">${k.patients}명</div>
+        <div class="kol-conv">전환율 ${k.conv}</div>
+      </div>
+      <div style="width:80px;text-align:right">
+        <div class="kol-commission">${k.commission}</div>
+        <div style="font-size:.64rem;color:var(--gray3)">이번달</div>
+      </div>
+      <button class="btn btn-outline" style="font-size:.66rem;padding:.22rem .5rem;margin-left:.5rem" onclick="toast('${k.name} 상세')">상세</button>
+    </div>`).join('');
+}
+
+function renderKolChart() {
+  const data=KOLS.map(k=>({l:k.name.split('(')[0],v:k.patients,c:k.bg}));
+  const max=Math.max(...data.map(d=>d.v));
+  document.getElementById('kol-chart').innerHTML = data.map(d=>`
+    <div class="bc-row">
+      <div class="bc-label">${d.l}</div>
+      <div class="bc-bg"><div class="bc-fill" style="width:${(d.v/max*100).toFixed(0)}%;background:${d.c}"></div></div>
+      <div class="bc-val" style="color:${d.c}">${d.v}명</div>
+    </div>`).join('');
+}
+
+function renderRevChart() {
+  const months=['1월','2월','3월','4월','5월','6월'];
+  const values=[0,0,500,800,1200,1640];
+  const max=1640;
+  const el=document.getElementById('rev-bars');
+  const ml=document.getElementById('rev-months');
+  el.innerHTML=values.map((v,i)=>`
+    <div class="rev-bar-wrap">
+      <div class="rev-bar" style="height:${max?Math.max(4,(v/max*90)):4}px;background:var(--teal)">
+        <span class="rev-tooltip">₩${v}만</span>
+      </div>
+    </div>`).join('');
+  ml.innerHTML=months.map(m=>`<div style="flex:1;font-size:.68rem;color:var(--gray3);text-align:center">${m}</div>`).join('');
+}
+
+function renderHospRevChart() {
+  const data=[{l:'강남 루체',v:1260},{l:'압구정 아이디',v:2592},{l:'청담 플러스',v:1116},{l:'신사 글로우',v:840},{l:'강남 메디',v:300}];
+  const max=2592;
+  document.getElementById('hosp-rev-chart').innerHTML=data.map(d=>`
+    <div class="bc-row">
+      <div class="bc-label">${d.l}</div>
+      <div class="bc-bg"><div class="bc-fill" style="width:${(d.v/max*100).toFixed(0)}%;background:var(--amber)"></div></div>
+      <div class="bc-val" style="color:var(--amber)">₩${(d.v/100).toFixed(0)}만</div>
+    </div>`).join('');
+}
+
+// ── PAGE ROUTING ──────────────────────────────────────────────────────
+const TITLES={overview:'전체 현황',revenue:'매출·재무',hospitals:'병원 관리','patients-bo':'환자 CRM',coordinators:'코디 배정',complaints:'컴플레인',kol:'왕홍·KOL',campaigns:'캠페인',settlement:'정산 관리'};
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('topbar-title').textContent=TITLES[id]||'';
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow Korea — K-Beauty Medical Tourism</title>
+<style>
+/* ── RESET & BASE ─────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1B3E; --navy2:#162550;
+  --teal:#1D9E75; --teal2:#E1F5EE; --teal3:#9FE1CB;
+  --gold:#C9A84C; --gold2:#FAEEDA;
+  --rose:#C8556A; --rose2:#FDECEA;
+  --gray1:#F4F6F9; --gray2:#E8ECF2; --gray3:#8A9BB5; --gray4:#4A5568;
+  --white:#fff; --dark:#1A2744;
+  --shadow:0 2px 16px rgba(13,27,62,.08);
+  --radius:10px;
+}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--gray1);color:var(--dark);min-height:100vh}
+
+/* ── NAV ──────────────────────────────────────── */
+nav{background:var(--navy);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.nav-logo{font-size:1.2rem;font-weight:700;color:#fff;letter-spacing:.3px;cursor:pointer}
+.nav-logo span{color:var(--teal3)}
+.nav-right{display:flex;align-items:center;gap:.6rem}
+.lang-btns{display:flex;gap:3px}
+.lang-btn{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-size:.72rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer;transition:all .18s;font-family:inherit}
+.lang-btn.active,.lang-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.nav-chat-btn{background:var(--rose);color:#fff;border:none;border-radius:20px;padding:.32rem .9rem;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .18s}
+.nav-chat-btn:hover{background:#b5435b}
+
+/* ── HERO ─────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 65%,#1e3a5f 100%);padding:2.4rem 1.2rem 2rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,.1)}
+.hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:200px;height:200px;border-radius:50%;background:rgba(201,168,76,.08)}
+.hero-badge{display:inline-block;background:rgba(201,168,76,.18);color:var(--gold);font-size:.68rem;letter-spacing:1.2px;padding:.25rem .75rem;border-radius:20px;margin-bottom:.9rem;border:1px solid rgba(201,168,76,.3)}
+.hero h1{font-size:1.75rem;color:#fff;font-weight:700;line-height:1.25;margin-bottom:.6rem}
+.hero h1 em{color:var(--teal3);font-style:normal}
+.hero-sub{color:rgba(255,255,255,.6);font-size:.84rem;line-height:1.7;margin-bottom:1.6rem}
+
+/* ── SEARCH BOX ───────────────────────────────── */
+.search-box{background:#fff;border-radius:12px;padding:1rem 1.1rem;box-shadow:0 8px 32px rgba(0,0,0,.22)}
+.search-tabs{display:flex;gap:.4rem;margin-bottom:.8rem;flex-wrap:wrap}
+.stab{padding:.28rem .72rem;border-radius:20px;font-size:.72rem;cursor:pointer;border:1px solid var(--gray2);background:transparent;color:var(--gray4);transition:all .18s;font-family:inherit}
+.stab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.search-row{display:flex;gap:.5rem;align-items:center}
+.search-select{flex:1;border:1.5px solid var(--gray2);border-radius:8px;padding:.55rem .7rem;font-size:.8rem;color:var(--dark);background:#fff;outline:none;cursor:pointer;font-family:inherit;transition:border .18s}
+.search-select:focus{border-color:var(--teal)}
+.search-btn{background:var(--rose);color:#fff;border:none;border-radius:8px;padding:.6rem 1.1rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .18s}
+.search-btn:hover{background:#b5435b}
+
+/* ── STATS ────────────────────────────────────── */
+.stats-row{display:flex;justify-content:space-around;background:#fff;padding:1rem 0;border-bottom:1px solid var(--gray2)}
+.stat{text-align:center}
+.stat-n{font-size:1.35rem;font-weight:700;color:var(--navy)}
+.stat-l{font-size:.68rem;color:var(--gray3);margin-top:2px;letter-spacing:.3px}
+
+/* ── SECTION ──────────────────────────────────── */
+.section{padding:1.4rem 1.1rem}
+.section-title{font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+.section-sub{font-size:.75rem;color:var(--gray3);margin-bottom:1rem}
+
+/* ── CATEGORY PILLS ───────────────────────────── */
+.cat-pills{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.cpill{padding:.3rem .8rem;border-radius:20px;font-size:.72rem;border:1px solid var(--gray2);cursor:pointer;transition:all .18s;background:#fff;color:var(--gray4);font-family:inherit}
+.cpill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cpill:hover:not(.active){border-color:var(--teal);color:var(--teal)}
+
+/* ── HOSPITAL CARDS ───────────────────────────── */
+.hosp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.85rem}
+.hosp-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--gray2);cursor:pointer;transition:transform .18s,box-shadow .18s}
+.hosp-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.hosp-img{height:90px;display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative}
+.hosp-certified{position:absolute;top:7px;left:7px;background:var(--gold);color:var(--navy);font-size:.58rem;padding:.15rem .45rem;border-radius:8px;font-weight:700}
+.hosp-popular{position:absolute;top:7px;right:7px;background:var(--rose);color:#fff;font-size:.58rem;padding:.15rem .45rem;border-radius:8px;font-weight:700}
+.hosp-body{padding:.7rem .85rem}
+.hosp-name{font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:.12rem}
+.hosp-spec{font-size:.68rem;color:var(--gray3);margin-bottom:.4rem}
+.hosp-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+.hosp-rating{font-size:.7rem;color:var(--gold);font-weight:600}
+.hosp-price{font-size:.68rem;color:var(--teal);font-weight:600}
+.hosp-langs{display:flex;gap:.2rem}
+.lang-tag{font-size:.58rem;background:var(--teal2);color:var(--teal);padding:.1rem .35rem;border-radius:4px}
+
+/* ── COORDINATOR ──────────────────────────────── */
+.coord-section{background:var(--navy);padding:1.4rem 1.1rem}
+.coord-card{background:var(--navy2);border-radius:12px;padding:.9rem 1rem;display:flex;gap:.9rem;align-items:flex-start;margin-bottom:.7rem;border:1px solid rgba(255,255,255,.06)}
+.coord-avatar{width:44px;height:44px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0}
+.coord-name{font-weight:700;font-size:.85rem;color:#fff;margin-bottom:.15rem}
+.coord-langs{font-size:.68rem;color:var(--teal3);margin-bottom:.3rem}
+.coord-bio{font-size:.72rem;color:rgba(255,255,255,.55);line-height:1.55}
+.coord-badge{display:inline-block;background:rgba(29,158,117,.2);color:var(--teal3);font-size:.6rem;padding:.12rem .4rem;border-radius:4px;margin-top:.35rem;border:1px solid rgba(29,158,117,.3)}
+
+/* ── CHAT ─────────────────────────────────────── */
+.chat-section{padding:1.4rem 1.1rem;background:var(--gray1)}
+.chat-box{background:#fff;border-radius:12px;border:1px solid var(--gray2);overflow:hidden}
+.chat-header{background:var(--navy);padding:.6rem 1rem;display:flex;align-items:center;gap:.55rem}
+.chat-online{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.chat-title{color:#fff;font-size:.8rem;font-weight:600}
+.chat-sub{color:rgba(255,255,255,.45);font-size:.65rem}
+.chat-msgs{padding:.85rem;min-height:160px;max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem}
+.msg{display:flex;gap:.4rem;align-items:flex-end}
+.msg.mine{flex-direction:row-reverse}
+.msg-bubble{max-width:78%;padding:.48rem .68rem;border-radius:10px;font-size:.75rem;line-height:1.55}
+.msg.theirs .msg-bubble{background:var(--gray1);color:var(--dark);border-radius:4px 10px 10px 10px}
+.msg.mine .msg-bubble{background:var(--rose);color:#fff;border-radius:10px 4px 10px 10px}
+.msg-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700}
+.chat-input-row{display:flex;gap:.45rem;padding:.65rem;border-top:1px solid var(--gray2)}
+.chat-inp{flex:1;border:1px solid var(--gray2);border-radius:8px;padding:.42rem .65rem;font-size:.76rem;outline:none;font-family:inherit;transition:border .18s}
+.chat-inp:focus{border-color:var(--rose)}
+.chat-send{background:var(--rose);color:#fff;border:none;border-radius:8px;padding:.42rem .85rem;cursor:pointer;font-size:.76rem;font-family:inherit;transition:background .18s}
+.chat-send:hover{background:#b5435b}
+
+/* ── DETAIL MODAL ─────────────────────────────── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding-bottom:1.5rem}
+.modal-handle{width:38px;height:4px;background:var(--gray2);border-radius:2px;margin:.75rem auto .2rem}
+.modal-hero{height:140px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;background:linear-gradient(135deg,var(--navy),var(--navy2));position:relative}
+.modal-close{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:1rem 1.1rem}
+.modal-name{font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+.modal-addr{font-size:.75rem;color:var(--gray3);margin-bottom:.5rem}
+.modal-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.9rem}
+.modal-tag{font-size:.65rem;padding:.18rem .55rem;border-radius:20px;border:1px solid var(--gray2);color:var(--gray4)}
+.proc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.9rem}
+.proc-card{border:1.5px solid var(--gray2);border-radius:8px;padding:.65rem;cursor:pointer;transition:all .18s}
+.proc-card.selected,.proc-card:hover{border-color:var(--rose);background:var(--rose2)}
+.proc-card.selected .proc-name{color:var(--rose)}
+.proc-name{font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:.18rem}
+.proc-price{font-size:.73rem;color:var(--teal);font-weight:600}
+.proc-time{font-size:.65rem;color:var(--gray3)}
+.review-item{border:1px solid var(--gray2);border-radius:8px;padding:.75rem;margin-bottom:.6rem}
+.rv-top{display:flex;justify-content:space-between;margin-bottom:.4rem}
+.rv-name{font-size:.75rem;font-weight:600;color:var(--dark)}
+.rv-stars{font-size:.7rem;color:var(--gold)}
+.rv-text{font-size:.74rem;color:var(--gray4);line-height:1.6}
+.btn-primary{background:var(--rose);color:#fff;border:none;border-radius:8px;padding:.72rem;font-size:.85rem;font-weight:700;cursor:pointer;width:100%;margin-top:.5rem;font-family:inherit;transition:background .18s}
+.btn-primary:hover{background:#b5435b}
+.btn-secondary{background:transparent;color:var(--dark);border:1.5px solid var(--gray2);border-radius:8px;padding:.62rem;font-size:.8rem;cursor:pointer;font-family:inherit;transition:all .18s;width:100%;margin-top:.4rem}
+.btn-secondary:hover{border-color:var(--navy)}
+
+/* ── BOOKING MODAL ────────────────────────────── */
+.booking-steps{display:flex;gap:0;margin-bottom:1rem}
+.bstep{flex:1;text-align:center;font-size:.65rem;color:var(--gray3);padding:.35rem;position:relative}
+.bstep::after{content:'';position:absolute;top:50%;right:0;transform:translateY(-50%);width:1px;height:14px;background:var(--gray2)}
+.bstep:last-child::after{display:none}
+.bstep.active{color:var(--rose);font-weight:700}
+.bstep.done{color:var(--teal)}
+.bstep-dot{width:18px;height:18px;border-radius:50%;background:var(--gray2);margin:0 auto .25rem;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700}
+.bstep.active .bstep-dot{background:var(--rose);color:#fff}
+.bstep.done .bstep-dot{background:var(--teal);color:#fff}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:.6rem 0}
+.cal-day-hd{font-size:.65rem;color:var(--gray3);text-align:center;font-weight:600}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;border:1px solid transparent;transition:all .18s}
+.cal-day:hover:not(.empty):not(.past){background:var(--gray1);border-color:var(--gray2)}
+.cal-day.selected{background:var(--rose);color:#fff;font-weight:700}
+.cal-day.today{border-color:var(--rose);color:var(--rose);font-weight:700}
+.cal-day.past,.cal-day.empty{color:var(--gray2);cursor:default}
+.time-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem;margin:.6rem 0}
+.tslot{border:1px solid var(--gray2);border-radius:6px;padding:.35rem;text-align:center;font-size:.7rem;cursor:pointer;transition:all .18s}
+.tslot:hover{border-color:var(--rose)}
+.tslot.selected{background:var(--rose);color:#fff;border-color:var(--rose)}
+.tslot.unavail{background:var(--gray1);color:var(--gray2);cursor:not-allowed}
+.form-row{margin-bottom:.7rem}
+.form-label{font-size:.72rem;color:var(--gray4);font-weight:600;margin-bottom:.25rem;display:block}
+.form-input{width:100%;border:1.5px solid var(--gray2);border-radius:8px;padding:.5rem .72rem;font-size:.8rem;color:var(--dark);outline:none;font-family:inherit;transition:border .18s}
+.form-input:focus{border-color:var(--rose)}
+.price-summary{background:var(--gray1);border-radius:8px;padding:.8rem;margin:.7rem 0}
+.price-row{display:flex;justify-content:space-between;font-size:.76rem;color:var(--gray4);margin-bottom:.28rem}
+.price-total{display:flex;justify-content:space-between;font-size:.88rem;font-weight:700;color:var(--navy);border-top:1px solid var(--gray2);padding-top:.45rem;margin-top:.45rem}
+.escrow-note{font-size:.65rem;color:var(--teal);background:var(--teal2);padding:.35rem .65rem;border-radius:6px;margin-top:.45rem}
+.confirm-box{text-align:center;padding:1.4rem .8rem}
+.confirm-icon{font-size:2.8rem;margin-bottom:.7rem}
+.confirm-title{font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:.45rem}
+.confirm-sub{font-size:.78rem;color:var(--gray3);line-height:1.7;margin-bottom.7rem}
+.confirm-card{background:var(--gray1);border-radius:8px;padding:.85rem;margin:.85rem 0;text-align:left}
+.cc-row{display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:.28rem}
+.cc-label{color:var(--gray3)}
+.cc-val{font-weight:600;color:var(--navy)}
+
+/* ── BOTTOM NAV ───────────────────────────────── */
+.bottom-nav{background:#fff;border-top:1px solid var(--gray2);display:flex;padding:.35rem 0;position:sticky;bottom:0;z-index:100}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:.28rem;cursor:pointer;transition:color .18s;color:var(--gray3);font-size:.58rem;border:none;background:none;font-family:inherit}
+.bnav-item.active{color:var(--rose)}
+.bnav-icon{font-size:1.2rem}
+
+/* ── TOAST ────────────────────────────────────── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:.5rem 1.1rem;border-radius:20px;font-size:.75rem;opacity:0;transition:all .3s;pointer-events:none;z-index:400;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── PAGES ────────────────────────────────────── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── WISHLIST HEART ───────────────────────────── */
+.wish-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.85);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:transform .18s}
+.wish-btn:hover{transform:scale(1.15)}
+.wish-btn.active{color:var(--rose)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="goPage('home')">Follow<span>Korea</span></div>
+  <div class="nav-right">
+    <div class="lang-btns">
+      <button class="lang-btn active" onclick="setLang('ko',this)">KO</button>
+      <button class="lang-btn" onclick="setLang('zh',this)">中</button>
+      <button class="lang-btn" onclick="setLang('en',this)">EN</button>
+      <button class="lang-btn" onclick="setLang('vi',this)">VI</button>
+    </div>
+    <button class="nav-chat-btn" onclick="goPage('chat')">상담</button>
+  </div>
+</nav>
+
+<!-- ── HOME PAGE ────────────────────────────── -->
+<div class="page active" id="page-home">
+
+  <div class="hero">
+    <div class="hero-badge" id="hero-badge">✦ GLOBAL K-BEAUTY MEDICAL TOURISM</div>
+    <h1 id="hero-title">당신의 K-뷰티<br><em>여정</em>이 시작됩니다</h1>
+    <p class="hero-sub" id="hero-sub">중국·동남아에서 한국 최고의 미용 병원까지<br>예약부터 귀국까지 원스톱 케어</p>
+
+    <div class="search-box">
+      <div class="search-tabs">
+        <button class="stab active" onclick="setTab(this,'피부과')">피부과</button>
+        <button class="stab" onclick="setTab(this,'성형외과')">성형외과</button>
+        <button class="stab" onclick="setTab(this,'줄기세포')">줄기세포</button>
+        <button class="stab" onclick="setTab(this,'한방')">한방</button>
+      </div>
+      <div class="search-row">
+        <select class="search-select" id="proc-sel">
+          <option value="">시술 선택</option>
+          <option>레이저 토닝</option><option>필러·보톡스</option>
+          <option>리프팅</option><option>피부 재생</option>
+          <option>화이트닝</option><option>쌍꺼풀</option>
+          <option>코성형</option><option>줄기세포</option>
+        </select>
+        <select class="search-select" id="area-sel" style="flex:.8">
+          <option value="">지역</option>
+          <option>강남</option><option>압구정</option>
+          <option>신사</option><option>홍대</option>
+        </select>
+        <button class="search-btn" onclick="doSearch()">검색</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n">30+</div><div class="stat-l">파트너 병원</div></div>
+    <div class="stat"><div class="stat-n">4.9★</div><div class="stat-l">평균 만족도</div></div>
+    <div class="stat"><div class="stat-n">4개국어</div><div class="stat-l">다국어 지원</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" id="feat-title">인기 시술</div>
+    <div class="section-sub" id="feat-sub">지금 가장 많이 예약되는 시술</div>
+    <div class="cat-pills" id="cat-pills">
+      <button class="cpill active" onclick="filterCat(this,'전체')">전체</button>
+      <button class="cpill" onclick="filterCat(this,'레이저')">레이저</button>
+      <button class="cpill" onclick="filterCat(this,'필러')">필러·보톡스</button>
+      <button class="cpill" onclick="filterCat(this,'리프팅')">리프팅</button>
+      <button class="cpill" onclick="filterCat(this,'성형')">성형</button>
+    </div>
+    <div class="hosp-grid" id="hosp-grid"></div>
+  </div>
+
+  <div class="coord-section">
+    <div class="section-title" style="color:#fff;margin-bottom:.2rem" id="coord-title">코디네이터 서비스</div>
+    <div class="section-sub" style="color:rgba(255,255,255,.45);margin-bottom:.9rem" id="coord-sub">공항 픽업부터 귀국까지 전담 케어</div>
+    <div class="coord-card">
+      <div class="coord-avatar">李</div>
+      <div>
+        <div class="coord-name">이메이 코디네이터</div>
+        <div class="coord-langs">🇨🇳 중국어 · 🇰🇷 한국어 · 🇺🇸 영어</div>
+        <div class="coord-bio">5년 의료관광 전문. 강남 주요 병원 네트워크 보유. VIP 전담.</div>
+        <span class="coord-badge">✓ 공식 인증 코디네이터</span>
+      </div>
+    </div>
+    <div class="coord-card">
+      <div class="coord-avatar" style="background:var(--rose)">N</div>
+      <div>
+        <div class="coord-name">Nguyen Thi 코디</div>
+        <div class="coord-langs">🇻🇳 베트남어 · 🇰🇷 한국어 · 🇺🇸 영어</div>
+        <div class="coord-bio">베트남·태국 환자 전문. 숙박·관광 패키지 설계 경력 3년.</div>
+        <span class="coord-badge">✓ 공식 인증 코디네이터</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEARCH RESULT PAGE ─────────────────────── -->
+<div class="page" id="page-search">
+  <div style="background:var(--navy);padding:.85rem 1.1rem;display:flex;align-items:center;gap:.7rem">
+    <button onclick="goPage('home')" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1.1rem;cursor:pointer">←</button>
+    <div>
+      <div style="font-size:.95rem;font-weight:700;color:#fff" id="search-result-title">검색 결과</div>
+      <div style="font-size:.7rem;color:rgba(255,255,255,.45)" id="search-result-sub">0곳</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:.35rem">
+      <button onclick="showToast('지도 보기')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;padding:.28rem .6rem;font-size:.7rem;cursor:pointer;font-family:inherit">지도</button>
+    </div>
+  </div>
+  <div class="section" style="padding-top:.9rem">
+    <div class="cat-pills" id="sort-pills">
+      <button class="cpill active">추천순</button>
+      <button class="cpill" onclick="showToast('가격순 정렬')">가격순</button>
+      <button class="cpill" onclick="showToast('평점순 정렬')">평점순</button>
+      <button class="cpill" onclick="showToast('리뷰순 정렬')">리뷰순</button>
+    </div>
+    <div id="search-grid"></div>
+  </div>
+</div>
+
+<!-- ── CHAT PAGE ──────────────────────────────── -->
+<div class="page" id="page-chat">
+  <div style="background:var(--navy);padding:.85rem 1.1rem;display:flex;align-items:center;gap:.7rem">
+    <button onclick="goPage('home')" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1.1rem;cursor:pointer">←</button>
+    <div class="chat-online"></div>
+    <div>
+      <div style="font-size:.9rem;font-weight:700;color:#fff">FollowKorea 상담</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.45)">평균 응답 2분</div>
+    </div>
+  </div>
+  <div class="chat-section" style="padding-top:.9rem">
+    <div class="chat-box">
+      <div class="chat-msgs" id="full-chat-msgs">
+        <div class="msg theirs">
+          <div class="msg-av" style="background:var(--navy);color:var(--gold)">FK</div>
+          <div class="msg-bubble">안녕하세요! 팔로우코리아입니다. 어떤 시술에 관심 있으신가요? 😊</div>
+        </div>
+        <div class="msg theirs">
+          <div class="msg-av" style="background:var(--navy);color:var(--gold)">FK</div>
+          <div class="msg-bubble">중국어·영어·베트남어로도 상담 가능합니다.</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-inp" id="full-chat-inp" placeholder="메시지 입력..." onkeydown="if(event.key==='Enter')sendFullChat()">
+        <button class="chat-send" onclick="sendFullChat()">전송</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WISHLIST PAGE ───────────────────────────── -->
+<div class="page" id="page-wish">
+  <div style="background:var(--navy);padding:.85rem 1.1rem">
+    <div style="font-size:1rem;font-weight:700;color:#fff">찜한 병원</div>
+  </div>
+  <div class="section">
+    <div id="wish-grid"></div>
+    <div id="wish-empty" style="text-align:center;padding:2rem;color:var(--gray3);font-size:.85rem">아직 찜한 병원이 없습니다</div>
+  </div>
+</div>
+
+<!-- ── BOTTOM NAV ──────────────────────────────── -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="bnav-home" onclick="goPage('home')">
+    <span class="bnav-icon">🏠</span>홈
+  </button>
+  <button class="bnav-item" id="bnav-search" onclick="goPage('search')">
+    <span class="bnav-icon">🔍</span>검색
+  </button>
+  <button class="bnav-item" id="bnav-wish" onclick="goPage('wish')">
+    <span class="bnav-icon">♡</span>찜
+  </button>
+  <button class="bnav-item" id="bnav-chat" onclick="goPage('chat')">
+    <span class="bnav-icon">💬</span>상담
+  </button>
+</nav>
+
+<!-- ── HOSPITAL DETAIL MODAL ─────────────────── -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hero" id="modal-hero-emoji">
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-addr" id="modal-addr"></div>
+      <div id="modal-tags" class="modal-tags"></div>
+
+      <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.5rem">시술 선택</div>
+      <div class="proc-grid" id="modal-procs"></div>
+
+      <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.6rem">환자 후기</div>
+      <div id="modal-reviews"></div>
+
+      <button class="btn-primary" onclick="openBooking()">이 병원 예약하기 →</button>
+      <button class="btn-secondary" onclick="closeModal('detail-modal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOOKING MODAL ──────────────────────────── -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="padding:.6rem 1.1rem .4rem;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:1rem;font-weight:700;color:var(--navy)" id="booking-modal-title">예약하기</div>
+      <button onclick="closeModal('booking-modal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray3)">✕</button>
+    </div>
+    <div style="padding:0 1.1rem 1rem">
+      <div class="booking-steps" id="booking-steps">
+        <div class="bstep active" id="bst-1"><div class="bstep-dot">1</div>날짜</div>
+        <div class="bstep" id="bst-2"><div class="bstep-dot">2</div>정보</div>
+        <div class="bstep" id="bst-3"><div class="bstep-dot">3</div>결제</div>
+        <div class="bstep" id="bst-4"><div class="bstep-dot">4</div>완료</div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="bstep1">
+        <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.4rem">날짜 선택</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+          <button onclick="prevMonth()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--gray4)">←</button>
+          <span style="font-size:.8rem;font-weight:700;color:var(--navy)" id="cal-month-lbl"></span>
+          <button onclick="nextMonth()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--gray4)">→</button>
+        </div>
+        <div class="cal-grid" id="cal-headers"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+
+        <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin:.7rem 0 .4rem">시간 선택</div>
+        <div class="time-slots" id="time-slots"></div>
+
+        <button class="btn-primary" id="step1-next" onclick="nextBStep(2)" disabled style="opacity:.4">다음 →</button>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="bstep2" style="display:none">
+        <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.7rem">예약자 정보</div>
+        <div class="form-row">
+          <label class="form-label">이름 / Name</label>
+          <input class="form-input" placeholder="홍길동 / Hong Gildong" id="inp-name">
+        </div>
+        <div class="form-row">
+          <label class="form-label">국적</label>
+          <select class="form-input" id="inp-nation">
+            <option>중국</option><option>베트남</option><option>태국</option>
+            <option>말레이시아</option><option>기타</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">연락처 (WhatsApp / WeChat)</label>
+          <input class="form-input" placeholder="+86 xxx xxxx xxxx" id="inp-phone">
+        </div>
+        <div class="form-row">
+          <label class="form-label">코디네이터 서비스</label>
+          <select class="form-input" id="inp-coord" onchange="updatePrice()">
+            <option value="0">필요 없음</option>
+            <option value="80000">기본 통역 동행 (+₩80,000)</option>
+            <option value="200000">프리미엄 픽업+통역+숙박 (+₩200,000)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn-secondary" onclick="nextBStep(1)" style="flex:.5;margin-top:.5rem">← 이전</button>
+          <button class="btn-primary" onclick="nextBStep(3)" style="flex:1">다음 →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="bstep3" style="display:none">
+        <div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.4rem">결제 정보</div>
+        <div class="price-summary" id="price-summary"></div>
+        <div class="escrow-note">🔒 에스크로 보호 — 시술 완료 확인 후 병원에 지급</div>
+        <div class="form-row" style="margin-top:.7rem">
+          <label class="form-label">결제 수단</label>
+          <select class="form-input">
+            <option>신용카드 / Credit Card</option>
+            <option>위챗페이 WeChat Pay</option>
+            <option>알리페이 Alipay</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">카드 번호</label>
+          <input class="form-input" placeholder="**** **** **** ****">
+        </div>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn-secondary" onclick="nextBStep(2)" style="flex:.5;margin-top:.5rem">← 이전</button>
+          <button class="btn-primary" onclick="confirmBooking()" style="flex:1">예약 확정 →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div id="bstep4" style="display:none">
+        <div class="confirm-box">
+          <div class="confirm-icon">✅</div>
+          <div class="confirm-title">예약 완료!</div>
+          <div class="confirm-sub" id="confirm-sub"></div>
+          <div class="confirm-card" id="confirm-card"></div>
+          <button class="btn-secondary" onclick="closeModal('booking-modal');goPage('home')">홈으로</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const HOSPITALS = [
+  { id:1, name:"강남 루체 피부과", spec:"피부·레이저 전문", emoji:"💆", rating:"4.9", reviews:"(312)", price:"₩120,000~",
+    cat:"레이저", addr:"강남구 테헤란로 123", color:"#FFE4E8",
+    tags:["레이저","필러","피부관리"], langs:["中文","English","Tiếng Việt"],
+    procs:[{name:"레이저토닝",price:"₩120,000",time:"40분"},{name:"피코레이저",price:"₩280,000",time:"30분"},{name:"필러",price:"₩350,000",time:"30분"},{name:"보톡스",price:"₩150,000",time:"20분"}],
+    reviews:[{flag:"🇨🇳",name:"Xiao Mei",stars:"★★★★★",text:"레이저 토닝 후 피부가 밝아졌어요! 코디네이터 덕분에 말이 안 통해도 편했습니다."},{flag:"🇻🇳",name:"Linh N.",stars:"★★★★★",text:"예약부터 귀국까지 완벽했어요. 강력 추천!"}]
+  },
+  { id:2, name:"압구정 아이디 성형외과", spec:"눈·코 성형 전문", emoji:"👁", rating:"4.8", reviews:"(289)", price:"₩800,000~",
+    cat:"성형", addr:"강남구 압구정로 88", color:"#E4E8FF",
+    tags:["쌍꺼풀","코성형","윤곽"], langs:["中文","English"],
+    procs:[{name:"쌍꺼풀",price:"₩800,000",time:"1시간"},{name:"코성형",price:"₩2,500,000",time:"2시간"},{name:"눈밑지방",price:"₩1,200,000",time:"1.5시간"},{name:"윤곽주사",price:"₩250,000",time:"30분"}],
+    reviews:[{flag:"🇨🇳",name:"Wang Li",stars:"★★★★★",text:"자연스러운 결과에 감동! 중국어 통역 제공이 정말 편했어요."},{flag:"🇹🇭",name:"Suda T.",stars:"★★★★☆",text:"결과에 만족합니다. 회복 관리도 잘 해줬어요."}]
+  },
+  { id:3, name:"신사 글로우 피부과", spec:"미백·리프팅 전문", emoji:"✨", rating:"4.7", reviews:"(198)", price:"₩200,000~",
+    cat:"리프팅", addr:"강남구 신사동 456", color:"#E4FFF0",
+    tags:["리프팅","화이트닝","스킨케어"], langs:["中文","Bahasa"],
+    procs:[{name:"울쎄라",price:"₩1,200,000",time:"1.5시간"},{name:"써마지",price:"₩900,000",time:"1시간"},{name:"피코토닝",price:"₩180,000",time:"40분"},{name:"스킨부스터",price:"₩250,000",time:"30분"}],
+    reviews:[{flag:"🇲🇾",name:"Aishah R.",stars:"★★★★★",text:"울쎄라 효과 정말 좋아요! 코디님이 말레이어로 설명해줘서 편했습니다."},{flag:"🇨🇳",name:"Chen Yu",stars:"★★★★☆",text:"리프팅 효과 만족. 다음에 또 오고 싶어요."}]
+  },
+  { id:4, name:"강남 메디 한의원", spec:"한방 다이어트·피부", emoji:"🌿", rating:"4.8", reviews:"(156)", price:"₩100,000~",
+    cat:"리프팅", addr:"강남구 강남대로 210", color:"#FFF4E4",
+    tags:["한방","다이어트","면역"], langs:["中文","Tiếng Việt"],
+    procs:[{name:"한방 다이어트",price:"₩300,000",time:"50분"},{name:"침 리프팅",price:"₩180,000",time:"60분"},{name:"면역 치료",price:"₩120,000",time:"40분"},{name:"피부 한방팩",price:"₩100,000",time:"30분"}],
+    reviews:[{flag:"🇻🇳",name:"Nguyen T.",stars:"★★★★★",text:"한방 다이어트 3kg 감량! 베트남어 코디 덕분에 편하게 치료받았어요."},{flag:"🇨🇳",name:"Liu Fang",stars:"★★★★★",text:"침 치료 효과 탁월. 친절한 서비스 감사합니다."}]
+  },
+  { id:5, name:"청담 플러스 피부과", spec:"필러·보톡스 전문", emoji:"💉", rating:"4.9", reviews:"(421)", price:"₩120,000~",
+    cat:"필러", addr:"강남구 청담동 89", color:"#F0E4FF",
+    tags:["필러","보톡스","리쥬란"], langs:["中文","English","ภาษาไทย"],
+    procs:[{name:"히알루론산 필러",price:"₩350,000",time:"30분"},{name:"보톡스",price:"₩120,000",time:"20분"},{name:"리쥬란힐러",price:"₩380,000",time:"40분"},{name:"스킨보톡스",price:"₩200,000",time:"30분"}],
+    reviews:[{flag:"🇹🇭",name:"Nipa S.",stars:"★★★★★",text:"필러 결과 자연스러워요! 태국어 상담 가능해서 좋았어요."},{flag:"🇨🇳",name:"Zhao Min",stars:"★★★★★",text:"보톡스 후 정말 젊어 보인다는 말을 들었어요."}]
+  },
+  { id:6, name:"강남 라이트 피부과", spec:"레이저·흉터 전문", emoji:"⚡", rating:"4.7", reviews:"(203)", price:"₩90,000~",
+    cat:"레이저", addr:"강남구 역삼동 321", color:"#FFF8E4",
+    tags:["레이저","흉터","모공"], langs:["中文","English"],
+    procs:[{name:"CO2레이저",price:"₩200,000",time:"30분"},{name:"IPL",price:"₩150,000",time:"40분"},{name:"모공축소",price:"₩90,000",time:"35분"},{name:"흉터치료",price:"₩250,000",time:"45분"}],
+    reviews:[{flag:"🇨🇳",name:"Sun Jia",stars:"★★★★★",text:"흉터 치료 효과 놀라워요. 영어 상담 가능해서 소통에 문제 없었습니다."},{flag:"🇻🇳",name:"Tran H.",stars:"★★★★☆",text:"레이저 후 피부가 확실히 좋아졌어요."}]
+  },
+];
+
+const CHAT_REPLIES = [
+  "네, 레이저 토닝은 저희 파트너 병원에서 가장 인기 있는 시술이에요! 피부 미백과 트러블 개선에 효과적입니다 😊",
+  "강남 루체 피부과를 추천드려요. 현재 주 3회 예약 가능하고 중국어 통역도 제공됩니다!",
+  "예약은 원하시는 병원 카드를 클릭하면 바로 진행하실 수 있어요. 에스크로로 결제가 보호됩니다 🔒",
+  "원하시는 날짜와 시술을 알려주시면 최적의 병원을 매칭해 드릴게요!",
+  "코디네이터 서비스를 이용하시면 공항 픽업부터 귀국까지 전담 케어를 받으실 수 있습니다 ✈️",
+];
+
+const LANGS = {
+  ko:{ badge:"✦ GLOBAL K-BEAUTY MEDICAL TOURISM", title:"당신의 K-뷰티\n여정이 시작됩니다", sub:"중국·동남아에서 한국 최고의 미용 병원까지\n예약부터 귀국까지 원스톱 케어", feat:"인기 시술", fsub:"지금 가장 많이 예약되는 시술", coord:"코디네이터 서비스", csub:"공항 픽업부터 귀국까지 전담 케어" },
+  zh:{ badge:"✦ 全球K-美容医疗旅游", title:"您的K-Beauty\n美丽之旅从这里开始", sub:"从中国·东南亚直达韩国顶级美容医院\n预约到回国一站式服务", feat:"热门项目", fsub:"现在最多预约的项目", coord:"协调员服务", csub:"从机场接送到回国全程专属服务" },
+  en:{ badge:"✦ GLOBAL K-BEAUTY MEDICAL TOURISM", title:"Your K-Beauty\nJourney Starts Here", sub:"From China & Southeast Asia to Korea's top clinics\nAll-in-one from booking to return", feat:"Popular Treatments", fsub:"Most booked procedures right now", coord:"Coordinator Service", csub:"From airport pickup to departure, full care" },
+  vi:{ badge:"✦ DU LỊCH Y TẾ K-BEAUTY TOÀN CẦU", title:"Hành trình K-Beauty\ncủa bạn bắt đầu từ đây", sub:"Từ Việt Nam đến các phòng khám hàng đầu Hàn Quốc\nDịch vụ trọn gói từ đặt chỗ đến về nhà", feat:"Dịch vụ phổ biến", fsub:"Các thủ thuật được đặt nhiều nhất", coord:"Dịch vụ điều phối viên", csub:"Đưa đón sân bay đến khi về nước" },
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let currentLang = 'ko';
+let selectedHosp = HOSPITALS[0];
+let selectedDate = null;
+let selectedTime = null;
+let currentStep = 1;
+let wishlist = new Set();
+let chatReplies_idx = 0;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderHospGrid('전체');
+renderCalendar();
+
+// ── LANG ──────────────────────────────────────────────────────────────
+function setLang(l, btn) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const t = LANGS[l];
+  document.getElementById('hero-badge').textContent = t.badge;
+  const lines = t.title.split('\n');
+  document.getElementById('hero-title').innerHTML = lines[0] + '<br><em>' + lines[1] + '</em>';
+  document.getElementById('hero-sub').innerHTML = t.sub.replace('\n','<br>');
+  document.getElementById('feat-title').textContent = t.feat;
+  document.getElementById('feat-sub').textContent = t.fsub;
+  document.getElementById('coord-title').textContent = t.coord;
+  document.getElementById('coord-sub').textContent = t.csub;
+}
+
+// ── PAGE ROUTING ──────────────────────────────────────────────────────
+function goPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-' + p)?.classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  const navMap = {home:'bnav-home', search:'bnav-search', wish:'bnav-wish', chat:'bnav-chat'};
+  if(navMap[p]) document.getElementById(navMap[p])?.classList.add('active');
+  if(p === 'wish') renderWishlist();
+  window.scrollTo(0,0);
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────
+function setTab(el, cat) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function doSearch() {
+  const proc = document.getElementById('proc-sel').value;
+  const area = document.getElementById('area-sel').value;
+  document.getElementById('search-result-title').textContent = (proc||'전체') + (area?' · '+area:'');
+  document.getElementById('search-result-sub').textContent = HOSPITALS.length + '곳';
+  renderSearchGrid(HOSPITALS);
+  goPage('search');
+}
+
+function filterCat(el, cat) {
+  document.querySelectorAll('.cpill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderHospGrid(cat);
+}
+
+// ── RENDER GRID ───────────────────────────────────────────────────────
+function renderHospGrid(cat) {
+  const list = cat === '전체' ? HOSPITALS : HOSPITALS.filter(h => h.cat === cat);
+  const g = document.getElementById('hosp-grid');
+  g.innerHTML = list.map(h => hospCardHTML(h, false)).join('');
+}
+
+function renderSearchGrid(list) {
+  const g = document.getElementById('search-grid');
+  g.innerHTML = list.map(h => `
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray2);padding:.9rem;margin-bottom:.7rem;display:flex;gap:.8rem;cursor:pointer;transition:box-shadow .18s" onclick="openDetail(${h.id})" onmouseenter="this.style.boxShadow='var(--shadow)'" onmouseleave="this.style.boxShadow='none'">
+      <div style="width:60px;height:60px;border-radius:10px;background:${h.color};display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">${h.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:.85rem;color:var(--navy)">${h.name}</div>
+        <div style="font-size:.68rem;color:var(--gray3);margin:.08rem 0">📍 ${h.addr}</div>
+        <div style="display:flex;align-items:center;gap:.45rem;margin:.25rem 0">
+          <span style="color:var(--gold);font-size:.7rem;font-weight:600">★ ${h.rating}</span>
+          <span style="font-size:.65rem;color:var(--gray3)">${h.reviews}</span>
+          <span style="font-size:.68rem;color:var(--teal);font-weight:600;margin-left:auto">${h.price}</span>
+        </div>
+        <div style="display:flex;gap:.22rem;flex-wrap:wrap">${h.tags.map(t=>`<span style="font-size:.58rem;background:var(--gray1);color:var(--gray4);padding:.1rem .35rem;border-radius:4px">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function hospCardHTML(h, compact) {
+  return `
+    <div class="hosp-card" onclick="openDetail(${h.id})">
+      <div class="hosp-img" style="background:${h.color}">
+        ${h.emoji}
+        <span class="hosp-certified">인증</span>
+        <span class="hosp-popular">인기</span>
+        <button class="wish-btn ${wishlist.has(h.id)?'active':''}" onclick="toggleWish(event,${h.id})">${wishlist.has(h.id)?'♥':'♡'}</button>
+      </div>
+      <div class="hosp-body">
+        <div class="hosp-name">${h.name}</div>
+        <div class="hosp-spec">${h.spec}</div>
+        <div class="hosp-meta">
+          <span class="hosp-rating">★ ${h.rating} ${h.reviews}</span>
+          <span class="hosp-price">${h.price}</span>
+        </div>
+        <div class="hosp-langs">${h.langs.map(l=>`<span class="lang-tag">${l}</span>`).join('')}</div>
+      </div>
+    </div>`;
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────
+function openDetail(id) {
+  const h = HOSPITALS.find(x => x.id === id);
+  if(!h) return;
+  selectedHosp = h;
+  document.getElementById('modal-hero-emoji').childNodes[0].textContent = h.emoji;
+  document.getElementById('modal-hero-emoji').style.background = `linear-gradient(135deg, ${h.color}, #fff)`;
+  document.getElementById('modal-name').textContent = h.name;
+  document.getElementById('modal-addr').textContent = '📍 ' + h.addr;
+  document.getElementById('modal-tags').innerHTML = h.tags.map(t=>`<span class="modal-tag">${t}</span>`).join('') + h.langs.map(l=>`<span class="modal-tag" style="color:var(--gold);border-color:rgba(201,168,76,.4)">${l}</span>`).join('');
+  document.getElementById('modal-procs').innerHTML = h.procs.map((p,i)=>`
+    <div class="proc-card ${i===0?'selected':''}" onclick="selectProc(this)">
+      <div class="proc-name">${p.name}</div>
+      <div class="proc-price">${p.price}</div>
+      <div class="proc-time">${p.time}</div>
+    </div>`).join('');
+  document.getElementById('modal-reviews').innerHTML = h.reviews.map(r=>`
+    <div class="review-item">
+      <div class="rv-top">
+        <div class="rv-name">${r.flag} ${r.name}</div>
+        <div class="rv-stars">${r.stars}</div>
+      </div>
+      <div class="rv-text">${r.text}</div>
+    </div>`).join('');
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function selectProc(el) {
+  document.querySelectorAll('.proc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── WISHLIST ──────────────────────────────────────────────────────────
+function toggleWish(e, id) {
+  e.stopPropagation();
+  if(wishlist.has(id)) { wishlist.delete(id); showToast('찜 목록에서 제거됨'); }
+  else { wishlist.add(id); showToast('♥ 찜 목록에 추가됨'); }
+  renderHospGrid(document.querySelector('.cpill.active')?.textContent || '전체');
+}
+
+function renderWishlist() {
+  const g = document.getElementById('wish-grid');
+  const empty = document.getElementById('wish-empty');
+  if(wishlist.size === 0) { g.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const list = HOSPITALS.filter(h => wishlist.has(h.id));
+  g.innerHTML = `<div class="hosp-grid">${list.map(h => hospCardHTML(h, false)).join('')}</div>`;
+}
+
+// ── BOOKING ───────────────────────────────────────────────────────────
+function openBooking() {
+  closeModal('detail-modal');
+  currentStep = 1;
+  selectedDate = null; selectedTime = null;
+  document.getElementById('step1-next').disabled = true;
+  document.getElementById('step1-next').style.opacity = '.4';
+  renderCalendar();
+  [1,2,3,4].forEach(n => {
+    document.getElementById('bstep'+n).style.display = n===1?'block':'none';
+    const st = document.getElementById('bst-'+n);
+    st.classList.remove('active','done');
+    if(n===1) st.classList.add('active');
+  });
+  document.getElementById('booking-modal-title').textContent = (selectedHosp?.name||'') + ' 예약';
+  document.getElementById('booking-modal').classList.add('open');
+}
+
+function nextBStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('bstep'+i).style.display = i===n?'block':'none';
+    const st = document.getElementById('bst-'+i);
+    st.classList.remove('active','done');
+    if(i < n) st.classList.add('done');
+    else if(i === n) st.classList.add('active');
+  });
+  currentStep = n;
+  if(n === 3) updatePrice();
+}
+
+function renderCalendar() {
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-month-lbl').textContent = calYear + '년 ' + months[calMonth];
+  const days = ['일','월','화','수','목','금','토'];
+  document.getElementById('cal-headers').innerHTML = days.map(d=>`<div class="cal-day-hd">${d}</div>`).join('');
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+  let html = '';
+  for(let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const isToday = d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const sel = selectedDate === ds;
+    html += `<div class="cal-day ${isPast?'past':''} ${isToday?'today':''} ${sel?'selected':''}" onclick="${isPast?'':'selectDate(this,\''+ds+'\')'}">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  const slots = ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+  const unavail = [2,5];
+  document.getElementById('time-slots').innerHTML = slots.map((t,i)=>`
+    <div class="tslot ${unavail.includes(i)?'unavail':''} ${selectedTime===t?'selected':''}" onclick="${unavail.includes(i)?'':'selectTime(this,\''+t+'\')'}">${t}</div>`).join('');
+}
+
+function prevMonth() { if(calMonth>0) calMonth--; else{calMonth=11;calYear--;} renderCalendar(); }
+function nextMonth() { if(calMonth<11) calMonth++; else{calMonth=0;calYear++;} renderCalendar(); }
+
+function selectDate(el, ds) {
+  document.querySelectorAll('.cal-day').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected'); selectedDate = ds; checkStep1();
+}
+
+function selectTime(el, t) {
+  document.querySelectorAll('.tslot:not(.unavail)').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected'); selectedTime = t; checkStep1();
+}
+
+function checkStep1() {
+  const btn = document.getElementById('step1-next');
+  if(selectedDate && selectedTime) { btn.disabled=false; btn.style.opacity='1'; }
+}
+
+function updatePrice() {
+  const coordVal = parseInt(document.getElementById('inp-coord')?.value||0);
+  const proc = selectedHosp.procs[0];
+  const raw = parseInt(proc.price.replace(/[₩,]/g,'').split('~')[0]);
+  const fee = Math.round(raw * .08);
+  const total = raw + coordVal + fee;
+  document.getElementById('price-summary').innerHTML = `
+    <div class="price-row"><span>시술: ${proc.name}</span><span>${proc.price}</span></div>
+    <div class="price-row"><span>코디네이터</span><span>${coordVal>0?'₩'+coordVal.toLocaleString():'무료'}</span></div>
+    <div class="price-row"><span>예약 수수료 (8%)</span><span>₩${fee.toLocaleString()}</span></div>
+    <div class="price-total"><span>총 결제금액</span><span>₩${total.toLocaleString()}</span></div>`;
+}
+
+function confirmBooking() {
+  const name = document.getElementById('inp-name').value || '고객님';
+  const proc = selectedHosp.procs[0];
+  const bookingNo = 'FK-' + Math.floor(Math.random()*90000+10000);
+  document.getElementById('confirm-sub').textContent = name + '의 예약이 완료되었습니다. 코디네이터가 24시간 내 연락드립니다.';
+  document.getElementById('confirm-card').innerHTML = `
+    <div class="cc-row"><span class="cc-label">병원</span><span class="cc-val">${selectedHosp.name}</span></div>
+    <div class="cc-row"><span class="cc-label">시술</span><span class="cc-val">${proc.name}</span></div>
+    <div class="cc-row"><span class="cc-label">날짜</span><span class="cc-val">${selectedDate||'미정'}</span></div>
+    <div class="cc-row"><span class="cc-label">시간</span><span class="cc-val">${selectedTime||'미정'}</span></div>
+    <div class="cc-row"><span class="cc-label">예약번호</span><span class="cc-val" style="color:var(--rose)">${bookingNo}</span></div>`;
+  nextBStep(4);
+  showToast('🎉 예약이 완료되었습니다!');
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────
+function sendFullChat() {
+  const inp = document.getElementById('full-chat-inp');
+  const msg = inp.value.trim(); if(!msg) return;
+  const msgs = document.getElementById('full-chat-msgs');
+  msgs.innerHTML += `<div class="msg mine"><div class="msg-av" style="background:var(--rose);color:#fff">나</div><div class="msg-bubble">${msg}</div></div>`;
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="msg theirs"><div class="msg-av" style="background:var(--navy);color:var(--gold)">FK</div><div class="msg-bubble">${CHAT_REPLIES[chatReplies_idx % CHAT_REPLIES.length]}</div></div>`;
+    chatReplies_idx++;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 900);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── MODAL CLOSE ON OVERLAY CLICK ──────────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+});
+</script>
+
+</body>
+</html>
