@@ -534,13 +534,21 @@ async function dbLoad(table){
   return Array.isArray(d)?d.map(x=>x.data).filter(Boolean):[];
 }
 async function dbSave(table,rows){
-  // 전체 삭제 후 재삽입
-  await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:'DELETE',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({})});
+  // 전체 삭제 (id > 0 조건 필터)
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  });
   if(!rows.length)return;
-  await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify(rows.map(r=>({data:r})))});
+  // 재삽입
+  await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...headers,'Prefer':'return=minimal'},
+    body:JSON.stringify(rows.map(r=>({data:r})))
+  });
 }
 async function dbDeleteAll(table){
-  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gte.0`,{method:'DELETE',headers});
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
 }
 
 // ── 로그인 ──
