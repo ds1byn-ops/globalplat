@@ -381,9 +381,18 @@ async function dbLoad(){
   return Array.isArray(data)?data.map(x=>x.data).filter(Boolean):[];
 }
 async function dbSaveAll(rows){
-  await fetch(`${SUPA_URL}/rest/v1/bookings`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},'body':'{"id":{"gt":0}}'});
+  // 전체 삭제 (id > 0 조건으로 필터)
+  await fetch(`${SUPA_URL}/rest/v1/bookings?id=gt.0`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  });
   if(!rows.length)return;
-  await fetch(`${SUPA_URL}/rest/v1/bookings`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},body:JSON.stringify(rows.map(r=>({data:r})))});
+  // 재삽입
+  await fetch(`${SUPA_URL}/rest/v1/bookings`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(rows.map(r=>({data:r})))
+  });
 }
 async function dbUpdateOne(row){
   const all=await dbLoad();
