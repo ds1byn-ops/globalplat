@@ -118,6 +118,15 @@ a{text-decoration:none;color:inherit;}
 .footer-col a{display:block;font-size:12px;margin-bottom:5px;}
 .footer-bottom{border-top:1px solid rgba(255,255,255,0.1);margin-top:28px;padding-top:16px;text-align:center;font-size:11px;}
 .float-btn{position:fixed;bottom:22px;right:22px;background:linear-gradient(135deg,var(--pk2),var(--gn));color:var(--white);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:50;border:none;}
+
+
+.svc-btn{width:100%;padding:10px 14px;background:var(--white);border:1px solid #fde68a;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;text-align:left;color:var(--dark);transition:all 0.15s;}
+.svc-btn:hover{background:#fffbf0;border-color:var(--gold);}
+.svc-btn.green{border-color:#a7f3d0;}.svc-btn.green:hover{background:#f0fff8;border-color:var(--gn);}
+.svc-btn.blue{border-color:#c7d2fe;}.svc-btn.blue:hover{background:#f0f4ff;border-color:#6366f1;}
+.lang-opt{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--dark);display:flex;align-items:center;gap:8px;}
+.lang-opt:hover{background:var(--lgray);}
+.lang-opt.active{background:#f0fff8;color:var(--gn2);font-weight:700;}
 @media(max-width:768px){
   .hero-title{font-size:28px;}
   .nav-links{display:none;}
@@ -142,14 +151,21 @@ a{text-decoration:none;color:inherit;}
       <a onclick="document.getElementById('sec-review').scrollIntoView({behavior:'smooth'})" data-i18n="nav_review">用户评价</a>
     </div>
     <div class="nav-right">
-      <div class="lang-btns" style="flex-wrap:wrap;">
-        <button class="lang-btn active" onclick="setLang('zh')">中文</button>
-        <button class="lang-btn" onclick="setLang('ko')">한국어</button>
-        <button class="lang-btn" onclick="setLang('en')">EN</button>
-        <button class="lang-btn" onclick="setLang('vi')">Tiếng Việt</button>
-        <button class="lang-btn" onclick="setLang('th')">ภาษาไทย</button>
-        <button class="lang-btn" onclick="setLang('ja')">日本語</button>
-        <button class="lang-btn" onclick="setLang('ru')">Русский</button>
+      <div class="lang-select-wrap" style="position:relative;">
+        <button id="lang-trigger" onclick="toggleLangMenu()" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--white);cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);">
+          <span id="lang-flag">🇨🇳</span>
+          <span id="lang-label">中文</span>
+          <span style="font-size:9px;color:var(--gray);">▼</span>
+        </button>
+        <div id="lang-menu" style="display:none;position:absolute;top:38px;right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:300;min-width:160px;overflow:hidden;">
+          <div onclick="setLang('zh')" class="lang-opt" data-lang="zh">🇨🇳 中文</div>
+          <div onclick="setLang('ko')" class="lang-opt" data-lang="ko">🇰🇷 한국어</div>
+          <div onclick="setLang('en')" class="lang-opt" data-lang="en">🇺🇸 English</div>
+          <div onclick="setLang('vi')" class="lang-opt" data-lang="vi">🇻🇳 Tiếng Việt</div>
+          <div onclick="setLang('th')" class="lang-opt" data-lang="th">🇹🇭 ภาษาไทย</div>
+          <div onclick="setLang('ja')" class="lang-opt" data-lang="ja">🇯🇵 日本語</div>
+          <div onclick="setLang('ru')" class="lang-opt" data-lang="ru">🇷🇺 Русский</div>
+        </div>
       </div>
       <button class="btn-consult" onclick="openModal(null)" data-i18n="nav_consult">免费咨询</button>
     </div>
@@ -247,10 +263,22 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="footer-col">
       <h4 data-i18n="f_h3">联系方式</h4>
-      <a>💬 WeChat: <b>Followkorea1</b></a>
-      <a>📕 小红书: <b>Followkorea_kr</b></a>
-      <a>💚 Line: <b>Followkorea</b></a>
-      <a>📧 contact@followkorea.co.kr</a>
+      <a href="https://work.weixin.qq.com/kfid/kfc" target="_blank" style="display:flex;align-items:center;gap:6px;">
+        <img src="https://img.icons8.com/color/20/wechat.png" style="border-radius:4px;">
+        WeChat: <b>Followkorea1</b>
+      </a>
+      <a href="https://www.xiaohongshu.com/user/profile/Followkorea_kr" target="_blank" style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:14px;">📕</span>
+        小红书: <b>Followkorea_kr</b>
+      </a>
+      <a href="https://line.me/ti/p/Followkorea" target="_blank" style="display:flex;align-items:center;gap:6px;">
+        <img src="https://img.icons8.com/color/20/line-me.png" style="border-radius:4px;">
+        Line: <b>Followkorea</b>
+      </a>
+      <a href="mailto:contact@followkorea.co.kr" style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:14px;">📧</span>
+        contact@followkorea.co.kr
+      </a>
     </div>
   </div>
   <div class="footer-bottom">© 2026 Follow Korea. All rights reserved.</div>
@@ -313,6 +341,81 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
+
+<!-- 기타 서비스 섹션 -->
+<div id="sec-extra" style="display:none;">
+<section class="section" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">EXTRA SERVICES</div>
+      <h2 class="sec-title" data-i18n="extra_title">기타 서비스</h2>
+      <p class="sec-sub" data-i18n="extra_sub">의료관광 전 일정을 함께합니다</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+
+      <!-- 컨시어지 -->
+      <div style="background:linear-gradient(135deg,#FFF8E7,#FFF0F4);border-radius:var(--r);padding:24px;border:1px solid #fde68a;">
+        <div style="font-size:32px;margin-bottom:10px;">👑</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_concierge">VVIP 컨시어지</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_concierge_desc">전담 코디네이터 동행, 병원 예약부터 귀국까지</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn" onclick="openSvcModal('concierge','1n2d')" data-i18n="c_1n2d">1박 2일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','2n3d')" data-i18n="c_2n3d">2박 3일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','3n4d')" data-i18n="c_3n4d">3박 4일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','4n5d')" data-i18n="c_4n5d">4박 5일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','5nmore')" data-i18n="c_5nmore">5박 이상 패키지</button>
+        </div>
+      </div>
+
+      <!-- 통역 -->
+      <div style="background:linear-gradient(135deg,#F0FFF8,#E0F2FE);border-radius:var(--r);padding:24px;border:1px solid #a7f3d0;">
+        <div style="font-size:32px;margin-bottom:10px;">🗣️</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_interpret">통역 서비스</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_interpret_desc">중국어·베트남어·태국어·영어 전문 통역</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn green" onclick="openSvcModal('interpret','half')" data-i18n="i_half">반일 통역 (4시간)</button>
+          <button class="svc-btn green" onclick="openSvcModal('interpret','full')" data-i18n="i_full">종일 통역 (8시간)</button>
+          <button class="svc-btn green" onclick="openSvcModal('interpret','hosp')" data-i18n="i_hosp">병원 동행 통역</button>
+        </div>
+      </div>
+
+      <!-- 차량 서비스 -->
+      <div style="background:linear-gradient(135deg,#F0F4FF,#F5F3FF);border-radius:var(--r);padding:24px;border:1px solid #c7d2fe;">
+        <div style="font-size:32px;margin-bottom:10px;">🚗</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_car">차량 서비스</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_car_desc">공항 픽업·병원 이동·관광 전용 차량</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn blue" onclick="openSvcModal('car','1d')" data-i18n="car_1d">차량 1일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','2d')" data-i18n="car_2d">차량 2일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','3d')" data-i18n="car_3d">차량 3일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','4d')" data-i18n="car_4d">차량 4일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','5dmore')" data-i18n="car_5dmore">차량 5일 이상</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','airport')" data-i18n="car_airport">공항 픽업/샌딩</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- AI 상담 모달 -->
+<div class="modal-bg" id="ai-modal-bg" onclick="if(event.target===this)closeAiChat()">
+<div class="modal" style="width:480px;max-height:85vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#fff;">🤖 AI 상담</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.8);" id="ai-lang-label">中文 · 한국어 · EN · 多语言</div>
+    </div>
+    <button onclick="closeAiChat()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer;font-size:14px;">✕</button>
+  </div>
+  <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:300px;max-height:420px;"></div>
+  <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+    <input type="text" id="ai-input" placeholder="무엇이든 물어보세요 / 请随时提问..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMsg();}">
+    <button onclick="sendAiMsg()" style="padding:9px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;">전송</button>
+  </div>
+</div>
+</div>
 <!-- 예약 모달 -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
 <div class="modal">
@@ -361,6 +464,37 @@ a{text-decoration:none;color:inherit;}
 </div>
 
 
+
+<!-- 서비스 신청 모달 -->
+<div class="modal-bg" id="svc-modal-bg" onclick="if(event.target===this)closeSvcModal()">
+<div class="modal">
+  <h2><span id="svc-modal-title">서비스 신청</span><button onclick="closeSvcModal()">✕</button></h2>
+  <div id="svc-form">
+    <div style="background:var(--lgray);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:2px;" data-i18n="svc_selected">선택 서비스</div>
+      <div style="font-size:14px;font-weight:700;" id="svc-selected-label"></div>
+    </div>
+    <div class="fg">
+      <div class="fitem"><label data-i18n="f_name">성명 (여권 영문명)</label><input type="text" id="svc-name" placeholder="ZHANG JING"></div>
+      <div class="fitem"><label data-i18n="f_date">희망 날짜</label><input type="date" id="svc-date"></div>
+      <div class="fitem"><label data-i18n="f_nation">국적</label>
+        <select id="svc-nation">
+          <option>中国</option><option>越南</option><option>泰国</option><option>其他</option>
+        </select>
+      </div>
+      <div class="fitem"><label data-i18n="f_contact">위챗/연락처</label><input type="text" id="svc-contact" placeholder="WeChat ID"></div>
+      <div class="fitem" style="grid-column:span 2 / span 2;"><label data-i18n="f_note">요청사항</label><textarea id="svc-note" style="height:68px;resize:none;" placeholder="..."></textarea></div>
+    </div>
+    <button class="btn-full" onclick="submitSvc()" style="margin-top:10px;" data-i18n="f_submit">신청 완료 ✓</button>
+  </div>
+  <div id="svc-done" style="display:none;text-align:center;padding:16px 0;">
+    <div style="font-size:48px;margin-bottom:12px;">✅</div>
+    <h3 style="font-size:17px;font-weight:800;margin-bottom:8px;" data-i18n="done_title">신청 완료!</h3>
+    <p style="color:var(--gray);font-size:13px;" data-i18n="done_desc">24시간 내 위챗으로 연락드립니다</p>
+    <button class="btn-full" onclick="closeSvcModal()" style="margin-top:14px;" data-i18n="done_close">닫기</button>
+  </div>
+</div>
+</div>
 <!-- 리뷰 작성 모달 -->
 <div class="modal-bg" id="review-modal-bg" onclick="if(event.target===this)closeReviewModal()">
 <div class="modal" style="max-width:440px;">
@@ -430,7 +564,10 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 </div>
-<button class="float-btn" onclick="openModal(null)">💬</button>
+<div style="position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:50;">
+  <button class="float-btn" onclick="openAiChat()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);" title="AI 상담">🤖</button>
+  <button class="float-btn" onclick="openModal(null)" title="예약 상담">💬</button>
+</div>
 
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
@@ -462,10 +599,18 @@ const I={
     f_nation:'国籍',n_cn:'中国',n_vn:'越南',n_th:'泰国',n_my:'马来西亚',n_etc:'其他',
     f_date:'希望日期',f_contact:'微信/联系方式',f_note:'备注',f_submit:'提交预约申请 ✓',
     done_title:'预约申请完成！',done_desc:'顾问将在24小时内通过微信联系您',done_close:'关闭',
-    cats:['全部','整形外科','皮肤','干细胞','体型','女性医学','眼科','抗衰老'],
+    cats:['全部','整形外科','皮肤','干细胞','体型','女性医学','眼科','抗衰老','牙科','美容护理','其他服务'],
     steps:[['01','选择医院·项目','浏览精选医院，选择适合您的项目'],['02','填写预约表','输入个人信息和希望日期'],['03','顾问确认联系','24小时内专属顾问微信联系'],['04','到院享受服务','抵韩后全程中文陪同']],
     reviews:[{t:'"超声刀效果超好！护士全程中文，完全无语言障碍。强烈推荐！"',n:'Zhang Wei',f:'中国·上海'},{t:'"第一次来韩国做医美，Follow Korea安排得非常周到。"',n:'Li Mei',f:'中国·北京'},{t:'"预约很方便，顾问姐姐特别耐心。下次还会来！"',n:'Wang Fang',f:'越南·河内'}],
     loc_gangnam:'首尔江南',loc_sinsa:'首尔新沙',loc_apgujeong:'首尔狎鸥亭',
+        extra_title:'其他服务',extra_sub:'全程陪同您的医疗之旅',
+    svc_concierge:'VVIP 礼宾服务',svc_concierge_desc:'专属顾问全程陪同，从预约到回国',
+    svc_interpret:'翻译服务',svc_interpret_desc:'中文·越南语·泰语·英语专业翻译',
+    svc_car:'专车服务',svc_car_desc:'机场接送·医院交通·观光专车',
+    c_1n2d:'1晚2天套餐',c_2n3d:'2晚3天套餐',c_3n4d:'3晚4天套餐',c_4n5d:'4晚5天套餐',c_5nmore:'5晚以上套餐',
+    i_half:'半日翻译 (4小时)',i_full:'全日翻译 (8小时)',i_hosp:'陪同就诊翻译',
+    car_1d:'专车1日',car_2d:'专车2日',car_3d:'专车3日',car_4d:'专车4日',car_5dmore:'专车5日以上',car_airport:'机场接送',
+    svc_selected:'已选服务',
     reserve_btn:'预约',detail_btn:'详情',
     overview_default:'专业医院，提供优质医美服务。中文全程服务，专属顾问陪同。',
     review_sub:'来自全球患者的真实体验分享',
@@ -496,10 +641,18 @@ const I={
     f_nation:'국적',n_cn:'중국',n_vn:'베트남',n_th:'태국',n_my:'말레이시아',n_etc:'기타',
     f_date:'희망 날짜',f_contact:'위챗/연락처',f_note:'메모',f_submit:'예약 신청 완료 ✓',
     done_title:'예약 신청 완료!',done_desc:'24시간 내 코디네이터가 위챗으로 연락드립니다',done_close:'닫기',
-    cats:['전체','성형외과','피부','줄기세포','체형','여성의학','안과','항노화'],
+    cats:['전체','성형외과','피부','줄기세포','체형','여성의학','안과','안티에이징','치과','에스테틱','기타서비스'],
     steps:[['01','병원·시술 선택','원하는 병원과 시술을 선택하세요'],['02','예약 정보 입력','개인정보와 희망 날짜를 입력하세요'],['03','코디네이터 확인','24시간 내 전담 코디네이터 위챗 연락'],['04','병원 방문·시술','전 일정 통역 동행 서비스']],
     reviews:[{t:'"울쎄라 효과 정말 좋았어요! 직원분들이 중국어로 친절히 설명해 주셨어요."',n:'Zhang Wei',f:'중국·상하이'},{t:'"처음 한국 의료관광인데 팔로우코리아 덕분에 너무 편하게 다녀왔어요!"',n:'Li Mei',f:'중국·베이징'},{t:'"예약부터 시술까지 모든 과정이 체계적이었어요. 다음에도 이용할게요!"',n:'Wang Fang',f:'베트남·하노이'}],
     loc_gangnam:'서울 강남',loc_sinsa:'서울 신사',loc_apgujeong:'서울 압구정',
+        extra_title:'기타 서비스',extra_sub:'의료관광 전 일정을 함께합니다',
+    svc_concierge:'VVIP 컨시어지',svc_concierge_desc:'전담 코디네이터 동행, 병원 예약부터 귀국까지',
+    svc_interpret:'통역 서비스',svc_interpret_desc:'중국어·베트남어·태국어·영어 전문 통역',
+    svc_car:'차량 서비스',svc_car_desc:'공항 픽업·병원 이동·관광 전용 차량',
+    c_1n2d:'1박 2일 패키지',c_2n3d:'2박 3일 패키지',c_3n4d:'3박 4일 패키지',c_4n5d:'4박 5일 패키지',c_5nmore:'5박 이상 패키지',
+    i_half:'반일 통역 (4시간)',i_full:'종일 통역 (8시간)',i_hosp:'병원 동행 통역',
+    car_1d:'차량 1일',car_2d:'차량 2일',car_3d:'차량 3일',car_4d:'차량 4일',car_5dmore:'차량 5일 이상',car_airport:'공항 픽업/샌딩',
+    svc_selected:'선택 서비스',
     reserve_btn:'예약',detail_btn:'상세보기',
     overview_default:'전문 의료진이 최고의 의료미용 서비스를 제공합니다. 중국어 통역 가능, 전담 코디네이터 동행.',
     review_sub:'전 세계 환자들의 실제 경험 공유',
@@ -529,10 +682,18 @@ const I={
     f_nation:'Nationality',n_cn:'China',n_vn:'Vietnam',n_th:'Thailand',n_my:'Malaysia',n_etc:'Other',
     f_date:'Preferred Date',f_contact:'WeChat / Contact',f_note:'Notes',f_submit:'Submit Booking ✓',
     done_title:'Booking Submitted!',done_desc:'Our coordinator will contact you via WeChat within 24 hours',done_close:'Close',
-    cats:['All','Plastic Surgery','Skin','Stem Cell','Body','Women\'s Health','Eye','Anti-aging'],
+    cats:['All','Plastic Surgery','Skin','Stem Cell','Body','Women\'s Health','Eye','Anti-aging','Dental','Esthetic','Other Services'],
     steps:[['01','Choose Clinic & Treatment','Browse curated clinics'],['02','Fill Booking Form','Enter your details'],['03','Coordinator Confirms','Within 24h via WeChat'],['04','Visit & Enjoy','Full escort service']],
     reviews:[{t:'"Ulthera results were amazing! Staff communicated in Chinese. Highly recommend!"',n:'Zhang Wei',f:'China · Shanghai'},{t:'"First time medical tourism in Korea — Follow Korea made everything so easy!"',n:'Li Mei',f:'China · Beijing'},{t:'"Super convenient booking. The coordinator answered all my questions!"',n:'Wang Fang',f:'Vietnam · Hanoi'}],
     loc_gangnam:'Gangnam, Seoul',loc_sinsa:'Sinsa, Gangnam',loc_apgujeong:'Apgujeong, Seoul',
+        extra_title:'Other Services',extra_sub:'We accompany your entire medical journey',
+    svc_concierge:'VVIP Concierge',svc_concierge_desc:'Dedicated coordinator from booking to departure',
+    svc_interpret:'Interpretation',svc_interpret_desc:'Chinese·Vietnamese·Thai·English interpretation',
+    svc_car:'Car Service',svc_car_desc:'Airport transfer·Hospital·Sightseeing',
+    c_1n2d:'1 Night 2 Days',c_2n3d:'2 Nights 3 Days',c_3n4d:'3 Nights 4 Days',c_4n5d:'4 Nights 5 Days',c_5nmore:'5+ Nights',
+    i_half:'Half Day (4hrs)',i_full:'Full Day (8hrs)',i_hosp:'Hospital Escort',
+    car_1d:'Car 1 Day',car_2d:'Car 2 Days',car_3d:'Car 3 Days',car_4d:'Car 4 Days',car_5dmore:'Car 5+ Days',car_airport:'Airport Transfer',
+    svc_selected:'Selected Service',
     reserve_btn:'Book',detail_btn:'Details',
     overview_default:'Professional medical aesthetic clinic offering top-quality services with Chinese interpretation.',
     review_sub:'Real experiences from patients worldwide',
@@ -562,7 +723,7 @@ const I={
     f_nation:'Quốc tịch',n_cn:'Trung Quốc',n_vn:'Việt Nam',n_th:'Thái Lan',n_my:'Malaysia',n_etc:'Khác',
     f_date:'Ngày mong muốn',f_contact:'WeChat / Liên hệ',f_note:'Ghi chú',f_submit:'Gửi đặt lịch ✓',
     done_title:'Đặt lịch thành công!',done_desc:'Tư vấn viên sẽ liên hệ qua WeChat trong 24h',done_close:'Đóng',
-    cats:['Tất cả','Phẫu thuật','Da liễu','Tế bào gốc','Cơ thể','Y tế phụ nữ','Mắt','Kháng lão hóa'],
+    cats:['Tất cả','Phẫu thuật','Da liễu','Tế bào gốc','Cơ thể','Y tế phụ nữ','Mắt','Chống lão hóa','Nha khoa','Thẩm mỹ','Dịch vụ khác'],
     steps:[['01','Chọn BV & Dịch vụ','Duyệt các bệnh viện được chọn lọc'],['02','Điền form','Nhập thông tin và ngày'],['03','Xác nhận','Tư vấn viên liên hệ 24h'],['04','Đến khám','Dịch vụ đồng hành toàn trình']],
     reviews:[{t:'"Kết quả Ulthera tuyệt vời! Nhân viên nói tiếng Anh rất tốt."',n:'Nguyen Thu',f:'Việt Nam · Hà Nội'},{t:'"Lần đầu du lịch thẩm mỹ Hàn Quốc, Follow Korea sắp xếp rất chu đáo!"',n:'Pham Lan',f:'Việt Nam · HCM'},{t:'"Dịch vụ chuyên nghiệp, bác sĩ giỏi. Rất hài lòng!"',n:'Tran Mai',f:'Việt Nam · Đà Nẵng'}],
     loc_gangnam:'Gangnam, Seoul',loc_sinsa:'Sinsa, Gangnam',loc_apgujeong:'Apgujeong, Seoul',
@@ -592,7 +753,7 @@ const I={
     f_nation:'สัญชาติ',n_cn:'จีน',n_vn:'เวียดนาม',n_th:'ไทย',n_my:'มาเลเซีย',n_etc:'อื่นๆ',
     f_date:'วันที่ต้องการ',f_contact:'WeChat / ติดต่อ',f_note:'หมายเหตุ',f_submit:'ส่งการจอง ✓',
     done_title:'จองสำเร็จ!',done_desc:'ที่ปรึกษาจะติดต่อผ่าน WeChat ภายใน 24 ชั่วโมง',done_close:'ปิด',
-    cats:['ทั้งหมด','ศัลยกรรม','ผิวพรรณ','เซลล์ต้นกำเนิด','รูปร่าง','สุขภาพสตรี','จักษุ','ต้านวัย'],
+    cats:['ทั้งหมด','ศัลยกรรม','ผิวพรรณ','เซลล์ต้นกำเนิด','รูปร่าง','สุขภาพสตรี','จักษุ','ต้านวัย','ทันตกรรม','เอสเทติก','บริการอื่นๆ'],
     steps:[['01','เลือก รพ.','เลือกโรงพยาบาลและบริการ'],['02','กรอกข้อมูล','ใส่ข้อมูลส่วนตัว'],['03','ยืนยัน','ที่ปรึกษาติดต่อภายใน 24h'],['04','รับบริการ','ดูแลตลอดการเดินทาง']],
     reviews:[{t:'"ผลลัพธ์ Ulthera ดีมาก! พนักงานพูดภาษาอังกฤษได้ดี"',n:'Siriwan T.',f:'ไทย · กรุงเทพ'},{t:'"ครั้งแรกที่มาเกาหลีทำความงาม Follow Korea ดูแลดีมาก!"',n:'Araya P.',f:'ไทย · เชียงใหม่'},{t:'"บริการดีเยี่ยม หมอเก่งมาก ประทับใจมาก"',n:'Nisa K.',f:'ไทย · ภูเก็ต'}],
     loc_gangnam:'กังนัม โซล',loc_sinsa:'ซินซา กังนัม',loc_apgujeong:'อัปกูจอง โซล',
@@ -622,7 +783,7 @@ const I={
     f_nation:'国籍',n_cn:'中国',n_vn:'ベトナム',n_th:'タイ',n_my:'マレーシア',n_etc:'その他',
     f_date:'希望日',f_contact:'WeChat / 連絡先',f_note:'備考',f_submit:'予約を申し込む ✓',
     done_title:'予約完了！',done_desc:'24時間以内にWeChatでご連絡します',done_close:'閉じる',
-    cats:['すべて','整形外科','スキン','幹細胞','ボディ','女性医療','眼科','アンチエイジング'],
+    cats:['すべて','整形外科','スキン','幹細胞','ボディ','女性医療','眼科','アンチエイジング','歯科','エステ','その他サービス'],
     steps:[['01','病院・施術選択','厳選病院から選ぶ'],['02','予約フォーム入力','個人情報と希望日'],['03','コーディネーター確認','24時間以内にWeChat連絡'],['04','来院・施術','全行程サポート付き']],
     reviews:[{t:'"ウルセラの効果が素晴らしかった！スタッフが中国語で対応してくれて安心でした。"',n:'Yuki T.',f:'日本・東京'},{t:'"初めての韓国美容医療。Follow Koreaのおかげで安心でした！"',n:'Akiko M.',f:'日本・大阪'},{t:'"予約から施術まで丁寧なサポートでした。また利用します！"',n:'Hana S.',f:'日本・福岡'}],
     loc_gangnam:'江南、ソウル',loc_sinsa:'新沙、江南',loc_apgujeong:'狎鴎亭、ソウル',
@@ -652,7 +813,7 @@ const I={
     f_nation:'Гражданство',n_cn:'Китай',n_vn:'Вьетнам',n_th:'Таиланд',n_my:'Малайзия',n_etc:'Другое',
     f_date:'Желаемая дата',f_contact:'WeChat / Контакт',f_note:'Примечания',f_submit:'Отправить запись ✓',
     done_title:'Запись принята!',done_desc:'Координатор свяжется через WeChat в течение 24 часов',done_close:'Закрыть',
-    cats:['Все','Пластическая хирургия','Кожа','Стволовые клетки','Тело','Женское здоровье','Офтальмология','Антивозрастное'],
+    cats:['Все','Пластическая хирургия','Кожа','Стволовые клетки','Тело','Женское здоровье','Офтальмология','Антивозрастное','Стоматология','Эстетика','Другие услуги'],
     steps:[['01','Выбор клиники','Просмотр клиник'],['02','Заполнение формы','Личные данные и дата'],['03','Подтверждение','Координатор свяжется 24ч'],['04','Визит и процедура','Сопровождение на месте']],
     reviews:[{t:'"Результат Ulthera превзошёл ожидания! Персонал говорит по-английски."',n:'Anna K.',f:'Россия · Москва'},{t:'"Первый раз в медицинском туризме — Follow Korea позаботилась обо всём!"',n:'Maria S.',f:'Россия · СПб'},{t:'"Профессиональный сервис. Очень довольна результатом!"',n:'Elena V.',f:'Казахстан · Алматы'}],
     loc_gangnam:'Каннам, Сеул',loc_sinsa:'Синса, Каннам',loc_apgujeong:'Апкуджон, Сеул',
@@ -715,6 +876,180 @@ const BADGE_MAP={
   '윤곽전문':  {zh:'轮廓专科',ko:'윤곽전문',en:'Contouring',vi:'Tạo hình',th:'เฉพาะรูปหน้า',ja:'輪郭専門',ru:'Контур'},
   '전문':    {zh:'专科',ko:'전문',en:'Specialist',vi:'Chuyên khoa',th:'เฉพาะทาง',ja:'専門',ru:'Специалист'},
 };
+
+// ── 언어 드롭다운 ──
+const LANG_META={
+  zh:{flag:'🇨🇳',label:'中文'},ko:{flag:'🇰🇷',label:'한국어'},en:{flag:'🇺🇸',label:'English'},
+  vi:{flag:'🇻🇳',label:'Tiếng Việt'},th:{flag:'🇹🇭',label:'ภาษาไทย'},
+  ja:{flag:'🇯🇵',label:'日本語'},ru:{flag:'🇷🇺',label:'Русский'}
+};
+function toggleLangMenu(){
+  const m=document.getElementById('lang-menu');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.lang-select-wrap')){
+    const m=document.getElementById('lang-menu');
+    if(m)m.style.display='none';
+  }
+});
+
+// ── 카테고리 렌더 (기타서비스 포함) ──
+const CAT_ICONS={
+  '전체':'🏥','성형외과':'💉','整形外科':'💉','Plastic Surgery':'💉',
+  '피부':'🌿','皮肤':'🌿','Skin':'🌿',
+  '줄기세포':'🧬','干细胞':'🧬','Stem Cell':'🧬',
+  '체형':'💪','体型':'💪','Body':'💪',
+  '여성의학':'🌸','女性医学':'🌸',"Women's Health":'🌸',
+  '안과':'👁','眼科':'👁','Eye':'👁',
+  '안티에이징':'🏅','抗衰老':'🏅','Anti-aging':'🏅',
+  '치과':'🦷','牙科':'🦷','Dental':'🦷',
+  '에스테틱':'✨','美容护理':'✨','Esthetic':'✨',
+  '기타서비스':'🎯','其他服务':'🎯','Other Services':'🎯',
+  // 기타 언어
+  'Chống lão hóa':'🏅','Nha khoa':'🦷','Thẩm mỹ':'✨','Dịch vụ khác':'🎯',
+  'ต้านวัย':'🏅','ทันตกรรม':'🦷','เอสเทติก':'✨','บริการอื่นๆ':'🎯',
+  'アンチエイジング':'🏅','歯科':'🦷','エステ':'✨','その他サービス':'🎯',
+  'Антивозрастное':'🏅','Стоматология':'🦷','Эстетика':'✨','Другие услуги':'🎯',
+};
+const EXTRA_CATS_KR=['기타서비스','其他服务','Other Services','Dịch vụ khác','บริการอื่นๆ','その他サービス','Другие услуги'];
+
+// ── 서비스 모달 ──
+let currentSvcType='', currentSvcSub='';
+const SVC_LABELS={
+  concierge:{
+    '1n2d':{zh:'1晚2天套餐',ko:'1박 2일 패키지',en:'1N2D Package'},
+    '2n3d':{zh:'2晚3天套餐',ko:'2박 3일 패키지',en:'2N3D Package'},
+    '3n4d':{zh:'3晚4天套餐',ko:'3박 4일 패키지',en:'3N4D Package'},
+    '4n5d':{zh:'4晚5天套餐',ko:'4박 5일 패키지',en:'4N5D Package'},
+    '5nmore':{zh:'5晚以上套餐',ko:'5박 이상 패키지',en:'5+ Nights Package'},
+  },
+  interpret:{
+    'half':{zh:'半日翻译(4小时)',ko:'반일 통역(4시간)',en:'Half Day Interpretation'},
+    'full':{zh:'全日翻译(8小时)',ko:'종일 통역(8시간)',en:'Full Day Interpretation'},
+    'hosp':{zh:'陪同就诊翻译',ko:'병원 동행 통역',en:'Hospital Escort'},
+  },
+  car:{
+    '1d':{zh:'专车1日',ko:'차량 1일',en:'Car 1 Day'},
+    '2d':{zh:'专车2日',ko:'차량 2일',en:'Car 2 Days'},
+    '3d':{zh:'专车3日',ko:'차량 3일',en:'Car 3 Days'},
+    '4d':{zh:'专车4日',ko:'차량 4일',en:'Car 4 Days'},
+    '5dmore':{zh:'专车5日以上',ko:'차량 5일 이상',en:'Car 5+ Days'},
+    'airport':{zh:'机场接送',ko:'공항 픽업/샌딩',en:'Airport Transfer'},
+  }
+};
+function openSvcModal(type,sub){
+  currentSvcType=type;currentSvcSub=sub;
+  const lbl=SVC_LABELS[type]?.[sub]?.[lang]||sub;
+  document.getElementById('svc-selected-label').textContent=lbl;
+  document.getElementById('svc-form').style.display='';
+  document.getElementById('svc-done').style.display='none';
+  document.getElementById('svc-modal-bg').classList.add('open');
+}
+function closeSvcModal(){document.getElementById('svc-modal-bg').classList.remove('open');}
+async function submitSvc(){
+  const name=document.getElementById('svc-name').value.trim();
+  if(!name){alert(lang==='ko'?'성명을 입력하세요':lang==='zh'?'请输入姓名':'Please enter your name');return;}
+  const booking={
+    id:Date.now(),name,
+    hospital:'팔로우코리아 서비스',
+    treatment:currentSvcType+'/'+currentSvcSub,
+    datetime:document.getElementById('svc-date').value+' 00:00',
+    nationality:document.getElementById('svc-nation').value,
+    contact:document.getElementById('svc-contact').value,
+    note:document.getElementById('svc-note').value,
+    status:'대기',inflow_type:'플랫폼',introducer:'플랫폼',
+    hosp_comm_rate:0,dob:'',noshow:'N',hosp_paydate:'',hosp_paidamt:0,
+    dept:'기타서비스',amount:0,expected:0,vat:'별도',tax_invoice:'N',
+  };
+  await dbInsert('bookings',booking);
+  document.getElementById('svc-form').style.display='none';
+  document.getElementById('svc-done').style.display='';
+}
+
+// ── AI 상담 채팅 ──
+let aiHistory=[];
+const AI_SYSTEM=`You are a helpful medical tourism consultant for Follow Korea (팔로우코리아), a Korean medical tourism agency in Gangnam, Seoul.
+You help patients from China, Vietnam, Thailand, Japan, Russia, and Korea with:
+- Information about our partner hospitals and medical procedures
+- Booking and reservation inquiries
+- Korean medical tourism logistics (visa, transportation, accommodation)
+- Post-procedure care advice
+
+Always respond in the SAME LANGUAGE the user writes in.
+Be warm, professional, and concise. For specific medical advice, recommend consulting a doctor.
+Contact: WeChat Followkorea1 | Line: Followkorea | Email: contact@followkorea.co.kr`;
+
+function openAiChat(){
+  document.getElementById('ai-modal-bg').classList.add('open');
+  if(aiHistory.length===0){
+    const greetings={
+      zh:'您好！我是Follow Korea的AI顾问。请问有什么可以帮助您的？😊',
+      ko:'안녕하세요! 팔로우코리아 AI 상담사입니다. 무엇을 도와드릴까요? 😊',
+      en:"Hello! I'm Follow Korea's AI consultant. How can I help you today? 😊",
+      vi:'Xin chào! Tôi là tư vấn viên AI của Follow Korea. Tôi có thể giúp gì cho bạn? 😊',
+      th:'สวัสดีค่ะ! ฉันคือที่ปรึกษา AI ของ Follow Korea ให้ฉันช่วยอะไรได้บ้างคะ? 😊',
+      ja:'こんにちは！Follow KoreaのAIコンサルタントです。何かお手伝いできますか？😊',
+      ru:'Здравствуйте! Я AI-консультант Follow Korea. Чем могу помочь? 😊',
+    };
+    addAiMsg('ai', greetings[lang]||greetings.zh);
+  }
+  document.getElementById('ai-input').focus();
+}
+function closeAiChat(){document.getElementById('ai-modal-bg').classList.remove('open');}
+function addAiMsg(role,text){
+  const el=document.getElementById('ai-messages');
+  const isAi=role==='ai';
+  const div=document.createElement('div');
+  div.style.cssText=`display:flex;justify-content:${isAi?'flex-start':'flex-end'};`;
+  div.innerHTML=`<div style="max-width:80%;padding:10px 14px;border-radius:${isAi?'4px 16px 16px 16px':'16px 4px 16px 16px'};background:${isAi?'var(--lgray)':'linear-gradient(135deg,#6366f1,#8b5cf6)'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.6;white-space:pre-wrap;">${text}</div>`;
+  el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+}
+function addAiTyping(){
+  const el=document.getElementById('ai-messages');
+  const div=document.createElement('div');
+  div.id='ai-typing';div.style.display='flex';
+  div.innerHTML=`<div style="padding:10px 14px;border-radius:4px 16px 16px 16px;background:var(--lgray);font-size:13px;color:var(--gray);">●●●</div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
+}
+async function sendAiMsg(){
+  const input=document.getElementById('ai-input');
+  const msg=input.value.trim();if(!msg)return;
+  input.value='';
+  addAiMsg('user',msg);
+  aiHistory.push({role:'user',content:msg});
+  addAiTyping();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:800,
+        system:AI_SYSTEM,
+        messages:aiHistory.slice(-10),
+      })
+    });
+    const data=await res.json();
+    document.getElementById('ai-typing')?.remove();
+    const reply=data.content?.[0]?.text||'죄송합니다, 잠시 후 다시 시도해주세요.';
+    aiHistory.push({role:'assistant',content:reply});
+    addAiMsg('ai',reply);
+  }catch(e){
+    document.getElementById('ai-typing')?.remove();
+    const fallback={
+      zh:'抱歉，暂时无法连接AI。请通过微信联系我们：Followkorea1',
+      ko:'죄송합니다, AI 연결에 실패했습니다. 위챗으로 문의해주세요: Followkorea1',
+      en:'Sorry, AI connection failed. Please contact us via WeChat: Followkorea1',
+    };
+    addAiMsg('ai',fallback[lang]||fallback.en);
+  }
+}
+
+// ── 카테고리 클릭 시 기타서비스 섹션 토글 ──
+const _origSetCat=typeof setCat==='function'?setCat:null;
+
 function badgeLabel(b){const m=BADGE_MAP[b];return m?(m[lang]||m.zh||b):b;}
 
 let lang='zh', currentHosp=null, activeCat='';
@@ -722,8 +1057,12 @@ const t=k=>I[lang][k]||I.zh[k]||k;
 
 function setLang(l){
   lang=l;
-  const lblMap={zh:'中文',ko:'한국어',en:'EN',vi:'Tiếng Việt',th:'ภาษาไทย',ja:'日本語',ru:'Русский'};
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===lblMap[l]));
+  // 드롭다운 업데이트
+  const meta=LANG_META[l]||{flag:'🌐',label:l};
+  const fl=document.getElementById('lang-flag');const lb=document.getElementById('lang-label');
+  if(fl)fl.textContent=meta.flag;if(lb)lb.textContent=meta.label;
+  document.querySelectorAll('.lang-opt').forEach(o=>o.classList.toggle('active',o.dataset.lang===l));
+  const m=document.getElementById('lang-menu');if(m)m.style.display='none';
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews();
   if(currentHosp) renderDetail(currentHosp);
@@ -738,17 +1077,22 @@ function applyI18n(){
 
 function renderCats(){
   const cats=t('cats');
-  const icons=['🔮','💉','🌿','💪','🌸','👁','🏅'];
   document.getElementById('cat-grid').innerHTML=cats.map((c,i)=>`
     <div class="cat-card${activeCat===c?' active':''}" onclick="setCat('${c}',this)">
-      <div class="ci">${i===0?'🏥':icons[i-1]||'✨'}</div>
+      <div class="ci">${CAT_ICONS[c]||(i===0?'🏥':'✨')}</div>
       <div class="cn">${c}</div>
     </div>`).join('');
 }
 function setCat(cat,el){
   const all=t('cats')[0];
   activeCat=cat===all?'':cat;
-  filterHosps();
+  // 기타서비스 섹션 토글
+  const isExtra=EXTRA_CATS_KR.includes(cat);
+  const extraSec=document.getElementById('sec-extra');
+  const hospSec=document.getElementById('sec-hosps');
+  if(extraSec){extraSec.style.display=isExtra?'':'none';}
+  if(hospSec){hospSec.style.display=isExtra?'none':'';}
+  if(!isExtra)filterHosps();
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
