@@ -144,11 +144,12 @@ a{text-decoration:none;color:inherit;}
       <div class="logo" onclick="showMain()">Follow Korea</div>
       <div class="logo-sub">K-BEAUTY MEDICAL</div>
     </div>
-    <div class="nav-links">
+        <div class="nav-links">
       <a onclick="showMain()" data-i18n="nav_home">首页</a>
-      <a onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'})" data-i18n="nav_hosps">병원</a>
-      <a onclick="document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'})" data-i18n="nav_proc">예약과정</a>
-      <a onclick="document.getElementById('sec-review').scrollIntoView({behavior:'smooth'})" data-i18n="nav_review">후기</a>
+      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_hosps">병원</a>
+      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-extra').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_concierge">컨시어지</a>
+      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
+      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
     </div>
     <div class="nav-right">
       <div class="lang-select-wrap" style="position:relative;">
@@ -243,6 +244,86 @@ a{text-decoration:none;color:inherit;}
   </div>
 </section>
 
+<!-- 기타 서비스 섹션 -->
+<div id="sec-extra">
+<section class="section" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">EXTRA SERVICES</div>
+      <h2 class="sec-title" data-i18n="extra_title">기타 서비스</h2>
+      <p class="sec-sub" data-i18n="extra_sub">의료관광 전 일정을 함께합니다</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+
+      <!-- 컨시어지 -->
+      <div style="background:linear-gradient(135deg,#FFF8E7,#FFF0F4);border-radius:var(--r);padding:24px;border:1px solid #fde68a;">
+        <div style="font-size:32px;margin-bottom:10px;">👑</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_concierge">VVIP 컨시어지</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_concierge_desc">전담 코디네이터 동행, 병원 예약부터 귀국까지</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn" onclick="openSvcModal('concierge','1n2d')" data-i18n="c_1n2d">1박 2일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','2n3d')" data-i18n="c_2n3d">2박 3일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','3n4d')" data-i18n="c_3n4d">3박 4일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','4n5d')" data-i18n="c_4n5d">4박 5일 패키지</button>
+          <button class="svc-btn" onclick="openSvcModal('concierge','5nmore')" data-i18n="c_5nmore">5박 이상 패키지</button>
+        </div>
+      </div>
+
+      <!-- 통역 -->
+      <div style="background:linear-gradient(135deg,#F0FFF8,#E0F2FE);border-radius:var(--r);padding:24px;border:1px solid #a7f3d0;">
+        <div style="font-size:32px;margin-bottom:10px;">🗣️</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_interpret">통역 서비스</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_interpret_desc">중국어·베트남어·태국어·영어 전문 통역</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn green" onclick="openSvcModal('interpret','half')" data-i18n="i_half">반일 통역 (4시간)</button>
+          <button class="svc-btn green" onclick="openSvcModal('interpret','full')" data-i18n="i_full">종일 통역 (8시간)</button>
+          <button class="svc-btn green" onclick="openSvcModal('interpret','hosp')" data-i18n="i_hosp">병원 동행 통역</button>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:10px;color:var(--gray);margin-bottom:4px;" data-i18n="svc_time_hint">시작 시간 선택</div>
+          <select id="interpret-time" style="width:100%;padding:7px 9px;border:1px solid #a7f3d0;border-radius:8px;font-size:12px;">
+            <option value="09:00">09:00</option><option value="10:00">10:00</option>
+            <option value="11:00">11:00</option><option value="13:00">13:00</option>
+            <option value="14:00">14:00</option><option value="15:00">15:00</option>
+            <option value="16:00">16:00</option><option value="17:00">17:00</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 차량 서비스 -->
+      <div style="background:linear-gradient(135deg,#F0F4FF,#F5F3FF);border-radius:var(--r);padding:24px;border:1px solid #c7d2fe;">
+        <div style="font-size:32px;margin-bottom:10px;">🚗</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_car">차량 서비스</h3>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_car_desc">공항 픽업·병원 이동·관광 전용 차량</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn blue" onclick="openSvcModal('car','1d')" data-i18n="car_1d">차량 1일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','2d')" data-i18n="car_2d">차량 2일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','3d')" data-i18n="car_3d">차량 3일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','4d')" data-i18n="car_4d">차량 4일 렌트</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','5dmore')" data-i18n="car_5dmore">차량 5일 이상</button>
+          <button class="svc-btn blue" onclick="openSvcModal('car','airport')" data-i18n="car_airport">공항 픽업/샌딩</button>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:10px;color:var(--gray);margin-bottom:4px;" data-i18n="svc_time_hint">픽업 시간 선택</div>
+          <select id="car-time" style="width:100%;padding:7px 9px;border:1px solid #c7d2fe;border-radius:8px;font-size:12px;">
+            <option value="06:00">06:00 (새벽)</option><option value="07:00">07:00</option>
+            <option value="08:00">08:00</option><option value="09:00">09:00</option>
+            <option value="10:00">10:00</option><option value="11:00">11:00</option>
+            <option value="13:00">13:00</option><option value="14:00">14:00</option>
+            <option value="15:00">15:00</option><option value="16:00">16:00</option>
+            <option value="17:00">17:00</option><option value="18:00">18:00</option>
+            <option value="19:00">19:00</option><option value="21:00">21:00 (야간)</option>
+            <option value="23:00">23:00 (심야)</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</div>
+
+
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-brand">
@@ -257,7 +338,7 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="footer-col">
       <h4 data-i18n="f_h2">关于我们</h4>
-      <a data-i18n="f_about">公司介绍</a>
+      <a onclick="document.getElementById('about-modal-bg').classList.add('open')" style="cursor:pointer;" data-i18n="f_about">公司介绍</a>
       <a data-i18n="f_partner">合作医院</a>
       <a data-i18n="f_contact">联系我们</a>
     </div>
@@ -281,7 +362,15 @@ a{text-decoration:none;color:inherit;}
       </a>
     </div>
   </div>
-  <div class="footer-bottom">© 2026 Follow Korea. All rights reserved.</div>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:20px;padding-top:16px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">주식회사 팔로우코리아</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">사업자등록번호: 696-86-03627</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">외국인환자유치사업자: 제 A-2026-01-01-06622 호</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">관광사업등록증: 제 2026-000022 호</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">대표: 하장환</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.4);">서울 서초구 강남대로 373 홍우빌딩 13층 116호</span>
+  </div>
+  <div class="footer-bottom">© 2026 Follow Korea Co., Ltd. All rights reserved.</div>
 </footer>
 </div><!-- /main-view -->
 
@@ -342,77 +431,27 @@ a{text-decoration:none;color:inherit;}
 </div>
 
 
-<!-- 기타 서비스 섹션 -->
-<div id="sec-extra" style="display:none;">
-<section class="section" style="background:var(--white);">
-  <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">EXTRA SERVICES</div>
-      <h2 class="sec-title" data-i18n="extra_title">기타 서비스</h2>
-      <p class="sec-sub" data-i18n="extra_sub">의료관광 전 일정을 함께합니다</p>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
 
-      <!-- 컨시어지 -->
-      <div style="background:linear-gradient(135deg,#FFF8E7,#FFF0F4);border-radius:var(--r);padding:24px;border:1px solid #fde68a;">
-        <div style="font-size:32px;margin-bottom:10px;">👑</div>
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_concierge">VVIP 컨시어지</h3>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_concierge_desc">전담 코디네이터 동행, 병원 예약부터 귀국까지</p>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <button class="svc-btn" onclick="openSvcModal('concierge','1n2d')" data-i18n="c_1n2d">1박 2일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','2n3d')" data-i18n="c_2n3d">2박 3일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','3n4d')" data-i18n="c_3n4d">3박 4일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','4n5d')" data-i18n="c_4n5d">4박 5일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','5nmore')" data-i18n="c_5nmore">5박 이상 패키지</button>
-        </div>
-      </div>
-
-      <!-- 통역 -->
-      <div style="background:linear-gradient(135deg,#F0FFF8,#E0F2FE);border-radius:var(--r);padding:24px;border:1px solid #a7f3d0;">
-        <div style="font-size:32px;margin-bottom:10px;">🗣️</div>
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_interpret">통역 서비스</h3>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_interpret_desc">중국어·베트남어·태국어·영어 전문 통역</p>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <button class="svc-btn green" onclick="openSvcModal('interpret','half')" data-i18n="i_half">반일 통역 (4시간)</button>
-          <button class="svc-btn green" onclick="openSvcModal('interpret','full')" data-i18n="i_full">종일 통역 (8시간)</button>
-          <button class="svc-btn green" onclick="openSvcModal('interpret','hosp')" data-i18n="i_hosp">병원 동행 통역</button>
-        </div>
-      </div>
-
-      <!-- 차량 서비스 -->
-      <div style="background:linear-gradient(135deg,#F0F4FF,#F5F3FF);border-radius:var(--r);padding:24px;border:1px solid #c7d2fe;">
-        <div style="font-size:32px;margin-bottom:10px;">🚗</div>
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_car">차량 서비스</h3>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_car_desc">공항 픽업·병원 이동·관광 전용 차량</p>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <button class="svc-btn blue" onclick="openSvcModal('car','1d')" data-i18n="car_1d">차량 1일 렌트</button>
-          <button class="svc-btn blue" onclick="openSvcModal('car','2d')" data-i18n="car_2d">차량 2일 렌트</button>
-          <button class="svc-btn blue" onclick="openSvcModal('car','3d')" data-i18n="car_3d">차량 3일 렌트</button>
-          <button class="svc-btn blue" onclick="openSvcModal('car','4d')" data-i18n="car_4d">차량 4일 렌트</button>
-          <button class="svc-btn blue" onclick="openSvcModal('car','5dmore')" data-i18n="car_5dmore">차량 5일 이상</button>
-          <button class="svc-btn blue" onclick="openSvcModal('car','airport')" data-i18n="car_airport">공항 픽업/샌딩</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
 </div>
-
-<!-- AI 상담 모달 -->
+<!-- AI 다국어 상담 모달 -->
 <div class="modal-bg" id="ai-modal-bg" onclick="if(event.target===this)closeAiChat()">
-<div class="modal" style="width:480px;max-height:85vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
-  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+<div class="modal" style="width:500px;max-height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:20px;">
+  <!-- 헤더 -->
+  <div style="background:linear-gradient(135deg,#4CAF8C,#1A6B4A);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div>
-      <div style="font-size:15px;font-weight:800;color:#fff;">🤖 AI 상담</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.8);" id="ai-lang-label">中文 · 한국어 · EN · 多语言</div>
+      <div style="font-size:15px;font-weight:800;color:#fff;">🤖 Follow Korea AI 상담</div>
+      <div id="ai-step-indicator" style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">언어를 선택해 주세요</div>
     </div>
     <button onclick="closeAiChat()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer;font-size:14px;">✕</button>
   </div>
-  <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:300px;max-height:420px;"></div>
-  <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;">
-    <input type="text" id="ai-input" placeholder="무엇이든 물어보세요 / 请随时提问..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMsg();}">
-    <button onclick="sendAiMsg()" style="padding:9px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;">전송</button>
+  <!-- 메시지 영역 -->
+  <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:380px;background:#fafaf8;"></div>
+  <!-- 선택지 버튼 영역 -->
+  <div id="ai-options" style="padding:10px 14px;background:var(--white);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;"></div>
+  <!-- 직접 입력 영역 (마지막 단계에서 표시) -->
+  <div id="ai-input-area" style="display:none;padding:10px 14px;border-top:1px solid var(--border);display:none;gap:8px;background:var(--white);flex-shrink:0;">
+    <input type="text" id="ai-input" placeholder="질문을 입력하세요..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendAiMsg()">
+    <button onclick="sendAiMsg()" style="padding:9px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;" id="ai-send-btn">전송</button>
   </div>
 </div>
 </div>
@@ -492,6 +531,74 @@ a{text-decoration:none;color:inherit;}
     <h3 style="font-size:17px;font-weight:800;margin-bottom:8px;" data-i18n="done_title">신청 완료!</h3>
     <p style="color:var(--gray);font-size:13px;" data-i18n="done_desc">24시간 내 위챗으로 연락드립니다</p>
     <button class="btn-full" onclick="closeSvcModal()" style="margin-top:14px;" data-i18n="done_close">닫기</button>
+  </div>
+</div>
+</div>
+
+<!-- 회사소개 모달 -->
+<div class="modal-bg" id="about-modal-bg" onclick="if(event.target===this)document.getElementById('about-modal-bg').classList.remove('open')">
+<div class="modal" style="width:600px;max-height:85vh;overflow-y:auto;">
+  <h2>
+    <span data-i18n="f_about">关于我们</span>
+    <button onclick="document.getElementById('about-modal-bg').classList.remove('open')">✕</button>
+  </h2>
+  <div style="padding:4px 0;">
+    <!-- 로고/헤더 -->
+    <div style="background:linear-gradient(135deg,var(--dark),#1A2E1A);border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;">
+      <div style="font-size:22px;font-weight:800;color:var(--gold);letter-spacing:2px;">FOLLOW KOREA</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px;letter-spacing:3px;">K-PREMIUM MEDICAL TOURISM</div>
+    </div>
+    <!-- 핵심 정보 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--lgray);border-radius:10px;padding:12px;">
+        <div style="font-size:10px;color:var(--gray);margin-bottom:4px;">법인명</div>
+        <div style="font-size:12px;font-weight:600;">주식회사 팔로우코리아</div>
+      </div>
+      <div style="background:var(--lgray);border-radius:10px;padding:12px;">
+        <div style="font-size:10px;color:var(--gray);margin-bottom:4px;">대표이사</div>
+        <div style="font-size:12px;font-weight:600;">하장환 CEO</div>
+      </div>
+      <div style="background:var(--lgray);border-radius:10px;padding:12px;">
+        <div style="font-size:10px;color:var(--gray);margin-bottom:4px;">설립</div>
+        <div style="font-size:12px;font-weight:600;">2025년 12월</div>
+      </div>
+      <div style="background:var(--lgray);border-radius:10px;padding:12px;">
+        <div style="font-size:10px;color:var(--gray);margin-bottom:4px;">소재지</div>
+        <div style="font-size:12px;font-weight:600;">서울 강남 홍우빌딩 13F</div>
+      </div>
+    </div>
+    <!-- 비전 -->
+    <div style="background:linear-gradient(135deg,#f0fff8,#fffbf0);border-radius:10px;padding:14px;margin-bottom:14px;border-left:3px solid var(--gold);">
+      <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">VISION</div>
+      <div style="font-size:13px;font-weight:600;line-height:1.6;">글로벌 VIP가 선택하는 강남 기반 프리미엄 의료관광 허브</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:4px;">The Premier Destination for Global VIP Medical Tourism, Rooted in Gangnam.</div>
+    </div>
+    <!-- 핵심 가치 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+      <div style="text-align:center;padding:12px 8px;background:var(--white);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:20px;margin-bottom:6px;">🏛️</div>
+        <div style="font-size:11px;font-weight:700;margin-bottom:2px;">신뢰 Trust</div>
+        <div style="font-size:10px;color:var(--gray);">보건복지부 등록 정식 기관</div>
+      </div>
+      <div style="text-align:center;padding:12px 8px;background:var(--white);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:20px;margin-bottom:6px;">👑</div>
+        <div style="font-size:11px;font-weight:700;margin-bottom:2px;">품격 Prestige</div>
+        <div style="font-size:10px;color:var(--gray);">VIP 전담 의전 서비스</div>
+      </div>
+      <div style="text-align:center;padding:12px 8px;background:var(--white);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:20px;margin-bottom:6px;">🔬</div>
+        <div style="font-size:11px;font-weight:700;margin-bottom:2px;">전문성 Expertise</div>
+        <div style="font-size:10px;color:var(--gray);">국내 최상위 의료기관 네트워크</div>
+      </div>
+    </div>
+    <!-- 사업자 정보 -->
+    <div style="background:#f9f9f7;border-radius:10px;padding:12px;font-size:11px;color:var(--gray);line-height:2;">
+      <div>📋 사업자등록번호: <b style="color:var(--dark);">696-86-03627</b></div>
+      <div>🏥 외국인환자유치사업자: <b style="color:var(--dark);">제 A-2026-01-01-06622 호</b></div>
+      <div>✈️ 관광사업등록증: <b style="color:var(--dark);">제 2026-000022 호</b></div>
+      <div>📍 서울특별시 서초구 강남대로 373 홍우빌딩 13층 116호</div>
+      <div>🌐 <a href="https://followkorea.co.kr" target="_blank" style="color:var(--gn2);">www.followkorea.co.kr</a></div>
+    </div>
   </div>
 </div>
 </div>
@@ -579,7 +686,7 @@ async function dbInsert(table,row){
 }
 
 const I={
-  zh:{nav_home:'首页',nav_hosps:'医院',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',
+  zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',
     hero_badge:'韩国NO.1医美预约平台',hero_title:'打造<em>专属你的</em><br>K-Beauty之旅',
     hero_sub:'精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同',
     search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',
@@ -621,7 +728,7 @@ const I={
     rv_done_title:'评价已提交！',rv_done_desc:'感谢您的真实反馈 😊',rv_done_close:'关闭',
     star_hints:['','非常差','一般','还不错','很好','非常满意！'],
   },
-  ko:{nav_home:'홈',nav_hosps:'병원',nav_proc:'예약과정',nav_review:'후기',nav_consult:'무료상담',
+  ko:{nav_home:'홈',nav_hosps:'병원',nav_concierge:'컨시어지',nav_proc:'예약과정',nav_review:'후기',nav_consult:'무료상담',
     hero_badge:'한국 NO.1 의료관광 예약 플랫폼',hero_title:'<em>나만을 위한</em><br>K-뷰티 메디컬 여행',
     hero_sub:'서울 강남 최고의 의료미용 병원 엄선<br>전문 통역 서비스 · 전 일정 동행',
     search_ph:'병원, 시술 검색...',search_btn:'검색',hero_cta1:'지금 예약하기',hero_cta2:'병원 둘러보기',
@@ -652,7 +759,7 @@ const I={
     c_1n2d:'1박 2일 패키지',c_2n3d:'2박 3일 패키지',c_3n4d:'3박 4일 패키지',c_4n5d:'4박 5일 패키지',c_5nmore:'5박 이상 패키지',
     i_half:'반일 통역 (4시간)',i_full:'종일 통역 (8시간)',i_hosp:'병원 동행 통역',
     car_1d:'차량 1일',car_2d:'차량 2일',car_3d:'차량 3일',car_4d:'차량 4일',car_5dmore:'차량 5일 이상',car_airport:'공항 픽업/샌딩',
-    svc_selected:'선택 서비스',
+    svc_selected:'选择服务',svc_time_hint:'选择时间',
     reserve_btn:'예약',detail_btn:'상세보기',
     overview_default:'전문 의료진이 최고의 의료미용 서비스를 제공합니다. 중국어 통역 가능, 전담 코디네이터 동행.',
     review_sub:'전 세계 환자들의 실제 경험 공유',
@@ -663,7 +770,7 @@ const I={
     rv_done_title:'리뷰가 등록되었습니다!',rv_done_desc:'소중한 후기 감사합니다 😊',rv_done_close:'닫기',
     star_hints:['','매우 불만족','불만족','보통','만족','매우 만족!'],
   },
-  en:{nav_home:'Home',nav_hosps:'Hospitals',nav_proc:'How it Works',nav_review:'Reviews',nav_consult:'Free Consult',
+  en:{nav_home:'Home',nav_hosps:'Hospitals',nav_concierge:'Concierge',nav_proc:'How it Works',nav_review:'Reviews',nav_consult:'Free Consult',
     hero_badge:'Korea\'s #1 Medical Tourism Platform',hero_title:'Your Perfect<br><em>K-Beauty Journey</em>',
     hero_sub:'Top-rated Gangnam medical aesthetic clinics<br>Chinese & English support · Full escort',
     search_ph:'Search clinics, treatments...',search_btn:'Search',hero_cta1:'Book Now',hero_cta2:'Browse Clinics',
@@ -693,7 +800,7 @@ const I={
     c_1n2d:'1 Night 2 Days',c_2n3d:'2 Nights 3 Days',c_3n4d:'3 Nights 4 Days',c_4n5d:'4 Nights 5 Days',c_5nmore:'5+ Nights',
     i_half:'Half Day (4hrs)',i_full:'Full Day (8hrs)',i_hosp:'Hospital Escort',
     car_1d:'Car 1 Day',car_2d:'Car 2 Days',car_3d:'Car 3 Days',car_4d:'Car 4 Days',car_5dmore:'Car 5+ Days',car_airport:'Airport Transfer',
-    svc_selected:'Selected Service',
+    svc_selected:'Selected Service',svc_time_hint:'Select Time',
     reserve_btn:'Book',detail_btn:'Details',
     overview_default:'Professional medical aesthetic clinic offering top-quality services with Chinese interpretation.',
     review_sub:'Real experiences from patients worldwide',
@@ -704,7 +811,7 @@ const I={
     rv_done_title:'Review Submitted!',rv_done_desc:'Thank you for sharing your experience 😊',rv_done_close:'Close',
     star_hints:['','Very Poor','Poor','OK','Good','Excellent!'],
   }
-  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',
+  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',
     hero_badge:'Nền tảng du lịch thẩm mỹ #1 Hàn Quốc',hero_title:'Hành trình<br><em>K-Beauty</em> của bạn',
     hero_sub:'Các bệnh viện thẩm mỹ hàng đầu Gangnam, Seoul<br>Hỗ trợ tiếng Trung & tiếng Anh · Đồng hành toàn trình',
     search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',
@@ -734,7 +841,7 @@ const I={
     rv_done_title:'Đánh giá đã gửi!',rv_done_desc:'Cảm ơn bạn 😊',rv_done_close:'Đóng',
     star_hints:['','Rất tệ','Tệ','Bình thường','Tốt','Xuất sắc!'],
   }
-  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',
+  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',
     hero_badge:'แพลตฟอร์มท่องเที่ยวเพื่อความงาม #1 เกาหลี',hero_title:'การเดินทาง<br><em>K-Beauty</em> ของคุณ',
     hero_sub:'คลินิกความงามชั้นนำในกังนัม โซล<br>บริการภาษาจีนและอังกฤษ · ดูแลตลอดการเดินทาง',
     search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',
@@ -764,7 +871,7 @@ const I={
     rv_done_title:'ส่งรีวิวแล้ว!',rv_done_desc:'ขอบคุณสำหรับรีวิวของคุณ 😊',rv_done_close:'ปิด',
     star_hints:['','แย่มาก','แย่','ปานกลาง','ดี','ดีเยี่ยม!'],
   }
-  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',
+  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',
     hero_badge:'韓国No.1医療美容予約プラットフォーム',hero_title:'あなただけの<br><em>K-Beautyの旅</em>へ',
     hero_sub:'ソウル江南トップクラスの医療美容クリニック<br>中国語・日本語対応 · 全行程サポート',
     search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',
@@ -794,7 +901,7 @@ const I={
     rv_done_title:'口コミ投稿完了！',rv_done_desc:'貴重なご意見ありがとうございます 😊',rv_done_close:'閉じる',
     star_hints:['','とても悪い','悪い','普通','良い','とても満足！'],
   }
-  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',
+  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',
     hero_badge:'Платформа медицинского туризма №1 в Корее',hero_title:'Ваше идеальное<br><em>K-Beauty путешествие</em>',
     hero_sub:'Лучшие клиники красоты Каннама, Сеул<br>Поддержка на китайском и английском · Сопровождение',
     search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',
@@ -967,92 +1074,328 @@ async function submitSvc(){
   document.getElementById('svc-done').style.display='';
 }
 
-// ── AI 상담 채팅 ──
-let aiHistory=[];
-const AI_SYSTEM=`You are a helpful medical tourism consultant for Follow Korea (팔로우코리아), a Korean medical tourism agency in Gangnam, Seoul.
-You help patients from China, Vietnam, Thailand, Japan, Russia, and Korea with:
-- Information about our partner hospitals and medical procedures
-- Booking and reservation inquiries
-- Korean medical tourism logistics (visa, transportation, accommodation)
-- Post-procedure care advice
+// ══════════════════════════════════════════
+// AI 다국어 상담 시스템
+// ══════════════════════════════════════════
+let aiHistory=[], aiStep=0, aiLang='zh', aiTopic='';
 
-Always respond in the SAME LANGUAGE the user writes in.
-Be warm, professional, and concise. For specific medical advice, recommend consulting a doctor.
-Contact: WeChat Followkorea1 | Line: Followkorea | Email: contact@followkorea.co.kr`;
+// ── 단계별 플로우 정의 ──
+const AI_FLOW={
+  // STEP 0: 언어 선택
+  lang:{
+    zh:{msg:'您好！我是Follow Korea的AI顾问 🌟 请选择您的语言：',opts:[
+      {label:'🇨🇳 中文',val:'zh'},{label:'🇰🇷 한국어',val:'ko'},{label:'🇺🇸 English',val:'en'},
+      {label:'🇻🇳 Tiếng Việt',val:'vi'},{label:'🇹🇭 ภาษาไทย',val:'th'},
+      {label:'🇯🇵 日本語',val:'ja'},{label:'🇷🇺 Русский',val:'ru'},
+    ]}
+  },
+  // STEP 1: 상담 주제
+  topic:{
+    zh:{msg:'您想了解什么？',hint:'请选择咨询主题',opts:[
+      {label:'🏥 医院推荐',val:'hospital'},{label:'💉 项目介绍',val:'treatment'},
+      {label:'✈️ 旅游行程',val:'tour'},{label:'👑 礼宾服务',val:'concierge'},
+      {label:'💰 费用咨询',val:'cost'},{label:'📋 预约方法',val:'booking'},
+      {label:'✍️ 直接提问',val:'free'},
+    ]},
+    ko:{msg:'어떤 것이 궁금하신가요?',hint:'상담 주제를 선택하세요',opts:[
+      {label:'🏥 병원 추천',val:'hospital'},{label:'💉 시술 안내',val:'treatment'},
+      {label:'✈️ 여행 일정',val:'tour'},{label:'👑 컨시어지',val:'concierge'},
+      {label:'💰 비용 문의',val:'cost'},{label:'📋 예약 방법',val:'booking'},
+      {label:'✍️ 직접 질문',val:'free'},
+    ]},
+    en:{msg:'What would you like to know?',hint:'Select a topic',opts:[
+      {label:'🏥 Hospital Recommendation',val:'hospital'},{label:'💉 Treatments',val:'treatment'},
+      {label:'✈️ Travel Itinerary',val:'tour'},{label:'👑 Concierge',val:'concierge'},
+      {label:'💰 Cost Inquiry',val:'cost'},{label:'📋 How to Book',val:'booking'},
+      {label:'✍️ Ask Directly',val:'free'},
+    ]},
+    vi:{msg:'Bạn muốn biết điều gì?',hint:'Chọn chủ đề tư vấn',opts:[
+      {label:'🏥 Giới thiệu bệnh viện',val:'hospital'},{label:'💉 Dịch vụ',val:'treatment'},
+      {label:'✈️ Lịch trình',val:'tour'},{label:'👑 Dịch vụ concierge',val:'concierge'},
+      {label:'💰 Chi phí',val:'cost'},{label:'📋 Cách đặt lịch',val:'booking'},
+      {label:'✍️ Hỏi trực tiếp',val:'free'},
+    ]},
+    th:{msg:'คุณต้องการทราบอะไร?',hint:'เลือกหัวข้อ',opts:[
+      {label:'🏥 แนะนำโรงพยาบาล',val:'hospital'},{label:'💉 บริการ',val:'treatment'},
+      {label:'✈️ แผนการเดินทาง',val:'tour'},{label:'👑 คอนเซียร์จ',val:'concierge'},
+      {label:'💰 ค่าใช้จ่าย',val:'cost'},{label:'📋 วิธีจอง',val:'booking'},
+      {label:'✍️ ถามตรงๆ',val:'free'},
+    ]},
+    ja:{msg:'何についてお聞きしますか？',hint:'相談テーマを選んでください',opts:[
+      {label:'🏥 病院のご案内',val:'hospital'},{label:'💉 施術案内',val:'treatment'},
+      {label:'✈️ 旅程案内',val:'tour'},{label:'👑 コンシェルジュ',val:'concierge'},
+      {label:'💰 費用のご相談',val:'cost'},{label:'📋 予約方法',val:'booking'},
+      {label:'✍️ 直接質問',val:'free'},
+    ]},
+    ru:{msg:'Что вас интересует?',hint:'Выберите тему',opts:[
+      {label:'🏥 Рекомендация клиники',val:'hospital'},{label:'💉 Процедуры',val:'treatment'},
+      {label:'✈️ Маршрут',val:'tour'},{label:'👑 Консьерж',val:'concierge'},
+      {label:'💰 Стоимость',val:'cost'},{label:'📋 Как записаться',val:'booking'},
+      {label:'✍️ Задать вопрос',val:'free'},
+    ]},
+  },
+  // STEP 2: 세부 선택 (hospital)
+  hospital:{
+    zh:{msg:'您对哪类医院感兴趣？',opts:[
+      {label:'💉 整形外科',val:'plastic'},{label:'🌿 皮肤科',val:'skin'},
+      {label:'🧬 干细胞·抗衰老',val:'stem'},{label:'👁 眼科',val:'eye'},
+      {label:'🌸 女性医学',val:'women'},{label:'🦷 牙科',val:'dental'},
+      {label:'✍️ 直接提问',val:'free'},
+    ]},
+    ko:{msg:'어떤 진료 분야를 찾으시나요?',opts:[
+      {label:'💉 성형외과',val:'plastic'},{label:'🌿 피부과',val:'skin'},
+      {label:'🧬 줄기세포·안티에이징',val:'stem'},{label:'👁 안과',val:'eye'},
+      {label:'🌸 여성의학',val:'women'},{label:'🦷 치과',val:'dental'},
+      {label:'✍️ 직접 질문',val:'free'},
+    ]},
+    en:{msg:'Which type of clinic are you looking for?',opts:[
+      {label:'💉 Plastic Surgery',val:'plastic'},{label:'🌿 Dermatology',val:'skin'},
+      {label:'🧬 Stem Cell & Anti-aging',val:'stem'},{label:'👁 Eye Clinic',val:'eye'},
+      {label:"🌸 Women's Health",val:'women'},{label:'🦷 Dental',val:'dental'},
+      {label:'✍️ Ask Directly',val:'free'},
+    ]},
+  },
+};
+
+// ── AI 시스템 프롬프트 ──
+const AI_SYSTEM_PROMPT=`You are a professional medical tourism consultant for Follow Korea (팔로우코리아/跟随韩国), based in Gangnam, Seoul.
+
+COMPANY INFO:
+- Name: Follow Korea Co., Ltd. (주식회사 팔로우코리아)
+- CEO: Ha Jang-hwan (하장환)
+- Address: 13F, 116, Hongwoo Bldg, 373 Gangnam-daero, Seocho-gu, Seoul
+- License: Ministry of Health & Welfare registered foreign patient attraction agency (A-2026-01-01-06622)
+- Tourism License: 2026-000022
+- Contact: WeChat Followkorea1 | Line: Followkorea | Email: contact@followkorea.co.kr
+
+PARTNER HOSPITALS (26 clinics in Gangnam):
+Plastic Surgery: Wonjin, Shinsang, Dream, Globi, Faceline, The Beauty, View, Ruby(Sinsa)
+Skin/Lifting: Gangnam Daum, Heer Dermatology, Lifton, Cheongdam Circle, Benjamin, Lamiche
+Stem Cell/Anti-aging: Jiyu, Cellinique, Chaum, One Cell, Cellora, GV, JD(Jangdeok), TR Trinity
+Women's Health: Barunhifu, Sinsoa, Heer Women's
+Eye: Gangnam Seoul Eye
+Body: Gowoonmom
+
+SERVICES:
+- VVIP Concierge packages (1N2D ~ 5N+)
+- Interpretation (Chinese, Vietnamese, Thai, English)
+- Airport transfer & car service
+- Full escort during hospital visits
+
+RULES:
+1. ALWAYS respond in the SAME LANGUAGE the user wrote in
+2. Be warm, professional, and concise
+3. For specific medical advice, recommend consulting a doctor
+4. If asked about prices, say "varies by case, contact us for a free consultation"
+5. Always end responses with a booking invitation when appropriate`;
 
 function openAiChat(){
+  aiStep=0; aiHistory=[]; aiLang=lang||'zh';
   document.getElementById('ai-modal-bg').classList.add('open');
-  if(aiHistory.length===0){
-    const greetings={
-      zh:'您好！我是Follow Korea的AI顾问。请问有什么可以帮助您的？😊',
-      ko:'안녕하세요! 팔로우코리아 AI 상담사입니다. 무엇을 도와드릴까요? 😊',
-      en:"Hello! I'm Follow Korea's AI consultant. How can I help you today? 😊",
-      vi:'Xin chào! Tôi là tư vấn viên AI của Follow Korea. Tôi có thể giúp gì cho bạn? 😊',
-      th:'สวัสดีค่ะ! ฉันคือที่ปรึกษา AI ของ Follow Korea ให้ฉันช่วยอะไรได้บ้างคะ? 😊',
-      ja:'こんにちは！Follow KoreaのAIコンサルタントです。何かお手伝いできますか？😊',
-      ru:'Здравствуйте! Я AI-консультант Follow Korea. Чем могу помочь? 😊',
-    };
-    addAiMsg('ai', greetings[lang]||greetings.zh);
-  }
-  document.getElementById('ai-input').focus();
+  document.getElementById('ai-messages').innerHTML='';
+  document.getElementById('ai-input-area').style.display='none';
+  showAiStep0();
 }
 function closeAiChat(){document.getElementById('ai-modal-bg').classList.remove('open');}
+
+function showAiStep0(){
+  // 언어 선택
+  const flow=AI_FLOW.lang.zh;
+  addAiMsg('ai',flow.msg);
+  showAiOptions(flow.opts,(val)=>{
+    aiLang=val;
+    const langNames={zh:'中文',ko:'한국어',en:'English',vi:'Tiếng Việt',th:'ภาษาไทย',ja:'日本語',ru:'Русский'};
+    addAiMsg('user','🌐 '+langNames[val]);
+    document.getElementById('ai-step-indicator').textContent={
+      zh:'상담 주제 선택',ko:'상담 주제 선택',en:'Select Topic',
+      vi:'Chọn chủ đề',th:'เลือกหัวข้อ',ja:'テーマ選択',ru:'Выберите тему'
+    }[val]||'Select Topic';
+    showAiStep1();
+  });
+}
+
+function showAiStep1(){
+  const topicFlow=AI_FLOW.topic;
+  const f=topicFlow[aiLang]||topicFlow.en;
+  addAiMsg('ai',f.msg);
+  showAiOptions(f.opts,(val)=>{
+    aiTopic=val;
+    const label=f.opts.find(o=>o.val===val)?.label||val;
+    addAiMsg('user',label);
+    if(val==='free'){
+      goFreeChat();
+    }else if(val==='hospital'&&AI_FLOW.hospital[aiLang]){
+      const hf=AI_FLOW.hospital[aiLang]||AI_FLOW.hospital.en;
+      addAiMsg('ai',hf.msg);
+      showAiOptions(hf.opts,(v2)=>{
+        const l2=hf.opts.find(o=>o.val===v2)?.label||v2;
+        addAiMsg('user',l2);
+        if(v2==='free'){goFreeChat();}
+        else{askAiAbout(aiTopic+'/'+v2);}
+      });
+    }else{
+      askAiAbout(val);
+    }
+  });
+}
+
+function askAiAbout(topic){
+  // 주제에 맞는 초기 정보 AI에게 요청
+  const prompts={
+    hospital:{zh:'请介绍Follow Korea的合作医院和推荐的医院',ko:'팔로우코리아 제휴 병원들을 소개해 주세요',en:'Please introduce Follow Korea partner hospitals'},
+    treatment:{zh:'请介绍可以在韩国做的医美项目',ko:'한국에서 받을 수 있는 의료미용 시술을 알려주세요',en:'Please tell me about available medical aesthetic treatments in Korea'},
+    tour:{zh:'请介绍医疗旅游行程安排',ko:'의료관광 여행 일정을 안내해 주세요',en:'Please explain the medical tourism itinerary'},
+    concierge:{zh:'请介绍VVIP礼宾服务内容和费用',ko:'VVIP 컨시어지 서비스를 소개해 주세요',en:'Please describe the VVIP Concierge service'},
+    cost:{zh:'请介绍大概的费用范围',ko:'대략적인 비용 범위를 알려주세요',en:'Please give me a general idea of costs'},
+    booking:{zh:'请告诉我预约方法',ko:'예약 방법을 알려주세요',en:'Please explain how to make a booking'},
+    'hospital/plastic':{zh:'请推荐整形外科医院',ko:'성형외과 병원을 추천해 주세요',en:'Please recommend plastic surgery clinics'},
+    'hospital/skin':{zh:'请推荐皮肤科医院',ko:'피부과 병원을 추천해 주세요',en:'Please recommend dermatology clinics'},
+    'hospital/stem':{zh:'请推荐干细胞和抗衰老医院',ko:'줄기세포 및 안티에이징 병원을 추천해 주세요',en:'Please recommend stem cell & anti-aging clinics'},
+    'hospital/eye':{zh:'请推荐眼科医院',ko:'안과 병원을 추천해 주세요',en:'Please recommend eye clinics'},
+    'hospital/women':{zh:'请推荐女性医学医院',ko:'여성의학 병원을 추천해 주세요',en:"Please recommend women's health clinics"},
+    'hospital/dental':{zh:'韩国牙科信息',ko:'한국 치과 정보를 알려주세요',en:'Please tell me about dental clinics in Korea'},
+  };
+  const userMsg=prompts[topic]?.[aiLang]||prompts[topic]?.en||'Tell me more about '+topic;
+  goFreeChat(userMsg);
+}
+
+function goFreeChat(initialMsg){
+  clearAiOptions();
+  const inputArea=document.getElementById('ai-input-area');
+  inputArea.style.display='flex';
+  document.getElementById('ai-step-indicator').textContent={
+    zh:'自由提问模式',ko:'자유 질문 모드',en:'Free Chat Mode',
+    vi:'Chế độ tự do',th:'โหมดถามอิสระ',ja:'自由質問モード',ru:'Свободный чат'
+  }[aiLang]||'Free Chat';
+  if(initialMsg){
+    sendAiMsgText(initialMsg,false);
+  }else{
+    const hints={zh:'请直接输入您的问题 😊',ko:'질문을 직접 입력해 주세요 😊',en:'Please type your question 😊',
+      vi:'Hãy nhập câu hỏi của bạn 😊',th:'กรุณาพิมพ์คำถาม 😊',ja:'ご質問を入力してください 😊',ru:'Введите ваш вопрос 😊'};
+    addAiMsg('ai',hints[aiLang]||hints.en);
+    document.getElementById('ai-input').focus();
+  }
+}
+
+function showAiOptions(opts,callback){
+  const container=document.getElementById('ai-options');
+  container.innerHTML='';
+  container.style.display='flex';
+  opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.textContent=opt.label;
+    btn.style.cssText='padding:7px 12px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;cursor:pointer;color:var(--dark);transition:all 0.15s;';
+    btn.onmouseover=()=>{btn.style.background='var(--lgray)';btn.style.borderColor='var(--gn)';};
+    btn.onmouseout=()=>{btn.style.background='var(--white)';btn.style.borderColor='var(--border)';};
+    btn.onclick=()=>{clearAiOptions();callback(opt.val);};
+    container.appendChild(btn);
+  });
+}
+function clearAiOptions(){
+  const c=document.getElementById('ai-options');
+  if(c){c.innerHTML='';c.style.display='none';}
+}
+
 function addAiMsg(role,text){
   const el=document.getElementById('ai-messages');
   const isAi=role==='ai';
   const div=document.createElement('div');
   div.style.cssText=`display:flex;justify-content:${isAi?'flex-start':'flex-end'};`;
-  div.innerHTML=`<div style="max-width:80%;padding:10px 14px;border-radius:${isAi?'4px 16px 16px 16px':'16px 4px 16px 16px'};background:${isAi?'var(--lgray)':'linear-gradient(135deg,#6366f1,#8b5cf6)'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.6;white-space:pre-wrap;">${text}</div>`;
+  div.innerHTML=`<div style="max-width:82%;padding:10px 13px;border-radius:${isAi?'4px 14px 14px 14px':'14px 4px 14px 14px'};background:${isAi?'var(--white)':'linear-gradient(135deg,var(--gn),var(--gn2))'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.65;white-space:pre-wrap;box-shadow:0 1px 4px rgba(0,0,0,0.06);">${text}</div>`;
   el.appendChild(div);
   el.scrollTop=el.scrollHeight;
 }
+
 function addAiTyping(){
   const el=document.getElementById('ai-messages');
   const div=document.createElement('div');
   div.id='ai-typing';div.style.display='flex';
-  div.innerHTML=`<div style="padding:10px 14px;border-radius:4px 16px 16px 16px;background:var(--lgray);font-size:13px;color:var(--gray);">●●●</div>`;
+  div.innerHTML=`<div style="padding:10px 14px;border-radius:4px 14px 14px 14px;background:var(--white);font-size:18px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+    <span style="animation:aiDot 1s infinite">●</span><span style="animation:aiDot 1s infinite 0.2s">●</span><span style="animation:aiDot 1s infinite 0.4s">●</span>
+  </div>`;
   el.appendChild(div);el.scrollTop=el.scrollHeight;
 }
+
 async function sendAiMsg(){
   const input=document.getElementById('ai-input');
   const msg=input.value.trim();if(!msg)return;
   input.value='';
-  addAiMsg('user',msg);
+  sendAiMsgText(msg,true);
+}
+
+async function sendAiMsgText(msg, showUser=true){
+  if(showUser)addAiMsg('user',msg);
   aiHistory.push({role:'user',content:msg});
   addAiTyping();
+  const btn=document.getElementById('ai-send-btn');if(btn)btn.disabled=true;
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
-        max_tokens:800,
-        system:AI_SYSTEM,
-        messages:aiHistory.slice(-10),
+        max_tokens:600,
+        system:AI_SYSTEM_PROMPT+`\n\nUSER LANGUAGE: ${aiLang}. Always respond in this language.`,
+        messages:aiHistory.slice(-8),
       })
     });
     const data=await res.json();
     document.getElementById('ai-typing')?.remove();
-    const reply=data.content?.[0]?.text||'죄송합니다, 잠시 후 다시 시도해주세요.';
+    const reply=data.content?.[0]?.text||'...';
     aiHistory.push({role:'assistant',content:reply});
     addAiMsg('ai',reply);
+    // 예약 버튼 표시
+    showAiBookingPrompt();
   }catch(e){
     document.getElementById('ai-typing')?.remove();
-    const fallback={
-      zh:'抱歉，暂时无法连接AI。请通过微信联系我们：Followkorea1',
-      ko:'죄송합니다, AI 연결에 실패했습니다. 위챗으로 문의해주세요: Followkorea1',
-      en:'Sorry, AI connection failed. Please contact us via WeChat: Followkorea1',
-    };
-    addAiMsg('ai',fallback[lang]||fallback.en);
+    const fallbacks={zh:'抱歉，AI暂时无法连接。请微信联系我们：Followkorea1 😊',ko:'잠시 연결이 불안정합니다. 위챗으로 문의해주세요: Followkorea1 😊',en:'Connection issue. Contact WeChat: Followkorea1 😊'};
+    addAiMsg('ai',fallbacks[aiLang]||fallbacks.en);
   }
+  if(btn)btn.disabled=false;
 }
 
-// ── 카테고리 클릭 시 기타서비스 섹션 토글 ──
-const _origSetCat=typeof setCat==='function'?setCat:null;
+function showAiBookingPrompt(){
+  const options=document.getElementById('ai-options');
+  options.style.display='flex';
+  options.innerHTML='';
+  const bookLabels={zh:'📅 立即预约',ko:'📅 지금 예약하기',en:'📅 Book Now',vi:'📅 Đặt lịch',th:'📅 จองเลย',ja:'📅 今すぐ予約',ru:'📅 Записаться'};
+  const moreLabels={zh:'💬 继续提问',ko:'💬 계속 질문',en:'💬 Keep asking',vi:'💬 Hỏi thêm',th:'💬 ถามต่อ',ja:'💬 続ける',ru:'💬 Продолжить'};
+  const bookBtn=document.createElement('button');
+  bookBtn.textContent=bookLabels[aiLang]||bookLabels.en;
+  bookBtn.style.cssText='padding:8px 14px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;';
+  bookBtn.onclick=()=>{clearAiOptions();closeAiChat();openModal(null);};
+  const moreBtn=document.createElement('button');
+  moreBtn.textContent=moreLabels[aiLang]||moreLabels.en;
+  moreBtn.style.cssText='padding:8px 14px;background:var(--white);color:var(--gn2);border:1px solid var(--gn);border-radius:20px;font-size:12px;cursor:pointer;';
+  moreBtn.onclick=()=>{clearAiOptions();document.getElementById('ai-input').focus();};
+  options.appendChild(bookBtn);
+  options.appendChild(moreBtn);
+}
+
+
+// ── 전체 병원 소개 이미지 로드 ──
+async function loadHospIntros(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(!r.ok)return;
+    const all=await r.json();
+    if(Array.isArray(all)){
+      all.forEach(row=>{
+        if(row.data&&row.data.name){
+          HOSP_INTROS[row.data.name]=row.data;
+        }
+      });
+    }
+    // 이미지 로드 후 카드 재렌더
+    filterHosps();
+  }catch(e){}
+}
 
 function badgeLabel(b){const m=BADGE_MAP[b];return m?(m[lang]||m.zh||b):b;}
 
-let lang='zh', currentHosp=null, activeCat='';
+let lang='zh', currentHosp=null, activeCat='', HOSP_INTROS={};
 const t=k=>I[lang][k]||I.zh[k]||k;
 
 function setLang(l){
@@ -1118,8 +1461,11 @@ function filterHosps(){
     const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
+    const intro=HOSP_INTROS[h.kr];
+    const cardImg=intro&&intro.images&&intro.images[0]?
+      `<img src="${intro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     return`<div class="hosp-card" onclick="showDetail('${h.kr}')">
-      <div class="hosp-img">${h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}">${badgeLabel(h.badge)}</div></div>
+      <div class="hosp-img" style="position:relative;">${cardImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
       <div class="hosp-body">
         <div class="hosp-name">${name}</div>
         <div class="hosp-dept">${dept}</div>
@@ -1429,6 +1775,7 @@ async function submitReview() {
 
 setLang('zh');
 loadReviews();
+loadHospIntros();
 </script>
 </body>
 </html>
