@@ -485,8 +485,8 @@ a{text-decoration:none;color:inherit;}
   <!-- 선택지 버튼 영역 -->
   <div id="ai-options" style="padding:10px 14px;background:var(--white);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;"></div>
   <!-- 직접 입력 영역 (마지막 단계에서 표시) -->
-  <div id="ai-input-area" style="padding:10px 14px;border-top:1px solid var(--border);gap:8px;background:var(--white);flex-shrink:0;display:none;">
-    <input type="text" id="ai-input" placeholder="질문을 입력하세요..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendAiMsg()">
+  <div id="ai-input-area" style="display:none;padding:10px 14px;border-top:1px solid var(--border);display:none;gap:8px;background:var(--white);flex-shrink:0;">
+    <input type="text" id="ai-input" id="ai-input-placeholder" placeholder="질문을 입력하세요..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendAiMsg()">
     <button onclick="sendAiMsg()" style="padding:9px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;" id="ai-send-btn">전송</button>
   </div>
 </div>
@@ -1474,16 +1474,11 @@ function applyI18n(){
 
 function renderCats(){
   const cats=t('cats');
-  const grid=document.getElementById('cat-grid');
-  grid.innerHTML=cats.map((c,i)=>`
-    <div class="cat-card${activeCat===c?' active':''}" data-cat="${i}">
+  document.getElementById('cat-grid').innerHTML=cats.map((c,i)=>`
+    <div class="cat-card${activeCat===c?' active':''}" onclick="setCat('${c}',this)">
       <div class="ci">${CAT_ICONS[c]||(i===0?'🏥':'✨')}</div>
       <div class="cn">${c}</div>
     </div>`).join('');
-  // data-cat 인덱스로 클릭 이벤트 등록 (따옴표 문제 방지)
-  grid.querySelectorAll('.cat-card').forEach(el=>{
-    el.onclick=function(){setCat(cats[parseInt(this.dataset.cat)],this);};
-  });
 }
 function setCat(cat,el){
   const all=t('cats')[0];
@@ -1523,32 +1518,19 @@ function filterHosps(){
     const intro=HOSP_INTROS[h.kr];
     const cardImg=intro&&intro.images&&intro.images[0]?
       `<img src="${intro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
-    return`<div class="hosp-card" data-kr="${h.kr}">
+    return`<div class="hosp-card" onclick="showDetail('${h.kr}')">
       <div class="hosp-img" style="position:relative;">${cardImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
       <div class="hosp-body">
         <div class="hosp-name">${name}</div>
         <div class="hosp-dept">${dept}</div>
         <div class="hosp-tags">${treats.slice(0,3).map(tr=>`<span class="hosp-tag">${tr}</span>`).join('')}</div>
-        <div class="hosp-bottom">
-          <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
-          <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+        <div class="hosp-bottom" onclick="event.stopPropagation()">
+          <button class="btn-detail" onclick="showDetail('${h.kr}')">${t('detail_btn')}</button>
+          <button class="btn-book" onclick="openModal('${h.kr}')">${t('reserve_btn')}</button>
         </div>
       </div>
     </div>`;
   }).join('');
-  // 카드/버튼 클릭 이벤트 등록
-  document.querySelectorAll('#hosp-grid .hosp-card').forEach(card=>{
-    card.onclick=function(e){
-      const btn=e.target.closest('[data-action]');
-      if(btn){
-        e.stopPropagation();
-        if(btn.dataset.action==='detail')showDetail(btn.dataset.kr);
-        else if(btn.dataset.action==='modal')openModal(btn.dataset.kr);
-      }else{
-        showDetail(this.dataset.kr);
-      }
-    };
-  });
 }
 
 function renderSteps(){
@@ -1846,7 +1828,7 @@ async function submitReview() {
 }
 
 setLang('zh');
-loadReviews();
+loadRevi오후 2:33 2026-06-12ews();
 loadHospIntros();
 </script>
 </body>
