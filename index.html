@@ -1724,7 +1724,8 @@ async function loadReviews() {
     });
     if (r.ok) {
       const data = await r.json();
-      allReviews = Array.isArray(data) ? data.map(x => x.data).filter(Boolean) : [];
+      // 승인된 리뷰만 표시 (status='active' 또는 status 없으면 기존 샘플)
+    allReviews = Array.isArray(data) ? data.map(x => x.data).filter(x=>x&&x.status==='active') : [];
     }
   } catch(e) {
     allReviews = [];
