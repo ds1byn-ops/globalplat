@@ -100,7 +100,7 @@ tr:hover td{background:#fafaf8;}
   <div class="logo">FK</div>
   <div class="header-sub">병원 파트너 포털</div>
   <div class="header-right">
-    <div class="hosp-badge">🏥 <b id="hosp-name-badge">신상성형외과</b></div>
+    <div class="hosp-badge" onclick="openChangePwModal()" style="cursor:pointer;" title="클릭하여 비밀번호 변경">🏥 <b id="hosp-name-badge">신상성형외과</b> <span style="font-size:10px;color:#aaa;">🔑</span></div>
     <button class="btn" onclick="doLogout()" style="font-size:11px;color:#aaa;border-color:#444;">로그아웃</button>
   </div>
 </div>
@@ -862,6 +862,68 @@ function setNoPopupToday(){
   if(document.getElementById('no-popup-today').checked)localStorage.setItem('fk_no_popup_date',new Date().toISOString().slice(0,10));
   else localStorage.removeItem('fk_no_popup_date');
 }
+
+// ── 비밀번호 변경 ──
+function openChangePwModal(){
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  document.getElementById('change-pw-modal').style.display='flex';
+}
+function closeChangePwModal(){document.getElementById('change-pw-modal').style.display='none';}
+async function doChangePw(){
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  if(cur!==currentHosp.pw){alert('현재 비밀번호가 틀립니다.');return;}
+  if(!nw){alert('새 비밀번호를 입력하세요.');return;}
+  if(nw!==cf){alert('새 비밀번호가 일치하지 않습니다.');return;}
+  try{
+    // Supabase hospitals 테이블에 저장
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const all=await r.json();
+    const row=all.find(x=>(x.data||x).name===currentHosp.name);
+    if(row){
+      const newData=Object.assign({},row.data||row,{portal_pw:nw});
+      await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
+        method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:newData})
+      });
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:{name:currentHosp.name,portal_pw:nw}})
+      });
+    }
+    currentHosp.pw=nw;
+    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
+    alert('비밀번호가 변경되었습니다.');
+    closeChangePwModal();
+  }catch(e){alert('오류: '+e.message);}
+}
 </script>
+
+<!-- 비밀번호 변경 모달 -->
+<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:900;align-items:center;justify-content:center;" onclick="if(event.target===this)closeChangePwModal()">
+<div style="background:#fff;border-radius:16px;width:340px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🔑 비밀번호 변경</h3>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">현재 비밀번호</label>
+    <input type="password" id="pw-current" placeholder="현재 비밀번호" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호</label>
+    <input type="password" id="pw-new" placeholder="새 비밀번호" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="margin-bottom:14px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호 확인</label>
+    <input type="password" id="pw-confirm" placeholder="새 비밀번호 확인" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="doChangePw()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">변경</button>
+    <button onclick="closeChangePwModal()" style="padding:10px 16px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
 </body>
 </html>
