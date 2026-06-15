@@ -275,25 +275,11 @@ a{text-decoration:none;color:inherit;}
         <div style="font-size:32px;margin-bottom:10px;">🗣️</div>
         <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_interpret">통역 서비스</h3>
         <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_interpret_desc">중국어·베트남어·태국어·영어 전문 통역</p>
-        <div style="display:flex;flex-direction:column;gap:8px;" id="interpret-btns">
-
-          <!-- 반일 통역 -->
-          <div class="svc-inline-card green-card">
-            <div class="svc-inline-title" data-i18n="i_half">반일 통역 (4시간)</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="it-half-date" class="svc-inline-input green-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">시작 시간</label>
-                <select id="it-half-time" class="svc-inline-select green-input">
-                  <option>09:00</option><option>10:00</option><option>11:00</option>
-                  <option>13:00</option><option>14:00</option><option>15:00</option>
-                  <option>16:00</option><option>17:00</option>
-                </select>
-              </div>
-            </div>
+                <div style="display:flex;flex-direction:column;gap:6px;" id="interpret-btns">
+          <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','half')" data-i18n="i_half">반일 통역 (4시간)</button>
+          <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','full')" data-i18n="i_full">종일 통역 (8시간)</button>
+          <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','hosp')" data-i18n="i_hosp">병원 동행 통역</button>
+        </div>
             <button class="svc-inline-btn green-btn2" onclick="openSvcInline('interpret','half','it-half-date','it-half-time')">신청하기</button>
           </div>
 
@@ -343,108 +329,14 @@ a{text-decoration:none;color:inherit;}
         <div style="font-size:32px;margin-bottom:10px;">🚗</div>
         <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_car">차량 서비스</h3>
         <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_car_desc">공항 픽업·병원 이동·관광 전용 차량</p>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-
-          <!-- 차량 1일 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_1d">차량 1일</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="car-1d-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-1d-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','1d','car-1d-date','car-1d-time')">신청하기</button>
-          </div>
-          <!-- 차량 2일 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_2d">차량 2일</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="car-2d-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-2d-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','2d','car-2d-date','car-2d-time')">신청하기</button>
-          </div>
-          <!-- 차량 3일 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_3d">차량 3일</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="car-3d-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-3d-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','3d','car-3d-date','car-3d-time')">신청하기</button>
-          </div>
-          <!-- 차량 4일 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_4d">차량 4일</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="car-4d-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-4d-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','4d','car-4d-date','car-4d-time')">신청하기</button>
-          </div>
-          <!-- 차량 5일 이상 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_5dmore">차량 5일 이상</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">시작일</label>
-                <input type="date" id="car-5d-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-5d-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','5dmore','car-5d-date','car-5d-time')">신청하기</button>
-          </div>
-          <!-- 공항 픽업/샌딩 -->
-          <div class="svc-inline-card blue-card">
-            <div class="svc-inline-title" data-i18n="car_airport">공항 픽업/샌딩</div>
-            <div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="car-apt-date" class="svc-inline-input blue-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">픽업 시간</label>
-                <select id="car-apt-time" class="svc-inline-select blue-input">
-                  <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
-                </select>
-              </div>
-            </div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','1d')" data-i18n="car_1d">차량 1일</button>
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','2d')" data-i18n="car_2d">차량 2일</button>
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','3d')" data-i18n="car_3d">차량 3일</button>
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','4d')" data-i18n="car_4d">차량 4일</button>
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','5dmore')" data-i18n="car_5dmore">차량 5일 이상</button>
+          <button class="svc-btn blue" onclick="openSvcWithDateTime('car','airport')" data-i18n="car_airport">공항 픽업/샌딩</button>
+        </div>
             <button class="svc-inline-btn blue-btn2" onclick="openSvcInline('car','airport','car-apt-date','car-apt-time')">신청하기</button>
           </div>
         </div>
@@ -676,6 +568,16 @@ a{text-decoration:none;color:inherit;}
     <div class="fg">
       <div class="fitem"><label data-i18n="f_name">성명 (여권 영문명)</label><input type="text" id="svc-name" placeholder="ZHANG JING"></div>
       <div class="fitem"><label data-i18n="f_date">희망 날짜</label><input type="date" id="svc-date"></div>
+      <div id="svc-time-row" class="fitem" style="display:none;">
+        <label id="svc-time-label">시간 선택</label>
+        <select id="svc-time">
+          <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option>
+          <option>09:00</option><option>10:00</option><option>11:00</option>
+          <option>13:00</option><option>14:00</option><option>15:00</option>
+          <option>16:00</option><option>17:00</option><option>18:00</option>
+          <option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
+        </select>
+      </div>
       <div class="fitem"><label data-i18n="f_nation">국적</label>
         <select id="svc-nation">
           <option>中国</option><option>越南</option><option>泰国</option><option>其他</option>
@@ -1233,6 +1135,30 @@ function openSvcInline(type, sub, dateId, timeId){
   currentSvcType = type; currentSvcSub = sub;
   document.getElementById('svc-modal-bg').classList.add('open');
 }
+
+// ── 날짜+시간을 모달 안에서 선택하는 서비스 신청 ──
+function openSvcWithDateTime(type, sub){
+  currentSvcType=type; currentSvcSub=sub;
+  const lbl=SVC_LABELS[type]?.[sub]?.[lang]||sub;
+  document.getElementById('svc-selected-label').textContent=lbl;
+  document.getElementById('svc-form').style.display='';
+  document.getElementById('svc-done').style.display='none';
+  document.getElementById('svc-date').value='';
+  // 시간 선택 표시 (차량/통역 모두 표시)
+  const timeRow=document.getElementById('svc-time-row');
+  if(timeRow){
+    timeRow.style.display='';
+    const timeLabel=document.getElementById('svc-time-label');
+    if(timeLabel){
+      const labels={
+        interpret:{zh:'开始时间',ko:'시작 시간',en:'Start Time'},
+        car:{zh:'取车时间',ko:'픽업 시간',en:'Pickup Time'},
+      };
+      timeLabel.textContent=(labels[type]||{})[lang]||(labels[type]||{}).ko||'시간';
+    }
+  }
+  document.getElementById('svc-modal-bg').classList.add('open');
+}
 function openSvcModal(type,sub,time){
   currentSvcType=type;currentSvcSub=sub;
   const lbl=SVC_LABELS[type]?.[sub]?.[lang]||sub;
@@ -1248,11 +1174,13 @@ function closeSvcModal(){document.getElementById('svc-modal-bg').classList.remov
 async function submitSvc(){
   const name=document.getElementById('svc-name').value.trim();
   if(!name){alert(lang==='ko'?'성명을 입력하세요':lang==='zh'?'请输入姓名':'Please enter your name');return;}
+  const svcTimeEl=document.getElementById('svc-time');
+  const svcTimeVal=svcTimeEl&&document.getElementById('svc-time-row').style.display!=='none'?svcTimeEl.value.split(' ')[0]:'';
   const booking={
     id:Date.now(),name,
     hospital:'팔로우코리아 서비스',
-    treatment:currentSvcType+'/'+currentSvcSub+(document.getElementById('svc-modal-bg')._time?'@'+document.getElementById('svc-modal-bg')._time:''),
-    datetime:document.getElementById('svc-date').value+' 00:00',
+    treatment:currentSvcType+'/'+currentSvcSub+(svcTimeVal?'@'+svcTimeVal:''),
+    datetime:document.getElementById('svc-date').value+' '+(svcTimeVal||'00:00'),
     nationality:document.getElementById('svc-nation').value,
     contact:document.getElementById('svc-contact').value,
     note:document.getElementById('svc-note').value,
