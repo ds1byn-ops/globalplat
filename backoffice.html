@@ -1464,38 +1464,101 @@ async function loadAdminReviews(){
   const fH=document.getElementById('rv-filter-hosp')?.value||'';
   const fS=document.getElementById('rv-filter-status')?.value||'';
   try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*&order=id.desc&limit=200`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    let list=(await r.json()).map(x=>x.data||x).filter(Boolean);
-    // 승인 대기: status 없거나 'pending'
-    if(fS==='pending')list=list.filter(r=>!r.status||r.status==='pending');
-    else if(fS)list=list.filter(r=>r.status===fS);
-    if(fH)list=list.filter(r=>(r.hospital||'').includes(fH));
-    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">리뷰가 없습니다.</div>';return;}
-    const starStr=n=>'★'.repeat(n||5)+'☆'.repeat(5-(n||5));
-    el.innerHTML=list.map(rv=>{
-      const st=rv.status||'pending';
-      const stBadge=st==='active'?'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:8px;font-size:10px;">✅ 승인됨</span>':st==='rejected'?'<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:8px;font-size:10px;">❌ 거절됨</span>':'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:10px;">⏳ 대기</span>';
-      return`<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            ${stBadge}
-            <span style="font-size:12px;font-weight:700;">${rv.name||'익명'}</span>
-            <span style="font-size:11px;color:var(--gray);">${rv.from||''}</span>
-            <span style="color:#D4AF37;font-size:12px;">${starStr(rv.star)}</span>
-          </div>
-          <span style="font-size:10px;color:var(--gray);">${(rv.date||'').slice(0,10)}</span>
-        </div>
-        <div style="font-size:11px;background:var(--lgray);color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:6px;">${rv.hospital||''} · ${rv.treatment||''}</div>
-        <div style="font-size:12px;color:var(--gray);line-height:1.6;">${rv.text||''}</div>
-        ${rv.img?`<img src="${rv.img}" style="width:80px;height:65px;object-fit:cover;border-radius:6px;margin-top:8px;">`:''}
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          ${st!=='active'?`<button onclick="approveReview(${rv.id})" style="padding:5px 12px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">✅ 승인</button>`:''}
-          ${st!=='rejected'?`<button onclick="rejectReview(${rv.id})" style="padding:5px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;font-size:11px;cursor:pointer;">❌ 거절</button>`:''}
-          <button onclick="deleteReview(${rv.id})" style="padding:5px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">🗑️ 삭제</button>
-        </div>
-      </div>`;
+    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*&order=id.desc&limit=200`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const raw=await r.json();
+    // row.id(DB PK)와 data.id(JS timestamp) 모두 저장
+    let list=raw.map(function(row){
+      var d=row.data||row;
+      d._rowId=row.id; // DB PK 저장
+      return d;
+    }).filter(Boolean);
+    // 상태 필터
+    if(fS==='pending') list=list.filter(function(r){return !r.status||r.status==='pending';});
+    else if(fS) list=list.filter(function(r){return r.status===fS;});
+    // 병원 필터
+    if(fH) list=list.filter(function(r){return (r.hospital||'').includes(fH);});
+    if(!list.length){
+      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">리뷰가 없습니다.</div>';
+      return;
+    }
+    function starStr(n){return '★'.repeat(n||5)+'☆'.repeat(5-(n||5));}
+    el.innerHTML=list.map(function(rv){
+      var st=rv.status||'pending';
+      var rowId=String(rv._rowId||'');
+      var stBadge=st==='active'
+        ?'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:8px;font-size:10px;">✅ 승인됨</span>'
+        :st==='rejected'
+        ?'<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:8px;font-size:10px;">❌ 거절됨</span>'
+        :'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:10px;">⏳ 대기</span>';
+      var approveBtn=st!=='active'?'<button data-rowid="'+rowId+'" data-action="approve" class="rv-action-btn" style="padding:5px 12px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">✅ 승인</button>':'';
+      var rejectBtn=st!=='rejected'?'<button data-rowid="'+rowId+'" data-action="reject" class="rv-action-btn" style="padding:5px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;font-size:11px;cursor:pointer;">❌ 거절</button>':'';
+      var deleteBtn='<button data-rowid="'+rowId+'" data-action="delete" class="rv-action-btn" style="padding:5px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">🗑️ 삭제</button>';
+      return '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
+        +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
+        +stBadge
+        +'<span style="font-size:12px;font-weight:700;">'+(rv.name||'익명')+'</span>'
+        +'<span style="font-size:11px;color:var(--gray);">'+(rv.from||'')+'</span>'
+        +'<span style="color:#D4AF37;font-size:12px;">'+starStr(rv.star)+'</span>'
+        +'</div>'
+        +'<span style="font-size:10px;color:var(--gray);">'+(rv.date||'').slice(0,10)+'</span>'
+        +'</div>'
+        +'<div style="font-size:11px;background:var(--lgray);color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:6px;">'+(rv.hospital||'')+' · '+(rv.treatment||'')+'</div>'
+        +'<div style="font-size:12px;color:var(--gray);line-height:1.6;">'+(rv.text||'')+'</div>'
+        +(rv.img?'<img src="'+rv.img+'" style="width:80px;height:65px;object-fit:cover;border-radius:6px;margin-top:8px;">':'')
+        +'<div style="display:flex;gap:6px;margin-top:10px;">'+approveBtn+rejectBtn+deleteBtn+'</div>'
+        +'</div>';
     }).join('');
-  }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패</div>';}
+    // 이벤트 위임
+    el.querySelectorAll('.rv-action-btn').forEach(function(btn){
+      btn.onclick=function(){
+        var rowId=this.dataset.rowid;
+        var action=this.dataset.action;
+        if(action==='approve') doReviewAction(rowId,'active');
+        else if(action==='reject') doReviewAction(rowId,'rejected');
+        else if(action==='delete') doDeleteReview(rowId);
+      };
+    });
+  }catch(e){
+    el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패: '+e.message+'</div>';
+    console.error(e);
+  }
+}
+async function doReviewAction(rowId, status){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const rows=await r.json();
+    if(!rows.length){alert('리뷰를 찾을 수 없습니다.');return;}
+    const row=rows[0];
+    const newData=Object.assign({},row.data||row,{status:status});
+    delete newData._rowId;
+    const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify({data:newData})
+    });
+    if(res.ok){
+      alert(status==='active'?'승인되었습니다.':'거절되었습니다.');
+      loadAdminReviews();
+    }else{
+      alert('처리 실패: '+(await res.text()));
+    }
+  }catch(e){alert('오류: '+e.message);}
+}
+async function doDeleteReview(rowId){
+  if(!confirm('이 리뷰를 삭제하시겠습니까?'))return;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(res.ok){alert('삭제되었습니다.');loadAdminReviews();}
+    else alert('삭제 실패');
+  }catch(e){alert('오류: '+e.message);}
 }
 
 async function updateReviewStatus(id, status){
