@@ -247,11 +247,11 @@ a{text-decoration:none;color:inherit;}
         <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_concierge">VVIP 컨시어지</h3>
         <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_concierge_desc">전담 코디네이터 동행, 병원 예약부터 귀국까지</p>
         <div style="display:flex;flex-direction:column;gap:6px;">
-          <button class="svc-btn" onclick="openSvcModal('concierge','1n2d')" data-i18n="c_1n2d">1박 2일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','2n3d')" data-i18n="c_2n3d">2박 3일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','3n4d')" data-i18n="c_3n4d">3박 4일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','4n5d')" data-i18n="c_4n5d">4박 5일 패키지</button>
-          <button class="svc-btn" onclick="openSvcModal('concierge','5nmore')" data-i18n="c_5nmore">5박 이상 패키지</button>
+          <button class="svc-btn" onclick="openSvcWithDateTime('concierge','1n2d')" data-i18n="c_1n2d">1박 2일 패키지</button>
+          <button class="svc-btn" onclick="openSvcWithDateTime('concierge','2n3d')" data-i18n="c_2n3d">2박 3일 패키지</button>
+          <button class="svc-btn" onclick="openSvcWithDateTime('concierge','3n4d')" data-i18n="c_3n4d">3박 4일 패키지</button>
+          <button class="svc-btn" onclick="openSvcWithDateTime('concierge','4n5d')" data-i18n="c_4n5d">4박 5일 패키지</button>
+          <button class="svc-btn" onclick="openSvcWithDateTime('concierge','5nmore')" data-i18n="c_5nmore">5박 이상 패키지</button>
         </div>
       </div>
 
@@ -260,34 +260,10 @@ a{text-decoration:none;color:inherit;}
         <div style="font-size:32px;margin-bottom:10px;">🗣️</div>
         <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_interpret">통역 서비스</h3>
         <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_interpret_desc">중국어·베트남어·태국어·영어 전문 통역</p>
-                <div style="display:flex;flex-direction:column;gap:6px;" id="interpret-btns">
+        <div style="display:flex;flex-direction:column;gap:6px;">
           <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','half')" data-i18n="i_half">반일 통역 (4시간)</button>
           <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','full')" data-i18n="i_full">종일 통역 (8시간)</button>
           <button class="svc-btn green" onclick="openSvcWithDateTime('interpret','hosp')" data-i18n="i_hosp">병원 동행 통역</button>
-        </div>
-            <button class="svc-inline-btn green-btn2" >신청하기</button>
-          </div>
-
-          <!-- 종일 통역 -->
-          
-            <button class="svc-inline-btn green-btn2" >신청하기</button>
-          </div><div class="svc-inline-row">
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">날짜</label>
-                <input type="date" id="it-hosp-date" class="svc-inline-input green-input">
-              </div>
-              <div class="svc-inline-field">
-                <label class="svc-inline-label">시간</label>
-                <select id="it-hosp-time" class="svc-inline-select green-input">
-                  <option>09:00</option><option>10:00</option><option>11:00</option>
-                  <option>13:00</option><option>14:00</option><option>15:00</option>
-                  <option>16:00</option><option>17:00</option><option>18:00</option>
-                </select>
-              </div>
-            </div>
-            <button class="svc-inline-btn green-btn2" >신청하기</button>
-          </div>
-
         </div>
       </div>
 
@@ -296,7 +272,7 @@ a{text-decoration:none;color:inherit;}
         <div style="font-size:32px;margin-bottom:10px;">🚗</div>
         <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;" data-i18n="svc_car">차량 서비스</h3>
         <p style="font-size:12px;color:var(--gray);margin-bottom:14px;" data-i18n="svc_car_desc">공항 픽업·병원 이동·관광 전용 차량</p>
-                <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
           <button class="svc-btn blue" onclick="openSvcWithDateTime('car','1d')" data-i18n="car_1d">차량 1일</button>
           <button class="svc-btn blue" onclick="openSvcWithDateTime('car','2d')" data-i18n="car_2d">차량 2일</button>
           <button class="svc-btn blue" onclick="openSvcWithDateTime('car','3d')" data-i18n="car_3d">차량 3일</button>
@@ -304,16 +280,12 @@ a{text-decoration:none;color:inherit;}
           <button class="svc-btn blue" onclick="openSvcWithDateTime('car','5dmore')" data-i18n="car_5dmore">차량 5일 이상</button>
           <button class="svc-btn blue" onclick="openSvcWithDateTime('car','airport')" data-i18n="car_airport">공항 픽업/샌딩</button>
         </div>
-            <button class="svc-inline-btn blue-btn2" >신청하기</button>
-          </div>
-        </div>
       </div>
 
     </div>
   </div>
 </section>
 </div>
-
 <section class="section process" id="sec-proc">
   <div class="section-inner">
     <div class="sec-head">
