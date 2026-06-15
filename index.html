@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Follow Korea | K-Beauty Medical</title>
 <style>
-:root{--pk:#FFB5C8;--pk2:#FF8FAD;--gn:#4CAF8C;--gn2:#1A6B4A;--gold:#D4AF37;--bg:#FAFAFA;--white:#FFFFFF;--dark:#1A1A1A;--gray:#6B7280;--lgray:#F3F4F6;--border:#E5E7EB;--shadow:0 4px 24px rgba(0,0,0,0.08);--r:16px;}
+:root{--pk:#FFB5C8;--pk2:#FF8FAD;--gn:#26C6B8;--gn2:#00897B;--gold:#D4AF37;--bg:#FAFAFA;--white:#FFFFFF;--dark:#1A1A1A;--gray:#6B7280;--lgray:#F3F4F6;--border:#E5E7EB;--shadow:0 4px 24px rgba(0,0,0,0.08);--r:16px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Apple SD Gothic Neo','PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;}
 a{text-decoration:none;color:inherit;}
@@ -1902,7 +1902,7 @@ async function submitReview() {
     imgs: rvImgs.length>0 ? rvImgs : [],
     date: new Date().toISOString().slice(0,10),
     lang,
-    status: 'active',
+    status: 'pending',
   };
   try {
     await fetch(`${SUPA_URL}/rest/v1/reviews`, {
@@ -1916,7 +1916,11 @@ async function submitReview() {
   }
   document.getElementById('review-form').style.display = 'none';
   document.getElementById('review-done').style.display = '';
-  renderReviews();
+  // 승인 대기 안내 메시지로 변경
+  const doneTitle = document.getElementById('rv-done-title');
+  const doneDesc = document.getElementById('rv-done-desc');
+  if(doneTitle) doneTitle.textContent = {zh:'评价提交成功！',ko:'리뷰가 제출되었습니다!',en:'Review Submitted!',vi:'Đã gửi đánh giá!',th:'ส่งรีวิวแล้ว!',ja:'口コミを投稿しました！',ru:'Отзыв отправлен!'}[lang]||'리뷰가 제출되었습니다!';
+  if(doneDesc) doneDesc.textContent = {zh:'管理员审核通过后将会显示，感谢您的评价 😊',ko:'관리자 승인 후 게시됩니다. 소중한 후기 감사합니다 😊',en:'Will be shown after admin approval. Thank you 😊',vi:'Sẽ hiện sau khi quản trị viên duyệt 😊',th:'จะแสดงหลังจากผู้ดูแลอนุมัติ 😊',ja:'管理者の承認後に表示されます 😊',ru:'Появится после одобрения администратора 😊'}[lang]||'관리자 승인 후 게시됩니다 😊';
 }
 
 setLang('zh');
