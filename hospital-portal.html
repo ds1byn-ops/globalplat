@@ -422,6 +422,7 @@ function doLogout(){sessionStorage.removeItem('hportal');location.reload();}
 async function loadAndRender(){
   BK=await dbLoad();
   renderDashboard();
+  setTimeout(checkNoticePopup,1500);
 }
 
 function hospBK(){return BK.filter(b=>b.hospital===currentHosp.name);}
@@ -654,23 +655,37 @@ function renderProfile(){
 function saveProfile(){alert('저장되었습니다.');}
 
 // ── 공지사항 ──
-function renderNotice(){
-  const notices=[
-    {date:'2026-06-10',title:'6월 수수료 정산 안내',content:'6월분 수수료는 7월 15일에 정산됩니다. 청구서를 확인해 주세요.'},
-    {date:'2026-06-01',title:'중국 왕홍 방문 일정 공유',content:'6월 15~20일 왕홍 그룹 방문 예정입니다. 예약 가능 슬롯을 확인해 주세요.'},
-    {date:'2026-05-20',title:'시스템 업데이트 안내',content:'팔로우코리아 병원 포털이 업데이트되었습니다. 새로운 정산 기능을 이용해 보세요.'},
-  ];
-  document.getElementById('notice-list').innerHTML=notices.map(n=>`
-    <div style="padding:12px 0;border-bottom:1px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-        <span style="font-size:12px;font-weight:600;">${n.title}</span>
-        <span style="font-size:10px;color:var(--gray);">${n.date}</span>
-      </div>
-      <div style="font-size:11px;color:var(--gray);">${n.content}</div>
-    </div>`).join('');
+async function renderNotice(){
+  const el=document.getElementById('notice-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:30px;">로딩 중...</div>';
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=50',{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(!r.ok){el.innerHTML='<div style="color:#dc2626;padding:20px;">공지 로드 실패('+r.status+')</div>';return;}
+    const all=await r.json();
+    const hn=currentHosp?currentHosp.name:'';
+    const list=all.map(function(x){return x.data||x;}).filter(function(n){
+      return n&&(n.target==='all'||n.target===hn);
+    });
+    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280;">📭 공지사항이 없습니다.</div>';return;}
+    const TL={general:'📌',urgent:'🚨',settlement:'💰',schedule:'📅'};
+    el.innerHTML=list.map(function(n){
+      var u=n.type==='urgent';
+      return '<div style="padding:14px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;margin-bottom:8px;background:'+(u?'#fef2f2':'#fff')+'">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;">'+(TL[n.type]||'📌')
+        +' <b style="font-size:12px;">'+(n.title||'')+'</b>'
+        +(n.target==='all'?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:8px;">전체</span>':'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;">개별</span>')
+        +'</div><span style="font-size:10px;color:#9ca3af;">'+(n.created_at||n.date||'').slice(0,10)+'</span></div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.7;white-space:pre-line;">'+(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:5px;">작성: '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<div style="color:#dc2626;padding:20px;">오류: '+e.message+'</div>';}
 }
 
-// ── 예약 모달 ──
 function openBkModal(id){
   editBkId=id;
   const b=BK.find(x=>x.id===id);if(!b)return;
@@ -800,6 +815,52 @@ if(saved){
     document.getElementById('hosp-name-badge').textContent=currentHosp.name;
     loadAndRender();
   }catch(e){sessionStorage.removeItem('hportal');}
+}
+</script>
+
+<div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticePopup()">
+  <div style="background:#fff;border-radius:16px;width:460px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+    <div style="background:linear-gradient(135deg,#1A6B4A,#4CAF8C);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:14px;font-weight:800;color:#fff;">📢 팔로우코리아 공지사항</div><div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div></div>
+      <button onclick="closeNoticePopup()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:26px;height:26px;color:#fff;cursor:pointer;">✕</button>
+    </div>
+    <div id="popup-notice-list" style="padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="padding:10px 16px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#888;cursor:pointer;"><input type="checkbox" id="no-popup-today" onchange="setNoPopupToday()"> 오늘 하루 보지 않기</label>
+      <button onclick="closeNoticePopup()" style="padding:6px 16px;background:linear-gradient(135deg,#4CAF8C,#1A6B4A);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">확인</button>
+    </div>
+  </div>
+</div>
+<script>
+async function checkNoticePopup(){
+  if(localStorage.getItem('fk_no_popup_date')===new Date().toISOString().slice(0,10))return;
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=20',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(!r.ok)return;
+    var all=await r.json();
+    var hn=currentHosp?currentHosp.name:'';
+    var list=all.map(function(x){return x.data||x;}).filter(function(n){return n&&(n.target==='all'||n.target===hn);});
+    if(!list.length)return;
+    var TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    var urg=list.filter(function(n){return n.type==='urgent';}).length;
+    document.getElementById('popup-badge').textContent=urg?('🚨 긴급 '+urg+'건 포함'):('공지 '+list.length+'건');
+    document.getElementById('popup-notice-list').innerHTML=list.map(function(n){
+      var u=n.type==='urgent';
+      return '<div style="padding:12px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;background:'+(u?'#fef2f2':'#fafafa')+'">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
+        +'<span style="font-size:11px;background:'+(u?'#dc2626':'#f3f4f6')+';color:'+(u?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'📌 일반')+'</span>'
+        +'<b style="font-size:13px;">'+(n.title||'')+'</b></div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:4px;">'+(n.created_at||n.date||'').slice(0,10)+' · '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'</div>';
+    }).join('');
+    document.getElementById('notice-popup-bg').style.display='flex';
+  }catch(e){console.error(e);}
+}
+function closeNoticePopup(){document.getElementById('notice-popup-bg').style.display='none';}
+function setNoPopupToday(){
+  if(document.getElementById('no-popup-today').checked)localStorage.setItem('fk_no_popup_date',new Date().toISOString().slice(0,10));
+  else localStorage.removeItem('fk_no_popup_date');
 }
 </script>
 </body>
