@@ -1410,6 +1410,7 @@ async function submitNotice(){
     else alert('저장 실패: '+(await res.text()));
   }catch(e){alert('오류: '+e.message);}
 }
+window._noticeCache={};
 async function loadNotices(){
   const el=document.getElementById('notice-list');
   if(!el)return;
@@ -1424,6 +1425,7 @@ async function loadNotices(){
     if(fTy)list=list.filter(n=>n.type===fTy);
     if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">📭 공지사항이 없습니다.</div>';return;}
     const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    list.forEach(n=>{window._noticeCache[String(n.id)]=n;});
     el.innerHTML=list.map(n=>`
       <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
@@ -1434,15 +1436,20 @@ async function loadNotices(){
           </div>
           <div style="display:flex;gap:4px;align-items:center;white-space:nowrap;">
             <span style="font-size:10px;color:var(--gray);">${(n.created_at||'').slice(0,10)}</span>
-            <button onclick='openNoticeModal(${JSON.stringify(n).replace(/\/g,"\\")})' style="padding:3px 8px;background:var(--lgray);border:1px solid var(--border);border-radius:4px;font-size:10px;cursor:pointer;">수정</button>
+            <button data-nid="${n.id}" class="n-edit-btn" style="padding:3px 8px;background:var(--lgray);border:1px solid var(--border);border-radius:4px;font-size:10px;cursor:pointer;">수정</button>
             <button onclick="deleteNotice(${n.id})" style="padding:3px 8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:4px;font-size:10px;cursor:pointer;">삭제</button>
           </div>
         </div>
         <div style="font-size:12px;color:var(--gray);line-height:1.7;white-space:pre-line;">${n.content||''}</div>
         <div style="font-size:10px;color:#bbb;margin-top:6px;">작성: ${n.author||''}</div>
       </div>`).join('');
+  // 수정 버튼 이벤트
+    el.querySelectorAll('.n-edit-btn').forEach(function(b){
+      b.onclick=function(){openNoticeModal(window._noticeCache[this.dataset.nid]);};
+    });
   }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패</div>';}
 }
+function editNotice(id){openNoticeModal(window._noticeCache[id]);}
 async function deleteNotice(id){
   if(!confirm('삭제하시겠습니까?'))return;
   await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
