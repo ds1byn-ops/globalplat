@@ -1770,30 +1770,43 @@ function renderReviews() {
 
 // ── 병원 소개 DB 이미지 로드 ──
 async function loadHospIntro(kr){
-  try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
-    });
-    if(!r.ok)return;
-    const all=await r.json();
-    const intro=Array.isArray(all)?all.map(x=>x.data).filter(Boolean).find(x=>x.name===kr):null;
-    if(!intro)return;
-    // 소개 텍스트 업데이트 (DB에 있으면 우선)
-    const overviewEl=document.getElementById('d-overview');
-    const dbText=lang==='ko'?intro.overview_ko:lang==='zh'?intro.overview_zh:intro.overview_en;
-    if(dbText&&overviewEl)overviewEl.textContent=dbText;
-    // 이미지 표시
-    if(intro.images&&intro.images.length>0){
-      const overviewSec=document.getElementById('ds-overview');
-      if(overviewSec){
-        let imgDiv=document.getElementById('hosp-intro-imgs');
-        if(!imgDiv){imgDiv=document.createElement('div');imgDiv.id='hosp-intro-imgs';overviewSec.appendChild(imgDiv);}
-        imgDiv.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px;">`+
-          intro.images.map(img=>`<img src="${img}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;">`).join('')+
-        `</div>`;
-      }
-    }
-  }catch(e){}
+  // 먼저 이전 이미지 div 항상 초기화
+  const overviewSec=document.getElementById('ds-overview');
+  const oldImgDiv=document.getElementById('hosp-intro-imgs');
+  if(oldImgDiv)oldImgDiv.remove();
+
+  // HOSP_INTROS 캐시 우선 사용
+  let intro=HOSP_INTROS[kr]||null;
+
+  // 캐시에 없으면 DB에서 해당 병원만 조회
+  if(!intro){
+    try{
+      const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+      if(!r.ok)return;
+      const all=await r.json();
+      intro=Array.isArray(all)?all.map(x=>x.data).filter(Boolean).find(x=>x.name===kr):null;
+      if(intro)HOSP_INTROS[kr]=intro; // 캐시 저장
+    }catch(e){return;}
+  }
+
+  if(!intro)return;
+
+  // 소개 텍스트 업데이트 (DB에 있으면 우선)
+  const overviewEl=document.getElementById('d-overview');
+  const dbText=lang==='ko'?intro.overview_ko:lang==='zh'?intro.overview_zh:intro.overview_en;
+  if(dbText&&overviewEl)overviewEl.textContent=dbText;
+
+  // 이미지 표시 (이 병원 것만)
+  if(intro.images&&intro.images.length>0&&overviewSec){
+    const imgDiv=document.createElement('div');
+    imgDiv.id='hosp-intro-imgs';
+    imgDiv.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px;">`+
+      intro.images.map(img=>`<img src="${img}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`).join('')+
+    `</div>`;
+    overviewSec.appendChild(imgDiv);
+  }
 }
 
 // ── 리뷰 이미지 ──
