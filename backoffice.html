@@ -94,7 +94,7 @@ tr:hover td{background:#fafaf8;}
 
 <div id="app" style="display:none;">
 <div class="header">
-  <div class="logo">팔로우코리아</div>
+  <div class="logo" onclick="location.reload()" style="cursor:pointer;" title="새로고침">팔로우코리아</div>
   <div class="header-badge">백오피스 ADMIN</div>
   <div style="margin-left:auto;display:flex;gap:8px;">
     <button class="btn gold-btn" onclick="exportExcel()" style="font-size:11px;">엑셀 다운로드</button>
@@ -1527,6 +1527,62 @@ async function deleteReview(id){
   }
   loadAdminReviews();
 }
+
+// ── 병원 비밀번호 관리 ──
+function openHospPwModal(name){
+  document.getElementById('hosp-pw-name').value=name;
+  document.getElementById('hosp-pw-new').value='';
+  document.getElementById('hosp-pw-modal').style.display='flex';
+}
+function closeHospPwModal(){document.getElementById('hosp-pw-modal').style.display='none';}
+async function saveHospPw(){
+  const name=document.getElementById('hosp-pw-name').value;
+  const pw=document.getElementById('hosp-pw-new').value.trim();
+  if(!pw){alert('새 비밀번호를 입력하세요');return;}
+  try{
+    // hospitals 테이블에서 해당 병원 찾기
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const all=await r.json();
+    const row=all.find(x=>(x.data||x).name===name);
+    if(row){
+      const newData=Object.assign({},row.data||row,{portal_pw:pw});
+      await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:newData})
+      });
+    }else{
+      // 없으면 새로 생성
+      await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:{name,portal_pw:pw}})
+      });
+    }
+    alert(`${name} 비밀번호가 변경되었습니다.`);
+    closeHospPwModal();
+  }catch(e){alert('오류: '+e.message);}
+}
 </script>
+
+<!-- 병원 비밀번호 변경 모달 -->
+<div class="modal-bg" id="hosp-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeHospPwModal()">
+<div class="modal" style="width:360px;">
+  <h3 style="margin-bottom:16px;">🔑 병원 비밀번호 변경</h3>
+  <div style="margin-bottom:12px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">병원명</label>
+    <input type="text" id="hosp-pw-name" readonly style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:13px;">
+  </div>
+  <div style="margin-bottom:12px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호</label>
+    <input type="text" id="hosp-pw-new" placeholder="새 비밀번호 입력" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="font-size:11px;color:#888;margin-bottom:14px;">※ 변경 후 hospital-portal.html 코드에 직접 반영됩니다.</div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="saveHospPw()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">저장</button>
+    <button onclick="closeHospPwModal()" style="padding:10px 16px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
 </body>
 </html>
