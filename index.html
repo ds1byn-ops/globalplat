@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -203,7 +202,7 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="num">2,000+</div><div class="lbl" data-i18n="stat1">服务患者</div></div>
-      <div class="hero-stat"><div class="num">1,500+</div><div class="lbl" data-i18n="stat2">合作医院</div></div>
+      <div class="hero-stat"><div class="num">2,500+</div><div class="lbl" data-i18n="stat2">合作医院</div></div>
       <div class="hero-stat"><div class="num">4.9★</div><div class="lbl" data-i18n="stat3">满意度</div></div>
     </div>
   </div>
@@ -230,35 +229,8 @@ a{text-decoration:none;color:inherit;}
   </div>
 </section>
 
-<section class="section process" id="sec-proc">
-  <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">HOW IT WORKS</div>
-      <h2 class="sec-title" data-i18n="proc_title">预约只需4步</h2>
-    </div>
-    <div class="step-grid" id="step-grid"></div>
-  </div>
-</section>
-
-<section class="section" id="sec-review" style="background:var(--white);">
-  <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">REVIEWS</div>
-      <h2 class="sec-title" data-i18n="review_title">真实用户评价</h2>
-      <p class="sec-sub" data-i18n="review_sub">来自全球患者的真实体验分享</p>
-      <button onclick="openReviewModal()" style="margin-top:14px;padding:10px 24px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:#fff;border:none;border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;" data-i18n="write_review">✍️ 写评价</button>
-    </div>
-    <div id="reviews-loading" style="text-align:center;padding:20px;color:var(--gray);font-size:13px;display:none;">⏳ 加载中...</div>
-    <div class="testi-grid" id="testi-grid"></div>
-    <div id="reviews-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);">
-      <div style="font-size:36px;margin-bottom:10px;">💬</div>
-      <p data-i18n="no_review">还没有评价，来写第一条吧！</p>
-    </div>
-  </div>
-</section>
-
 <!-- 기타 서비스 섹션 -->
-<div id="sec-extra">
+<div id="sec-extra" style="display:none;">
 <section class="section" style="background:var(--white);">
   <div class="section-inner">
     <div class="sec-head">
@@ -359,6 +331,34 @@ a{text-decoration:none;color:inherit;}
   </div>
 </section>
 </div>
+
+<section class="section process" id="sec-proc">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">HOW IT WORKS</div>
+      <h2 class="sec-title" data-i18n="proc_title">预约只需4步</h2>
+    </div>
+    <div class="step-grid" id="step-grid"></div>
+  </div>
+</section>
+
+<section class="section" id="sec-review" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">REVIEWS</div>
+      <h2 class="sec-title" data-i18n="review_title">真实用户评价</h2>
+      <p class="sec-sub" data-i18n="review_sub">来自全球患者的真实体验分享</p>
+      <button onclick="openReviewModal()" style="margin-top:14px;padding:10px 24px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:#fff;border:none;border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;" data-i18n="write_review">✍️ 写评价</button>
+    </div>
+    <div id="reviews-loading" style="text-align:center;padding:20px;color:var(--gray);font-size:13px;display:none;">⏳ 加载中...</div>
+    <div class="testi-grid" id="testi-grid"></div>
+    <div id="reviews-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);">
+      <div style="font-size:36px;margin-bottom:10px;">💬</div>
+      <p data-i18n="no_review">还没有评价，来写第一条吧！</p>
+    </div>
+  </div>
+</section>
+
 
 
 <footer class="footer">
@@ -486,8 +486,8 @@ a{text-decoration:none;color:inherit;}
   <!-- 선택지 버튼 영역 -->
   <div id="ai-options" style="padding:10px 14px;background:var(--white);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;"></div>
   <!-- 직접 입력 영역 (마지막 단계에서 표시) -->
-  <div id="ai-input-area" style="display:none;padding:10px 14px;border-top:1px solid var(--border);display:none;gap:8px;background:var(--white);flex-shrink:0;">
-    <input type="text" id="ai-input" id="ai-input-placeholder" placeholder="질문을 입력하세요..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendAiMsg()">
+  <div id="ai-input-area" style="padding:10px 14px;border-top:1px solid var(--border);gap:8px;background:var(--white);flex-shrink:0;display:none;">
+    <input type="text" id="ai-input" placeholder="질문을 입력하세요..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendAiMsg()">
     <button onclick="sendAiMsg()" style="padding:9px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;" id="ai-send-btn">전송</button>
   </div>
 </div>
@@ -1444,6 +1444,65 @@ function badgeLabel(b){const m=BADGE_MAP[b];return m?(m[lang]||m.zh||b):b;}
 let lang='zh', currentHosp=null, activeCat='', HOSP_INTROS={};
 const t=k=>I[lang][k]||I.zh[k]||k;
 
+
+function toggleSvcTime(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const isOpen=el.style.display==='flex';
+  // 모두 닫기
+  document.querySelectorAll('.svc-time-picker').forEach(p=>{p.style.display='none';});
+  // 토글
+  el.style.display=isOpen?'none':'flex';
+}
+
+function initSvcButtons(){
+  // 통역 버튼
+  ['it-half','it-full'].forEach(id=>{
+    const picker=document.getElementById(id);
+    if(!picker)return;
+    const btn=picker.previousElementSibling;
+    if(btn){
+      btn.onclick=function(e){e.stopPropagation();toggleSvcTime(id);};
+    }
+    const confirmBtn=picker.querySelector('.svc-confirm-btn');
+    if(confirmBtn){
+      const parts=confirmBtn.getAttribute('onclick')||'';
+      confirmBtn.onclick=function(e){
+        e.stopPropagation();
+        const sel=picker.querySelector('select');
+        const time=sel?sel.value.split(' ')[0]:'';
+        const typeMatch=parts.match(/openSvcModalWithTime\('([^']+)','([^']+)'/);
+        if(typeMatch)openSvcModal(typeMatch[1],typeMatch[2],time);
+      };
+    }
+  });
+  // 차량 버튼
+  ['car-1d','car-2d','car-3d','car-4d','car-apt'].forEach(id=>{
+    const picker=document.getElementById(id);
+    if(!picker)return;
+    const btn=picker.previousElementSibling;
+    if(btn){
+      btn.onclick=function(e){e.stopPropagation();toggleSvcTime(id);};
+    }
+    const confirmBtn=picker.querySelector('.svc-confirm-btn');
+    if(confirmBtn){
+      const parts=confirmBtn.getAttribute('onclick')||'';
+      confirmBtn.onclick=function(e){
+        e.stopPropagation();
+        const sel=picker.querySelector('select');
+        const time=sel?sel.value.split(' ')[0]:'';
+        const typeMatch=parts.match(/openSvcModalWithTime\('([^']+)','([^']+)'/);
+        if(typeMatch)openSvcModal(typeMatch[1],typeMatch[2],time);
+      };
+    }
+  });
+}
+function openSvcModalWithTime(type,sub,pickerId){
+  const picker=document.getElementById(pickerId);
+  const sel=picker?picker.querySelector('select'):null;
+  const time=sel?sel.value.split(' ')[0]:'';
+  openSvcModal(type,sub,time);
+}
 function setLang(l){
   lang=l;
   // 드롭다운 업데이트
@@ -1460,6 +1519,7 @@ function setLang(l){
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews();
   if(currentHosp) renderDetail(currentHosp);
+  initSvcButtons();
 }
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -1475,21 +1535,33 @@ function applyI18n(){
 
 function renderCats(){
   const cats=t('cats');
-  document.getElementById('cat-grid').innerHTML=cats.map((c,i)=>`
-    <div class="cat-card${activeCat===c?' active':''}" onclick="setCat('${c}',this)">
+  const grid=document.getElementById('cat-grid');
+  grid.innerHTML=cats.map((c,i)=>`
+    <div class="cat-card${activeCat===c?' active':''}" data-cat="${i}">
       <div class="ci">${CAT_ICONS[c]||(i===0?'🏥':'✨')}</div>
       <div class="cn">${c}</div>
     </div>`).join('');
+  // data-cat 인덱스로 클릭 이벤트 등록 (따옴표 문제 방지)
+  grid.querySelectorAll('.cat-card').forEach(el=>{
+    el.onclick=function(){setCat(cats[parseInt(this.dataset.cat)],this);};
+  });
 }
 function setCat(cat,el){
   const all=t('cats')[0];
   activeCat=cat===all?'':cat;
-  // 기타서비스 섹션 토글
   const isExtra=EXTRA_CATS_KR.includes(cat);
   const extraSec=document.getElementById('sec-extra');
   const hospSec=document.getElementById('sec-hosps');
-  if(extraSec){extraSec.style.display=isExtra?'':'none';}
-  if(hospSec){hospSec.style.display=isExtra?'none':'';}
+  // 기타서비스: 기타서비스 섹션 표시, 병원 목록 숨김
+  if(extraSec)extraSec.style.display=isExtra?'':'none';
+  if(hospSec)hospSec.style.display=isExtra?'none':'';
+  // 기타서비스 섹션으로 스크롤
+  if(isExtra&&extraSec){
+    setTimeout(()=>{
+      extraSec.scrollIntoView({behavior:'smooth',block:'start'});
+      initSvcButtons();
+    },100);
+  }
   if(!isExtra)filterHosps();
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
@@ -1519,19 +1591,32 @@ function filterHosps(){
     const intro=HOSP_INTROS[h.kr];
     const cardImg=intro&&intro.images&&intro.images[0]?
       `<img src="${intro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
-    return`<div class="hosp-card" onclick="showDetail('${h.kr}')">
+    return`<div class="hosp-card" data-kr="${h.kr}">
       <div class="hosp-img" style="position:relative;">${cardImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
       <div class="hosp-body">
         <div class="hosp-name">${name}</div>
         <div class="hosp-dept">${dept}</div>
         <div class="hosp-tags">${treats.slice(0,3).map(tr=>`<span class="hosp-tag">${tr}</span>`).join('')}</div>
-        <div class="hosp-bottom" onclick="event.stopPropagation()">
-          <button class="btn-detail" onclick="showDetail('${h.kr}')">${t('detail_btn')}</button>
-          <button class="btn-book" onclick="openModal('${h.kr}')">${t('reserve_btn')}</button>
+        <div class="hosp-bottom">
+          <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
+          <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
         </div>
       </div>
     </div>`;
   }).join('');
+  // 카드/버튼 클릭 이벤트 등록
+  document.querySelectorAll('#hosp-grid .hosp-card').forEach(card=>{
+    card.onclick=function(e){
+      const btn=e.target.closest('[data-action]');
+      if(btn){
+        e.stopPropagation();
+        if(btn.dataset.action==='detail')showDetail(btn.dataset.kr);
+        else if(btn.dataset.action==='modal')openModal(btn.dataset.kr);
+      }else{
+        showDetail(this.dataset.kr);
+      }
+    };
+  });
 }
 
 function renderSteps(){
@@ -1829,7 +1914,7 @@ async function submitReview() {
 }
 
 setLang('zh');
-loadRevi오후 2:33 2026-06-12ews();
+loadReviews();
 loadHospIntros();
 </script>
 </body>
