@@ -427,6 +427,7 @@ function doLogout(){sessionStorage.removeItem('hportal');location.reload();}
 async function loadAndRender(){
   BK=await dbLoad();
   renderDashboard();
+  setTimeout(checkNoticePopup, 1500);
 }
 
 function hospBK(){return BK.filter(b=>b.hospital===currentHosp.name);}
@@ -824,6 +825,72 @@ if(saved){
     loadAndRender();
   }catch(e){sessionStorage.removeItem('hportal');}
 }
+
+async function checkNoticePopup(){
+  const noPopup=localStorage.getItem('fk_no_popup_date');
+  if(noPopup===new Date().toISOString().slice(0,10))return;
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=created_at.desc&limit=10`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const all=await r.json();
+    const hospName=currentHosp?.name||'';
+    const notices=Array.isArray(all)?all.map(x=>x.data||x).filter(function(n){
+      return n&&(n.target==='all'||n.target===hospName);
+    }):[];
+    if(!notices.length)return;
+    const recent=notices.filter(function(n){
+      const d=new Date(n.created_at||n.date||0);
+      return (Date.now()-d.getTime())<3*24*60*60*1000;
+    });
+    if(!recent.length)return;
+    showNoticePopup(recent);
+  }catch(e){}
+}
+function showNoticePopup(notices){
+  const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+  const urgentCount=notices.filter(function(n){return n.type==='urgent';}).length;
+  document.getElementById('popup-badge').textContent=
+    urgentCount?('🚨 긴급 공지 '+urgentCount+'건 포함'):('공지 '+notices.length+'건');
+  document.getElementById('popup-list').innerHTML=notices.map(function(n){
+    return '<div style="padding:12px;border:1px solid '+(n.type==='urgent'?'#fecaca':'#e5e7eb')+';border-radius:8px;background:'+(n.type==='urgent'?'#fef2f2':'#fafafa')+';margin-bottom:4px;">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
+      +'<span style="font-size:11px;background:'+(n.type==='urgent'?'#dc2626':'#f3f4f6')+';color:'+(n.type==='urgent'?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'📌 일반')+'</span>'
+      +'<span style="font-size:13px;font-weight:700;">'+(n.title||'')+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+(n.content||'')+'</div>'
+      +'<div style="font-size:10px;color:#bbb;margin-top:5px;">'+(n.created_at||'').slice(0,10)+' · '+(n.author||'Follow Korea 운영팀')+'</div>'
+      +'</div>';
+  }).join('');
+  document.getElementById('notice-popup-bg').style.display='flex';
+}
+function closeNoticePopup(){document.getElementById('notice-popup-bg').style.display='none';}
+function setNoPopupToday(){
+  if(document.getElementById('no-popup-today').checked){
+    localStorage.setItem('fk_no_popup_date',new Date().toISOString().slice(0,10));
+  }else{
+    localStorage.removeItem('fk_no_popup_date');
+  }
+}
 </script>
+
+<div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticePopup()">
+  <div style="background:#fff;border-radius:16px;width:460px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+    <div style="background:linear-gradient(135deg,#1A6B4A,#4CAF8C);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">📢 팔로우코리아 공지사항</div>
+        <div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div>
+      </div>
+      <button onclick="closeNoticePopup()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:26px;height:26px;color:#fff;cursor:pointer;font-size:13px;">✕</button>
+    </div>
+    <div id="popup-list" style="padding:16px;display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="padding:10px 16px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#888;cursor:pointer;">
+        <input type="checkbox" id="no-popup-today" onchange="setNoPopupToday()"> 오늘 하루 보지 않기
+      </label>
+      <button onclick="closeNoticePopup()" style="padding:6px 16px;background:linear-gradient(135deg,#4CAF8C,#1A6B4A);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">확인</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
