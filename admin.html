@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow Korea | 백오피스</title>
+<style>
+:root{--gn:#4CAF8C;--gn2:#1A6B4A;--gold:#D4AF37;--pk:#FF8FAD;--bg:#F5F5F0;--white:#fff;--dark:#1a1a1a;--gray:#6B7280;--lgray:#F3F4F6;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,0.07);--r:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--dark);font-size:13px;}
+.header{background:var(--dark);color:#fff;padding:0 20px;display:flex;align-items:center;height:52px;gap:12px;position:sticky;top:0;z-index:200;}
+.logo{font-size:16px;font-weight:700;color:var(--gold);}
+.header-badge{background:#2d2d2d;border:1px solid #555;border-radius:12px;padding:3px 10px;font-size:10px;color:var(--gold);}
+.sidebar{width:210px;background:var(--white);height:calc(100vh - 52px);position:fixed;top:52px;left:0;border-right:1px solid var(--border);padding:14px 0;overflow-y:auto;z-index:100;}
+.sidebar-menu a{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:12px;color:var(--gray);cursor:pointer;transition:all 0.15s;text-decoration:none;}
+.sidebar-menu a:hover,.sidebar-menu a.active{background:var(--lgray);color:var(--gn2);font-weight:600;}
+.sidebar-menu a .ic{font-size:14px;width:18px;text-align:center;}
+.sidebar-section{font-size:10px;font-weight:700;color:#ccc;padding:12px 18px 4px;letter-spacing:1px;}
+.main{margin-left:210px;padding:20px;min-height:calc(100vh-52px);}
+.page{display:none;}.page.active{display:block;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.sc{background:var(--white);border-radius:var(--r);padding:14px 16px;border:1px solid var(--border);}
+.sc .sl{font-size:10px;color:var(--gray);margin-bottom:4px;}
+.sc .sv{font-size:20px;font-weight:700;}
+.sc .ss{font-size:10px;color:#aaa;}
+.sc.green .sv{color:var(--gn2);}.sc.gold .sv{color:#B8960C;}.sc.blue .sv{color:#2563eb;}.sc.red .sv{color:#dc2626;}.sc.purple .sv{color:#7c3aed;}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--lgray);font-size:11px;font-weight:600;color:var(--gray);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{background:#eee;}
+td{padding:8px 10px;border-bottom:1px solid #f5f5f5;font-size:11px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafaf8;}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:500;}
+.badge.확정{background:#dcfce7;color:#15803d;}.badge.대기{background:#fef9c3;color:#854d0e;}
+.badge.완료{background:#dbeafe;color:#1e40af;}.badge.취소,.badge.노쇼{background:#fee2e2;color:#991b1b;}
+.badge.왕홍{background:#ede9fe;color:#5b21b6;}.badge.가이드{background:#dbeafe;color:#1e40af;}
+.badge.에이전시{background:#fce7f3;color:#9d174d;}.badge.플랫폼,.badge.중국사업부{background:#dcfce7;color:#065f46;}
+.badge.계약완료{background:#dcfce7;color:#065f46;}.badge.협의중{background:#fef3c7;color:#92400e;}.badge.미정{background:var(--lgray);color:#374151;}
+.btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;cursor:pointer;color:var(--dark);}
+.btn:hover{background:var(--lgray);}
+.btn.primary{background:var(--gn2);color:#fff;border-color:var(--gn2);}
+.btn.gold-btn{background:var(--gold);color:#fff;border-color:var(--gold);}
+.btn.danger{color:#dc2626;border-color:#fca5a5;}
+.btn.sm{padding:3px 8px;font-size:10px;}
+.toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.toolbar input,.toolbar select{padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:11px;background:var(--white);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;z-index:500;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:12px;padding:22px;width:580px;max-width:100%;}
+.modal h3{font-size:14px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal h3 button{background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg .full{grid-column:1/-1;}
+.fitem{display:flex;flex-direction:column;gap:3px;}
+.fitem label{font-size:10px;color:var(--gray);font-weight:600;}
+.fitem input,.fitem select,.fitem textarea{padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;background:var(--white);color:var(--dark);}
+.fitem input:focus,.fitem select:focus{border-color:var(--gn);}
+.fitem textarea{height:60px;resize:none;}
+.fsec{grid-column:1/-1;font-size:10px;font-weight:700;color:#aaa;padding:6px 0 0;border-top:1px solid #f5f5f5;margin-top:2px;letter-spacing:0.5px;}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid var(--border);}
+.fee-preview{background:#f9f9f7;border-radius:8px;padding:10px 12px;font-size:11px;grid-column:1/-1;line-height:2;}
+.won-hint{font-size:10px;color:var(--gold);min-height:14px;}
+.login-screen{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--white);border-radius:14px;padding:36px;width:320px;text-align:center;}
+.login-box .logo-lg{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.login-box .sub{font-size:12px;color:var(--gray);margin-bottom:24px;}
+.login-box input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:10px;outline:none;}
+.login-box input:focus{border-color:var(--gn);}
+.login-box button{width:100%;padding:11px;background:var(--gn2);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+.login-box .err{color:#dc2626;font-size:11px;margin-top:6px;}
+.bar-chart{display:flex;gap:5px;align-items:flex-end;height:100px;overflow-x:auto;padding-bottom:2px;}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:36px;}
+.bar{width:24px;border-radius:3px 3px 0 0;min-height:2px;}
+.blbl{font-size:9px;color:var(--gray);text-align:center;}
+.bval{font-size:9px;font-weight:600;color:#555;}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:10px;}}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="logo-lg">Follow Korea</div>
+    <div class="sub">운영 백오피스</div>
+    <input type="text" id="l-id" placeholder="관리자 아이디" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+    <input type="password" id="l-pw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">로그인</button>
+    <div class="err" id="l-err"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+<div class="header">
+  <div class="logo">팔로우코리아</div>
+  <div class="header-badge">백오피스 ADMIN</div>
+  <div style="margin-left:auto;display:flex;gap:8px;">
+    <button class="btn gold-btn" onclick="exportExcel()" style="font-size:11px;">엑셀 다운로드</button>
+    <button class="btn" onclick="doLogout()" style="font-size:11px;color:#aaa;border-color:#444;">로그아웃</button>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-section">📊 현황</div>
+  <div class="sidebar-menu">
+    <a class="active" onclick="showPage('dashboard')"><span class="ic">🏠</span>대시보드</a>
+    <a onclick="showPage('bookings')"><span class="ic">📋</span>예약 명단</a>
+    <a onclick="showPage('calendar')"><span class="ic">📅</span>일정 캘린더</a>
+  </div>
+  <div class="sidebar-section">💰 수익</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('revenue')"><span class="ic">💵</span>매출 / 수수료</a>
+    <a onclick="showPage('hospital_rev')"><span class="ic">🏥</span>병원별 입금</a>
+    <a onclick="showPage('wanghong_rev')"><span class="ic">👑</span>왕홍별 실적</a>
+  </div>
+  <div class="sidebar-section">👥 관리</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
+    <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
+    <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
+  </div>
+  <div class="sidebar-section">⭐ 리뷰</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('reviews')"><span class="ic">⭐</span>고객 리뷰 관리</a>
+  </div>
+  <div class="sidebar-section">📢 공지</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('notices')"><span class="ic">📢</span>공지사항 관리</a>
+  </div>
+  <div class="sidebar-section">⚙️ 설정</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('settings')"><span class="ic">⚙️</span>시스템 설정</a>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- 대시보드 -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-row">
+    <div class="sc"><div class="sl">전체 예약</div><div class="sv" id="db-total">-</div><div class="ss">건</div></div>
+    <div class="sc gold"><div class="sl">총 결제금액</div><div class="sv" id="db-rev">-</div><div class="ss">원</div></div>
+    <div class="sc green"><div class="sl">FK 순매출</div><div class="sv" id="db-net">-</div><div class="ss">원</div></div>
+    <div class="sc blue"><div class="sl">활성 왕홍</div><div class="sv" id="db-wang">-</div></div>
+    <div class="sc red"><div class="sl">이번달 예약</div><div class="sv" id="db-month">-</div><div class="ss">건</div></div>
+    <div class="sc purple"><div class="sl">미확인 예약</div><div class="sv" id="db-new">-</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+    <div class="card"><div class="card-title">병원별 예약 건수</div><div class="bar-chart" id="ch-hosp"></div></div>
+    <div class="card"><div class="card-title">월별 예약 추이</div><div class="bar-chart" id="ch-month"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">최근 예약 10건
+      <button class="btn sm" onclick="showPage('bookings')">전체보기</button>
+    </div>
+    <div style="overflow-x:auto;"><table>
+      <thead><tr><th>환자명</th><th>병원</th><th>예약일시</th><th>유입</th><th>소개자</th><th>결제금액</th><th>상태</th><th>관리</th></tr></thead>
+      <tbody id="db-recent"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- 예약 명단 -->
+<div class="page" id="page-bookings">
+  <div class="stats-row">
+    <div class="sc"><div class="sl">전체</div><div class="sv" id="bk-st-total">-</div></div>
+    <div class="sc gold"><div class="sl">총 결제</div><div class="sv" id="bk-st-rev">-</div></div>
+    <div class="sc green"><div class="sl">병원→FK</div><div class="sv" id="bk-st-hc">-</div></div>
+    <div class="sc purple"><div class="sl">FK→소개자</div><div class="sv" id="bk-st-wc">-</div></div>
+    <div class="sc blue"><div class="sl">FK 순매출</div><div class="sv" id="bk-st-net">-</div></div>
+    <div class="sc red"><div class="sl">노쇼/취소</div><div class="sv" id="bk-st-ns">-</div></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="bk-q" placeholder="이름·병원·소개자 검색..." oninput="renderBk()" style="width:180px;">
+    <select id="bk-hosp-f" onchange="renderBk()"><option value="">전체 병원</option></select>
+    <select id="bk-inflow-f" onchange="renderBk()">
+      <option value="">전체 유입</option>
+      <option>왕홍</option><option>가이드</option><option>에이전시</option><option>중국사업부</option><option>플랫폼</option>
+    </select>
+    <select id="bk-month-f" onchange="renderBk()">
+      <option value="">전체 기간</option>
+      <option value="2026-03">3월</option><option value="2026-04">4월</option>
+      <option value="2026-05">5월</option><option value="2026-06">6월</option><option value="2026-07">7월</option>
+    </select>
+    <select id="bk-status-f" onchange="renderBk()">
+      <option value="">전체 상태</option>
+      <option>확정</option><option>대기</option><option>완료</option><option>취소</option><option>노쇼</option>
+    </select>
+    <button class="btn primary" onclick="openBkModal(null)">+ 신규 등록</button>
+  </div>
+  <div style="overflow-x:auto;" class="card" style="padding:0;">
+    <table><thead id="bk-thead"><tr>
+      <th>No</th><th onclick="sortBk('name')">환자명</th><th>생년월일</th><th>성별</th><th>국적</th>
+      <th onclick="sortBk('hospital')">병원</th><th onclick="sortBk('datetime')">예약일시 ▲</th>
+      <th>시술</th><th onclick="sortBk('amount')">결제금액</th>
+      <th>유입</th><th>소개자</th><th>수수료율</th><th>병원→FK</th><th>FK→소개자</th><th>FK순매출</th>
+      <th>부가세</th><th>세금계산서</th><th>입금일</th><th>상태</th><th>관리</th>
+    </tr></thead>
+    <tbody id="bk-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 캘린더 -->
+<div class="page" id="page-calendar">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <button class="btn" onclick="calChange(-1)">◀ 이전달</button>
+    <h2 style="font-size:14px;font-weight:700;" id="cal-title"></h2>
+    <button class="btn" onclick="calChange(1)">다음달 ▶</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px;">
+    <div style="text-align:center;font-size:11px;color:#dc2626;padding:3px;">일</div>
+    <div style="text-align:center;font-size:11px;color:var(--gray);padding:3px;">월</div>
+    <div style="text-align:center;font-size:11px;color:var(--gray);padding:3px;">화</div>
+    <div style="text-align:center;font-size:11px;color:var(--gray);padding:3px;">수</div>
+    <div style="text-align:center;font-size:11px;color:var(--gray);padding:3px;">목</div>
+    <div style="text-align:center;font-size:11px;color:var(--gray);padding:3px;">금</div>
+    <div style="text-align:center;font-size:11px;color:#2563eb;padding:3px;">토</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;" id="cal-grid"></div>
+  <div id="cal-detail" style="display:none;margin-top:12px;"></div>
+</div>
+
+<!-- 매출/수수료 -->
+<div class="page" id="page-revenue">
+  <div class="stats-row">
+    <div class="sc gold"><div class="sl">총 결제금액</div><div class="sv" id="rv-total">-</div></div>
+    <div class="sc green"><div class="sl">병원→FK 수수료</div><div class="sv" id="rv-hcomm">-</div></div>
+    <div class="sc purple"><div class="sl">FK→소개자</div><div class="sv" id="rv-wcomm">-</div></div>
+    <div class="sc blue"><div class="sl">FK 순매출</div><div class="sv" id="rv-net">-</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">월별 매출 현황</div>
+    <table><thead><tr><th>월</th><th>예약건</th><th>시술건</th><th>총 결제</th><th>병원→FK</th><th>FK→소개자</th><th>FK 순매출</th><th>누적 순매출</th></tr></thead>
+    <tbody id="rv-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 병원별 입금 -->
+<div class="page" id="page-hospital_rev">
+  <div class="card">
+    <div class="card-title">병원별 매출 / 입금 현황</div>
+    <div style="overflow-x:auto;"><table><thead><tr>
+      <th>병원명</th><th>내원건수</th><th>총 결제</th><th>수수료율</th><th>FK수수료</th><th>병원수령</th><th>입금예정일</th><th>입금완료</th><th>미입금</th><th>상태</th>
+    </tr></thead><tbody id="hrv-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- 왕홍별 실적 -->
+<div class="page" id="page-wanghong_rev">
+  <div class="card">
+    <div class="card-title">왕홍·소개자별 실적</div>
+    <table><thead><tr>
+      <th>소개자</th><th>구분</th><th>예약건</th><th>시술건</th><th>총 매출</th>
+      <th>FK→소개자 수수료율</th><th>FK→소개자 수수료</th><th>FK 순매출</th><th>노쇼</th><th>전환율</th>
+    </tr></thead><tbody id="wrev-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 병원 관리 -->
+<div class="page" id="page-hospitals">
+  <div class="toolbar">
+    <input type="text" id="hd-q" placeholder="병원명 검색..." oninput="renderHospitals()" style="width:160px;">
+    <select id="hd-contract-f" onchange="renderHospitals()">
+      <option value="">전체 계약상태</option>
+      <option>계약완료</option><option>협의중</option><option>미정</option>
+    </select>
+    <span id="hd-count" style="margin-left:auto;font-size:11px;color:var(--gray);"></span>
+    <button class="btn primary" onclick="openHdModal(null)">+ 병원 추가</button>
+  </div>
+  <div style="overflow-x:auto;" class="card" style="padding:0;">
+    <table><thead><tr>
+      <th>No</th><th>병원명</th><th>진료과목</th><th>계약상태</th><th>담당자</th><th>연락처</th>
+      <th>수수료</th><th>부가세</th><th>지급일</th><th>예약건수</th><th>관리</th>
+    </tr></thead><tbody id="hd-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 왕홍·소개자 관리 -->
+<div class="page" id="page-wanghongs">
+  <div class="toolbar">
+    <span style="margin-left:auto;"></span>
+    <button class="btn primary" onclick="openWmModal(null)">+ 소개자 추가</button>
+  </div>
+  <div class="card" style="padding:0;">
+    <table><thead><tr>
+      <th>이름</th><th>구분</th><th>채널</th><th>연락처</th><th>수수료율</th>
+      <th>연결 환자수</th><th>누적 매출</th><th>FK 순매출</th><th>비고</th><th>관리</th>
+    </tr></thead><tbody id="wm-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 외국인환자 보고 -->
+<div class="page" id="page-foreign">
+  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:#92400e;margin-bottom:14px;">
+    외국인환자 유치 보고 — 연 1회 기관 제출 기준
+  </div>
+  <div class="stats-row">
+    <div class="sc"><div class="sl">문의(전체 예약)</div><div class="sv" id="fg-inquiry">-</div></div>
+    <div class="sc blue"><div class="sl">예약인원</div><div class="sv" id="fg-reserved">-</div></div>
+    <div class="sc green"><div class="sl">시술인원(완료)</div><div class="sv" id="fg-treated">-</div></div>
+    <div class="sc gold"><div class="sl">매출합계</div><div class="sv" id="fg-rev">-</div></div>
+    <div class="sc"><div class="sl">예약전환율</div><div class="sv" id="fg-conv1">-</div></div>
+    <div class="sc"><div class="sl">시술전환율</div><div class="sv" id="fg-conv2">-</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+    <div class="card"><div class="card-title">월별 누적 현황</div>
+      <table><thead><tr><th>월</th><th>예약</th><th>시술</th><th>매출</th><th>FK순매출</th><th>노쇼</th></tr></thead>
+      <tbody id="fg-monthly"></tbody></table>
+    </div>
+    <div class="card"><div class="card-title">유입 구분별</div>
+      <table><thead><tr><th>구분</th><th>소개자</th><th>예약</th><th>시술</th><th>매출</th></tr></thead>
+      <tbody id="fg-inflow"></tbody></table>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="card"><div class="card-title">국적별</div>
+      <table><thead><tr><th>국적</th><th>예약</th><th>시술</th><th>매출</th><th>비중</th></tr></thead>
+      <tbody id="fg-nation"></tbody></table>
+    </div>
+    <div class="card"><div class="card-title">진료과목별</div>
+      <table><thead><tr><th>과목</th><th>예약</th><th>시술</th><th>매출</th><th>주요시술</th></tr></thead>
+      <tbody id="fg-dept"></tbody></table>
+    </div>
+  </div>
+</div>
+
+
+<!-- 리뷰 관리 -->
+<div class="page" id="page-reviews">
+  <div class="toolbar">
+    <input type="text" id="rv-q" placeholder="이름·병원·내용 검색..." oninput="renderAdminReviews()" style="width:200px;">
+    <select id="rv-star-f" onchange="renderAdminReviews()">
+      <option value="">전체 별점</option>
+      <option value="5">⭐⭐⭐⭐⭐ 5점</option>
+      <option value="4">⭐⭐⭐⭐ 4점</option>
+      <option value="3">⭐⭐⭐ 3점</option>
+      <option value="2">⭐⭐ 2점</option>
+      <option value="1">⭐ 1점</option>
+    </select>
+    <select id="rv-status-f" onchange="renderAdminReviews()">
+      <option value="">전체 상태</option>
+      <option value="active">게시중</option>
+      <option value="hidden">숨김</option>
+    </select>
+    <span id="rv-count" style="margin-left:auto;font-size:12px;color:var(--gray);"></span>
+  </div>
+  <div class="stats-row">
+    <div class="sc"><div class="sl">전체 리뷰</div><div class="sv" id="rv-st-total">-</div></div>
+    <div class="sc gold"><div class="sl">평균 별점</div><div class="sv" id="rv-st-avg">-</div></div>
+    <div class="sc green"><div class="sl">게시중</div><div class="sv" id="rv-st-active">-</div></div>
+    <div class="sc red"><div class="sl">숨김</div><div class="sv" id="rv-st-hidden">-</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;" id="rv-grid"></div>
+</div>
+
+<!-- 리뷰 수정 모달 -->
+<div class="modal-bg" id="rv-edit-modal" onclick="if(event.target===this)document.getElementById('rv-edit-modal').classList.remove('open')">
+<div class="modal" style="width:500px;">
+  <h3>리뷰 수정 <button onclick="document.getElementById('rv-edit-modal').classList.remove('open')">✕</button></h3>
+  <div class="fg">
+    <div class="fitem"><label>작성자</label><input type="text" id="rve-name"></div>
+    <div class="fitem"><label>지역</label><input type="text" id="rve-from"></div>
+    <div class="fitem"><label>병원</label><input type="text" id="rve-hosp"></div>
+    <div class="fitem"><label>시술</label><input type="text" id="rve-treat"></div>
+    <div class="fitem"><label>별점 (1~5)</label>
+      <select id="rve-star">
+        <option value="5">⭐⭐⭐⭐⭐ 5점</option>
+        <option value="4">⭐⭐⭐⭐ 4점</option>
+        <option value="3">⭐⭐⭐ 3점</option>
+        <option value="2">⭐⭐ 2점</option>
+        <option value="1">⭐ 1점</option>
+      </select>
+    </div>
+    <div class="fitem"><label>상태</label>
+      <select id="rve-status">
+        <option value="active">게시중</option>
+        <option value="hidden">숨김 (고객에게 안 보임)</option>
+      </select>
+    </div>
+    <div class="fitem full"><label>리뷰 내용</label>
+      <textarea id="rve-text" style="height:80px;"></textarea>
+    </div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn danger sm" id="rve-del-btn" onclick="deleteReview()" style="margin-right:auto;">🗑 삭제</button>
+    <button class="btn" onclick="document.getElementById('rv-edit-modal').classList.remove('open')">취소</button>
+    <button class="btn primary" onclick="saveReview()">저장</button>
+  </div>
+</div>
+</div>
+
+<!-- 공지사항 관리 -->
+<div class="page" id="page-notices">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h2 style="font-size:16px;font-weight:700;">📢 공지사항 관리</h2>
+    <button onclick="openNoticeModal()" style="padding:8px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">✏️ 공지 작성</button>
+  </div>
+
+  <!-- 필터 -->
+  <div class="card" style="padding:12px 16px;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <select id="notice-filter-target" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체 공지</option>
+        <option value="all">전체 병원 공지</option>
+        <option value="원진성형외과피부과">원진성형외과피부과</option>
+<option value="지유의원 (사적인아름다움)">지유의원</option>
+<option value="신상성형외과">신상성형외과</option>
+<option value="드림성형외과">드림성형외과</option>
+<option value="셀리닉의원">셀리닉의원</option>
+<option value="차움">차움</option>
+<option value="원셀의원">원셀의원</option>
+<option value="글로비성형외과">글로비성형외과</option>
+<option value="라미체의원">라미체의원</option>
+<option value="뷰성형외과">뷰성형외과</option>
+<option value="바른길산부인과">바른길산부인과</option>
+<option value="강남다움의원">강남다움의원</option>
+<option value="더뷰티성형외과">더뷰티성형외과</option>
+<option value="신소애여성의원">신소애여성의원</option>
+<option value="히어피부과">히어피부과</option>
+<option value="히어산부인과">히어산부인과</option>
+<option value="셀로라의원 (with 지유)">셀로라의원</option>
+<option value="리프톤의원">리프톤의원</option>
+<option value="청담서클의원">청담서클의원</option>
+<option value="루비성형외과(신사점)">루비성형외과</option>
+<option value="벤자민의원">벤자민의원</option>
+<option value="고운몸의원">고운몸의원</option>
+<option value="티알 트리니티라파엘로 청담의원">티알청담의원</option>
+<option value="GV 성형외과">GV성형외과</option>
+<option value="페이스라인성형외과의원">페이스라인성형외과</option>
+<option value="강남서울안과의원">강남서울안과</option>
+<option value="JD피부성형(장덕)">JD피부성형</option>
+      </select>
+      <select id="notice-filter-type" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체 유형</option>
+        <option value="general">일반</option>
+        <option value="urgent">긴급</option>
+        <option value="settlement">정산</option>
+        <option value="schedule">일정</option>
+      </select>
+      <button onclick="loadNotices()" style="padding:6px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <!-- 공지 목록 -->
+  <div id="notice-list">
+    <div style="text-align:center;padding:40px;color:var(--gray);">로딩 중...</div>
+  </div>
+</div>
+
+<!-- 공지 작성/수정 모달 -->
+<div id="notice-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticeModal()">
+<div style="background:#fff;border-radius:16px;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;padding:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h3 id="notice-modal-title" style="font-size:15px;font-weight:700;">📢 공지 작성</h3>
+    <button onclick="closeNoticeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--gray);">✕</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <!-- 수신 대상 -->
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📌 수신 대상</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);">
+          <input type="radio" name="notice-target-type" value="all" id="target-all" checked onchange="toggleNoticeTarget()"> 전체 병원
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);">
+          <input type="radio" name="notice-target-type" value="specific" id="target-specific" onchange="toggleNoticeTarget()"> 특정 병원 선택
+        </label>
+      </div>
+      <div id="notice-hosp-select" style="display:none;">
+        <select id="notice-target-hosp" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+          <option value="원진성형외과피부과">원진성형외과피부과</option>
+<option value="지유의원 (사적인아름다움)">지유의원</option>
+<option value="신상성형외과">신상성형외과</option>
+<option value="드림성형외과">드림성형외과</option>
+<option value="셀리닉의원">셀리닉의원</option>
+<option value="차움">차움</option>
+<option value="원셀의원">원셀의원</option>
+<option value="글로비성형외과">글로비성형외과</option>
+<option value="라미체의원">라미체의원</option>
+<option value="뷰성형외과">뷰성형외과</option>
+<option value="바른길산부인과">바른길산부인과</option>
+<option value="강남다움의원">강남다움의원</option>
+<option value="더뷰티성형외과">더뷰티성형외과</option>
+<option value="신소애여성의원">신소애여성의원</option>
+<option value="히어피부과">히어피부과</option>
+<option value="히어산부인과">히어산부인과</option>
+<option value="셀로라의원 (with 지유)">셀로라의원</option>
+<option value="리프톤의원">리프톤의원</option>
+<option value="청담서클의원">청담서클의원</option>
+<option value="루비성형외과(신사점)">루비성형외과</option>
+<option value="벤자민의원">벤자민의원</option>
+<option value="고운몸의원">고운몸의원</option>
+<option value="티알 트리니티라파엘로 청담의원">티알청담의원</option>
+<option value="GV 성형외과">GV성형외과</option>
+<option value="페이스라인성형외과의원">페이스라인성형외과</option>
+<option value="강남서울안과의원">강남서울안과</option>
+<option value="JD피부성형(장덕)">JD피부성형</option>
+        </select>
+      </div>
+    </div>
+    <!-- 공지 유형 -->
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">🏷️ 유형</label>
+      <select id="notice-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="general">📌 일반 공지</option>
+        <option value="urgent">🚨 긴급 공지</option>
+        <option value="settlement">💰 정산 안내</option>
+        <option value="schedule">📅 일정 공유</option>
+      </select>
+    </div>
+    <!-- 제목 -->
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📝 제목</label>
+      <input type="text" id="notice-title" placeholder="공지 제목을 입력하세요" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;">
+    </div>
+    <!-- 내용 -->
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📄 내용</label>
+      <textarea id="notice-content" rows="6" placeholder="공지 내용을 입력하세요" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical;outline:none;"></textarea>
+    </div>
+    <!-- 작성자 -->
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">👤 작성자</label>
+      <input type="text" id="notice-author" value="Follow Korea 운영팀" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;">
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:16px;">
+    <button onclick="submitNotice()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✅ 공지 등록</button>
+    <button onclick="closeNoticeModal()" style="padding:11px 18px;background:var(--lgray);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
+
+<!-- 설정 -->
+<div class="page" id="page-settings">
+  <div class="card" style="max-width:480px;">
+    <div class="card-title">⚙️ 시스템 설정</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--lgray);border-radius:8px;">
+        <span style="font-size:12px;font-weight:600;">Supabase 연결 상태</span>
+        <span id="supa-status" style="font-size:11px;color:var(--gn2);">✓ 연결됨</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--lgray);border-radius:8px;">
+        <span style="font-size:12px;font-weight:600;">데이터 동기화</span>
+        <button class="btn primary btn-sm" onclick="loadAndRender()">새로고침</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;">
+        <span style="font-size:12px;font-weight:600;color:#dc2626;">전체 데이터 초기화</span>
+        <button class="btn danger btn-sm" onclick="resetAllData()">초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- 예약 모달 -->
+<div class="modal-bg" id="bk-modal" onclick="if(event.target===this)closeBkModal()">
+<div class="modal">
+  <h3 id="bk-modal-title">예약 등록/수정 <button onclick="closeBkModal()">✕</button></h3>
+  <div class="fg">
+    <div class="fsec">기본 정보</div>
+    <div class="fitem"><label>환자명 (영문)</label><input type="text" id="f-name" placeholder="ZHANG JING"></div>
+    <div class="fitem"><label>예약 병원</label><select id="f-hosp"></select></div>
+    <div class="fitem"><label>예약 일시</label><input type="datetime-local" id="f-dt"></div>
+    <div class="fitem"><label>진료과목</label>
+      <select id="f-dept"><option>피부</option><option>성형외과</option><option>줄기세포</option><option>체형</option><option>산부인과</option><option>안과</option><option>기타</option></select>
+    </div>
+    <div class="fitem"><label>성별</label><select id="f-gender"><option value="F">여성(F)</option><option value="M">남성(M)</option></select></div>
+    <div class="fitem"><label>생년월일</label><input type="text" id="f-dob" placeholder="19900101" maxlength="10" oninput="fmtDob(this)"></div>
+    <div class="fitem"><label>국적</label><input type="text" id="f-nation" value="중국"></div>
+    <div class="fitem"><label>주요 시술</label><input type="text" id="f-treat" placeholder="超声刀、热玛吉"></div>
+    <div class="fsec">유입 경로</div>
+    <div class="fitem"><label>유입 구분</label>
+      <select id="f-inflow" onchange="updateInflowSel()">
+        <option>왕홍</option><option>가이드</option><option>에이전시</option><option>중국사업부</option><option>플랫폼</option>
+      </select>
+    </div>
+    <div class="fitem"><label>소개자</label><select id="f-introducer" onchange="calcFeePreview()"></select></div>
+    <div class="fsec">금액</div>
+    <div class="fitem">
+      <label>결제금액 (만원 단위)</label>
+      <input type="number" id="f-amt" step="0.01" oninput="calcFeePreview()" placeholder="292.6 → 2,926,000원">
+      <div class="won-hint" id="f-amt-hint"></div>
+    </div>
+    <div class="fitem"><label>병원 수수료율 (%)</label>
+      <select id="f-hrate" onchange="calcFeePreview()">
+        <option value="30">30%</option><option value="20">20%</option><option value="15">15%</option>
+        <option value="12">12%</option><option value="10">10%</option><option value="40">40%</option><option value="0">0%</option>
+      </select>
+    </div>
+    <div class="fitem"><label>부가세</label>
+      <select id="f-vat"><option value="포함">포함</option><option value="별도">별도</option></select>
+    </div>
+    <div class="fitem"><label>세금계산서</label>
+      <select id="f-tax"><option value="N">미발행</option><option value="Y">발행</option></select>
+    </div>
+    <div class="fitem"><label>병원 입금일</label><input type="date" id="f-hpaydate"></div>
+    <div class="fitem"><label>병원 입금액 (만원)</label><input type="number" id="f-hpaid" step="0.01" placeholder="0"></div>
+    <div class="fee-preview" id="fee-preview">금액을 입력하면 수수료가 자동 계산됩니다.</div>
+    <div class="fsec">상태</div>
+    <div class="fitem"><label>상태</label>
+      <select id="f-status"><option>확정</option><option>대기</option><option>완료</option><option>취소</option><option>노쇼</option></select>
+    </div>
+    <div class="fitem"><label>노쇼</label><select id="f-noshow"><option value="N">아니오</option><option value="Y">노쇼</option></select></div>
+    <div class="fitem full"><label>비고</label><input type="text" id="f-note" placeholder="메모"></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn danger sm" id="bk-del-btn" onclick="deleteBk()" style="display:none;margin-right:auto;">삭제</button>
+    <button class="btn" onclick="closeBkModal()">취소</button>
+    <button class="btn primary" onclick="saveBk()">저장</button>
+  </div>
+</div>
+</div>
+
+<!-- 병원 모달 -->
+<div class="modal-bg" id="hd-modal" onclick="if(event.target===this)document.getElementById('hd-modal').classList.remove('open')">
+<div class="modal">
+  <h3 id="hd-modal-title">병원 추가/수정 <button onclick="document.getElementById('hd-modal').classList.remove('open')">✕</button></h3>
+  <div class="fg">
+    <div class="fitem full"><label>병원명 *</label><input type="text" id="hd-name" placeholder="병원명"></div>
+    <div class="fitem"><label>진료과목</label><input type="text" id="hd-dept"></div>
+    <div class="fitem"><label>계약 상태</label>
+      <select id="hd-contract"><option>계약완료</option><option>협의중</option><option>미정</option></select>
+    </div>
+    <div class="fitem"><label>담당자</label><input type="text" id="hd-mgr"></div>
+    <div class="fitem"><label>연락처</label><input type="text" id="hd-tel"></div>
+    <div class="fitem"><label>수수료 조건</label><input type="text" id="hd-comm" placeholder="20%"></div>
+    <div class="fitem"><label>부가세</label><select id="hd-vat"><option value="별도">별도</option><option value="포함">포함</option></select></div>
+    <div class="fitem"><label>수수료 지급일</label><input type="text" id="hd-paydate" placeholder="익월15일"></div>
+    <div class="fitem"><label>홈페이지</label><input type="text" id="hd-link" placeholder="https://..."></div>
+    <div class="fitem full"><label>메모</label><input type="text" id="hd-note"></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn danger sm" id="hd-del-btn" onclick="deleteHd()" style="display:none;margin-right:auto;">🗑 삭제</button>
+    <button class="btn" onclick="document.getElementById('hd-modal').classList.remove('open')">취소</button>
+    <button class="btn primary" onclick="saveHd()">저장</button>
+  </div>
+</div>
+</div>
+
+<!-- 왕홍 모달 -->
+<div class="modal-bg" id="wm-modal" onclick="if(event.target===this)document.getElementById('wm-modal').classList.remove('open')">
+<div class="modal" style="width:440px;">
+  <h3 id="wm-modal-title">소개자 추가/수정 <button onclick="document.getElementById('wm-modal').classList.remove('open')">✕</button></h3>
+  <div class="fg">
+    <div class="fitem"><label>이름</label><input type="text" id="wm-name"></div>
+    <div class="fitem"><label>구분</label>
+      <select id="wm-type"><option>왕홍</option><option>가이드</option><option>에이전시</option><option>중국사업부</option><option>플랫폼</option></select>
+    </div>
+    <div class="fitem"><label>소속/채널</label><input type="text" id="wm-ch"></div>
+    <div class="fitem"><label>연락처</label><input type="text" id="wm-contact"></div>
+    <div class="fitem"><label>수수료율 (%)</label><input type="number" id="wm-rate" min="0" max="100"></div>
+    <div class="fitem full"><label>비고</label><input type="text" id="wm-note"></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn danger sm" id="wm-del-btn" onclick="deleteWm()" style="display:none;margin-right:auto;">삭제</button>
+    <button class="btn" onclick="document.getElementById('wm-modal').classList.remove('open')">취소</button>
+    <button class="btn primary" onclick="saveWm()">저장</button>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
+const ADMIN_ACCOUNTS=[{id:'followkorea',pw:'fk2026!'},{id:'admin',pw:'admin1234'},{id:'jeff',pw:'jeff2026!'}];
+
+let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
+let calY=2026, calM=5;
+
+// ── Supabase ──
+const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+async function dbLoad(table){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
+  const d=await r.json();
+  return Array.isArray(d)?d.map(x=>x.data).filter(Boolean):[];
+}
+async function dbSave(table,rows){
+  // 전체 삭제 (id > 0 조건 필터)
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  });
+  if(!rows.length)return;
+  // 재삽입
+  await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...headers,'Prefer':'return=minimal'},
+    body:JSON.stringify(rows.map(r=>({data:r})))
+  });
+}
+async function dbDeleteAll(table){
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+}
+
+// ── 로그인 ──
+function doLogin(){
+  const id=document.getElementById('l-id').value.trim();
+  const pw=document.getElementById('l-pw').value;
+  if(ADMIN_ACCOUNTS.find(a=>a.id===id&&a.pw===pw)){
+    sessionStorage.setItem('admin_auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='';
+    loadAndRender();
+  }else{
+    document.getElementById('l-err').textContent='아이디 또는 비밀번호가 틀렸습니다.';
+  }
+}
+function doLogout(){sessionStorage.removeItem('admin_auth');location.reload();}
+
+async function loadAndRender(){
+  try{
+    const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoad('hospitals')]);
+    if(bk&&bk.length>0)BK=bk;
+    if(wm&&wm.length>0)WM=wm;
+    if(hd&&hd.length>0)HD=hd;
+  }catch(e){console.warn('DB 로드 실패',e);}
+  populateFilters();
+  await loadReviews();
+  renderDashboard();
+}
+
+function r2w(v){return Math.round((v||0)*10000);}
+function fw(w){return w>0?w.toLocaleString()+'원':'-';}
+function getRate(name){const w=WM.find(x=>x.name===name);return w?w.rate:0;}
+function calcC(b){
+  const won=r2w(b.amount);
+  const hcBase=Math.round(won*(b.hosp_comm_rate||0)/100);
+  const hc=b.vat==='별도'?Math.round(hcBase*1.1):hcBase;
+  const wc=Math.round(won*getRate(b.introducer)/100);
+  return{won,hc,wc,net:hc-wc,hcBase};
+}
+
+function populateFilters(){
+  // 병원 필터
+  const sel=document.getElementById('bk-hosp-f');
+  while(sel.options.length>1)sel.remove(1);
+  const hosps=[...new Set(BK.map(b=>b.hospital))].sort((a,b)=>a.localeCompare(b,'ko'));
+  hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o);});
+  // 병원 등록 모달
+  const fSel=document.getElementById('f-hosp');
+  fSel.innerHTML=HD.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')).map(h=>`<option value="${h.name}">${h.name}</option>`).join('');
+}
+
+// ── 대시보드 ──
+function renderDashboard(){
+  const month=new Date().toISOString().slice(0,7);
+  const monthBk=BK.filter(b=>b.datetime&&b.datetime.startsWith(month));
+  const newBk=BK.filter(b=>b.status==='대기');
+  const totRev=BK.reduce((s,b)=>s+r2w(b.amount),0);
+  const totNet=BK.reduce((s,b)=>s+calcC(b).net,0);
+  document.getElementById('db-total').textContent=BK.length;
+  document.getElementById('db-rev').textContent=totRev>0?totRev.toLocaleString():'-';
+  document.getElementById('db-net').textContent=totNet>0?totNet.toLocaleString():'-';
+  document.getElementById('db-wang').textContent=new Set(BK.map(b=>b.introducer).filter(Boolean)).size;
+  document.getElementById('db-month').textContent=monthBk.length;
+  document.getElementById('db-new').textContent=newBk.length;
+  // 차트
+  const hm={},mm={};
+  BK.forEach(b=>{hm[b.hospital]=(hm[b.hospital]||0)+1;const mo=b.datetime.slice(5,7)+'월';mm[mo]=(mm[mo]||0)+1;});
+  makeBar('ch-hosp',Object.entries(hm).sort((a,b)=>b[1]-a[1]).slice(0,7));
+  makeBar('ch-month',Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])));
+  // 최근 10건
+  const recent=[...BK].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
+  document.getElementById('db-recent').innerHTML=recent.map(b=>{
+    const c=calcC(b);
+    return`<tr>
+      <td style="font-weight:500;">${b.name}</td>
+      <td style="font-size:10px;">${b.hospital}</td>
+      <td style="color:#555;white-space:nowrap;">${b.datetime}</td>
+      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
+      <td style="font-size:11px;">${b.introducer||'-'}</td>
+      <td style="color:#B8960C;white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
+      <td><span class="badge ${b.status}">${b.status}</span></td>
+      <td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td>
+    </tr>`;
+  }).join('');
+}
+function makeBar(id,entries){
+  const el=document.getElementById(id);if(!el)return;
+  const max=Math.max(...entries.map(e=>e[1]),1);
+  el.innerHTML=entries.map(([l,v])=>{
+    const h=Math.round(v/max*100);
+    const dv=v>=10000?Math.round(v/10000)+'만':v;
+    return`<div class="bcol"><div class="bval">${dv}</div><div class="bar" style="height:${h}px;background:var(--gn2);"></div><div class="blbl">${l.substring(0,4)}</div></div>`;
+  }).join('');
+}
+
+// ── 예약 명단 ──
+function renderBk(){
+  const q=(document.getElementById('bk-q').value||'').toLowerCase();
+  const hosp=document.getElementById('bk-hosp-f').value;
+  const inflow=document.getElementById('bk-inflow-f').value;
+  const month=document.getElementById('bk-month-f').value;
+  const status=document.getElementById('bk-status-f').value;
+  const filtered=BK.filter(b=>{
+    const mq=!q||b.name.toLowerCase().includes(q)||b.hospital.toLowerCase().includes(q)||(b.introducer||'').toLowerCase().includes(q);
+    return mq&&(!hosp||b.hospital===hosp)&&(!inflow||b.inflow_type===inflow)&&(!month||b.datetime.startsWith(month))&&(!status||b.status===status);
+  }).sort((a,b)=>a.datetime.localeCompare(b.datetime));
+  // 통계
+  let tW=0,tH=0,tWC=0,tN=0,tNS=0;
+  filtered.forEach(b=>{const c=calcC(b);tW+=c.won;tH+=c.hc;tWC+=c.wc;tN+=c.net;if(b.noshow==='Y'||b.status==='노쇼'||b.status==='취소')tNS++;});
+  document.getElementById('bk-st-total').textContent=filtered.length;
+  document.getElementById('bk-st-rev').textContent=tW>0?tW.toLocaleString():'-';
+  document.getElementById('bk-st-hc').textContent=tH>0?tH.toLocaleString():'-';
+  document.getElementById('bk-st-wc').textContent=tWC>0?tWC.toLocaleString():'-';
+  document.getElementById('bk-st-net').textContent=tN>0?tN.toLocaleString():'-';
+  document.getElementById('bk-st-ns').textContent=tNS;
+  document.getElementById('bk-tbody').innerHTML=filtered.map((b,i)=>{
+    const c=calcC(b);
+    return`<tr>
+      <td style="color:#ccc;">${i+1}</td>
+      <td style="font-weight:500;">${b.name}</td>
+      <td style="font-size:10px;color:#888;">${b.dob||''}</td>
+      <td style="text-align:center;">${b.gender||'-'}</td>
+      <td>${b.nationality||'중국'}</td>
+      <td style="font-size:10px;background:${b.hospital==='신상성형외과'?'#fffbf0':'#f5f5f5'};color:${b.hospital==='신상성형외과'?'#B8960C':'inherit'};padding:2px 6px;border-radius:4px;">${b.hospital==='신상성형외과'?'★ ':''}<b>${b.hospital}</b></td>
+      <td style="white-space:nowrap;color:#555;">${b.datetime}</td>
+      <td style="font-size:10px;color:#888;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.treatment||'-'}</td>
+      <td style="color:${c.won>0?'#B8960C':'#ccc'};white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
+      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
+      <td style="font-size:11px;">${b.introducer||'-'}</td>
+      <td style="text-align:center;">${b.hosp_comm_rate?b.hosp_comm_rate+'%':'-'}</td>
+      <td style="color:var(--gn2);white-space:nowrap;">${c.hc>0?c.hc.toLocaleString()+'원':'-'}</td>
+      <td style="color:#7c3aed;white-space:nowrap;">${c.wc>0?c.wc.toLocaleString()+'원':'-'}</td>
+      <td style="color:${c.net>0?'#D4AF37':c.net<0?'#dc2626':'#ccc'};font-weight:600;white-space:nowrap;">${c.won>0?c.net.toLocaleString()+'원':'-'}</td>
+      <td style="text-align:center;">${b.vat==='별도'?'<span class="badge 대기">별도</span>':'<span style="font-size:10px;color:#aaa;">포함</span>'}</td>
+      <td style="text-align:center;">${b.tax_invoice==='Y'?'<span class="badge 확정">발행</span>':'-'}</td>
+      <td style="font-size:10px;color:#888;">${b.hosp_paydate||'-'}</td>
+      <td><span class="badge ${b.status}">${b.status}</span></td>
+      <td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 예약 모달 ──
+function updateInflowSel(){
+  const type=document.getElementById('f-inflow').value;
+  const sel=document.getElementById('f-introducer');sel.innerHTML='';
+  WM.filter(w=>w.type===type).forEach(w=>{
+    const o=document.createElement('option');o.value=w.name;
+    o.textContent=`${w.name} [${w.rate}%]`;sel.appendChild(o);
+  });
+  if(!sel.options.length){const o=document.createElement('option');o.value='';o.textContent='(없음)';sel.appendChild(o);}
+  calcFeePreview();
+}
+function fmtDob(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=8){v=v.slice(0,8);el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}
+  else if(v.length>6)el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6);
+  else if(v.length>4)el.value=v.slice(0,4)+'-'+v.slice(4);
+  else el.value=v;
+}
+function calcFeePreview(){
+  const amt=parseFloat(document.getElementById('f-amt').value)||0;
+  const won=r2w(amt);
+  const hr=parseInt(document.getElementById('f-hrate').value)||0;
+  const hcBase=Math.round(won*hr/100);
+  const vat=document.getElementById('f-vat').value;
+  const hc=vat==='별도'?Math.round(hcBase*1.1):hcBase;
+  const intro=document.getElementById('f-introducer').value;
+  const wr=getRate(intro);const wc=Math.round(won*wr/100);
+  document.getElementById('f-amt-hint').textContent=won>0?won.toLocaleString()+'원':'';
+  document.getElementById('fee-preview').innerHTML=won>0?
+    `결제금액: <b>${won.toLocaleString()}원</b> | 병원→FK(${hr}%${vat==='별도'?'+VAT':''}): <b style="color:var(--gn2)">${hc.toLocaleString()}원</b> | FK→소개자(${wr}%): <b style="color:#7c3aed">${wc.toLocaleString()}원</b> | <b style="color:var(--gold)">FK순매출: ${(hc-wc).toLocaleString()}원</b>`
+    :'금액을 입력하면 자동 계산됩니다.';
+}
+function openBkModal(id){
+  bkEditId=id;
+  document.getElementById('bk-del-btn').style.display=id?'':'none';
+  document.getElementById('bk-modal-title').textContent=id?'예약 수정':'신규 예약 등록';
+  if(id){
+    const b=BK.find(x=>x.id===id);if(!b)return;
+    document.getElementById('f-name').value=b.name;
+    document.getElementById('f-hosp').value=b.hospital;
+    document.getElementById('f-dt').value=b.datetime.replace(' ','T');
+    document.getElementById('f-dept').value=b.dept||'피부';
+    document.getElementById('f-gender').value=b.gender||'F';
+    document.getElementById('f-dob').value=b.dob||'';
+    document.getElementById('f-nation').value=b.nationality||'중국';
+    document.getElementById('f-treat').value=b.treatment||'';
+    document.getElementById('f-amt').value=b.amount||'';
+    document.getElementById('f-hrate').value=b.hosp_comm_rate||20;
+    document.getElementById('f-vat').value=b.vat||'포함';
+    document.getElementById('f-tax').value=b.tax_invoice||'N';
+    document.getElementById('f-hpaydate').value=b.hosp_paydate||'';
+    document.getElementById('f-hpaid').value=b.hosp_paidamt||'';
+    document.getElementById('f-inflow').value=b.inflow_type||'왕홍';
+    updateInflowSel();
+    document.getElementById('f-introducer').value=b.introducer||'';
+    document.getElementById('f-status').value=b.status;
+    document.getElementById('f-noshow').value=b.noshow||'N';
+    document.getElementById('f-note').value=b.note||'';
+    calcFeePreview();
+  }else{
+    ['f-name','f-treat','f-note','f-hpaydate','f-dob'].forEach(i=>document.getElementById(i).value='');
+    ['f-amt','f-hpaid'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('f-nation').value='중국';
+    document.getElementById('f-inflow').value='왕홍';
+    updateInflowSel();
+    document.getElementById('fee-preview').textContent='금액을 입력하면 자동 계산됩니다.';
+    document.getElementById('f-amt-hint').textContent='';
+  }
+  document.getElementById('bk-modal').classList.add('open');
+}
+function closeBkModal(){document.getElementById('bk-modal').classList.remove('open');}
+async function saveBk(){
+  const name=document.getElementById('f-name').value.trim().toUpperCase();
+  if(!name){alert('환자명을 입력하세요');return;}
+  const obj={
+    name,hospital:document.getElementById('f-hosp').value,
+    datetime:document.getElementById('f-dt').value.replace('T',' '),
+    dept:document.getElementById('f-dept').value,
+    gender:document.getElementById('f-gender').value,
+    dob:document.getElementById('f-dob').value||'',
+    nationality:document.getElementById('f-nation').value||'중국',
+    treatment:document.getElementById('f-treat').value.trim(),
+    amount:parseFloat(document.getElementById('f-amt').value)||0,
+    hosp_comm_rate:parseInt(document.getElementById('f-hrate').value)||0,
+    vat:document.getElementById('f-vat').value,
+    tax_invoice:document.getElementById('f-tax').value,
+    hosp_paydate:document.getElementById('f-hpaydate').value,
+    hosp_paidamt:parseFloat(document.getElementById('f-hpaid').value)||0,
+    inflow_type:document.getElementById('f-inflow').value,
+    introducer:document.getElementById('f-introducer').value,
+    status:document.getElementById('f-status').value,
+    noshow:document.getElementById('f-noshow').value,
+    note:document.getElementById('f-note').value.trim(),
+    paid_comm:0,expected:0,
+  };
+  if(bkEditId){const i=BK.findIndex(b=>b.id===bkEditId);if(i>=0)BK[i]={...BK[i],...obj};}
+  else{obj.id=BK.reduce((m,b)=>Math.max(m,b.id),0)+1;BK.push(obj);}
+  closeBkModal();
+  await dbSave('bookings',BK);
+  renderBk();renderDashboard();
+}
+async function deleteBk(){
+  if(!bkEditId||!confirm('삭제하시겠습니까?'))return;
+  BK=BK.filter(b=>b.id!==bkEditId);
+  closeBkModal();await dbSave('bookings',BK);renderBk();renderDashboard();
+}
+
+// ── 캘린더 ──
+function renderCalendar(){
+  const ml=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-title').textContent=`${calY}년 ${ml[calM]}`;
+  const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  const first=new Date(calY,calM,1).getDay();
+  const days=new Date(calY,calM+1,0).getDate();
+  const byDay={};
+  BK.forEach(b=>{const d=b.datetime.slice(0,10);if(!byDay[d])byDay[d]=[];byDay[d].push(b);});
+  const today=new Date().toISOString().slice(0,10);
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.style.minHeight='64px';grid.appendChild(d);}
+  for(let d=1;d<=days;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const items=byDay[ds]||[];
+    const div=document.createElement('div');
+    div.style.cssText=`padding:5px;min-height:64px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:${items.length?'#f0fff8':'var(--white)'};${ds===today?'border-color:var(--gn2);':''}`;
+    div.innerHTML=`<div style="font-size:11px;font-weight:600;margin-bottom:3px;">${d}</div>`+
+    items.slice(0,2).map(b=>`<div style="font-size:9px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.name}</div>`).join('')+
+    (items.length>2?`<div style="font-size:9px;color:var(--gray);">+${items.length-2}건</div>`:'');
+    div.onclick=()=>{
+      document.getElementById('cal-detail').style.display='block';
+      document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
+      (items.length?`<table><thead><tr><th>환자명</th><th>병원</th><th>시간</th><th>시술</th><th>유입</th><th>상태</th><th>관리</th></tr></thead><tbody>`+
+      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td style="font-size:10px;">${b.hospital}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.inflow_type}">${b.inflow_type}</span></td><td><span class="badge ${b.status}">${b.status}</span></td><td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td></tr>`).join('')+`</tbody></table>`
+      :`<div style="color:#aaa;font-size:12px;padding:8px;">예약 없음</div>`)+`</div>`;
+    };
+    grid.appendChild(div);
+  }
+}
+function calChange(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCalendar();}
+
+// ── 매출 ──
+function renderRevenue(){
+  const map={};
+  BK.forEach(b=>{
+    const m=b.datetime.slice(0,7);
+    if(!map[m])map[m]={cnt:0,treat:0,won:0,hc:0,wc:0,net:0};
+    const c=calcC(b);map[m].cnt++;map[m].won+=c.won;map[m].hc+=c.hc;map[m].wc+=c.wc;map[m].net+=c.net;
+    if(b.status==='완료')map[m].treat++;
+  });
+  const totRev=BK.reduce((s,b)=>s+r2w(b.amount),0);
+  const totHC=BK.reduce((s,b)=>s+calcC(b).hc,0);
+  const totWC=BK.reduce((s,b)=>s+calcC(b).wc,0);
+  const totNet=BK.reduce((s,b)=>s+calcC(b).net,0);
+  document.getElementById('rv-total').textContent=fw(totRev);
+  document.getElementById('rv-hcomm').textContent=fw(totHC);
+  document.getElementById('rv-wcomm').textContent=fw(totWC);
+  document.getElementById('rv-net').textContent=fw(totNet);
+  let cumNet=0;
+  document.getElementById('rv-tbody').innerHTML=Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).map(([m,v])=>{
+    cumNet+=v.net;
+    return`<tr><td>${m}</td><td style="text-align:center;">${v.cnt}</td><td style="text-align:center;">${v.treat}</td>
+      <td style="color:#B8960C;">${fw(v.won)}</td>
+      <td style="color:var(--gn2);">${fw(v.hc)}</td>
+      <td style="color:#7c3aed;">${fw(v.wc)}</td>
+      <td style="color:var(--gold);font-weight:600;">${fw(v.net)}</td>
+      <td style="color:var(--gn2);font-weight:700;">${fw(cumNet)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 병원별 입금 ──
+function renderHospitalRev(){
+  const map={};
+  BK.forEach(b=>{
+    const h=b.hospital;if(!map[h])map[h]={cnt:0,rev:0,comm:0,paid:0};
+    const c=calcC(b);map[h].cnt++;map[h].rev+=c.won;map[h].comm+=c.hc;
+    map[h].paid+=r2w(b.hosp_paidamt||0);
+  });
+  document.getElementById('hrv-tbody').innerHTML=Object.entries(map).sort((a,b)=>b[1].rev-a[1].rev).map(([h,v])=>{
+    const hd=HD.find(x=>x.name===h);
+    const rate=hd?hd.commission:'-';const pd=hd?hd.paydate:'-';
+    const unpaid=v.rev-v.comm-v.paid;
+    return`<tr>
+      <td style="font-size:11px;font-weight:500;">${h}</td>
+      <td style="text-align:center;">${v.cnt}건</td>
+      <td style="color:#B8960C;">${fw(v.rev)}</td>
+      <td style="font-size:10px;color:var(--gray);">${rate}</td>
+      <td style="color:var(--gn2);">${fw(v.comm)}</td>
+      <td>${fw(v.rev-v.comm)}</td>
+      <td style="font-size:10px;color:var(--gray);">${pd}</td>
+      <td style="color:#555;">${fw(v.paid)}</td>
+      <td style="color:${unpaid>0?'#dc2626':'var(--gn2)'};">${unpaid>0?fw(unpaid):'-'}</td>
+      <td><span class="badge ${v.paid>0&&unpaid<=0?'확정':'대기'}">${v.paid>0&&unpaid<=0?'완료':'미완료'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 왕홍별 실적 ──
+function renderWanghongRev(){
+  const map={};
+  BK.forEach(b=>{
+    const k=b.introducer||'미상';
+    const w=WM.find(x=>x.name===k);
+    if(!map[k])map[k]={type:w?w.type:'미상',cnt:0,treat:0,won:0,hc:0,wc:0,net:0,ns:0};
+    const c=calcC(b);map[k].cnt++;map[k].won+=c.won;map[k].hc+=c.hc;map[k].wc+=c.wc;map[k].net+=c.net;
+    if(b.status==='완료')map[k].treat++;
+    if(b.noshow==='Y'||b.status==='노쇼')map[k].ns++;
+  });
+  document.getElementById('wrev-tbody').innerHTML=Object.entries(map).sort((a,b)=>b[1].won-a[1].won).map(([n,v])=>{
+    const w=WM.find(x=>x.name===n);const rate=w?w.rate:0;
+    const conv=v.cnt?Math.round(v.treat/v.cnt*100):0;
+    return`<tr>
+      <td style="font-weight:500;">${n}</td>
+      <td><span class="badge ${v.type}">${v.type}</span></td>
+      <td style="text-align:center;">${v.cnt}</td>
+      <td style="text-align:center;">${v.treat}</td>
+      <td style="color:#B8960C;">${fw(v.won)}</td>
+      <td style="text-align:center;color:#7c3aed;">${rate}%</td>
+      <td style="color:#7c3aed;">${fw(v.wc)}</td>
+      <td style="color:var(--gold);font-weight:600;">${fw(v.net)}</td>
+      <td style="text-align:center;color:${v.ns?'#dc2626':'#aaa'};">${v.ns||'-'}</td>
+      <td style="text-align:center;">${conv}%</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 병원 관리 ──
+function renderHospitals(){
+  const q=(document.getElementById('hd-q').value||'').toLowerCase();
+  const cf=document.getElementById('hd-contract-f').value;
+  const data=HD.filter(h=>(!q||h.name.toLowerCase().includes(q)||(h.manager||'').toLowerCase().includes(q))&&(!cf||h.contract===cf));
+  document.getElementById('hd-count').textContent=`총 ${HD.length}개 병원`;
+  document.getElementById('hd-tbody').innerHTML=data.map((h,i)=>{
+    const bkCnt=BK.filter(b=>b.hospital===h.name).length;
+    return`<tr>
+      <td style="color:#ccc;">${i+1}</td>
+      <td style="font-weight:500;">${h.name}</td>
+      <td style="font-size:10px;">${h.dept||'-'}</td>
+      <td><span class="badge ${h.contract}">${h.contract}</span></td>
+      <td style="font-size:11px;">${h.manager||'-'}</td>
+      <td style="font-size:11px;">${h.tel||'-'}</td>
+      <td style="color:#B8960C;font-size:11px;">${h.commission||'-'}</td>
+      <td style="font-size:10px;">${h.vat||'-'}</td>
+      <td style="font-size:10px;color:var(--gray);">${h.paydate||'-'}</td>
+      <td style="text-align:center;color:${bkCnt>0?'var(--gold)':'#aaa'};">${bkCnt}건</td>
+      <td><button class="btn sm" onclick="openHdModal(${h.no})">편집</button></td>
+    </tr>`;
+  }).join('');
+}
+function openHdModal(no){
+  hdEditId=no;
+  document.getElementById('hd-del-btn').style.display=no!==null?'':'none';
+  document.getElementById('hd-modal-title').textContent=no!==null?'병원 수정':'병원 추가';
+  if(no!==null){
+    const h=HD.find(x=>x.no===no);if(!h)return;
+    document.getElementById('hd-name').value=h.name||'';
+    document.getElementById('hd-dept').value=h.dept||'';
+    document.getElementById('hd-contract').value=h.contract||'미정';
+    document.getElementById('hd-mgr').value=h.manager||'';
+    document.getElementById('hd-tel').value=h.tel||'';
+    document.getElementById('hd-comm').value=h.commission||'';
+    document.getElementById('hd-vat').value=h.vat||'별도';
+    document.getElementById('hd-paydate').value=h.paydate||'';
+    document.getElementById('hd-link').value=h.link||'';
+    document.getElementById('hd-note').value=h.note||'';
+  }else{
+    ['hd-name','hd-dept','hd-mgr','hd-tel','hd-comm','hd-paydate','hd-link','hd-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('hd-contract').value='미정';
+  }
+  document.getElementById('hd-modal').classList.add('open');
+}
+async function saveHd(){
+  const name=document.getElementById('hd-name').value.trim();
+  if(!name){alert('병원명을 입력하세요');return;}
+  const data={name,dept:document.getElementById('hd-dept').value.trim(),contract:document.getElementById('hd-contract').value,manager:document.getElementById('hd-mgr').value.trim(),tel:document.getElementById('hd-tel').value.trim(),commission:document.getElementById('hd-comm').value.trim(),vat:document.getElementById('hd-vat').value,paydate:document.getElementById('hd-paydate').value.trim(),link:document.getElementById('hd-link').value.trim(),note:document.getElementById('hd-note').value.trim()};
+  if(hdEditId!==null){const i=HD.findIndex(h=>h.no===hdEditId);if(i>=0)HD[i]={...HD[i],...data};}
+  else{data.no=HD.reduce((m,h)=>Math.max(m,h.no||0),0)+1;HD.push(data);}
+  document.getElementById('hd-modal').classList.remove('open');
+  await dbSave('hospitals',HD);
+  renderHospitals();populateFilters();
+}
+async function deleteHd(){
+  if(hdEditId===null||!confirm('삭제하시겠습니까?'))return;
+  HD=HD.filter(h=>h.no!==hdEditId);
+  document.getElementById('hd-modal').classList.remove('open');
+  await dbSave('hospitals',HD);renderHospitals();populateFilters();
+}
+
+// ── 왕홍 관리 ──
+function renderWanghongs(){
+  document.getElementById('wm-tbody').innerHTML=WM.map(w=>{
+    const bks=BK.filter(b=>b.introducer===w.name);
+    const totW=bks.reduce((s,b)=>s+r2w(b.amount),0);
+    const totN=bks.reduce((s,b)=>s+calcC(b).net,0);
+    return`<tr>
+      <td style="font-weight:500;">${w.name}</td>
+      <td><span class="badge ${w.type}">${w.type}</span></td>
+      <td style="font-size:11px;color:var(--gray);">${w.channel||'-'}</td>
+      <td style="font-size:11px;color:var(--gray);">${w.contact||'-'}</td>
+      <td style="text-align:center;color:#7c3aed;font-weight:600;">${w.rate}%</td>
+      <td style="text-align:center;">${bks.length}명</td>
+      <td style="color:#B8960C;">${fw(totW)}</td>
+      <td style="color:var(--gold);font-weight:600;">${fw(totN)}</td>
+      <td style="font-size:10px;color:var(--gray);">${w.note||'-'}</td>
+      <td><button class="btn sm" onclick="openWmModal(${w.id})">편집</button></td>
+    </tr>`;
+  }).join('');
+}
+function openWmModal(id){
+  wmEditId=id;
+  document.getElementById('wm-del-btn').style.display=id!==null?'':'none';
+  document.getElementById('wm-modal-title').textContent=id!==null?'소개자 수정':'소개자 추가';
+  if(id!==null){
+    const w=WM.find(x=>x.id===id);if(!w)return;
+    document.getElementById('wm-name').value=w.name||'';
+    document.getElementById('wm-type').value=w.type||'왕홍';
+    document.getElementById('wm-ch').value=w.channel||'';
+    document.getElementById('wm-contact').value=w.contact||'';
+    document.getElementById('wm-rate').value=w.rate||0;
+    document.getElementById('wm-note').value=w.note||'';
+  }else{['wm-name','wm-ch','wm-contact','wm-note'].forEach(i=>document.getElementById(i).value='');document.getElementById('wm-rate').value='';}
+  document.getElementById('wm-modal').classList.add('open');
+}
+async function saveWm(){
+  const name=document.getElementById('wm-name').value.trim();
+  if(!name){alert('이름을 입력하세요');return;}
+  const obj={name,type:document.getElementById('wm-type').value,channel:document.getElementById('wm-ch').value.trim(),contact:document.getElementById('wm-contact').value.trim(),rate:parseInt(document.getElementById('wm-rate').value)||0,note:document.getElementById('wm-note').value.trim()};
+  if(wmEditId!==null){const i=WM.findIndex(w=>w.id===wmEditId);if(i>=0)WM[i]={...WM[i],...obj};}
+  else{obj.id=WM.reduce((m,w)=>Math.max(m,w.id||0),0)+1;WM.push(obj);}
+  document.getElementById('wm-modal').classList.remove('open');
+  await dbSave('wanghongs',WM);renderWanghongs();updateInflowSel();
+}
+async function deleteWm(){
+  if(wmEditId===null||!confirm('삭제하시겠습니까?'))return;
+  WM=WM.filter(w=>w.id!==wmEditId);
+  document.getElementById('wm-modal').classList.remove('open');
+  await dbSave('wanghongs',WM);renderWanghongs();
+}
+
+// ── 외국인환자 보고 ──
+function renderForeign(){
+  const total=BK.length,res=BK.filter(b=>b.status!=='취소').length,treat=BK.filter(b=>b.status==='완료').length;
+  const totW=BK.reduce((s,b)=>s+r2w(b.amount),0);
+  document.getElementById('fg-inquiry').textContent=total;
+  document.getElementById('fg-reserved').textContent=res;
+  document.getElementById('fg-treated').textContent=treat;
+  document.getElementById('fg-rev').textContent=totW>0?totW.toLocaleString()+'원':'-';
+  document.getElementById('fg-conv1').textContent=(total?Math.round(res/total*100):0)+'%';
+  document.getElementById('fg-conv2').textContent=(res?Math.round(treat/res*100):0)+'%';
+  const mm={};BK.forEach(b=>{const m=b.datetime.slice(0,7);if(!mm[m])mm[m]={res:0,treat:0,won:0,net:0,ns:0};const c=calcC(b);mm[m].res++;mm[m].won+=c.won;mm[m].net+=c.net;if(b.status==='완료')mm[m].treat++;if(b.noshow==='Y'||b.status==='노쇼')mm[m].ns++;});
+  document.getElementById('fg-monthly').innerHTML=Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])).map(([m,v])=>`<tr><td>${m}</td><td style="text-align:center;">${v.res}</td><td style="text-align:center;">${v.treat}</td><td style="color:#B8960C;">${fw(v.won)}</td><td style="color:var(--gold);">${fw(v.net)}</td><td style="text-align:center;color:${v.ns?'#dc2626':'#aaa'};">${v.ns||'-'}</td></tr>`).join('');
+  const im={};BK.forEach(b=>{const k=b.inflow_type;if(!im[k])im[k]={subs:new Set(),cnt:0,treat:0,won:0};im[k].subs.add(b.introducer);im[k].cnt++;im[k].won+=r2w(b.amount);if(b.status==='완료')im[k].treat++;});
+  document.getElementById('fg-inflow').innerHTML=Object.entries(im).sort((a,b)=>b[1].cnt-a[1].cnt).map(([k,v])=>`<tr><td><span class="badge ${k}">${k}</span></td><td style="font-size:10px;">${[...v.subs].filter(Boolean).join(', ')}</td><td style="text-align:center;">${v.cnt}</td><td style="text-align:center;">${v.treat}</td><td style="color:#B8960C;">${fw(v.won)}</td></tr>`).join('');
+  const nm={};BK.forEach(b=>{const n=b.nationality||'미상';if(!nm[n])nm[n]={cnt:0,treat:0,won:0};nm[n].cnt++;nm[n].won+=r2w(b.amount);if(b.status==='완료')nm[n].treat++;});
+  document.getElementById('fg-nation').innerHTML=Object.entries(nm).sort((a,b)=>b[1].cnt-a[1].cnt).map(([n,v])=>`<tr><td>${n}</td><td style="text-align:center;">${v.cnt}</td><td style="text-align:center;">${v.treat}</td><td style="color:#B8960C;">${fw(v.won)}</td><td style="text-align:center;">${total?Math.round(v.cnt/total*100):0}%</td></tr>`).join('');
+  const dm={};BK.forEach(b=>{const d=b.dept||'기타';if(!dm[d])dm[d]={cnt:0,treat:0,won:0,ts:new Set()};dm[d].cnt++;dm[d].won+=r2w(b.amount);if(b.treatment)b.treatment.split(/[、,]/).forEach(t=>dm[d].ts.add(t.trim()));if(b.status==='완료')dm[d].treat++;});
+  document.getElementById('fg-dept').innerHTML=Object.entries(dm).sort((a,b)=>b[1].cnt-a[1].cnt).map(([d,v])=>`<tr><td>${d}</td><td style="text-align:center;">${v.cnt}</td><td style="text-align:center;">${v.treat}</td><td style="color:#B8960C;">${fw(v.won)}</td><td style="font-size:10px;color:var(--gray);">${[...v.ts].slice(0,3).join(', ')}</td></tr>`).join('');
+}
+
+// ── 엑셀 ──
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const hdr=['No','환자명','생년월일','성별','국적','병원','예약일시','진료과목','시술','결제금액','유입','소개자','수수료율','FK수수료','FK→소개자','FK순매출','부가세','세금계산서','상태','비고'];
+  const rows=[hdr,...BK.sort((a,b)=>a.datetime.localeCompare(b.datetime)).map((b,i)=>{
+    const c=calcC(b);
+    return[i+1,b.name,b.dob||'',b.gender,b.nationality,b.hospital,b.datetime,b.dept,b.treatment,c.won,b.inflow_type,b.introducer,b.hosp_comm_rate,c.hc,c.wc,c.net,b.vat||'포함',b.tax_invoice||'N',b.status,b.note];
+  })];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'예약명단');
+  const wr=[['이름','구분','채널','연락처','수수료율','비고'],...WM.map(w=>[w.name,w.type,w.channel,w.contact,w.rate,w.note])];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(wr),'왕홍소개자');
+  const hr=[['No','병원명','과목','담당자','연락처','계약','수수료','부가세','지급일'],...HD.map(h=>[h.no,h.name,h.dept,h.manager,h.tel,h.contract,h.commission,h.vat,h.paydate])];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hr),'병원마스터');
+  XLSX.writeFile(wb,'팔로우코리아_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+async function resetAllData(){
+  if(!confirm('⚠️ 모든 DB 데이터를 삭제합니다. 계속하시겠습니까?'))return;
+  if(!confirm('정말로 초기화하시겠습니까? 되돌릴 수 없습니다.'))return;
+  await Promise.all([dbDeleteAll('bookings'),dbDeleteAll('wanghongs'),dbDeleteAll('hospitals')]);
+  BK=[];WM=[];HD=[];
+  alert('초기화 완료. 예약관리 시스템에서 기본 데이터를 다시 업로드해 주세요.');
+  renderDashboard();
+}
+
+
+// ── 리뷰 관리 ──
+let REVIEWS=[], rvEditId=null;
+async function loadReviews(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*&order=id.desc`,{headers});
+    const d=await r.json();
+    REVIEWS=Array.isArray(d)?d.map(x=>x.data).filter(Boolean):[];
+  }catch(e){REVIEWS=[];}
+}
+async function saveReviewsToDB(){
+  await fetch(`${SUPA_URL}/rest/v1/reviews?id=gte.0`,{method:'DELETE',headers});
+  if(!REVIEWS.length)return;
+  await fetch(`${SUPA_URL}/rest/v1/reviews`,{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify(REVIEWS.map(r=>({data:r})))});
+}
+
+function renderAdminReviews(){
+  const q=(document.getElementById('rv-q').value||'').toLowerCase();
+  const sf=document.getElementById('rv-star-f').value;
+  const stf=document.getElementById('rv-status-f').value;
+  const filtered=REVIEWS.filter(r=>{
+    const mq=!q||(r.name||'').toLowerCase().includes(q)||(r.hospital||'').toLowerCase().includes(q)||(r.text||'').toLowerCase().includes(q);
+    const ms=!sf||String(r.star)===sf;
+    const mst=!stf||r.status===stf;
+    return mq&&ms&&mst;
+  });
+  document.getElementById('rv-count').textContent=`총 ${filtered.length}건`;
+  // 통계
+  const active=REVIEWS.filter(r=>r.status!=='hidden').length;
+  const avg=REVIEWS.length?Math.round(REVIEWS.reduce((s,r)=>s+(r.star||5),0)/REVIEWS.length*10)/10:0;
+  document.getElementById('rv-st-total').textContent=REVIEWS.length;
+  document.getElementById('rv-st-avg').textContent=avg+'★';
+  document.getElementById('rv-st-active').textContent=active;
+  document.getElementById('rv-st-hidden').textContent=REVIEWS.length-active;
+  
+  document.getElementById('rv-grid').innerHTML=filtered.map(r=>{
+    const stars='★'.repeat(r.star||5)+'☆'.repeat(5-(r.star||5));
+    const hidden=r.status==='hidden';
+    return`<div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:14px;${hidden?'opacity:0.5;':''}" >
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div style="color:#D4AF37;font-size:14px;letter-spacing:2px;">${stars}</div>
+        <div style="display:flex;gap:5px;">
+          <span class="badge ${hidden?'취소':'확정'}">${hidden?'숨김':'게시중'}</span>
+          <button class="btn sm" onclick="openRvEdit(${r.id})">수정</button>
+          <button class="btn sm" onclick="toggleRvStatus(${r.id})">${hidden?'▶ 게시':'⏸ 숨김'}</button>
+        </div>
+      </div>
+      ${r.img?`<img src="${r.img}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` :''}
+      <div style="font-size:10px;background:#f0fff8;color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:6px;">${r.hospital||''} · ${r.treatment||''}</div>
+      <div style="font-size:12px;line-height:1.6;margin-bottom:8px;color:var(--dark);">${r.text||''}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pk),var(--gn));display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">${(r.name||'?')[0]}</div>
+        <div>
+          <div style="font-size:11px;font-weight:600;">${r.name||''}</div>
+          <div style="font-size:10px;color:var(--gray);">${r.from||''} · ${r.date||''}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openRvEdit(id){
+  rvEditId=id;
+  const r=REVIEWS.find(x=>x.id===id);if(!r)return;
+  document.getElementById('rve-name').value=r.name||'';
+  document.getElementById('rve-from').value=r.from||'';
+  document.getElementById('rve-hosp').value=r.hospital||'';
+  document.getElementById('rve-treat').value=r.treatment||'';
+  document.getElementById('rve-star').value=r.star||5;
+  document.getElementById('rve-status').value=r.status||'active';
+  document.getElementById('rve-text').value=(r.text||'').replace(/^"|"$/g,'');
+  document.getElementById('rv-edit-modal').classList.add('open');
+}
+async function saveReview(){
+  const idx=REVIEWS.findIndex(r=>r.id===rvEditId);if(idx<0)return;
+  REVIEWS[idx]={...REVIEWS[idx],
+    name:document.getElementById('rve-name').value.trim(),
+    from:document.getElementById('rve-from').value.trim(),
+    hospital:document.getElementById('rve-hosp').value.trim(),
+    treatment:document.getElementById('rve-treat').value.trim(),
+    star:parseInt(document.getElementById('rve-star').value),
+    status:document.getElementById('rve-status').value,
+    text:'"'+document.getElementById('rve-text').value.trim()+'"',
+  };
+  document.getElementById('rv-edit-modal').classList.remove('open');
+  await saveReviewsToDB();
+  renderAdminReviews();
+}
+async function deleteReview(){
+  if(!rvEditId||!confirm('리뷰를 삭제하시겠습니까?'))return;
+  REVIEWS=REVIEWS.filter(r=>r.id!==rvEditId);
+  document.getElementById('rv-edit-modal').classList.remove('open');
+  await saveReviewsToDB();
+  renderAdminReviews();
+}
+async function toggleRvStatus(id){
+  const idx=REVIEWS.findIndex(r=>r.id===id);if(idx<0)return;
+  REVIEWS[idx].status=REVIEWS[idx].status==='hidden'?'active':'hidden';
+  await saveReviewsToDB();
+  renderAdminReviews();
+}
+
+// ── 페이지 전환 ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`.sidebar-menu a[onclick="showPage('${id}')"]`)?.classList.add('active');
+  if(id==='bookings')renderBk();
+  if(id==='calendar')renderCalendar();
+  if(id==='revenue')renderRevenue();
+  if(id==='hospital_rev')renderHospitalRev();
+  if(id==='wanghong_rev')renderWanghongRev();
+  if(id==='hospitals')renderHospitals();
+  if(id==='wanghongs')renderWanghongs();
+  if(id==='foreign')renderForeign();
+  if(id==='reviews'){loadReviews().then(renderAdminReviews);}
+  if(id==='notices')loadNotices();
+}
+
+// ── 자동 로그인 ──
+if(sessionStorage.getItem('admin_auth')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='';
+  loadAndRender();
+}
+
+// ══════════════════════════════════════
+// 공지사항 관리
+// ══════════════════════════════════════
+let editingNoticeId=null;
+
+function openNoticeModal(nd){
+  editingNoticeId=nd?.id||null;
+  document.getElementById('notice-modal-title').textContent=editingNoticeId?'📢 공지 수정':'📢 공지 작성';
+  document.getElementById('notice-title').value=nd?.title||'';
+  document.getElementById('notice-content').value=nd?.content||'';
+  document.getElementById('notice-type').value=nd?.type||'general';
+  document.getElementById('notice-author').value=nd?.author||'Follow Korea 운영팀';
+  const tgt=nd?.target||'all';
+  document.getElementById('target-all').checked=(tgt==='all');
+  document.getElementById('target-specific').checked=(tgt!=='all');
+  if(tgt!=='all')document.getElementById('notice-target-hosp').value=tgt;
+  toggleNoticeTarget();
+  document.getElementById('notice-modal-bg').style.display='flex';
+}
+function closeNoticeModal(){
+  document.getElementById('notice-modal-bg').style.display='none';
+  editingNoticeId=null;
+}
+function toggleNoticeTarget(){
+  const isSpec=document.getElementById('target-specific').checked;
+  document.getElementById('notice-hosp-select').style.display=isSpec?'':'none';
+}
+async function submitNotice(){
+  const title=document.getElementById('notice-title').value.trim();
+  const content=document.getElementById('notice-content').value.trim();
+  if(!title){alert('제목을 입력하세요');return;}
+  if(!content){alert('내용을 입력하세요');return;}
+  const isSpec=document.getElementById('target-specific').checked;
+  const target=isSpec?document.getElementById('notice-target-hosp').value:'all';
+  const nd={
+    id:editingNoticeId||Date.now(),
+    title,content,
+    type:document.getElementById('notice-type').value,
+    target,
+    author:document.getElementById('notice-author').value||'Follow Korea 운영팀',
+    created_at:new Date().toISOString().slice(0,10),
+  };
+  try{
+    let res;
+    if(editingNoticeId){
+      res=await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${editingNoticeId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:nd})
+      });
+    }else{
+      res=await fetch(`${SUPA_URL}/rest/v1/notices`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:nd})
+      });
+    }
+    if(res.ok){alert(editingNoticeId?'수정 완료!':'공지 등록 완료!');closeNoticeModal();loadNotices();}
+    else alert('저장 실패: '+(await res.text()));
+  }catch(e){alert('오류: '+e.message);}
+}
+async function loadNotices(){
+  const el=document.getElementById('notice-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--gray);">로딩 중...</div>';
+  const fTarget=document.getElementById('notice-filter-target')?.value||'';
+  const fType=document.getElementById('notice-filter-type')?.value||'';
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=id.desc&limit=200`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    let notices=(await r.json()).map(x=>x.data||x).filter(Boolean);
+    if(fTarget==='all')notices=notices.filter(n=>n.target==='all');
+    else if(fTarget)notices=notices.filter(n=>n.target===fTarget);
+    if(fType)notices=notices.filter(n=>n.type===fType);
+    if(!notices.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">📭 공지사항이 없습니다.</div>';return;}
+    const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    el.innerHTML=notices.map(n=>`
+      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:10px;background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:10px;">${TL[n.type]||'📌 일반'}</span>
+            <span style="font-size:13px;font-weight:700;">${n.title||''}</span>
+            ${n.target==='all'
+              ?'<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;">🌐 전체 병원</span>'
+              :`<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;">🏥 ${n.target}</span>`}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span style="font-size:10px;color:var(--gray);">${(n.created_at||'').slice(0,10)}</span>
+            <button onclick='openNoticeModal(${JSON.stringify(n)})' style="padding:3px 8px;background:var(--lgray);border:1px solid var(--border);border-radius:4px;font-size:10px;cursor:pointer;">수정</button>
+            <button onclick="deleteNotice(${n.id})" style="padding:3px 8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:4px;font-size:10px;cursor:pointer;">삭제</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.7;white-space:pre-line;">${n.content||''}</div>
+        <div style="font-size:10px;color:#bbb;margin-top:6px;">작성: ${n.author||'Follow Korea 운영팀'}</div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패: '+e.message+'</div>';}
+}
+async function deleteNotice(id){
+  if(!confirm('이 공지를 삭제하시겠습니까?'))return;
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(r.ok){alert('삭제되었습니다.');loadNotices();}
+    else alert('삭제 실패');
+  }catch(e){alert('오류: '+e.message);}
+}
+</script>
+</body>
+</html>
