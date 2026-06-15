@@ -121,9 +121,13 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
   </div>
+  <div class="sidebar-section">📢 공지</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('notices')"><span class="ic">📢</span>공지사항 관리</a>
+  </div>
   <div class="sidebar-section">⭐ 리뷰</div>
   <div class="sidebar-menu">
-    <a onclick="showPage('reviews')"><span class="ic">⭐</span>고객 리뷰 관리</a>
+    <a onclick="showPage('reviews')"><span class="ic">⭐</span>리뷰 승인 관리</a>
   </div>
   <div class="sidebar-section">⚙️ 설정</div>
   <div class="sidebar-menu">
@@ -387,6 +391,173 @@ tr:hover td{background:#fafaf8;}
 </div>
 </div>
 <!-- 설정 -->
+
+<!-- 공지사항 관리 -->
+<div class="page" id="page-notices">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h2 style="font-size:16px;font-weight:700;">📢 공지사항 관리</h2>
+    <button onclick="openNoticeModal()" style="padding:8px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">✏️ 공지 작성</button>
+  </div>
+  <div class="card" style="padding:12px 16px;margin-bottom:12px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="notice-filter-target" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체</option>
+        <option value="all">전체 병원 공지</option>
+        <option value="신상성형외과">신상성형외과</option>
+<option value="원진성형외과피부과">원진성형외과피부과</option>
+<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
+<option value="드림성형외과">드림성형외과</option>
+<option value="셀리닉의원">셀리닉의원</option>
+<option value="차움">차움</option>
+<option value="원셀의원">원셀의원</option>
+<option value="글로비성형외과">글로비성형외과</option>
+<option value="라미체의원">라미체의원</option>
+<option value="뷰성형외과">뷰성형외과</option>
+<option value="바른길산부인과">바른길산부인과</option>
+<option value="강남다움의원">강남다움의원</option>
+<option value="더뷰티성형외과">더뷰티성형외과</option>
+<option value="신소애여성의원">신소애여성의원</option>
+<option value="히어피부과">히어피부과</option>
+<option value="히어산부인과">히어산부인과</option>
+<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
+<option value="리프톤의원">리프톤의원</option>
+<option value="청담서클의원">청담서클의원</option>
+<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
+<option value="벤자민의원">벤자민의원</option>
+<option value="고운몸의원">고운몸의원</option>
+<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
+<option value="GV 성형외과">GV 성형외과</option>
+<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
+<option value="강남서울안과의원">강남서울안과의원</option>
+<option value="JD피부성형(장덕)">JD피부성형(장덕)</option>
+      </select>
+      <select id="notice-filter-type" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체 유형</option>
+        <option value="general">📌 일반</option>
+        <option value="urgent">🚨 긴급</option>
+        <option value="settlement">💰 정산</option>
+        <option value="schedule">📅 일정</option>
+      </select>
+      <button onclick="loadNotices()" style="padding:6px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">🔄 새로고침</button>
+    </div>
+  </div>
+  <div id="notice-list"><div style="text-align:center;padding:40px;color:var(--gray);">로딩 중...</div></div>
+</div>
+
+<!-- 공지 작성 모달 -->
+<div id="notice-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticeModal()">
+<div style="background:#fff;border-radius:16px;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;padding:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h3 id="notice-modal-title" style="font-size:15px;font-weight:700;">📢 공지 작성</h3>
+    <button onclick="closeNoticeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:11px;">
+    <div>
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📌 수신 대상</label>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);"><input type="radio" name="ntgt" value="all" id="ntgt-all" checked onchange="toggleNTarget()"> 전체 병원</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);"><input type="radio" name="ntgt" value="specific" id="ntgt-specific" onchange="toggleNTarget()"> 특정 병원</label>
+      </div>
+      <div id="ntgt-hosp-wrap" style="display:none;">
+        <select id="ntgt-hosp" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="신상성형외과">신상성형외과</option>
+<option value="원진성형외과피부과">원진성형외과피부과</option>
+<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
+<option value="드림성형외과">드림성형외과</option>
+<option value="셀리닉의원">셀리닉의원</option>
+<option value="차움">차움</option>
+<option value="원셀의원">원셀의원</option>
+<option value="글로비성형외과">글로비성형외과</option>
+<option value="라미체의원">라미체의원</option>
+<option value="뷰성형외과">뷰성형외과</option>
+<option value="바른길산부인과">바른길산부인과</option>
+<option value="강남다움의원">강남다움의원</option>
+<option value="더뷰티성형외과">더뷰티성형외과</option>
+<option value="신소애여성의원">신소애여성의원</option>
+<option value="히어피부과">히어피부과</option>
+<option value="히어산부인과">히어산부인과</option>
+<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
+<option value="리프톤의원">리프톤의원</option>
+<option value="청담서클의원">청담서클의원</option>
+<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
+<option value="벤자민의원">벤자민의원</option>
+<option value="고운몸의원">고운몸의원</option>
+<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
+<option value="GV 성형외과">GV 성형외과</option>
+<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
+<option value="강남서울안과의원">강남서울안과의원</option>
+<option value="JD피부성형(장덕)">JD피부성형(장덕)</option></select>
+      </div>
+    </div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">🏷️ 유형</label>
+      <select id="n-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="general">📌 일반 공지</option><option value="urgent">🚨 긴급 공지</option>
+        <option value="settlement">💰 정산 안내</option><option value="schedule">📅 일정 공유</option>
+      </select>
+    </div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📝 제목</label>
+      <input type="text" id="n-title" placeholder="공지 제목" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;">
+    </div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📄 내용</label>
+      <textarea id="n-content" rows="5" placeholder="공지 내용" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical;outline:none;"></textarea>
+    </div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">👤 작성자</label>
+      <input type="text" id="n-author" value="Follow Korea 운영팀" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;">
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:14px;">
+    <button onclick="submitNotice()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✅ 등록</button>
+    <button onclick="closeNoticeModal()" style="padding:11px 16px;background:var(--lgray);border:1px solid var(--border);border-radius:8px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
+
+<!-- 리뷰 승인 관리 -->
+<div class="page" id="page-reviews">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h2 style="font-size:16px;font-weight:700;">⭐ 리뷰 승인 관리</h2>
+    <div style="display:flex;gap:6px;">
+      <select id="rv-filter-hosp" onchange="loadAdminReviews()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체 병원</option>
+        <option value="신상성형외과">신상성형외과</option>
+<option value="원진성형외과피부과">원진성형외과피부과</option>
+<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
+<option value="드림성형외과">드림성형외과</option>
+<option value="셀리닉의원">셀리닉의원</option>
+<option value="차움">차움</option>
+<option value="원셀의원">원셀의원</option>
+<option value="글로비성형외과">글로비성형외과</option>
+<option value="라미체의원">라미체의원</option>
+<option value="뷰성형외과">뷰성형외과</option>
+<option value="바른길산부인과">바른길산부인과</option>
+<option value="강남다움의원">강남다움의원</option>
+<option value="더뷰티성형외과">더뷰티성형외과</option>
+<option value="신소애여성의원">신소애여성의원</option>
+<option value="히어피부과">히어피부과</option>
+<option value="히어산부인과">히어산부인과</option>
+<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
+<option value="리프톤의원">리프톤의원</option>
+<option value="청담서클의원">청담서클의원</option>
+<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
+<option value="벤자민의원">벤자민의원</option>
+<option value="고운몸의원">고운몸의원</option>
+<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
+<option value="GV 성형외과">GV 성형외과</option>
+<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
+<option value="강남서울안과의원">강남서울안과의원</option>
+<option value="JD피부성형(장덕)">JD피부성형(장덕)</option>
+      </select>
+      <select id="rv-filter-status" onchange="loadAdminReviews()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+        <option value="">전체 상태</option>
+        <option value="pending">⏳ 승인 대기</option>
+        <option value="active">✅ 승인됨</option>
+        <option value="rejected">❌ 거절됨</option>
+      </select>
+      <button onclick="loadAdminReviews()" style="padding:6px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">🔄</button>
+    </div>
+  </div>
+  <div id="admin-review-list"><div style="text-align:center;padding:40px;color:var(--gray);">로딩 중...</div></div>
+</div>
+
 <div class="page" id="page-settings">
   <div class="card" style="max-width:480px;">
     <div class="card-title">⚙️ 시스템 설정</div>
@@ -1189,7 +1360,8 @@ function showPage(id){
   if(id==='hospitals')renderHospitals();
   if(id==='wanghongs')renderWanghongs();
   if(id==='foreign')renderForeign();
-  if(id==='reviews'){loadReviews().then(renderAdminReviews);}
+  if(id==='reviews')loadAdminReviews();
+  if(id==='notices')loadNotices();
 }
 
 // ── 자동 로그인 ──
@@ -1197,6 +1369,159 @@ if(sessionStorage.getItem('admin_auth')==='1'){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='';
   loadAndRender();
+}
+
+// ══════════ 공지사항 ══════════
+let editingNoticeId=null;
+const SUPA_URL_N=SUPA_URL, SUPA_KEY_N=SUPA_KEY;
+
+function openNoticeModal(nd){
+  editingNoticeId=nd?.id||null;
+  document.getElementById('notice-modal-title').textContent=editingNoticeId?'📢 공지 수정':'📢 공지 작성';
+  document.getElementById('n-title').value=nd?.title||'';
+  document.getElementById('n-content').value=nd?.content||'';
+  document.getElementById('n-type').value=nd?.type||'general';
+  document.getElementById('n-author').value=nd?.author||'Follow Korea 운영팀';
+  const tgt=nd?.target||'all';
+  document.getElementById('ntgt-all').checked=(tgt==='all');
+  document.getElementById('ntgt-specific').checked=(tgt!=='all');
+  if(tgt!=='all')document.getElementById('ntgt-hosp').value=tgt;
+  toggleNTarget();
+  document.getElementById('notice-modal-bg').style.display='flex';
+}
+function closeNoticeModal(){document.getElementById('notice-modal-bg').style.display='none';editingNoticeId=null;}
+function toggleNTarget(){
+  document.getElementById('ntgt-hosp-wrap').style.display=document.getElementById('ntgt-specific').checked?'':'none';
+}
+async function submitNotice(){
+  const title=document.getElementById('n-title').value.trim();
+  const content=document.getElementById('n-content').value.trim();
+  if(!title){alert('제목을 입력하세요');return;}
+  if(!content){alert('내용을 입력하세요');return;}
+  const target=document.getElementById('ntgt-specific').checked?document.getElementById('ntgt-hosp').value:'all';
+  const nd={id:editingNoticeId||Date.now(),title,content,type:document.getElementById('n-type').value,
+    target,author:document.getElementById('n-author').value||'Follow Korea 운영팀',
+    created_at:new Date().toISOString().slice(0,10)};
+  try{
+    const res=editingNoticeId
+      ?await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${editingNoticeId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},body:JSON.stringify({data:nd})})
+      :await fetch(`${SUPA_URL}/rest/v1/notices`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},body:JSON.stringify({data:nd})});
+    if(res.ok){alert(editingNoticeId?'수정 완료!':'공지 등록 완료!');closeNoticeModal();loadNotices();}
+    else alert('저장 실패: '+(await res.text()));
+  }catch(e){alert('오류: '+e.message);}
+}
+async function loadNotices(){
+  const el=document.getElementById('notice-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--gray);">로딩 중...</div>';
+  const fT=document.getElementById('notice-filter-target')?.value||'';
+  const fTy=document.getElementById('notice-filter-type')?.value||'';
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=id.desc&limit=200`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    let list=(await r.json()).map(x=>x.data||x).filter(Boolean);
+    if(fT==='all')list=list.filter(n=>n.target==='all');
+    else if(fT)list=list.filter(n=>n.target===fT);
+    if(fTy)list=list.filter(n=>n.type===fTy);
+    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">📭 공지사항이 없습니다.</div>';return;}
+    const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    el.innerHTML=list.map(n=>`
+      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:10px;background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:10px;">${TL[n.type]||'📌 일반'}</span>
+            <span style="font-size:13px;font-weight:700;">${n.title||''}</span>
+            ${n.target==='all'?'<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;">🌐 전체</span>':`<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;">🏥 ${n.target}</span>`}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;white-space:nowrap;">
+            <span style="font-size:10px;color:var(--gray);">${(n.created_at||'').slice(0,10)}</span>
+            <button onclick='openNoticeModal(${JSON.stringify(n).replace(/\/g,"\\")})' style="padding:3px 8px;background:var(--lgray);border:1px solid var(--border);border-radius:4px;font-size:10px;cursor:pointer;">수정</button>
+            <button onclick="deleteNotice(${n.id})" style="padding:3px 8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:4px;font-size:10px;cursor:pointer;">삭제</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.7;white-space:pre-line;">${n.content||''}</div>
+        <div style="font-size:10px;color:#bbb;margin-top:6px;">작성: ${n.author||''}</div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패</div>';}
+}
+async function deleteNotice(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  loadNotices();
+}
+
+// ══════════ 리뷰 승인 관리 ══════════
+async function loadAdminReviews(){
+  const el=document.getElementById('admin-review-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--gray);">로딩 중...</div>';
+  const fH=document.getElementById('rv-filter-hosp')?.value||'';
+  const fS=document.getElementById('rv-filter-status')?.value||'';
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*&order=id.desc&limit=200`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    let list=(await r.json()).map(x=>x.data||x).filter(Boolean);
+    // 승인 대기: status 없거나 'pending'
+    if(fS==='pending')list=list.filter(r=>!r.status||r.status==='pending');
+    else if(fS)list=list.filter(r=>r.status===fS);
+    if(fH)list=list.filter(r=>(r.hospital||'').includes(fH));
+    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">리뷰가 없습니다.</div>';return;}
+    const starStr=n=>'★'.repeat(n||5)+'☆'.repeat(5-(n||5));
+    el.innerHTML=list.map(rv=>{
+      const st=rv.status||'pending';
+      const stBadge=st==='active'?'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:8px;font-size:10px;">✅ 승인됨</span>':st==='rejected'?'<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:8px;font-size:10px;">❌ 거절됨</span>':'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:10px;">⏳ 대기</span>';
+      return`<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            ${stBadge}
+            <span style="font-size:12px;font-weight:700;">${rv.name||'익명'}</span>
+            <span style="font-size:11px;color:var(--gray);">${rv.from||''}</span>
+            <span style="color:#D4AF37;font-size:12px;">${starStr(rv.star)}</span>
+          </div>
+          <span style="font-size:10px;color:var(--gray);">${(rv.date||'').slice(0,10)}</span>
+        </div>
+        <div style="font-size:11px;background:var(--lgray);color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:6px;">${rv.hospital||''} · ${rv.treatment||''}</div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.6;">${rv.text||''}</div>
+        ${rv.img?`<img src="${rv.img}" style="width:80px;height:65px;object-fit:cover;border-radius:6px;margin-top:8px;">`:''}
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          ${st!=='active'?`<button onclick="approveReview(${rv.id})" style="padding:5px 12px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">✅ 승인</button>`:''}
+          ${st!=='rejected'?`<button onclick="rejectReview(${rv.id})" style="padding:5px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;font-size:11px;cursor:pointer;">❌ 거절</button>`:''}
+          <button onclick="deleteReview(${rv.id})" style="padding:5px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">🗑️ 삭제</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패</div>';}
+}
+
+async function updateReviewStatus(id, status){
+  const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  const all=await r.json();
+  const row=all.find(x=>(x.data?.id||x.id)===id);
+  if(!row)return false;
+  const newData={...(row.data||row), status};
+  const rowId=row.id;
+  const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify({data:newData})
+  });
+  return res.ok;
+}
+async function approveReview(id){
+  if(await updateReviewStatus(id,'active')){alert('승인되었습니다.');loadAdminReviews();}
+  else alert('실패');
+}
+async function rejectReview(id){
+  if(await updateReviewStatus(id,'rejected')){alert('거절되었습니다.');loadAdminReviews();}
+  else alert('실패');
+}
+async function deleteReview(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  const all=await r.json();
+  const row=all.find(x=>(x.data?.id||x.id)===id);
+  if(row){
+    await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${row.id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  }
+  loadAdminReviews();
 }
 </script>
 </body>
