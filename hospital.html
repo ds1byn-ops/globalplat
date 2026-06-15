@@ -830,23 +830,26 @@ async function checkNoticePopup(){
   const noPopup=localStorage.getItem('fk_no_popup_date');
   if(noPopup===new Date().toISOString().slice(0,10))return;
   try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=created_at.desc&limit=10`,{
+    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=id.desc&limit=20`,{
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
     });
+    if(!r.ok){console.log('notices 조회 실패:',r.status);return;}
     const all=await r.json();
+    console.log('notices 전체:', all.length, '건');
     const hospName=currentHosp?.name||'';
-    const notices=Array.isArray(all)?all.map(x=>x.data||x).filter(function(n){
-      return n&&(n.target==='all'||n.target===hospName);
+    console.log('현재 병원:', hospName);
+    const notices=Array.isArray(all)?all.map(function(x){return x.data||x;}).filter(function(n){
+      if(!n)return false;
+      var match=(n.target==='all'||n.target===hospName);
+      console.log('공지:', n.title, '| target:', n.target, '| match:', match);
+      return match;
     }):[];
+    console.log('필터된 공지:', notices.length, '건');
     if(!notices.length)return;
-    const recent=notices.filter(function(n){
-      const d=new Date(n.created_at||n.date||0);
-      return (Date.now()-d.getTime())<3*24*60*60*1000;
-    });
-    if(!recent.length)return;
-    showNoticePopup(recent);
-  }catch(e){}
+    showNoticePopup(notices);
+  }catch(e){console.error('팝업 오류:',e);}
 }
+
 function showNoticePopup(notices){
   const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
   const urgentCount=notices.filter(function(n){return n.type==='urgent';}).length;
