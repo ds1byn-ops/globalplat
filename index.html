@@ -200,7 +200,7 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
-      <button class="btn-secondary" onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'})" data-i18n="hero_cta2">浏览医院</button>
+      <button class="btn-secondary" onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="num">2,000+</div><div class="lbl" data-i18n="stat1">服务患者</div></div>
@@ -1462,14 +1462,17 @@ async function loadHospIntros(){
     const all=await r.json();
     if(Array.isArray(all)){
       all.forEach(row=>{
-        if(row.data&&row.data.name){
-          HOSP_INTROS[row.data.name]=row.data;
+        const d=row.data||row;
+        if(d&&d.name){
+          HOSP_INTROS[d.name]=d;
+          // 병원명 변형도 매핑 (괄호 제거 등)
+          const nameSimple=d.name.replace(/\(.*?\)/g,'').trim();
+          if(nameSimple!==d.name) HOSP_INTROS[nameSimple]=d;
         }
       });
     }
-    // 이미지 로드 후 카드 재렌더
     filterHosps();
-  }catch(e){}
+  }catch(e){console.error('hosp_intro 로드 오류:',e);}
 }
 
 function badgeLabel(b){const m=BADGE_MAP[b];return m?(m[lang]||m.zh||b):b;}
@@ -1869,15 +1872,14 @@ function filterAllRv(btn){
 
 // ── 병원 소개 DB 이미지 로드 ──
 async function loadHospIntro(kr){
-  // 먼저 이전 이미지 div 항상 초기화
   const overviewSec=document.getElementById('ds-overview');
   const oldImgDiv=document.getElementById('hosp-intro-imgs');
   if(oldImgDiv)oldImgDiv.remove();
 
-  // HOSP_INTROS 캐시 우선 사용
-  let intro=HOSP_INTROS[kr]||null;
+  // 캐시 우선 (괄호 제거 버전도 시도)
+  const krSimple=kr.replace(/\(.*?\)/g,'').trim();
+  let intro=HOSP_INTROS[kr]||HOSP_INTROS[krSimple]||null;
 
-  // 캐시에 없으면 DB에서 해당 병원만 조회
   if(!intro){
     try{
       const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
@@ -1885,8 +1887,11 @@ async function loadHospIntro(kr){
       });
       if(!r.ok)return;
       const all=await r.json();
-      intro=Array.isArray(all)?all.map(x=>x.data).filter(Boolean).find(x=>x.name===kr):null;
-      if(intro)HOSP_INTROS[kr]=intro; // 캐시 저장
+      // name 정확 매칭 또는 부분 매칭
+      intro=Array.isArray(all)?all.map(x=>x.data||x).filter(Boolean).find(x=>
+        x.name===kr||x.name===krSimple||kr.includes(x.name)||x.name.includes(krSimple)
+      ):null;
+      if(intro){HOSP_INTROS[kr]=intro;HOSP_INTROS[krSimple]=intro;}
     }catch(e){return;}
   }
 
