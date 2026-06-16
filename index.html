@@ -180,6 +180,7 @@ a{text-decoration:none;color:inherit;}
           <div onclick="setLang('ja')" class="lang-opt" data-lang="ja">🇯🇵 日本語</div>
           <div onclick="setLang('ru')" class="lang-opt" data-lang="ru">🇷🇺 Русский</div>
         <div onclick="setLang('mn')" class="lang-opt" data-lang="mn">🇲🇳 Монгол</div>
+        <div onclick="setLang('id')" class="lang-opt" data-lang="id">🇮🇩 Indonesia</div>
         </div>
       </div>
       <button class="btn-consult" onclick="openModal(null)" data-i18n="nav_consult">免费咨询</button>
@@ -1002,6 +1003,41 @@ const I={
     rv_done_title:'Үнэлгээ илгээгдлээ!',rv_done_desc:'Баярлалаа 😊',rv_done_close:'Хаах',
     star_hints:['','Муу','Хангалттай биш','Дундаж','Сайн','Маш сайн!'],
   },
+  id:{nav_home:'Beranda',nav_hosps:'Rumah Sakit',nav_concierge:'Concierge',nav_proc:'Cara Pesan',nav_review:'Ulasan',nav_consult:'Konsultasi Gratis',review_more:'Lihat Semua Ulasan',
+    hero_badge:'Platform Wisata Medis No.1 Korea',hero_title:'Perjalanan<br><em>K-Beauty Eksklusif Anda</em>',
+    hero_sub:'Klinik kecantikan terbaik Gangnam Seoul<br>Layanan bahasa Indonesia · Pendampingan penuh',
+    search_ph:'Cari rumah sakit, prosedur...',search_btn:'Cari',hero_cta1:'Pesan Sekarang',hero_cta2:'Lihat Rumah Sakit',
+    stat1:'Pasien Dilayani',stat2:'Rumah Sakit Mitra',stat3:'Kepuasan',
+    cat_title:'Pilih Prosedur',hosp_title:'Rumah Sakit Mitra',
+    cats:['Semua','Bedah Plastik','Kulit','Stem Cell','Tubuh','Ginekologi','Mata','Anti-aging','Gigi','Estetik','Lainnya'],
+    cat_all:'Semua',cat_plastic:'Bedah Plastik',cat_skin:'Kulit',cat_stem:'Stem Cell',cat_health:'Kesehatan',cat_eye:'Mata',cat_gyn:'Ginekologi',
+    review_title:'Ulasan Pengguna Nyata',review_sub:'Pengalaman nyata dari pasien seluruh dunia',
+    write_review:'Tulis Ulasan',no_review:'Belum ada ulasan, jadilah yang pertama!',
+    book_title:'Buat Reservasi',book_sub:'Masukkan informasi Anda',
+    book_name:'Nama',book_sex:'Jenis Kelamin',book_m:'Pria',book_f:'Wanita',
+    book_bday:'Tanggal Lahir',book_nation:'Kewarganegaraan',book_hosp:'Rumah Sakit',
+    book_dept:'Departemen',book_date:'Tanggal & Waktu',book_treat:'Prosedur Utama',
+    book_memo:'Catatan',book_submit:'Kirim Reservasi',book_cancel:'Batal',
+    book_ok:'Reservasi Berhasil! 🎉',book_ok_sub:'Staf kami akan menghubungi Anda dalam 24 jam',
+    d_hosp:'Rumah Sakit',d_cat:'Kategori',d_loc:'Lokasi',d_lang:'Dukungan Bahasa',d_hours:'Jam Operasional',
+    d_book:'Buat Reservasi',d_overview:'Gambaran Umum',
+    svc_title:'Layanan Tambahan',svc_concierge:'Concierge',svc_interpreter:'Penerjemah',svc_transport:'Transportasi',
+    svc_desc_concierge:'Hotel, tiket, makanan - kami atur semuanya',
+    svc_desc_interpreter:'Penerjemah bahasa Indonesia profesional',
+    svc_desc_transport:'Dari bandara ke klinik',
+    svc_book:'Pesan',
+    rv_title:'Tulis Ulasan',rv_hosp:'Pilih Rumah Sakit',rv_treat:'Prosedur',rv_name:'Nama',rv_from:'Negara',rv_submit:'Kirim',rv_done:'Terima Kasih! 😊',rv_done_sub:'Akan ditampilkan setelah persetujuan admin',
+    footer_copy:'2026 Follow Korea. Hak cipta dilindungi.',
+    ai_title:'Konsultan AI Follow Korea',ai_placeholder:'Ketik pertanyaan Anda...',ai_send:'Kirim',
+    detail_btn:'Detail',reserve_btn:'Pesan',book_btn:'Pesan',
+    overview_default:'Informasi tidak tersedia.',
+    steps:[['1','Pilih Rumah Sakit','Pilih dengan konsultasi ahli'],['2','Buat Reservasi','Reservasi online'],['3','Terima Perawatan','Didampingi profesional'],['4','Tindak Lanjut','Pantau hasil perawatan']],
+    reviews:[],
+    loc_gangnam:'Seoul Gangnam',loc_jongno:'Seoul Jongno',loc_sinchon:'Seoul Sinchon',
+    concierge_title:'Layanan Concierge',interpreter_title:'Penerjemah',transport_title:'Layanan Transportasi',
+    rv_done_title:'Ulasan Terkirim!',rv_done_desc:'Terima kasih 😊',rv_done_close:'Tutup',
+    star_hints:['','Sangat Buruk','Buruk','Cukup','Bagus','Sangat Bagus!'],
+  },
 };
 
 const HOSPS=[
@@ -1059,7 +1095,8 @@ const LANG_META={
   zh:{flag:'🇨🇳',label:'中文'},ko:{flag:'🇰🇷',label:'한국어'},en:{flag:'🇺🇸',label:'English'},
   vi:{flag:'🇻🇳',label:'Tiếng Việt'},th:{flag:'🇹🇭',label:'ภาษาไทย'},
   ja:{flag:'🇯🇵',label:'日本語'},ru:{flag:'🇷🇺',label:'Русский'},
-  mn:{flag:'🇲🇳',label:'Монгол'}
+  mn:{flag:'🇲🇳',label:'Монгол'},
+  id:{flag:'🇮🇩',label:'Indonesia'}
 };
 function toggleLangMenu(){
   const m=document.getElementById('lang-menu');
@@ -1578,7 +1615,7 @@ function setLang(l){
   // AI input placeholder 다국어
   const aiPh=document.getElementById('ai-input-placeholder');
   if(aiPh){const phs={zh:'请直接输入您的问题...',ko:'질문을 입력하세요...',en:'Type your question...',
-    vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...'};
+    vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews();
@@ -1592,7 +1629,7 @@ function applyI18n(){
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   // svc 확인 버튼 텍스트
-  const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх'};
+  const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх',id:'Daftar'};
   const confirmTxt=confirmLabels[lang]||'신청';
   document.querySelectorAll('.svc-confirm-btn').forEach(btn=>{btn.textContent=confirmTxt;});
 }
