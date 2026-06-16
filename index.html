@@ -995,7 +995,8 @@ const BADGE_MAP={
 const LANG_META={
   zh:{flag:'🇨🇳',label:'中文'},ko:{flag:'🇰🇷',label:'한국어'},en:{flag:'🇺🇸',label:'English'},
   vi:{flag:'🇻🇳',label:'Tiếng Việt'},th:{flag:'🇹🇭',label:'ภาษาไทย'},
-  ja:{flag:'🇯🇵',label:'日本語'},ru:{flag:'🇷🇺',label:'Русский'}
+  ja:{flag:'🇯🇵',label:'日本語'},ru:{flag:'🇷🇺',label:'Русский'},
+  mn:{flag:'🇲🇳',label:'Монгол'}
 };
 function toggleLangMenu(){
   const m=document.getElementById('lang-menu');
@@ -1531,7 +1532,7 @@ function setLang(l){
   // AI input placeholder 다국어
   const aiPh=document.getElementById('ai-input-placeholder');
   if(aiPh){const phs={zh:'请直接输入您的问题...',ko:'질문을 입력하세요...',en:'Type your question...',
-    vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...'};
+    vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews();
