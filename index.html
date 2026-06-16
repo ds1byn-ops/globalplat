@@ -1555,6 +1555,8 @@ const PORTAL_TO_KR={
   '페이스라인성형외과':'페이스라인성형외과의원',
   '강남서울안과':'강남서울안과의원',
 };
+// 역방향 매핑 (B2C kr → 포털 저장명)
+const KR_TO_PORTAL=Object.fromEntries(Object.entries(PORTAL_TO_KR).map(([k,v])=>[v,k]));
 
 async function loadHospIntros(){
   try{
@@ -1998,9 +2000,10 @@ async function loadHospIntro(kr){
       const all=await r.json();
       // name 정확 매칭 또는 부분 매칭
       const allData=Array.isArray(all)?all.map(x=>x.data||x).filter(Boolean):[];
+      // 포털 저장명으로 역변환
+      const portalName=KR_TO_PORTAL[kr]||kr;
       intro=allData.find(function(x){
-        // 정확한 매칭만: 포털명===kr, 또는 매핑 테이블 통해서
-        return x.name===kr||(PORTAL_TO_KR&&PORTAL_TO_KR[x.name]===kr);
+        return x.name===kr||x.name===portalName||(PORTAL_TO_KR[x.name]===kr);
       })||null;
       if(intro)HOSP_INTROS[kr]=intro;
     }catch(e){return;}
