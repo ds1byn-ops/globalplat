@@ -137,15 +137,39 @@ a{text-decoration:none;color:inherit;}
 .svc-btn:hover{background:#fffbf0;border-color:var(--gold);}
 .svc-btn.green{border-color:#a7f3d0;}.svc-btn.green:hover{background:#f0fff8;border-color:var(--gn);}
 .svc-btn.blue{border-color:#c7d2fe;}.svc-btn.blue:hover{background:#f0f4ff;border-color:#6366f1;}
-.lang-opt{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--dark);display:flex;align-items:center;gap:8px;}
+.lang-opt{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--dark);display:flex;align-items:center;gap:8px;min-height:44px;display:flex;align-items:center;}
 .lang-opt:hover{background:var(--lgray);}
 .lang-opt.active{background:#f0fff8;color:var(--gn2);font-weight:700;}
 @media(max-width:768px){
-  .hero-title{font-size:28px;}
+  .hero-title{font-size:26px;}
   .nav-links{display:none;}
   .footer-inner{grid-template-columns:1fr 1fr;}
   .detail-inner{grid-template-columns:1fr;}
   .info-grid{grid-template-columns:1fr;}
+  /* 모바일 nav */
+  .nav-inner{padding:0 14px;}
+  .nav-right{gap:6px;}
+  /* 모바일 언어 드롭다운 - 왼쪽으로 열리게 */
+  #lang-menu{right:auto!important;left:0!important;min-width:150px!important;max-height:60vh;overflow-y:auto;}
+  /* 언어 버튼 작게 */
+  #lang-trigger{padding:5px 8px!important;font-size:12px!important;}
+  /* 상담버튼 작게 */
+  .btn-consult{padding:7px 12px!important;font-size:12px!important;}
+  /* 히어로 */
+  .hero-inner{padding:40px 16px 32px;}
+  .hero-stats{gap:16px;}
+  /* 병원 카드 1열 */
+  .hosp-grid{grid-template-columns:1fr!important;}
+  /* 리뷰 카드 1열 */
+  .testi-grid{grid-template-columns:1fr!important;}
+  /* 섹션 패딩 */
+  .section-inner{padding:0 14px;}
+  /* 전체리뷰 모달 */
+  #all-reviews-modal>div{padding:16px!important;margin:10px!important;}
+}
+@media(max-width:400px){
+  #lang-trigger span:nth-child(2){display:none;}
+  .btn-consult{display:none;}
 }
 </style>
 </head>
@@ -1100,7 +1124,27 @@ const LANG_META={
 };
 function toggleLangMenu(){
   const m=document.getElementById('lang-menu');
-  m.style.display=m.style.display==='none'?'block':'none';
+  const btn=document.getElementById('lang-trigger');
+  const isHidden=m.style.display==='none'||!m.style.display;
+  if(isHidden){
+    m.style.display='block';
+    // 모바일에서 화면 밖으로 나가지 않도록 위치 조정
+    const rect=btn.getBoundingClientRect();
+    const menuW=160;
+    if(rect.right - menuW < 0){
+      m.style.left='0';m.style.right='auto';
+    } else {
+      m.style.right='0';m.style.left='auto';
+    }
+    // 아래쪽 공간 부족하면 위로 열기
+    if(window.innerHeight - rect.bottom < 300){
+      m.style.top='auto';m.style.bottom='38px';
+    } else {
+      m.style.top='38px';m.style.bottom='auto';
+    }
+  } else {
+    m.style.display='none';
+  }
 }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.lang-select-wrap')){
@@ -2096,6 +2140,19 @@ async function submitReview() {
 setLang('zh');
 loadReviews();
 loadHospIntros();
+
+// 외부 터치/클릭 시 언어 메뉴 닫기
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.lang-select-wrap')){
+    const m=document.getElementById('lang-menu');
+    if(m)m.style.display='none';
+  }
+});
+document.addEventListener('touchstart',function(e){
+  if(!e.target.closest('.lang-select-wrap')){
+    const m=document.getElementById('lang-menu');
+    if(m)m.style.display='none';
+  }},{passive:true});
 </script>
 </body>
 </html>
