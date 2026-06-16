@@ -755,10 +755,28 @@ let introImgs = []; // base64 이미지 배열
 
 async function loadIntro(){
   try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*&order=id.desc&limit=100`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    const d=await r.json();
-    if(Array.isArray(d)&&d.length>0){
-      const hospData=d.map(x=>x.data).filter(x=>x&&x.name===currentHosp.name);
+    // hosp_intro 테이블에서 로드 (saveIntro와 동일한 테이블)
+    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const all=await r.json();
+    const row=Array.isArray(all)?all.find(x=>x.data&&x.data.name===currentHosp.name):null;
+    if(row&&row.data){
+      const h=row.data;
+      document.getElementById('intro-zh').value=h.overview_zh||'';
+      document.getElementById('intro-ko').value=h.overview_ko||'';
+      document.getElementById('intro-en').value=h.overview_en||'';
+      document.getElementById('intro-treats').value=(h.treats||[]).join(', ');
+      document.getElementById('intro-link').value=h.link||'';
+      introImgs=h.images||[];
+      renderImgPreview();
+    }else{
+      // hosp_intro에 없으면 hospitals 테이블에서도 시도
+      const r2=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+      const all2=await r2.json();
+      const hospData=Array.isArray(all2)?all2.map(x=>x.data||x).filter(x=>x&&x.name===currentHosp.name):[];
       if(hospData.length>0){
         const h=hospData[0];
         document.getElementById('intro-zh').value=h.overview_zh||'';
@@ -770,33 +788,8 @@ async function loadIntro(){
         renderImgPreview();
       }
     }
-  }catch(e){console.warn('소개 로드 실패',e);}
+  }catch(e){console.error('loadIntro 오류:',e);}
 }
-
-function handleImgUpload(e){
-  const files=Array.from(e.target.files);
-  if(introImgs.length+files.length>3){alert('이미지는 최대 3장까지 업로드할 수 있습니다.');return;}
-  files.forEach(file=>{
-    if(file.size>2*1024*1024){alert(`${file.name}: 2MB를 초과합니다.`);return;}
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      introImgs.push(ev.target.result);
-      renderImgPreview();
-    };
-    reader.readAsDataURL(file);
-  });
-  e.target.value='';
-}
-
-function renderImgPreview(){
-  const el=document.getElementById('img-preview');if(!el)return;
-  el.innerHTML=introImgs.map((img,i)=>`
-    <div style="position:relative;width:100px;height:80px;">
-      <img src="${img}" style="width:100px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
-      <button onclick="removeImg(${i})" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;">✕</button>
-    </div>`).join('');
-}
-function removeImg(i){introImgs.splice(i,1);renderImgPreview();}
 
 async function saveIntro(){
   const introData={
