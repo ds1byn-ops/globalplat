@@ -356,6 +356,10 @@ tr:hover td{background:#fafaf8;}
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 
+// 마스터 계정
+const MASTER_ID='fkmaster';
+const MASTER_PW='FollowKorea2026!@';
+
 // 병원 계정 목록 (아이디:비번:병원명:수수료율)
 const HOSP_ACCOUNTS=[
   {id:'gv',pw:'fkGV2026!',name:'GV성형외과',rate:20},
@@ -381,7 +385,7 @@ const HOSP_ACCOUNTS=[
   {id:'onecell',pw:'fkOnecell2026!',name:'원셀의원',rate:15},
   {id:'wonjin',pw:'fkWon2026!',name:'원진성형외과피부과',rate:20},
   {id:'escheongdam',pw:'fkES2026!',name:'이에스청담성형외과',rate:20},
-  {id:'jiyu',pw:'fkJiyu2026!',name:'지유의원(사적인아름다움)',rate:10},
+  {id:'gu',pw:'fkGu2026!',name:'지유의원(사적인아름다움)',rate:10},
   {id:'chaum',pw:'fkChaum2026!',name:'차움',rate:20},
   {id:'circle',pw:'fkCircle2026!',name:'청담서클의원',rate:20},
   {id:'trinity',pw:'fkTrinity2026!',name:'트리니티라파엘로청담의원',rate:20},
@@ -423,6 +427,15 @@ async function dbUpdateOne(row){
 function doLogin(){
   const id=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
+  // 마스터 계정 확인
+  if(id===MASTER_ID&&pw===MASTER_PW){
+    currentHosp={id:'master',pw:MASTER_PW,name:'FK 마스터 관리자',rate:0,isMaster:true};
+    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
+    document.getElementById('hosp-name-badge').textContent='FK 마스터';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='flex';
+    dbLoad();return;
+  }
   const acc=HOSP_ACCOUNTS.find(a=>a.id===id&&a.pw===pw);
   if(acc){
     currentHosp=acc;
@@ -940,6 +953,16 @@ function handleImgUpload(e){
     reader.readAsDataURL(file);
   });
   e.target.value='';
+}
+
+function removeIntroImg(idx){introImgs.splice(idx,1);renderImgPreview();}
+
+function deleteCalEvent(idx){
+  if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  BK.splice(idx,1);
+  saveWmData&&saveWmData();
+  renderCal&&renderCal();
+  alert('삭제되었습니다.');
 }
 </script>
 
