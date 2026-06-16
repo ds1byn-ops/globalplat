@@ -1453,6 +1453,17 @@ function showAiBookingPrompt(){
 
 
 // ── 전체 병원 소개 이미지 로드 ──
+// 포털 병원명 → B2C HOSPS kr 매핑
+const PORTAL_TO_KR={
+  'JD피부성형센터(장덕한방)':'JD피부성형(장덕)',
+  '지유의원(사적인아름다움)':'지유의원 (사적인아름다움)',
+  '셀로라의원':'셀로라의원 (with 지유)',
+  '트리니티라파엘로청담의원':'티알 트리니티라파엘로 청담의원',
+  'GV성형외과':'GV 성형외과',
+  '페이스라인성형외과':'페이스라인성형외과의원',
+  '강남서울안과':'강남서울안과의원',
+};
+
 async function loadHospIntros(){
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
@@ -1461,13 +1472,23 @@ async function loadHospIntros(){
     if(!r.ok)return;
     const all=await r.json();
     if(Array.isArray(all)){
-      all.forEach(row=>{
+      all.forEach(function(row){
         const d=row.data||row;
         if(d&&d.name){
+          // 원본 이름으로 저장
           HOSP_INTROS[d.name]=d;
-          // 병원명 변형도 매핑 (괄호 제거 등)
-          const nameSimple=d.name.replace(/\(.*?\)/g,'').trim();
-          if(nameSimple!==d.name) HOSP_INTROS[nameSimple]=d;
+          // 괄호 제거 버전
+          const nameSimple=d.name.replace(/[(（][^)）]*[)）]/g,'').trim();
+          if(nameSimple!==d.name)HOSP_INTROS[nameSimple]=d;
+          // 매핑 테이블로 HOSPS kr 키에도 저장
+          const krKey=PORTAL_TO_KR[d.name];
+          if(krKey)HOSP_INTROS[krKey]=d;
+          // 역방향도 저장 (HOSPS kr값 → intro)
+          HOSPS.forEach(function(h){
+            if(h.kr===d.name||nameSimple===h.kr||(krKey&&h.kr===krKey)){
+              HOSP_INTROS[h.kr]=d;
+            }
+          });
         }
       });
     }
@@ -1888,9 +1909,13 @@ async function loadHospIntro(kr){
       if(!r.ok)return;
       const all=await r.json();
       // name 정확 매칭 또는 부분 매칭
-      intro=Array.isArray(all)?all.map(x=>x.data||x).filter(Boolean).find(x=>
-        x.name===kr||x.name===krSimple||kr.includes(x.name)||x.name.includes(krSimple)
-      ):null;
+      const allData=Array.isArray(all)?all.map(x=>x.data||x).filter(Boolean):[];
+      intro=allData.find(function(x){
+        const xSimple=(x.name||'').replace(/[(（][^)）]*[)）]/g,'').trim();
+        return x.name===kr||x.name===krSimple||kr===xSimple||
+          (PORTAL_TO_KR&&PORTAL_TO_KR[x.name]===kr)||
+          kr.includes(xSimple)||xSimple.includes(krSimple);
+      })||null;
       if(intro){HOSP_INTROS[kr]=intro;HOSP_INTROS[krSimple]=intro;}
     }catch(e){return;}
   }
