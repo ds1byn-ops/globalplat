@@ -2156,6 +2156,20 @@ document.addEventListener('touchstart',function(e){
     const m=document.getElementById('lang-menu');
     if(m)m.style.display='none';
   }},{passive:true});
+
+// ── 펄스 동기화 왕홍 데이터 로드 ──
+let SHARED_WM=[];
+async function loadSharedWanghongs(){
+  try{
+    const r=await fetch('https://qfncxamqeiyxkbjxwtoi.supabase.co/rest/v1/wanghongs?select=*',{
+      headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE'}
+    });
+    const all=await r.json();
+    if(Array.isArray(all)){
+      SHARED_WM=all.map(x=>x.data||x).filter(Boolean);
+    }
+  }catch(e){}
+}
 </script>
 </body>
 </html>
