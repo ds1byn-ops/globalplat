@@ -1479,7 +1479,7 @@ function showAiBookingPrompt(){
 
 
 // ── 전체 병원 소개 이미지 로드 ──
-// 포털 병원명 → B2C HOSPS kr 매핑
+// 포털 병원명 → B2C HOSPS kr 정확한 매핑 테이블
 const PORTAL_TO_KR={
   'JD피부성형센터(장덕한방)':'JD피부성형(장덕)',
   '지유의원(사적인아름다움)':'지유의원 (사적인아름다움)',
@@ -1500,22 +1500,18 @@ async function loadHospIntros(){
     if(Array.isArray(all)){
       all.forEach(function(row){
         const d=row.data||row;
-        if(d&&d.name){
-          // 원본 이름으로 저장
-          HOSP_INTROS[d.name]=d;
-          // 괄호 제거 버전
-          const nameSimple=d.name.replace(/[(（][^)）]*[)）]/g,'').trim();
-          if(nameSimple!==d.name)HOSP_INTROS[nameSimple]=d;
-          // 매핑 테이블로 HOSPS kr 키에도 저장
-          const krKey=PORTAL_TO_KR[d.name];
-          if(krKey)HOSP_INTROS[krKey]=d;
-          // 역방향도 저장 (HOSPS kr값 → intro)
-          HOSPS.forEach(function(h){
-            if(h.kr===d.name||nameSimple===h.kr||(krKey&&h.kr===krKey)){
-              HOSP_INTROS[h.kr]=d;
-            }
-          });
-        }
+        if(!d||!d.name)return;
+        // 1. 포털 원본명으로 저장
+        HOSP_INTROS[d.name]=d;
+        // 2. PORTAL_TO_KR 매핑으로 B2C kr키에도 저장
+        const krKey=PORTAL_TO_KR[d.name];
+        if(krKey)HOSP_INTROS[krKey]=d;
+        // 3. 포털명과 HOSPS kr이 정확히 같은 경우만 저장
+        HOSPS.forEach(function(h){
+          if(h.kr===d.name||(krKey&&h.kr===krKey)){
+            HOSP_INTROS[h.kr]=d;
+          }
+        });
       });
     }
     filterHosps();
@@ -1937,12 +1933,10 @@ async function loadHospIntro(kr){
       // name 정확 매칭 또는 부분 매칭
       const allData=Array.isArray(all)?all.map(x=>x.data||x).filter(Boolean):[];
       intro=allData.find(function(x){
-        const xSimple=(x.name||'').replace(/[(（][^)）]*[)）]/g,'').trim();
-        return x.name===kr||x.name===krSimple||kr===xSimple||
-          (PORTAL_TO_KR&&PORTAL_TO_KR[x.name]===kr)||
-          kr.includes(xSimple)||xSimple.includes(krSimple);
+        // 정확한 매칭만: 포털명===kr, 또는 매핑 테이블 통해서
+        return x.name===kr||(PORTAL_TO_KR&&PORTAL_TO_KR[x.name]===kr);
       })||null;
-      if(intro){HOSP_INTROS[kr]=intro;HOSP_INTROS[krSimple]=intro;}
+      if(intro)HOSP_INTROS[kr]=intro;
     }catch(e){return;}
   }
 
