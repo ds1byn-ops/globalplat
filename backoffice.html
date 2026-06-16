@@ -281,7 +281,7 @@ tr:hover td{background:#fafaf8;}
 <div class="page" id="page-wanghongs">
   <div class="toolbar">
     <span style="margin-left:auto;"></span>
-    <button class="btn primary" onclick="openWmModal(null)">+ 소개자 추가</button>
+    <button class="btn primary" onclick="openWmModalBO(null)">+ 소개자 추가</button>
   </div>
   <div class="card" style="padding:0;">
     <table><thead><tr>
@@ -674,9 +674,10 @@ function doLogout(){sessionStorage.removeItem('admin_auth');location.reload();}
 async function loadAndRender(){
   try{
     const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoad('hospitals')]);
-    if(bk&&bk.length>0)BK=bk;
-    if(wm&&wm.length>0)WM=wm;
+    if(bk&&bk.length>0)BK=bk;else console.warn('bookings 없음');
+    if(wm&&wm.length>0)WM=wm;else console.warn('wanghongs 없음');
     if(hd&&hd.length>0)HD=hd;
+    console.log('로드: 예약',BK.length,'건 / 왕홍',WM.length,'명');
   }catch(e){console.warn('DB 로드 실패',e);}
   populateFilters();
   await loadReviews();
@@ -1281,6 +1282,72 @@ async function toggleRvStatus(id){
 }
 
 // ── 페이지 전환 ──
+
+function renderWanghongs(){
+  const tbody=document.getElementById('wm-tbody');
+  if(!tbody)return;
+  if(!WM||WM.length===0){
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:#888;">왕홍·소개자 데이터 없음 — 펄스에서 🔄 동기화 버튼을 눌러주세요</td></tr>';
+    return;
+  }
+  tbody.innerHTML=WM.map(function(w){
+    const bks=BK.filter(function(b){return b.introducer===w.name;});
+    const totRev=bks.reduce(function(s,b){return s+r2w(b.amount);},0);
+    const totNet=bks.reduce(function(s,b){return s+calcC(b).net;},0);
+    const badge=w.type==='왕홍'?'<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">왕홍</span>'
+      :w.type==='가이드'?'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">가이드</span>'
+      :'<span style="background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:10px;font-size:10px;">'+w.type+'</span>';
+    return '<tr>'
+      +'<td style="font-weight:600;">'+(w.name||'')+'</td>'
+      +'<td>'+badge+'</td>'
+      +'<td style="font-size:11px;color:#888;">'+(w.channel||'-')+'</td>'
+      +'<td style="font-size:11px;color:#888;">'+(w.contact||'-')+'</td>'
+      +'<td style="text-align:center;color:#7c3aed;font-weight:600;">'+(w.rate||0)+'%</td>'
+      +'<td style="text-align:center;">'+bks.length+'명</td>'
+      +'<td style="color:#B8960C;">'+(totRev>0?totRev.toLocaleString()+'원':'-')+'</td>'
+      +'<td style="color:#D4AF37;">'+(totNet>0?totNet.toLocaleString()+'원':'-')+'</td>'
+      +'<td style="font-size:11px;color:#888;">'+(w.note||'-')+'</td>'
+      +'<td><button class="btn sm" onclick="openWmModalBO('+w.id+')">편집</button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+var wmEditIdBO=null;
+function openWmModalBO(id){
+  wmEditIdBO=id!=undefined?id:null;
+  var w=wmEditIdBO!=null?WM.find(function(x){return x.id===wmEditIdBO;}):null;
+  document.getElementById('bo-wm-name').value=w?w.name:'';
+  document.getElementById('bo-wm-type').value=w?w.type:'왕홍';
+  document.getElementById('bo-wm-channel').value=w?w.channel:'';
+  document.getElementById('bo-wm-contact').value=w?w.contact:'';
+  document.getElementById('bo-wm-rate').value=w?w.rate:'';
+  document.getElementById('bo-wm-note').value=w?w.note:'';
+  document.getElementById('bo-wm-modal').style.display='flex';
+}
+function closeWmModalBO(){document.getElementById('bo-wm-modal').style.display='none';}
+async function saveWmBO(){
+  var name=document.getElementById('bo-wm-name').value.trim();
+  if(!name){alert('이름을 입력하세요');return;}
+  var obj={
+    id:wmEditIdBO!=null?wmEditIdBO:(WM.reduce(function(m,w){return Math.max(m,w.id||0);},0)+1),
+    name:name,type:document.getElementById('bo-wm-type').value,
+    channel:document.getElementById('bo-wm-channel').value.trim(),
+    contact:document.getElementById('bo-wm-contact').value.trim(),
+    rate:parseFloat(document.getElementById('bo-wm-rate').value)||0,
+    note:document.getElementById('bo-wm-note').value.trim(),
+  };
+  if(wmEditIdBO!=null){var i=WM.findIndex(function(w){return w.id===wmEditIdBO;});if(i>=0)WM[i]=obj;}
+  else WM.push(obj);
+  try{await dbSave('wanghongs',WM);}catch(e){console.warn('저장 오류',e);}
+  closeWmModalBO();renderWanghongs();
+}
+async function deleteWmBO(){
+  if(wmEditIdBO==null)return;
+  if(!confirm('삭제하시겠습니까?'))return;
+  WM=WM.filter(function(w){return w.id!==wmEditIdBO;});
+  try{await dbSave('wanghongs',WM);}catch(e){}
+  closeWmModalBO();renderWanghongs();
+}
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
@@ -1581,6 +1648,29 @@ async function saveHospPw(){
   <div style="display:flex;gap:8px;">
     <button onclick="saveHospPw()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">저장</button>
     <button onclick="closeHospPwModal()" style="padding:10px 16px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
+
+<!-- 왕홍 편집 모달 (backoffice) -->
+<div id="bo-wm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeWmModalBO()">
+<div style="background:#fff;border-radius:16px;width:400px;padding:24px;">
+  <h3 style="margin-bottom:16px;font-size:15px;font-weight:700;">👑 왕홍·소개자 편집</h3>
+  <div style="display:grid;gap:10px;">
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">이름</label><input type="text" id="bo-wm-name" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">구분</label>
+      <select id="bo-wm-type" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;">
+        <option>왕홍</option><option>가이드</option><option>에이전시</option><option>중국사업부</option>
+      </select></div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">채널/소속</label><input type="text" id="bo-wm-channel" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">연락처</label><input type="text" id="bo-wm-contact" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">수수료율 (%)</label><input type="number" id="bo-wm-rate" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
+    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">비고</label><input type="text" id="bo-wm-note" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:16px;">
+    <button onclick="saveWmBO()" style="flex:1;padding:10px;background:#1A6B4A;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">저장</button>
+    <button onclick="deleteWmBO()" style="padding:10px 14px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;cursor:pointer;">삭제</button>
+    <button onclick="closeWmModalBO()" style="padding:10px 14px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
   </div>
 </div>
 </div>
