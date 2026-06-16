@@ -553,7 +553,7 @@ function renderCalendar(){
       document.getElementById('cal-detail').style.display='block';
       document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
       (items.length?`<table><thead><tr><th>환자명</th><th>시간</th><th>시술</th><th>상태</th><th>처리</th></tr></thead><tbody>`+
-      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.status}">${b.status}</span></td><td><button class="btn sm" onclick="openBkModal(${b.id})">처리</button></td></tr>`).join('')+`</tbody></table>`
+      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.status}">${b.status}</span></td><td style="display:flex;gap:4px;"><button class="btn sm" onclick="openBkModal(${b.id})">처리</button><button class="btn sm" onclick="deleteCalBk(${b.id})" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5;">삭제</button></td></tr>`).join('')+`</tbody></table>`
       :`<div style="color:#aaa;padding:8px;font-size:12px;">예약 없음</div>`)+`</div>`;
     };
     grid.appendChild(div);
@@ -963,6 +963,20 @@ function deleteCalEvent(idx){
   saveWmData&&saveWmData();
   renderCal&&renderCal();
   alert('삭제되었습니다.');
+}
+
+async function deleteCalBk(id){
+  if(!confirm('이 예약을 삭제하시겠습니까?'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/bookings?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    await dbLoad();
+    document.getElementById('cal-detail').style.display='none';
+    renderCalendar();
+    alert('삭제되었습니다.');
+  }catch(e){alert('삭제 실패: '+e.message);}
 }
 </script>
 
