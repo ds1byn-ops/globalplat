@@ -306,13 +306,41 @@ a{text-decoration:none;color:inherit;}
       <button onclick="openReviewModal()" style="margin-top:14px;padding:10px 24px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:#fff;border:none;border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;" data-i18n="write_review">✍️ 写评价</button>
     </div>
     <div id="reviews-loading" style="text-align:center;padding:20px;color:var(--gray);font-size:13px;display:none;">⏳ 加载中...</div>
-    <div class="testi-grid" id="testi-grid"></div>
+    <!-- 롤링 뷰어 -->
+    <div style="position:relative;overflow:hidden;">
+      <div class="testi-grid" id="testi-grid" style="transition:opacity 0.4s;"></div>
+    </div>
+    <!-- 페이지 컨트롤 -->
+    <div id="rv-pager" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px;">
+      <button onclick="rvPage(-1)" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:16px;">‹</button>
+      <div id="rv-dots" style="display:flex;gap:6px;"></div>
+      <button onclick="rvPage(1)" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:16px;">›</button>
+    </div>
+    <!-- 더보기 -->
+    <div style="text-align:center;margin-top:20px;">
+      <button onclick="openAllReviews()" style="padding:10px 32px;background:transparent;border:2px solid var(--gn);color:var(--gn);border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;" data-i18n="review_more">모든 리뷰 보기 →</button>
+    </div>
     <div id="reviews-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);">
       <div style="font-size:36px;margin-bottom:10px;">💬</div>
       <p data-i18n="no_review">还没有评价，来写第一条吧！</p>
     </div>
   </div>
 </section>
+
+<!-- 전체 리뷰 모달 -->
+<div id="all-reviews-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:800;overflow-y:auto;padding:16px;" onclick="if(event.target===this)closeAllReviews()">
+  <div style="background:#fff;border-radius:16px;max-width:900px;margin:20px auto;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:18px;font-weight:800;" data-i18n="review_title">真实用户评价</h2>
+      <button onclick="closeAllReviews()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <!-- 병원 필터 -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="all-rv-hosp-filters">
+      <button onclick="filterAllRv('')" class="all-rv-filter active" style="padding:6px 14px;border-radius:20px;border:1px solid var(--gn);background:var(--gn);color:#fff;font-size:12px;cursor:pointer;">전체</button>
+    </div>
+    <div class="testi-grid" id="all-rv-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;"></div>
+  </div>
+</div>
 
 
 
@@ -693,7 +721,7 @@ async function dbInsert(table,row){
 }
 
 const I={
-  zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',
+  zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',review_more:'查看全部评价 →',
     hero_badge:'韩国NO.1医美预约平台',hero_title:'打造<em>专属你的</em><br>K-Beauty之旅',
     hero_sub:'精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同',
     search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',
@@ -818,7 +846,7 @@ const I={
     rv_done_title:'Review Submitted!',rv_done_desc:'Thank you for sharing your experience 😊',rv_done_close:'Close',
     star_hints:['','Very Poor','Poor','OK','Good','Excellent!'],
   }
-  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',
+  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',review_more:'Xem tất cả đánh giá →',
     hero_badge:'Nền tảng du lịch thẩm mỹ #1 Hàn Quốc',hero_title:'Hành trình<br><em>K-Beauty</em> của bạn',
     hero_sub:'Các bệnh viện thẩm mỹ hàng đầu Gangnam, Seoul<br>Hỗ trợ tiếng Trung & tiếng Anh · Đồng hành toàn trình',
     search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',
@@ -848,7 +876,7 @@ const I={
     rv_done_title:'Đánh giá đã gửi!',rv_done_desc:'Cảm ơn bạn 😊',rv_done_close:'Đóng',
     star_hints:['','Rất tệ','Tệ','Bình thường','Tốt','Xuất sắc!'],
   }
-  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',
+  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',review_more:'ดูรีวิวทั้งหมด →',
     hero_badge:'แพลตฟอร์มท่องเที่ยวเพื่อความงาม #1 เกาหลี',hero_title:'การเดินทาง<br><em>K-Beauty</em> ของคุณ',
     hero_sub:'คลินิกความงามชั้นนำในกังนัม โซล<br>บริการภาษาจีนและอังกฤษ · ดูแลตลอดการเดินทาง',
     search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',
@@ -878,7 +906,7 @@ const I={
     rv_done_title:'ส่งรีวิวแล้ว!',rv_done_desc:'ขอบคุณสำหรับรีวิวของคุณ 😊',rv_done_close:'ปิด',
     star_hints:['','แย่มาก','แย่','ปานกลาง','ดี','ดีเยี่ยม!'],
   }
-  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',
+  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',review_more:'全てのレビューを見る →',
     hero_badge:'韓国No.1医療美容予約プラットフォーム',hero_title:'あなただけの<br><em>K-Beautyの旅</em>へ',
     hero_sub:'ソウル江南トップクラスの医療美容クリニック<br>中国語・日本語対応 · 全行程サポート',
     search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',
@@ -908,7 +936,7 @@ const I={
     rv_done_title:'口コミ投稿完了！',rv_done_desc:'貴重なご意見ありがとうございます 😊',rv_done_close:'閉じる',
     star_hints:['','とても悪い','悪い','普通','良い','とても満足！'],
   }
-  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',
+  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',review_more:'Смотреть все отзывы →',
     hero_badge:'Платформа медицинского туризма №1 в Корее',hero_title:'Ваше идеальное<br><em>K-Beauty путешествие</em>',
     hero_sub:'Лучшие клиники красоты Каннама, Сеул<br>Поддержка на китайском и английском · Сопровождение',
     search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',
@@ -1038,7 +1066,7 @@ const SVC_LABELS={
     '3n4d':{zh:'3晚4天套餐',ko:'3박 4일 패키지',en:'3N4D Package'},
     '4n5d':{zh:'4晚5天套餐',ko:'4박 5일 패키지',en:'4N5D Package'},
     '5nmore':{zh:'5晚以上套餐',ko:'5박 이상 패키지',en:'5+ Nights Package'},
-  },  mn:{nav_home:'Нүүр',nav_hosps:'Эмнэлэг',nav_concierge:'Консьерж',nav_proc:'Захиалгын дараалал',nav_review:'Үнэлгээ',nav_consult:'Үнэгүй зөвлөгөө',
+  },  mn:{nav_home:'Нүүр',nav_hosps:'Эмнэлэг',nav_concierge:'Консьерж',nav_proc:'Захиалгын дараалал',nav_review:'Үнэлгээ',nav_consult:'Үнэгүй зөвлөгөө',review_more:'Бүх үнэлгээ харах →',
     hero_badge:'Солонгосын №1 эмнэлгийн аялал',hero_title:'Таны онцгой<br><em>K-Beauty аялал</em>',
     hero_sub:'Сеулын Ганнамын шилдэг гоо сайхны эмнэлгүүд<br>Хятад хэлний үйлчилгээ · Бүрэн дагалдан яваа',
     search_ph:'Эмнэлэг, процедур хайх...',
@@ -1670,7 +1698,14 @@ function renderDetail(kr){
   document.getElementById('d-treat-grid').innerHTML=treats.map((tr,i)=>`<div style="background:var(--white);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border);"><div style="font-size:24px;margin-bottom:6px;">${icons[i%icons.length]}</div><div style="font-size:12px;font-weight:600;">${tr}</div></div>`).join('');
   document.getElementById('d-hours-grid').innerHTML=h.hours.split('/').map(s=>{const p=s.trim().split(' ');const day=p.slice(0,-1).join(' ');const time=p[p.length-1];return`<div style="background:var(--white);border-radius:10px;padding:10px;border:1px solid var(--border);text-align:center;"><div style="font-size:11px;font-weight:700;color:var(--gn2);margin-bottom:4px;">${day}</div><div style="font-size:11px;color:var(--gray);">${time}</div></div>`;}).join('');
   const revs=t('reviews');
-  document.getElementById('d-review-grid').innerHTML=revs.map(r=>`<div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">${r.t}</div><div class="testi-user"><div class="testi-avatar">${r.n[0]}</div><div><div style="font-size:12px;font-weight:600;">${r.n}</div><div style="font-size:10px;color:var(--gray);">${r.f}</div></div></div></div>`).join('');
+  // 해당 병원 리뷰만 필터링
+  const hospRevs=(allReviews.length>0?allReviews:SAMPLE_REVIEWS).filter(function(r){return r.hospital===kr;});
+  const hospRvGrid=document.getElementById('d-review-grid');
+  if(hospRevs.length>0){
+    hospRvGrid.innerHTML=hospRevs.map(function(r){return rvCardHTML(r);}).join('');
+  }else{
+    hospRvGrid.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray);font-size:13px;">아직 리뷰가 없습니다.</div>';
+  }
   applyI18n();
   showDTab('overview',document.querySelector('.dtab'));
 }
@@ -1746,40 +1781,89 @@ async function loadReviews() {
   renderReviews();
 }
 
-function renderReviews() {
-  const grid = document.getElementById('testi-grid');
-  const empty = document.getElementById('reviews-empty');
-  // active 리뷰 있으면 DB 리뷰, 없으면 샘플 표시
-  const reviews = allReviews.length > 0 ? allReviews : SAMPLE_REVIEWS;
-  
-  if (!reviews || reviews.length === 0) {
-    grid.innerHTML = '';
-    if(empty) empty.style.display = '';
-    return;
-  }
-  if(empty) empty.style.display = 'none';
-  
-  grid.innerHTML = reviews.map(r => {
-    const stars = '★'.repeat(r.star || 5) + '☆'.repeat(5 - (r.star || 5));
-    const badge = allReviews.length > 0 && allReviews.includes(r)
-      ? `<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 7px;border-radius:8px;margin-left:6px;">인증</span>` : '';
-    return `<div class="testi-card" style="position:relative;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div class="testi-stars" style="color:#D4AF37;letter-spacing:2px;">${stars}</div>
-        <span style="font-size:10px;color:#aaa;">${r.date||''}</span>
-      </div>
-      <div style="font-size:11px;background:#f0fff8;color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">${r.hospital||''} · ${r.treatment||''}</div>
-      <div class="testi-text">${r.text}</div>
-      <div class="testi-user">
-        <div class="testi-avatar">${(r.name||'?')[0]}</div>
-        <div>
-          <div style="font-size:12px;font-weight:600;">${r.name||''}${badge}</div>
-          <div style="font-size:10px;color:var(--gray);">${r.from||''}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+// ── 리뷰 롤링 ──
+let rvCurrentPage=0;
+const RV_PER_PAGE=4;
+let rvAutoTimer=null;
+
+function rvCardHTML(r){
+  const stars='★'.repeat(r.star||5)+'☆'.repeat(5-(r.star||5));
+  const badge=allReviews.includes(r)?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 7px;border-radius:8px;margin-left:4px;">인증</span>':'';
+  return '<div class="testi-card">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
+    +'<div style="color:#D4AF37;letter-spacing:2px;font-size:13px;">'+stars+'</div>'
+    +'<span style="font-size:10px;color:#aaa;">'+(r.date||'')+'</span></div>'
+    +'<div style="font-size:11px;background:#f0fff8;color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">'+(r.hospital||'')+' · '+(r.treatment||'')+'</div>'
+    +'<div class="testi-text">'+(r.text||'')+'</div>'
+    +'<div class="testi-user"><div class="testi-avatar">'+(r.name||'?')[0]+'</div>'
+    +'<div><div style="font-size:12px;font-weight:600;">'+(r.name||'')+badge+'</div>'
+    +'<div style="font-size:10px;color:var(--gray);">'+(r.from||'')+'</div></div></div></div>';
 }
+
+function renderReviews(){
+  const grid=document.getElementById('testi-grid');
+  const empty=document.getElementById('reviews-empty');
+  const reviews=allReviews.length>0?allReviews:SAMPLE_REVIEWS;
+  if(!reviews||reviews.length===0){grid.innerHTML='';if(empty)empty.style.display='';return;}
+  if(empty)empty.style.display='none';
+  const totalPages=Math.ceil(reviews.length/RV_PER_PAGE);
+  rvCurrentPage=Math.min(rvCurrentPage,totalPages-1);
+  const pageRevs=reviews.slice(rvCurrentPage*RV_PER_PAGE,(rvCurrentPage+1)*RV_PER_PAGE);
+  grid.style.opacity='0';
+  setTimeout(function(){
+    grid.innerHTML=pageRevs.map(function(r){return rvCardHTML(r);}).join('');
+    grid.style.opacity='1';
+  },180);
+  const dots=document.getElementById('rv-dots');
+  if(dots){
+    dots.innerHTML=Array.from({length:totalPages},function(_,i){
+      return '<div onclick="rvGoTo('+i+')" style="width:8px;height:8px;border-radius:50%;background:'+(i===rvCurrentPage?'var(--gn)':'#ddd')+';cursor:pointer;transition:background 0.3s;"></div>';
+    }).join('');
+  }
+  clearTimeout(rvAutoTimer);
+  rvAutoTimer=setTimeout(function(){rvPage(1);},5000);
+}
+function rvPage(dir){
+  const reviews=allReviews.length>0?allReviews:SAMPLE_REVIEWS;
+  const totalPages=Math.ceil(reviews.length/RV_PER_PAGE);
+  rvCurrentPage=(rvCurrentPage+dir+totalPages)%totalPages;
+  renderReviews();
+}
+function rvGoTo(idx){rvCurrentPage=idx;renderReviews();}
+
+// ── 전체 리뷰 모달 ──
+function openAllReviews(){
+  const reviews=allReviews.length>0?allReviews:SAMPLE_REVIEWS;
+  const hosps=[...new Set(reviews.map(function(r){return r.hospital;}).filter(Boolean))];
+  const filterDiv=document.getElementById('all-rv-hosp-filters');
+  filterDiv.innerHTML='<button onclick="filterAllRv(null)" class="all-rv-filter arfb" data-hosp="" style="padding:6px 14px;border-radius:20px;border:1px solid var(--gn);background:var(--gn);color:#fff;font-size:12px;cursor:pointer;font-weight:600;">전체</button>'
+    +hosps.map(function(h){
+      return '<button onclick="filterAllRv(this)" data-hosp="'+h.replace(/"/g,'&quot;')+'" class="all-rv-filter arfb" style="padding:6px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;cursor:pointer;">'+h+'</button>';
+    }).join('');
+  filterAllRv(null);
+  document.getElementById('all-reviews-modal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeAllReviews(){
+  document.getElementById('all-reviews-modal').style.display='none';
+  document.body.style.overflow='';
+}
+function filterAllRv(btn){
+  const hosp=btn?btn.dataset.hosp:'';
+  const reviews=allReviews.length>0?allReviews:SAMPLE_REVIEWS;
+  const filtered=hosp?reviews.filter(function(r){return r.hospital===hosp;}):reviews;
+  document.getElementById('all-rv-grid').innerHTML=filtered.map(function(r){return rvCardHTML(r);}).join('');
+  document.querySelectorAll('.arfb').forEach(function(b){
+    const bHosp=b.dataset.hosp||'';
+    const active=bHosp===hosp;
+    b.style.background=active?'var(--gn)':'#fff';
+    b.style.color=active?'#fff':'#374151';
+    b.style.borderColor=active?'var(--gn)':'#e5e7eb';
+    b.style.fontWeight=active?'600':'400';
+  });
+}
+
+
 
 
 
