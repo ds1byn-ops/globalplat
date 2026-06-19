@@ -94,7 +94,7 @@ tr:hover td{background:#fafaf8;}
 
 <div id="app" style="display:none;">
 <div class="header">
-  <div class="logo" onclick="location.reload()" style="cursor:pointer;" title="새로고침">팔로우코리아</div>
+  <div class="logo">팔로우코리아</div>
   <div class="header-badge">백오피스 ADMIN</div>
   <div style="margin-left:auto;display:flex;gap:8px;">
     <button class="btn gold-btn" onclick="exportExcel()" style="font-size:11px;">엑셀 다운로드</button>
@@ -119,15 +119,12 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
+    <a onclick="showPage('quote_requests')"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></a>
     <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
-  </div>
-  <div class="sidebar-section">📢 공지</div>
-  <div class="sidebar-menu">
-    <a onclick="showPage('notices')"><span class="ic">📢</span>공지사항 관리</a>
   </div>
   <div class="sidebar-section">⭐ 리뷰</div>
   <div class="sidebar-menu">
-    <a onclick="showPage('reviews')"><span class="ic">⭐</span>리뷰 승인 관리</a>
+    <a onclick="showPage('reviews')"><span class="ic">⭐</span>고객 리뷰 관리</a>
   </div>
   <div class="sidebar-section">⚙️ 설정</div>
   <div class="sidebar-menu">
@@ -281,13 +278,43 @@ tr:hover td{background:#fafaf8;}
 <div class="page" id="page-wanghongs">
   <div class="toolbar">
     <span style="margin-left:auto;"></span>
-    <button class="btn primary" onclick="openWmModalBO(null)">+ 소개자 추가</button>
+    <button class="btn primary" onclick="openWmModal(null)">+ 소개자 추가</button>
   </div>
   <div class="card" style="padding:0;">
     <table><thead><tr>
       <th>이름</th><th>구분</th><th>채널</th><th>연락처</th><th>수수료율</th>
       <th>연결 환자수</th><th>누적 매출</th><th>FK 순매출</th><th>비고</th><th>관리</th>
     </tr></thead><tbody id="wm-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 견적신청 관리 -->
+<div class="page" id="page-quote_requests">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <h2 style="font-size:14px;font-weight:700;">🧾 환자웹 견적신청 관리</h2>
+    <div style="display:flex;gap:6px;">
+      <select id="qr-status-f" onchange="renderQuoteRequests()">
+        <option value="">전체 상태</option>
+        <option value="신규">신규</option>
+        <option value="상담중">상담중</option>
+        <option value="완료">완료</option>
+        <option value="취소">취소</option>
+      </select>
+      <button class="btn" onclick="loadQuoteRequests()">🔄 새로고침</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="sc red"><div class="sl">신규 (미처리)</div><div class="sv" id="qr-st-new">-</div></div>
+    <div class="sc gold"><div class="sl">상담중</div><div class="sv" id="qr-st-progress">-</div></div>
+    <div class="sc green"><div class="sl">완료</div><div class="sv" id="qr-st-done">-</div></div>
+    <div class="sc"><div class="sl">전체</div><div class="sv" id="qr-st-total">-</div></div>
+  </div>
+  <div style="overflow-x:auto;" class="card" style="padding:0;">
+    <table><thead><tr>
+      <th>접수일시</th><th>성명</th><th>국적</th><th>연락처</th>
+      <th>희망병원</th><th>방한일정</th><th>희망시술</th>
+      <th>예상견적</th><th>담당자</th><th>상태</th><th>관리</th>
+    </tr></thead><tbody id="qr-tbody"></tbody></table>
   </div>
 </div>
 
@@ -327,171 +354,70 @@ tr:hover td{background:#fafaf8;}
 </div>
 
 
-<div class="page" id="page-notices">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h2 style="font-size:16px;font-weight:700;">📢 공지사항 관리</h2>
-    <button onclick="openNoticeModal()" style="padding:8px 16px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">✏️ 공지 작성</button>
-  </div>
-  <div class="card" style="padding:12px 16px;margin-bottom:12px;">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <select id="notice-filter-target" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
-        <option value="">전체</option>
-        <option value="all">전체 병원 공지</option>
-        <option value="신상성형외과">신상성형외과</option>
-<option value="원진성형외과피부과">원진성형외과피부과</option>
-<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
-<option value="드림성형외과">드림성형외과</option>
-<option value="셀리닉의원">셀리닉의원</option>
-<option value="차움">차움</option>
-<option value="원셀의원">원셀의원</option>
-<option value="글로비성형외과">글로비성형외과</option>
-<option value="라미체의원">라미체의원</option>
-<option value="뷰성형외과">뷰성형외과</option>
-<option value="바른길산부인과">바른길산부인과</option>
-<option value="강남다움의원">강남다움의원</option>
-<option value="더뷰티성형외과">더뷰티성형외과</option>
-<option value="신소애여성의원">신소애여성의원</option>
-<option value="히어피부과">히어피부과</option>
-<option value="히어산부인과">히어산부인과</option>
-<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
-<option value="리프톤의원">리프톤의원</option>
-<option value="청담서클의원">청담서클의원</option>
-<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
-<option value="벤자민의원">벤자민의원</option>
-<option value="고운몸의원">고운몸의원</option>
-<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
-<option value="GV 성형외과">GV 성형외과</option>
-<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
-<option value="강남서울안과의원">강남서울안과의원</option>
-<option value="JD피부성형(장덕)">JD피부성형(장덕)</option>
-      </select>
-      <select id="notice-filter-type" onchange="loadNotices()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
-        <option value="">전체 유형</option>
-        <option value="general">📌 일반</option>
-        <option value="urgent">🚨 긴급</option>
-        <option value="settlement">💰 정산</option>
-        <option value="schedule">📅 일정</option>
-      </select>
-      <button onclick="loadNotices()" style="padding:6px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">🔄 새로고침</button>
-    </div>
-  </div>
-  <div id="notice-list"><div style="text-align:center;padding:40px;color:var(--gray);">로딩 중...</div></div>
-</div>
-
-<!-- 공지 작성 모달 -->
-<div id="notice-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticeModal()">
-<div style="background:#fff;border-radius:16px;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;padding:24px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h3 id="notice-modal-title" style="font-size:15px;font-weight:700;">📢 공지 작성</h3>
-    <button onclick="closeNoticeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;">✕</button>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:11px;">
-    <div>
-      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📌 수신 대상</label>
-      <div style="display:flex;gap:8px;margin-bottom:6px;">
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);"><input type="radio" name="ntgt" value="all" id="ntgt-all" checked onchange="toggleNTarget()"> 전체 병원</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--lgray);"><input type="radio" name="ntgt" value="specific" id="ntgt-specific" onchange="toggleNTarget()"> 특정 병원</label>
-      </div>
-      <div id="ntgt-hosp-wrap" style="display:none;">
-        <select id="ntgt-hosp" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="신상성형외과">신상성형외과</option>
-<option value="원진성형외과피부과">원진성형외과피부과</option>
-<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
-<option value="드림성형외과">드림성형외과</option>
-<option value="셀리닉의원">셀리닉의원</option>
-<option value="차움">차움</option>
-<option value="원셀의원">원셀의원</option>
-<option value="글로비성형외과">글로비성형외과</option>
-<option value="라미체의원">라미체의원</option>
-<option value="뷰성형외과">뷰성형외과</option>
-<option value="바른길산부인과">바른길산부인과</option>
-<option value="강남다움의원">강남다움의원</option>
-<option value="더뷰티성형외과">더뷰티성형외과</option>
-<option value="신소애여성의원">신소애여성의원</option>
-<option value="히어피부과">히어피부과</option>
-<option value="히어산부인과">히어산부인과</option>
-<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
-<option value="리프톤의원">리프톤의원</option>
-<option value="청담서클의원">청담서클의원</option>
-<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
-<option value="벤자민의원">벤자민의원</option>
-<option value="고운몸의원">고운몸의원</option>
-<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
-<option value="GV 성형외과">GV 성형외과</option>
-<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
-<option value="강남서울안과의원">강남서울안과의원</option>
-<option value="JD피부성형(장덕)">JD피부성형(장덕)</option></select>
-      </div>
-    </div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">🏷️ 유형</label>
-      <select id="n-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
-        <option value="general">📌 일반 공지</option><option value="urgent">🚨 긴급 공지</option>
-        <option value="settlement">💰 정산 안내</option><option value="schedule">📅 일정 공유</option>
-      </select>
-    </div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📝 제목</label>
-      <input type="text" id="n-title" placeholder="공지 제목" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;">
-    </div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">📄 내용</label>
-      <textarea id="n-content" rows="5" placeholder="공지 내용" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical;outline:none;"></textarea>
-    </div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">👤 작성자</label>
-      <input type="text" id="n-author" value="Follow Korea 운영팀" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;">
-    </div>
-  </div>
-  <div style="display:flex;gap:8px;margin-top:14px;">
-    <button onclick="submitNotice()" style="flex:1;padding:11px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✅ 등록</button>
-    <button onclick="closeNoticeModal()" style="padding:11px 16px;background:var(--lgray);border:1px solid var(--border);border-radius:8px;cursor:pointer;">취소</button>
-  </div>
-</div>
-</div>
-
-<!-- 리뷰 승인 관리 -->
+<!-- 리뷰 관리 -->
 <div class="page" id="page-reviews">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h2 style="font-size:16px;font-weight:700;">⭐ 리뷰 승인 관리</h2>
-    <div style="display:flex;gap:6px;">
-      <select id="rv-filter-hosp" onchange="loadAdminReviews()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
-        <option value="">전체 병원</option>
-        <option value="신상성형외과">신상성형외과</option>
-<option value="원진성형외과피부과">원진성형외과피부과</option>
-<option value="지유의원 (사적인아름다움)">지유의원 (사적인아름다움)</option>
-<option value="드림성형외과">드림성형외과</option>
-<option value="셀리닉의원">셀리닉의원</option>
-<option value="차움">차움</option>
-<option value="원셀의원">원셀의원</option>
-<option value="글로비성형외과">글로비성형외과</option>
-<option value="라미체의원">라미체의원</option>
-<option value="뷰성형외과">뷰성형외과</option>
-<option value="바른길산부인과">바른길산부인과</option>
-<option value="강남다움의원">강남다움의원</option>
-<option value="더뷰티성형외과">더뷰티성형외과</option>
-<option value="신소애여성의원">신소애여성의원</option>
-<option value="히어피부과">히어피부과</option>
-<option value="히어산부인과">히어산부인과</option>
-<option value="셀로라의원 (with 지유)">셀로라의원 (with 지유)</option>
-<option value="리프톤의원">리프톤의원</option>
-<option value="청담서클의원">청담서클의원</option>
-<option value="루비성형외과(신사점)">루비성형외과(신사점)</option>
-<option value="벤자민의원">벤자민의원</option>
-<option value="고운몸의원">고운몸의원</option>
-<option value="티알 트리니티라파엘로 청담의원">티알 트리니티라파엘로 청담의원</option>
-<option value="GV 성형외과">GV 성형외과</option>
-<option value="페이스라인성형외과의원">페이스라인성형외과의원</option>
-<option value="강남서울안과의원">강남서울안과의원</option>
-<option value="JD피부성형(장덕)">JD피부성형(장덕)</option>
-      </select>
-      <select id="rv-filter-status" onchange="loadAdminReviews()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
-        <option value="">전체 상태</option>
-        <option value="pending">⏳ 승인 대기</option>
-        <option value="active">✅ 승인됨</option>
-        <option value="rejected">❌ 거절됨</option>
-      </select>
-      <button onclick="loadAdminReviews()" style="padding:6px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;">🔄</button>
-    </div>
+  <div class="toolbar">
+    <input type="text" id="rv-q" placeholder="이름·병원·내용 검색..." oninput="renderAdminReviews()" style="width:200px;">
+    <select id="rv-star-f" onchange="renderAdminReviews()">
+      <option value="">전체 별점</option>
+      <option value="5">⭐⭐⭐⭐⭐ 5점</option>
+      <option value="4">⭐⭐⭐⭐ 4점</option>
+      <option value="3">⭐⭐⭐ 3점</option>
+      <option value="2">⭐⭐ 2점</option>
+      <option value="1">⭐ 1점</option>
+    </select>
+    <select id="rv-status-f" onchange="renderAdminReviews()">
+      <option value="">전체 상태</option>
+      <option value="active">게시중</option>
+      <option value="hidden">숨김</option>
+    </select>
+    <span id="rv-count" style="margin-left:auto;font-size:12px;color:var(--gray);"></span>
   </div>
-  <div id="admin-review-list"><div style="text-align:center;padding:40px;color:var(--gray);">로딩 중...</div></div>
+  <div class="stats-row">
+    <div class="sc"><div class="sl">전체 리뷰</div><div class="sv" id="rv-st-total">-</div></div>
+    <div class="sc gold"><div class="sl">평균 별점</div><div class="sv" id="rv-st-avg">-</div></div>
+    <div class="sc green"><div class="sl">게시중</div><div class="sv" id="rv-st-active">-</div></div>
+    <div class="sc red"><div class="sl">숨김</div><div class="sv" id="rv-st-hidden">-</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;" id="rv-grid"></div>
 </div>
 
+<!-- 리뷰 수정 모달 -->
+<div class="modal-bg" id="rv-edit-modal" onclick="if(event.target===this)document.getElementById('rv-edit-modal').classList.remove('open')">
+<div class="modal" style="width:500px;">
+  <h3>리뷰 수정 <button onclick="document.getElementById('rv-edit-modal').classList.remove('open')">✕</button></h3>
+  <div class="fg">
+    <div class="fitem"><label>작성자</label><input type="text" id="rve-name"></div>
+    <div class="fitem"><label>지역</label><input type="text" id="rve-from"></div>
+    <div class="fitem"><label>병원</label><input type="text" id="rve-hosp"></div>
+    <div class="fitem"><label>시술</label><input type="text" id="rve-treat"></div>
+    <div class="fitem"><label>별점 (1~5)</label>
+      <select id="rve-star">
+        <option value="5">⭐⭐⭐⭐⭐ 5점</option>
+        <option value="4">⭐⭐⭐⭐ 4점</option>
+        <option value="3">⭐⭐⭐ 3점</option>
+        <option value="2">⭐⭐ 2점</option>
+        <option value="1">⭐ 1점</option>
+      </select>
+    </div>
+    <div class="fitem"><label>상태</label>
+      <select id="rve-status">
+        <option value="active">게시중</option>
+        <option value="hidden">숨김 (고객에게 안 보임)</option>
+      </select>
+    </div>
+    <div class="fitem full"><label>리뷰 내용</label>
+      <textarea id="rve-text" style="height:80px;"></textarea>
+    </div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn danger sm" id="rve-del-btn" onclick="deleteReview()" style="margin-right:auto;">🗑 삭제</button>
+    <button class="btn" onclick="document.getElementById('rv-edit-modal').classList.remove('open')">취소</button>
+    <button class="btn primary" onclick="saveReview()">저장</button>
+  </div>
+</div>
+</div>
+<!-- 설정 -->
 <div class="page" id="page-settings">
   <div class="card" style="max-width:480px;">
     <div class="card-title">⚙️ 시스템 설정</div>
@@ -622,11 +548,31 @@ tr:hover td{background:#fafaf8;}
 </div>
 </div>
 
+<!-- 견적신청 처리 모달 -->
+<div class="modal-bg" id="qr-modal" onclick="if(event.target===this)document.getElementById('qr-modal').classList.remove('open')">
+<div class="modal" style="width:480px;">
+  <h3>견적신청 상세 / 처리 <button onclick="document.getElementById('qr-modal').classList.remove('open')">✕</button></h3>
+  <input type="hidden" id="qr-edit-id">
+  <div style="background:var(--lgray);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;line-height:1.9;" id="qr-detail-view"></div>
+  <div class="fg">
+    <div class="fitem"><label>담당 상담원</label><input type="text" id="qr-assigned" placeholder="담당자명"></div>
+    <div class="fitem"><label>상태</label>
+      <select id="qr-status-edit"><option>신규</option><option>상담중</option><option>완료</option><option>취소</option></select>
+    </div>
+    <div class="fitem full"><label>상담 메모</label><input type="text" id="qr-note-edit" placeholder="상담 내용, 후속 조치 등"></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="document.getElementById('qr-modal').classList.remove('open')">취소</button>
+    <button class="btn primary" onclick="saveQuoteRequest()">저장</button>
+  </div>
+</div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
-const ADMIN_ACCOUNTS=[{id:'followkorea',pw:'fk2026!'},{id:'admin',pw:'FKAdmin2026!@'},{id:'jeff',pw:'FKJeff2026!@'}];
+const ADMIN_ACCOUNTS=[{id:'followkorea',pw:'fk2026!'},{id:'admin',pw:'admin1234'},{id:'jeff',pw:'jeff2026!'}];
 
 let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
 let calY=2026, calM=5;
@@ -639,13 +585,11 @@ async function dbLoad(table){
   return Array.isArray(d)?d.map(x=>x.data).filter(Boolean):[];
 }
 async function dbSave(table,rows){
-  // 전체 삭제 (id > 0 조건 필터)
   await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
     method:'DELETE',
     headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
   });
   if(!rows.length)return;
-  // 재삽입
   await fetch(`${SUPA_URL}/rest/v1/${table}`,{
     method:'POST',
     headers:{...headers,'Prefer':'return=minimal'},
@@ -674,13 +618,13 @@ function doLogout(){sessionStorage.removeItem('admin_auth');location.reload();}
 async function loadAndRender(){
   try{
     const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoad('hospitals')]);
-    if(bk&&bk.length>0)BK=bk;else console.warn('bookings 없음');
-    if(wm&&wm.length>0)WM=wm;else console.warn('wanghongs 없음');
+    if(bk&&bk.length>0)BK=bk;
+    if(wm&&wm.length>0)WM=wm;
     if(hd&&hd.length>0)HD=hd;
-    console.log('로드: 예약',BK.length,'건 / 왕홍',WM.length,'명');
   }catch(e){console.warn('DB 로드 실패',e);}
   populateFilters();
   await loadReviews();
+  await loadQuoteRequests();
   renderDashboard();
 }
 
@@ -696,12 +640,10 @@ function calcC(b){
 }
 
 function populateFilters(){
-  // 병원 필터
   const sel=document.getElementById('bk-hosp-f');
   while(sel.options.length>1)sel.remove(1);
   const hosps=[...new Set(BK.map(b=>b.hospital))].sort((a,b)=>a.localeCompare(b,'ko'));
   hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o);});
-  // 병원 등록 모달
   const fSel=document.getElementById('f-hosp');
   fSel.innerHTML=HD.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')).map(h=>`<option value="${h.name}">${h.name}</option>`).join('');
 }
@@ -719,12 +661,10 @@ function renderDashboard(){
   document.getElementById('db-wang').textContent=new Set(BK.map(b=>b.introducer).filter(Boolean)).size;
   document.getElementById('db-month').textContent=monthBk.length;
   document.getElementById('db-new').textContent=newBk.length;
-  // 차트
   const hm={},mm={};
   BK.forEach(b=>{hm[b.hospital]=(hm[b.hospital]||0)+1;const mo=b.datetime.slice(5,7)+'월';mm[mo]=(mm[mo]||0)+1;});
   makeBar('ch-hosp',Object.entries(hm).sort((a,b)=>b[1]-a[1]).slice(0,7));
   makeBar('ch-month',Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])));
-  // 최근 10건
   const recent=[...BK].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
   document.getElementById('db-recent').innerHTML=recent.map(b=>{
     const c=calcC(b);
@@ -761,7 +701,6 @@ function renderBk(){
     const mq=!q||b.name.toLowerCase().includes(q)||b.hospital.toLowerCase().includes(q)||(b.introducer||'').toLowerCase().includes(q);
     return mq&&(!hosp||b.hospital===hosp)&&(!inflow||b.inflow_type===inflow)&&(!month||b.datetime.startsWith(month))&&(!status||b.status===status);
   }).sort((a,b)=>a.datetime.localeCompare(b.datetime));
-  // 통계
   let tW=0,tH=0,tWC=0,tN=0,tNS=0;
   filtered.forEach(b=>{const c=calcC(b);tW+=c.won;tH+=c.hc;tWC+=c.wc;tN+=c.net;if(b.noshow==='Y'||b.status==='노쇼'||b.status==='취소')tNS++;});
   document.getElementById('bk-st-total').textContent=filtered.length;
@@ -1206,7 +1145,6 @@ function renderAdminReviews(){
     return mq&&ms&&mst;
   });
   document.getElementById('rv-count').textContent=`총 ${filtered.length}건`;
-  // 통계
   const active=REVIEWS.filter(r=>r.status!=='hidden').length;
   const avg=REVIEWS.length?Math.round(REVIEWS.reduce((s,r)=>s+(r.star||5),0)/REVIEWS.length*10)/10:0;
   document.getElementById('rv-st-total').textContent=REVIEWS.length;
@@ -1282,72 +1220,6 @@ async function toggleRvStatus(id){
 }
 
 // ── 페이지 전환 ──
-
-function renderWanghongs(){
-  const tbody=document.getElementById('wm-tbody');
-  if(!tbody)return;
-  if(!WM||WM.length===0){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:#888;">왕홍·소개자 데이터 없음 — 펄스에서 🔄 동기화 버튼을 눌러주세요</td></tr>';
-    return;
-  }
-  tbody.innerHTML=WM.map(function(w){
-    const bks=BK.filter(function(b){return b.introducer===w.name;});
-    const totRev=bks.reduce(function(s,b){return s+r2w(b.amount);},0);
-    const totNet=bks.reduce(function(s,b){return s+calcC(b).net;},0);
-    const badge=w.type==='왕홍'?'<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">왕홍</span>'
-      :w.type==='가이드'?'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">가이드</span>'
-      :'<span style="background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:10px;font-size:10px;">'+w.type+'</span>';
-    return '<tr>'
-      +'<td style="font-weight:600;">'+(w.name||'')+'</td>'
-      +'<td>'+badge+'</td>'
-      +'<td style="font-size:11px;color:#888;">'+(w.channel||'-')+'</td>'
-      +'<td style="font-size:11px;color:#888;">'+(w.contact||'-')+'</td>'
-      +'<td style="text-align:center;color:#7c3aed;font-weight:600;">'+(w.rate||0)+'%</td>'
-      +'<td style="text-align:center;">'+bks.length+'명</td>'
-      +'<td style="color:#B8960C;">'+(totRev>0?totRev.toLocaleString()+'원':'-')+'</td>'
-      +'<td style="color:#D4AF37;">'+(totNet>0?totNet.toLocaleString()+'원':'-')+'</td>'
-      +'<td style="font-size:11px;color:#888;">'+(w.note||'-')+'</td>'
-      +'<td><button class="btn sm" onclick="openWmModalBO('+w.id+')">편집</button></td>'
-      +'</tr>';
-  }).join('');
-}
-
-var wmEditIdBO=null;
-function openWmModalBO(id){
-  wmEditIdBO=id!=undefined?id:null;
-  var w=wmEditIdBO!=null?WM.find(function(x){return x.id===wmEditIdBO;}):null;
-  document.getElementById('bo-wm-name').value=w?w.name:'';
-  document.getElementById('bo-wm-type').value=w?w.type:'왕홍';
-  document.getElementById('bo-wm-channel').value=w?w.channel:'';
-  document.getElementById('bo-wm-contact').value=w?w.contact:'';
-  document.getElementById('bo-wm-rate').value=w?w.rate:'';
-  document.getElementById('bo-wm-note').value=w?w.note:'';
-  document.getElementById('bo-wm-modal').style.display='flex';
-}
-function closeWmModalBO(){document.getElementById('bo-wm-modal').style.display='none';}
-async function saveWmBO(){
-  var name=document.getElementById('bo-wm-name').value.trim();
-  if(!name){alert('이름을 입력하세요');return;}
-  var obj={
-    id:wmEditIdBO!=null?wmEditIdBO:(WM.reduce(function(m,w){return Math.max(m,w.id||0);},0)+1),
-    name:name,type:document.getElementById('bo-wm-type').value,
-    channel:document.getElementById('bo-wm-channel').value.trim(),
-    contact:document.getElementById('bo-wm-contact').value.trim(),
-    rate:parseFloat(document.getElementById('bo-wm-rate').value)||0,
-    note:document.getElementById('bo-wm-note').value.trim(),
-  };
-  if(wmEditIdBO!=null){var i=WM.findIndex(function(w){return w.id===wmEditIdBO;});if(i>=0)WM[i]=obj;}
-  else WM.push(obj);
-  try{await dbSave('wanghongs',WM);}catch(e){console.warn('저장 오류',e);}
-  closeWmModalBO();renderWanghongs();
-}
-async function deleteWmBO(){
-  if(wmEditIdBO==null)return;
-  if(!confirm('삭제하시겠습니까?'))return;
-  WM=WM.filter(function(w){return w.id!==wmEditIdBO;});
-  try{await dbSave('wanghongs',WM);}catch(e){}
-  closeWmModalBO();renderWanghongs();
-}
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
@@ -1360,10 +1232,90 @@ function showPage(id){
   if(id==='wanghong_rev')renderWanghongRev();
   if(id==='hospitals')renderHospitals();
   if(id==='wanghongs')renderWanghongs();
+  if(id==='quote_requests')renderQuoteRequests();
   if(id==='foreign')renderForeign();
-  if(id==='reviews')loadAdminReviews();
-  if(id==='notices')loadNotices();
+  if(id==='reviews'){loadReviews().then(renderAdminReviews);}
 }
+
+// ── 견적신청 관리 (환자웹 견적위젯 연동) ──
+let QR=[];
+async function loadQuoteRequests(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/quote_requests?select=*&order=created_at.desc`,{headers});
+    QR=r.ok?await r.json():[];
+  }catch(e){console.warn('견적신청 로드 실패',e);QR=[];}
+  // 사이드바 뱃지 갱신 (페이지 어디에 있든 항상 보이도록)
+  const badge=document.getElementById('qr-badge');
+  if(badge){
+    const newCnt=QR.filter(q=>q.status==='신규'||!q.status).length;
+    badge.style.display=newCnt>0?'inline-block':'none';
+    badge.textContent=newCnt;
+  }
+}
+function qrBadgeClass(s){const m={신규:'대기',상담중:'협의중',완료:'확정',취소:'취소'};return m[s]||'미정';}
+function renderQuoteRequests(){
+  const sf=(document.getElementById('qr-status-f')||{value:''}).value;
+  const list=sf?QR.filter(q=>q.status===sf):QR;
+  document.getElementById('qr-st-new').textContent=QR.filter(q=>q.status==='신규'||!q.status).length;
+  document.getElementById('qr-st-progress').textContent=QR.filter(q=>q.status==='상담중').length;
+  document.getElementById('qr-st-done').textContent=QR.filter(q=>q.status==='완료').length;
+  document.getElementById('qr-st-total').textContent=QR.length;
+  document.getElementById('qr-tbody').innerHTML=list.map(q=>{
+    const created=q.created_at?new Date(q.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    const stay=(q.arrival_date&&q.departure_date)?`${q.arrival_date.slice(5)}~${q.departure_date.slice(5)}`:'-';
+    const quote=(q.quote_min||q.quote_max)?`${q.quote_min}~${q.quote_max}만원`:'-';
+    return`<tr style="${(q.status==='신규'||!q.status)?'background:#fffbf0;':''}">
+      <td style="font-size:10px;color:#888;white-space:nowrap;">${created}</td>
+      <td style="font-weight:500;">${q.name||'-'}</td>
+      <td>${q.nationality||'-'}</td>
+      <td style="font-size:11px;">${q.contact||'-'}</td>
+      <td style="font-size:11px;">${q.hospital||'상담 후 매칭'}</td>
+      <td style="font-size:10px;color:#888;white-space:nowrap;">${stay}</td>
+      <td style="font-size:10px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${q.procedures||''}">${q.procedures||'-'}</td>
+      <td style="color:#B8960C;white-space:nowrap;">${quote}</td>
+      <td style="font-size:11px;">${q.assigned_to||'-'}</td>
+      <td><span class="badge ${qrBadgeClass(q.status)}">${q.status||'신규'}</span></td>
+      <td><button class="btn sm" onclick="openQrModal('${q.id}')">처리</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#aaa;">견적신청이 없습니다</td></tr>';
+}
+function openQrModal(id){
+  const q=QR.find(x=>x.id===id);if(!q)return;
+  document.getElementById('qr-edit-id').value=id;
+  document.getElementById('qr-assigned').value=q.assigned_to||'';
+  document.getElementById('qr-status-edit').value=q.status||'신규';
+  document.getElementById('qr-note-edit').value=q.note||'';
+  document.getElementById('qr-detail-view').innerHTML=`
+    <b>${q.name}</b> (${q.nationality}) · ${q.contact}<br>
+    희망병원: ${q.hospital||'상담 후 매칭'}<br>
+    방한일정: ${q.arrival_date||'-'} ~ ${q.departure_date||'-'}<br>
+    희망시술: ${q.procedures||'-'}<br>
+    예상견적: <span style="color:#B8960C;font-weight:600;">${q.quote_min}~${q.quote_max}만원</span>
+  `;
+  document.getElementById('qr-modal').classList.add('open');
+}
+async function saveQuoteRequest(){
+  const id=document.getElementById('qr-edit-id').value;
+  const body={
+    assigned_to:document.getElementById('qr-assigned').value.trim(),
+    status:document.getElementById('qr-status-edit').value,
+    note:document.getElementById('qr-note-edit').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/quote_requests?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{...headers,'Prefer':'return=minimal'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){alert('저장 실패: '+res.status);return;}
+    document.getElementById('qr-modal').classList.remove('open');
+    await loadQuoteRequests();
+    renderQuoteRequests();
+  }catch(e){alert('저장 오류: '+e.message);}
+}
+// 5분마다 신규 견적신청 자동 확인 (사이드바 뱃지 갱신용)
+setInterval(()=>{loadQuoteRequests();},5*60*1000);
 
 // ── 자동 로그인 ──
 if(sessionStorage.getItem('admin_auth')==='1'){
@@ -1371,308 +1323,6 @@ if(sessionStorage.getItem('admin_auth')==='1'){
   document.getElementById('app').style.display='';
   loadAndRender();
 }
-
-// ══════════ 공지사항 ══════════
-let editingNoticeId=null;
-const SUPA_URL_N=SUPA_URL, SUPA_KEY_N=SUPA_KEY;
-
-function openNoticeModal(nd){
-  editingNoticeId=nd?.id||null;
-  document.getElementById('notice-modal-title').textContent=editingNoticeId?'📢 공지 수정':'📢 공지 작성';
-  document.getElementById('n-title').value=nd?.title||'';
-  document.getElementById('n-content').value=nd?.content||'';
-  document.getElementById('n-type').value=nd?.type||'general';
-  document.getElementById('n-author').value=nd?.author||'Follow Korea 운영팀';
-  const tgt=nd?.target||'all';
-  document.getElementById('ntgt-all').checked=(tgt==='all');
-  document.getElementById('ntgt-specific').checked=(tgt!=='all');
-  if(tgt!=='all')document.getElementById('ntgt-hosp').value=tgt;
-  toggleNTarget();
-  document.getElementById('notice-modal-bg').style.display='flex';
-}
-function closeNoticeModal(){document.getElementById('notice-modal-bg').style.display='none';editingNoticeId=null;}
-function toggleNTarget(){
-  document.getElementById('ntgt-hosp-wrap').style.display=document.getElementById('ntgt-specific').checked?'':'none';
-}
-async function submitNotice(){
-  const title=document.getElementById('n-title').value.trim();
-  const content=document.getElementById('n-content').value.trim();
-  if(!title){alert('제목을 입력하세요');return;}
-  if(!content){alert('내용을 입력하세요');return;}
-  const target=document.getElementById('ntgt-specific').checked?document.getElementById('ntgt-hosp').value:'all';
-  const nd={id:editingNoticeId||Date.now(),title,content,type:document.getElementById('n-type').value,
-    target,author:document.getElementById('n-author').value||'Follow Korea 운영팀',
-    created_at:new Date().toISOString().slice(0,10)};
-  try{
-    const res=editingNoticeId
-      ?await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${editingNoticeId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},body:JSON.stringify({data:nd})})
-      :await fetch(`${SUPA_URL}/rest/v1/notices`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},body:JSON.stringify({data:nd})});
-    if(res.ok){alert(editingNoticeId?'수정 완료!':'공지 등록 완료!');closeNoticeModal();loadNotices();}
-    else alert('저장 실패: '+(await res.text()));
-  }catch(e){alert('오류: '+e.message);}
-}
-window._noticeCache={};
-async function loadNotices(){
-  const el=document.getElementById('notice-list');
-  if(!el)return;
-  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--gray);">로딩 중...</div>';
-  const fT=document.getElementById('notice-filter-target')?.value||'';
-  const fTy=document.getElementById('notice-filter-type')?.value||'';
-  try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=id.desc&limit=200`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    let list=(await r.json()).map(x=>x.data||x).filter(Boolean);
-    if(fT==='all')list=list.filter(n=>n.target==='all');
-    else if(fT)list=list.filter(n=>n.target===fT);
-    if(fTy)list=list.filter(n=>n.type===fTy);
-    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">📭 공지사항이 없습니다.</div>';return;}
-    const TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
-    list.forEach(n=>{window._noticeCache[String(n.id)]=n;});
-    el.innerHTML=list.map(n=>`
-      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:10px;background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:10px;">${TL[n.type]||'📌 일반'}</span>
-            <span style="font-size:13px;font-weight:700;">${n.title||''}</span>
-            ${n.target==='all'?'<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:10px;">🌐 전체</span>':`<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;">🏥 ${n.target}</span>`}
-          </div>
-          <div style="display:flex;gap:4px;align-items:center;white-space:nowrap;">
-            <span style="font-size:10px;color:var(--gray);">${(n.created_at||'').slice(0,10)}</span>
-            <button data-nid="${n.id}" class="n-edit-btn" style="padding:3px 8px;background:var(--lgray);border:1px solid var(--border);border-radius:4px;font-size:10px;cursor:pointer;">수정</button>
-            <button onclick="deleteNotice(${n.id})" style="padding:3px 8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:4px;font-size:10px;cursor:pointer;">삭제</button>
-          </div>
-        </div>
-        <div style="font-size:12px;color:var(--gray);line-height:1.7;white-space:pre-line;">${n.content||''}</div>
-        <div style="font-size:10px;color:#bbb;margin-top:6px;">작성: ${n.author||''}</div>
-      </div>`).join('');
-  // 수정 버튼 이벤트
-    el.querySelectorAll('.n-edit-btn').forEach(function(b){
-      b.onclick=function(){openNoticeModal(window._noticeCache[this.dataset.nid]);};
-    });
-  }catch(e){el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패</div>';}
-}
-function editNotice(id){openNoticeModal(window._noticeCache[id]);}
-async function deleteNotice(id){
-  if(!confirm('삭제하시겠습니까?'))return;
-  await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-  loadNotices();
-}
-
-// ══════════ 리뷰 승인 관리 ══════════
-async function loadAdminReviews(){
-  const el=document.getElementById('admin-review-list');
-  if(!el)return;
-  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--gray);">로딩 중...</div>';
-  const fH=document.getElementById('rv-filter-hosp')?.value||'';
-  const fS=document.getElementById('rv-filter-status')?.value||'';
-  try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*&order=id.desc&limit=200`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
-    });
-    const raw=await r.json();
-    // row.id(DB PK)와 data.id(JS timestamp) 모두 저장
-    let list=raw.map(function(row){
-      var d=row.data||row;
-      d._rowId=row.id; // DB PK 저장
-      return d;
-    }).filter(Boolean);
-    // 상태 필터
-    if(fS==='pending') list=list.filter(function(r){return !r.status||r.status==='pending';});
-    else if(fS) list=list.filter(function(r){return r.status===fS;});
-    // 병원 필터
-    if(fH) list=list.filter(function(r){return (r.hospital||'').includes(fH);});
-    if(!list.length){
-      el.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">리뷰가 없습니다.</div>';
-      return;
-    }
-    function starStr(n){return '★'.repeat(n||5)+'☆'.repeat(5-(n||5));}
-    el.innerHTML=list.map(function(rv){
-      var st=rv.status||'pending';
-      var rowId=String(rv._rowId||'');
-      var stBadge=st==='active'
-        ?'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:8px;font-size:10px;">✅ 승인됨</span>'
-        :st==='rejected'
-        ?'<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:8px;font-size:10px;">❌ 거절됨</span>'
-        :'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:10px;">⏳ 대기</span>';
-      var approveBtn=st!=='active'?'<button data-rowid="'+rowId+'" data-action="approve" class="rv-action-btn" style="padding:5px 12px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">✅ 승인</button>':'';
-      var rejectBtn=st!=='rejected'?'<button data-rowid="'+rowId+'" data-action="reject" class="rv-action-btn" style="padding:5px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;font-size:11px;cursor:pointer;">❌ 거절</button>':'';
-      var deleteBtn='<button data-rowid="'+rowId+'" data-action="delete" class="rv-action-btn" style="padding:5px 12px;background:var(--lgray);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">🗑️ 삭제</button>';
-      return '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
-        +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
-        +stBadge
-        +'<span style="font-size:12px;font-weight:700;">'+(rv.name||'익명')+'</span>'
-        +'<span style="font-size:11px;color:var(--gray);">'+(rv.from||'')+'</span>'
-        +'<span style="color:#D4AF37;font-size:12px;">'+starStr(rv.star)+'</span>'
-        +'</div>'
-        +'<span style="font-size:10px;color:var(--gray);">'+(rv.date||'').slice(0,10)+'</span>'
-        +'</div>'
-        +'<div style="font-size:11px;background:var(--lgray);color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:6px;">'+(rv.hospital||'')+' · '+(rv.treatment||'')+'</div>'
-        +'<div style="font-size:12px;color:var(--gray);line-height:1.6;">'+(rv.text||'')+'</div>'
-        +(rv.img?'<img src="'+rv.img+'" style="width:80px;height:65px;object-fit:cover;border-radius:6px;margin-top:8px;">':'')
-        +'<div style="display:flex;gap:6px;margin-top:10px;">'+approveBtn+rejectBtn+deleteBtn+'</div>'
-        +'</div>';
-    }).join('');
-    // 이벤트 위임
-    el.querySelectorAll('.rv-action-btn').forEach(function(btn){
-      btn.onclick=function(){
-        var rowId=this.dataset.rowid;
-        var action=this.dataset.action;
-        if(action==='approve') doReviewAction(rowId,'active');
-        else if(action==='reject') doReviewAction(rowId,'rejected');
-        else if(action==='delete') doDeleteReview(rowId);
-      };
-    });
-  }catch(e){
-    el.innerHTML='<div style="padding:20px;color:#dc2626;">로드 실패: '+e.message+'</div>';
-    console.error(e);
-  }
-}
-async function doReviewAction(rowId, status){
-  try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
-    });
-    const rows=await r.json();
-    if(!rows.length){alert('리뷰를 찾을 수 없습니다.');return;}
-    const row=rows[0];
-    const newData=Object.assign({},row.data||row,{status:status});
-    delete newData._rowId;
-    const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({data:newData})
-    });
-    if(res.ok){
-      alert(status==='active'?'승인되었습니다.':'거절되었습니다.');
-      loadAdminReviews();
-    }else{
-      alert('처리 실패: '+(await res.text()));
-    }
-  }catch(e){alert('오류: '+e.message);}
-}
-async function doDeleteReview(rowId){
-  if(!confirm('이 리뷰를 삭제하시겠습니까?'))return;
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
-      method:'DELETE',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
-    });
-    if(res.ok){alert('삭제되었습니다.');loadAdminReviews();}
-    else alert('삭제 실패');
-  }catch(e){alert('오류: '+e.message);}
-}
-
-async function updateReviewStatus(id, status){
-  const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-  const all=await r.json();
-  const row=all.find(x=>(x.data?.id||x.id)===id);
-  if(!row)return false;
-  const newData={...(row.data||row), status};
-  const rowId=row.id;
-  const res=await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${rowId}`,{
-    method:'PATCH',
-    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
-    body:JSON.stringify({data:newData})
-  });
-  return res.ok;
-}
-async function approveReview(id){
-  if(await updateReviewStatus(id,'active')){alert('승인되었습니다.');loadAdminReviews();}
-  else alert('실패');
-}
-async function rejectReview(id){
-  if(await updateReviewStatus(id,'rejected')){alert('거절되었습니다.');loadAdminReviews();}
-  else alert('실패');
-}
-async function deleteReview(id){
-  if(!confirm('삭제하시겠습니까?'))return;
-  const r=await fetch(`${SUPA_URL}/rest/v1/reviews?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-  const all=await r.json();
-  const row=all.find(x=>(x.data?.id||x.id)===id);
-  if(row){
-    await fetch(`${SUPA_URL}/rest/v1/reviews?id=eq.${row.id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-  }
-  loadAdminReviews();
-}
-
-// ── 병원 비밀번호 관리 ──
-function openHospPwModal(name){
-  document.getElementById('hosp-pw-name').value=name;
-  document.getElementById('hosp-pw-new').value='';
-  document.getElementById('hosp-pw-modal').style.display='flex';
-}
-function closeHospPwModal(){document.getElementById('hosp-pw-modal').style.display='none';}
-async function saveHospPw(){
-  const name=document.getElementById('hosp-pw-name').value;
-  const pw=document.getElementById('hosp-pw-new').value.trim();
-  if(!pw){alert('새 비밀번호를 입력하세요');return;}
-  try{
-    // hospitals 테이블에서 해당 병원 찾기
-    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    const all=await r.json();
-    const row=all.find(x=>(x.data||x).name===name);
-    if(row){
-      const newData=Object.assign({},row.data||row,{portal_pw:pw});
-      await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify({data:newData})
-      });
-    }else{
-      // 없으면 새로 생성
-      await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify({data:{name,portal_pw:pw}})
-      });
-    }
-    alert(`${name} 비밀번호가 변경되었습니다.`);
-    closeHospPwModal();
-  }catch(e){alert('오류: '+e.message);}
-}
 </script>
-
-<!-- 병원 비밀번호 변경 모달 -->
-<div class="modal-bg" id="hosp-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeHospPwModal()">
-<div class="modal" style="width:360px;">
-  <h3 style="margin-bottom:16px;">🔑 병원 비밀번호 변경</h3>
-  <div style="margin-bottom:12px;">
-    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">병원명</label>
-    <input type="text" id="hosp-pw-name" readonly style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:13px;">
-  </div>
-  <div style="margin-bottom:12px;">
-    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호</label>
-    <input type="text" id="hosp-pw-new" placeholder="새 비밀번호 입력" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
-  </div>
-  <div style="font-size:11px;color:#888;margin-bottom:14px;">※ 변경 후 hospital-portal.html 코드에 직접 반영됩니다.</div>
-  <div style="display:flex;gap:8px;">
-    <button onclick="saveHospPw()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">저장</button>
-    <button onclick="closeHospPwModal()" style="padding:10px 16px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
-  </div>
-</div>
-</div>
-
-<!-- 왕홍 편집 모달 (backoffice) -->
-<div id="bo-wm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeWmModalBO()">
-<div style="background:#fff;border-radius:16px;width:400px;padding:24px;">
-  <h3 style="margin-bottom:16px;font-size:15px;font-weight:700;">👑 왕홍·소개자 편집</h3>
-  <div style="display:grid;gap:10px;">
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">이름</label><input type="text" id="bo-wm-name" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">구분</label>
-      <select id="bo-wm-type" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;">
-        <option>왕홍</option><option>가이드</option><option>에이전시</option><option>중국사업부</option>
-      </select></div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">채널/소속</label><input type="text" id="bo-wm-channel" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">연락처</label><input type="text" id="bo-wm-contact" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">수수료율 (%)</label><input type="number" id="bo-wm-rate" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
-    <div><label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px;">비고</label><input type="text" id="bo-wm-note" style="width:100%;padding:7px;border:1px solid #e5e7eb;border-radius:6px;box-sizing:border-box;"></div>
-  </div>
-  <div style="display:flex;gap:8px;margin-top:16px;">
-    <button onclick="saveWmBO()" style="flex:1;padding:10px;background:#1A6B4A;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">저장</button>
-    <button onclick="deleteWmBO()" style="padding:10px 14px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;cursor:pointer;">삭제</button>
-    <button onclick="closeWmModalBO()" style="padding:10px 14px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
-  </div>
-</div>
-</div>
 </body>
 </html>
