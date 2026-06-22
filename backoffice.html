@@ -118,6 +118,7 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-section">👥 관리</div>
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
+    <a onclick="showPage('ad_settings')"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('quote_requests')"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></a>
     <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
@@ -271,6 +272,32 @@ tr:hover td{background:#fafaf8;}
       <th>No</th><th>병원명</th><th>진료과목</th><th>계약상태</th><th>담당자</th><th>연락처</th>
       <th>수수료</th><th>부가세</th><th>지급일</th><th>예약건수</th><th>관리</th>
     </tr></thead><tbody id="hd-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 병원 광고 설정 -->
+<div class="page" id="page-ad_settings">
+  <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">📢 병원 광고 설정</h2>
+  <p style="font-size:13px;color:#888;margin-bottom:24px;">
+    메인 화면(followkorea.kr) "제휴 병원" 섹션 최상단에 노출될 추천 병원 2곳을 지정합니다.
+    여기서 지정하지 않은 나머지 병원들은 자동으로 하단에 1/4 크기 바둑판으로 배치됩니다.
+  </p>
+  <div class="card" style="max-width:600px;">
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">추천 병원 1번 칸</label>
+        <select id="ad-slot1" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;"></select>
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">추천 병원 2번 칸</label>
+        <select id="ad-slot2" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;"></select>
+      </div>
+      <button class="btn primary" onclick="saveAdSettings()" style="margin-top:8px;">저장하기</button>
+      <div id="ad-save-msg" style="font-size:13px;color:#15803d;display:none;">✓ 저장되었습니다. 메인 화면에 바로 반영됩니다.</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;padding:14px 18px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:12px;color:#92400e;max-width:600px;">
+    ⚠️ 1번 칸과 2번 칸에 같은 병원을 중복 지정할 수 없습니다.
   </div>
 </div>
 
@@ -596,6 +623,64 @@ async function dbSave(table,rows){
     body:JSON.stringify(rows.map(r=>({data:r})))
   });
 }
+// ── hospitals 전용 로드/저장 ──
+// ⚠️ hospitals 테이블은 bookings/wanghongs와 달리 {data:jsonb} 구조가 아니라
+//    실제 컬럼(name, category, contact, contract_rate, contract_status, note,
+//    id(uuid)) 구조입니다. 그래서 공통 dbLoad/dbSave를 쓰지 않고 이 테이블만
+//    별도 함수로 처리합니다. 화면에서 쓰는 필드명(dept/contract/manager/tel/
+//    commission/vat/paydate/link/no)과 실제 컬럼명을 여기서 매핑합니다.
+function hdToDbRow(h){
+  // 화면용 필드 → 실제 컬럼명으로 변환
+  // dept/manager/tel/commission/vat/paydate/link/no 는 실제 컬럼이 없으므로
+  // note 컬럼 안에 JSON 형태로 같이 보관해서 정보 손실 없이 저장합니다.
+  const extra = { dept:h.dept||'', manager:h.manager||'', tel:h.tel||'', commission:h.commission||'',
+                  vat:h.vat||'별도', paydate:h.paydate||'', link:h.link||'', no:h.no||0, note_text:h.note||'' };
+  return {
+    name: h.name,
+    category: h.dept || '',
+    contact: h.tel || '',
+    contract_rate: parseFloat(h.commission) || 0,
+    contract_status: h.contract || '미정',
+    note: JSON.stringify(extra)
+  };
+}
+function dbRowToHd(row, idx){
+  // 실제 컬럼 → 화면용 필드로 변환 (note 안의 JSON을 풀어서 복원)
+  let extra = {};
+  try{ extra = JSON.parse(row.note || '{}'); }catch(e){ extra = {}; }
+  return {
+    no: extra.no || (idx+1),
+    name: row.name || '',
+    dept: extra.dept || row.category || '',
+    contract: row.contract_status || '미정',
+    manager: extra.manager || '',
+    tel: extra.tel || row.contact || '',
+    commission: extra.commission || (row.contract_rate ? String(row.contract_rate) : ''),
+    vat: extra.vat || '별도',
+    paydate: extra.paydate || '',
+    link: extra.link || '',
+    note: extra.note_text || (typeof extra.no === 'undefined' ? (row.note||'') : ''),
+    _dbId: row.id // 실제 uuid 보관 (삭제 시 필요)
+  };
+}
+async function dbLoadHospitals(){
+  const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*&order=name.asc`,{headers});
+  const d=await r.json();
+  return Array.isArray(d)?d.map((row,i)=>dbRowToHd(row,i)):[];
+}
+async function dbSaveHospitals(rows){
+  // 전체를 지우고 다시 넣는 기존 dbSave 패턴과 동일하게 동작
+  await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'}
+  });
+  if(!rows.length)return;
+  await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+    method:'POST',
+    headers:{...headers,'Prefer':'return=minimal'},
+    body:JSON.stringify(rows.map(hdToDbRow))
+  });
+}
 async function dbDeleteAll(table){
   await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
 }
@@ -617,7 +702,7 @@ function doLogout(){sessionStorage.removeItem('admin_auth');location.reload();}
 
 async function loadAndRender(){
   try{
-    const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoad('hospitals')]);
+    const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoadHospitals()]);
     if(bk&&bk.length>0)BK=bk;
     if(wm&&wm.length>0)WM=wm;
     if(hd&&hd.length>0)HD=hd;
@@ -1012,14 +1097,64 @@ async function saveHd(){
   if(hdEditId!==null){const i=HD.findIndex(h=>h.no===hdEditId);if(i>=0)HD[i]={...HD[i],...data};}
   else{data.no=HD.reduce((m,h)=>Math.max(m,h.no||0),0)+1;HD.push(data);}
   document.getElementById('hd-modal').classList.remove('open');
-  await dbSave('hospitals',HD);
+  await dbSaveHospitals(HD);
   renderHospitals();populateFilters();
 }
 async function deleteHd(){
   if(hdEditId===null||!confirm('삭제하시겠습니까?'))return;
   HD=HD.filter(h=>h.no!==hdEditId);
   document.getElementById('hd-modal').classList.remove('open');
-  await dbSave('hospitals',HD);renderHospitals();populateFilters();
+  await dbSaveHospitals(HD);renderHospitals();populateFilters();
+}
+
+// ── 병원 광고 설정 (추천병원 2곳 지정) ──
+async function loadAdSettingsPage(){
+  const sel1=document.getElementById('ad-slot1');
+  const sel2=document.getElementById('ad-slot2');
+  // HD가 비어있으면(아직 로드 전이면) 다시 로드
+  if(!HD.length) HD=await dbLoadHospitals();
+  const optionsHtml=HD.map(h=>`<option value="${h.name}">${h.name}</option>`).join('');
+  sel1.innerHTML=optionsHtml;
+  sel2.innerHTML=optionsHtml;
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/ad_settings?select=*&order=id.desc&limit=1`,{headers});
+    if(r.ok){
+      const all=await r.json();
+      if(Array.isArray(all)&&all.length>0){
+        const setting=all[0].data||all[0];
+        if(setting.slot1)sel1.value=setting.slot1;
+        if(setting.slot2)sel2.value=setting.slot2;
+      }
+    }
+  }catch(e){
+    console.warn('[FK] 기존 광고설정 로드 실패(최초 설정 시 정상)',e);
+  }
+  if(!sel1.value&&HD[0])sel1.value=HD[0].name;
+  if(!sel2.value&&HD[1])sel2.value=HD[1].name;
+}
+async function saveAdSettings(){
+  const slot1=document.getElementById('ad-slot1').value;
+  const slot2=document.getElementById('ad-slot2').value;
+  if(slot1===slot2){
+    alert('1번 칸과 2번 칸에 같은 병원을 중복 지정할 수 없습니다. 다른 병원을 선택해주세요.');
+    return;
+  }
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/ad_settings`,{
+      method:'POST',
+      headers:{...headers,'Prefer':'return=minimal'},
+      body:JSON.stringify({data:{slot1,slot2,updated_at:new Date().toISOString()}})
+    });
+    if(res.ok){
+      const msg=document.getElementById('ad-save-msg');
+      msg.style.display='block';
+      setTimeout(()=>{msg.style.display='none';},3000);
+    }else{
+      alert('저장 실패 (상태코드 '+res.status+'). ad_settings 테이블이 생성되어 있는지 확인해주세요.');
+    }
+  }catch(e){
+    alert('저장 중 오류가 발생했습니다: '+e.message);
+  }
 }
 
 // ── 왕홍 관리 ──
@@ -1231,6 +1366,7 @@ function showPage(id){
   if(id==='hospital_rev')renderHospitalRev();
   if(id==='wanghong_rev')renderWanghongRev();
   if(id==='hospitals')renderHospitals();
+  if(id==='ad_settings')loadAdSettingsPage();
   if(id==='wanghongs')renderWanghongs();
   if(id==='quote_requests')renderQuoteRequests();
   if(id==='foreign')renderForeign();
