@@ -1218,6 +1218,246 @@ setInterval(() => { if(HP_CURRENT_HOSPITAL !== undefined) hpLoadBookings(); }, 5
 .hp-badge-partial{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
 .hp-badge-pending{background:#f3f4f6;color:#6b7280;padding:3px 10px;border-radius:10px;font-size:11px;}
 </style>
+<!-- ════════════════════════════════════════════════════════════
+  팔로우코리아 hospital-portal.html ↔ 펄스(backoffice.html) 연동 패치
+  
+  핵심 원리:
+  - 펄스와 병원포털은 이미 같은 Supabase(global_platform)를 보고 있음
+  - 펄스에서 bookings/hospitals 데이터를 저장하면, 병원포털이 "로그인한
+    병원명"으로 필터링해서 자기 병원 데이터만 화면에 표시
+  - 정산 완료/세금계산서 발행 등 상태값도 펄스에서 바뀌면 병원포털에
+    실시간(또는 새로고침 시) 반영됨 — 같은 DB를 보니 "전송"이 아니라
+    "같은 곳을 보는" 구조
+
+  설치 방법: hospital-portal.html의 기존 <script> 블록 안에
+  이 코드를 추가하고, 로그인 성공 시 loadHospitalData()를 호출하세요.
+  ════════════════════════════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════════════════
+//  Supabase 연결 — 펄스와 동일한 global_platform 프로젝트
+// ════════════════════════════════════════════════════════════
+const HP_SUPA_URL = 'https://qfncxamqeiyxkbjxwtoi.supabase.co';
+const HP_SUPA_KEY = 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV';
+const hpHeaders = { 'apikey': HP_SUPA_KEY, 'Authorization': `Bearer ${HP_SUPA_KEY}`, 'Content-Type': 'application/json' };
+
+// ── 로그인 계정 ↔ 병원명 매핑 ──
+// ⚠️ 운영 정책 결정 필요: 병원마다 별도 ID/PW를 발급할지,
+//    지금처럼 통합계정(fkmaster)으로 운영하고 로그인 후 병원을 선택하게 할지
+//    아래는 "병원별 계정 분리" 가정 하의 매핑 예시입니다.
+const HP_ACCOUNT_HOSPITAL_MAP = {
+  'shinsang': '신상성형외과',
+  'glovi': 'GLOVI 글로비성형외과',
+  'ruby': '루비클리닉',
+  'onecell': '원셀의원',
+  'cheongdam': '청담서클의원',
+  'cellinique': '셀리닉의원',
+  'gangnamseoul': '강남서울안과',
+  'jdh': 'JDH한방병원',
+  'fkmaster': null, // 통합 관리자 계정 — 전체 병원 데이터 조회 가능 (운영팀용)
+};
+
+let HP_CURRENT_HOSPITAL = null; // 로그인한 병원명
+let HP_BOOKINGS = [];
+let HP_HOSPITAL_INFO = null;
+
+// ════════════════════════════════════════════════════════════
+//  로그인 시 병원 식별 — 기존 로그인 함수에서 호출
+//  예: doLogin() 성공 시 → setHospitalContext(loginId) 추가
+// ════════════════════════════════════════════════════════════
+function hpSetHospitalContext(loginId){
+  HP_CURRENT_HOSPITAL = HP_ACCOUNT_HOSPITAL_MAP[loginId] || null;
+  // 헤더에 병원명 표시 (기존 "🏥 신상성형외과 🔑" 영역)
+  const headerEl = document.querySelector('[data-hp-hospital-name]');
+  if(headerEl) headerEl.textContent = HP_CURRENT_HOSPITAL || '전체 병원 (관리자)';
+  hpLoadBookings();
+  hpLoadHospitalInfo();
+}
+
+// ════════════════════════════════════════════════════════════
+//  예약 데이터 로드 — 펄스가 쓰는 동일한 bookings 테이블에서
+//  자기 병원명으로 필터링
+// ════════════════════════════════════════════════════════════
+async function hpLoadBookings(){
+  try{
+    const res = await fetch(`${HP_SUPA_URL}/rest/v1/bookings?select=*&order=id.asc`, { headers: hpHeaders });
+    const raw = await res.json();
+    let all = Array.isArray(raw) ? raw.map(x => x.data).filter(Boolean) : [];
+
+    // 통합관리자(fkmaster)가 아니면 자기 병원 것만 필터링
+    if(HP_CURRENT_HOSPITAL){
+      HP_BOOKINGS = all.filter(b => b.hospital === HP_CURRENT_HOSPITAL);
+    } else {
+      HP_BOOKINGS = all; // 관리자는 전체 조회
+    }
+    hpRenderDashboard();
+    hpRenderBookingList();
+    hpRenderSettlement();
+  }catch(e){
+    console.error('[병원포털] 예약 데이터 로드 실패', e);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  병원 정보 로드 — hospitals 테이블에서 자기 병원 정보 가져오기
+//  (병원 소개 관리, 기본정보, 정산상태 등에 사용)
+// ════════════════════════════════════════════════════════════
+async function hpLoadHospitalInfo(){
+  if(!HP_CURRENT_HOSPITAL) return;
+  try{
+    const res = await fetch(`${HP_SUPA_URL}/rest/v1/hospitals?select=*&order=no.asc`, { headers: hpHeaders });
+    const raw = await res.json();
+    const all = Array.isArray(raw) ? raw.map(x => x.data).filter(Boolean) : [];
+    HP_HOSPITAL_INFO = all.find(h => h.name === HP_CURRENT_HOSPITAL) || null;
+    if(HP_HOSPITAL_INFO) hpRenderHospitalInfoForm();
+  }catch(e){
+    console.error('[병원포털] 병원 정보 로드 실패', e);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  대시보드 통계 렌더링 (이번달 예약/매출/수수료/미확인 예약)
+// ════════════════════════════════════════════════════════════
+function hpCalcFee(b){
+  const won = Math.round((b.amount||0) * 10000);
+  const hospComm = Math.round(won * (b.hosp_comm_rate||0) / 100);
+  return { won, hospComm, hospReceive: won - hospComm };
+}
+
+function hpRenderDashboard(){
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const today = new Date().toISOString().slice(0,10);
+  const monthBookings = HP_BOOKINGS.filter(b => b.datetime && b.datetime.startsWith(thisMonth));
+  const todayBookings = HP_BOOKINGS.filter(b => b.datetime && b.datetime.startsWith(today));
+  const pendingBookings = HP_BOOKINGS.filter(b => b.status === '대기');
+
+  const monthRevenue = monthBookings.reduce((s,b) => s + hpCalcFee(b).won, 0);
+  const monthFee = monthBookings.reduce((s,b) => s + hpCalcFee(b).hospComm, 0);
+
+  const setText = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = val; };
+  setText('[data-hp-stat="month-count"]', monthBookings.length);
+  setText('[data-hp-stat="today-count"]', todayBookings.length);
+  setText('[data-hp-stat="month-revenue"]', monthRevenue > 0 ? monthRevenue.toLocaleString()+'원' : '-');
+  setText('[data-hp-stat="month-fee"]', monthFee > 0 ? monthFee.toLocaleString()+'원' : '-');
+  setText('[data-hp-stat="pending-count"]', pendingBookings.length);
+}
+
+// ════════════════════════════════════════════════════════════
+//  예약 목록 렌더링 — 펄스에서 등록/수정한 예약이 그대로 보임
+// ════════════════════════════════════════════════════════════
+function hpRenderBookingList(){
+  const tbody = document.querySelector('[data-hp-booking-tbody]');
+  if(!tbody) return;
+  const sorted = [...HP_BOOKINGS].sort((a,b) => (b.datetime||'').localeCompare(a.datetime||''));
+  tbody.innerHTML = sorted.map(b => `
+    <tr>
+      <td>${b.name}</td>
+      <td>${b.datetime}</td>
+      <td>${b.treatment || '-'}</td>
+      <td>${b.inflow_type || '-'}</td>
+      <td><span class="hp-status-badge hp-status-${b.status}">${b.status}</span></td>
+      <td><button onclick="hpOpenBookingDetail('${b.id}')">처리</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">예약이 없습니다</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════════
+//  정산 현황 렌더링 — 펄스의 hosp_paydate, hosp_paidamt,
+//  tax_invoice 필드를 그대로 읽어와서 "정산 완료" 여부 표시
+//  ★ 이게 11번 요청의 핵심: 펄스에서 입금완료/세금계산서 처리하면
+//     이 화면에 자동으로 "완료"로 보임 (같은 데이터를 보는 것이므로
+//     별도의 "전송" 로직이 필요 없음)
+// ════════════════════════════════════════════════════════════
+function hpRenderSettlement(){
+  const monthMap = {};
+  HP_BOOKINGS.forEach(b => {
+    const m = (b.datetime||'').slice(0,7);
+    if(!m) return;
+    if(!monthMap[m]) monthMap[m] = { count:0, revenue:0, fee:0, hospReceive:0, paid:0, taxInvoiceCount:0 };
+    const c = hpCalcFee(b);
+    monthMap[m].count++;
+    monthMap[m].revenue += c.won;
+    monthMap[m].fee += c.hospComm;
+    monthMap[m].hospReceive += c.hospReceive;
+    monthMap[m].paid += Math.round((b.hosp_paidamt||0) * 10000);
+    if(b.tax_invoice === 'Y') monthMap[m].taxInvoiceCount++;
+  });
+
+  const tbody = document.querySelector('[data-hp-settlement-tbody]');
+  if(!tbody) return;
+  tbody.innerHTML = Object.entries(monthMap).sort((a,b) => b[0].localeCompare(a[0])).map(([m, v]) => {
+    const isFullyPaid = v.paid >= v.hospReceive && v.hospReceive > 0;
+    const statusBadge = isFullyPaid
+      ? '<span class="hp-badge-done">✅ 정산완료</span>'
+      : v.paid > 0
+        ? '<span class="hp-badge-partial">⏳ 부분정산</span>'
+        : '<span class="hp-badge-pending">대기중</span>';
+    return `<tr>
+      <td>${m}</td>
+      <td>${v.count}건</td>
+      <td>${v.revenue.toLocaleString()}원</td>
+      <td>${v.count > 0 ? Math.round(v.fee/v.revenue*100) : 0}%</td>
+      <td>${v.fee.toLocaleString()}원</td>
+      <td>${v.hospReceive.toLocaleString()}원</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">정산 데이터가 없습니다</td></tr>';
+
+  // 건별 정산 내역 (세금계산서 발행 여부 포함)
+  const detailTbody = document.querySelector('[data-hp-settlement-detail-tbody]');
+  if(detailTbody){
+    detailTbody.innerHTML = HP_BOOKINGS.map(b => {
+      const c = hpCalcFee(b);
+      const paidYn = (b.hosp_paidamt||0) > 0 ? '✅ 입금완료' : '⏳ 대기';
+      const taxYn = b.tax_invoice === 'Y' ? '✅ 발행완료' : '-';
+      return `<tr>
+        <td>${b.name}</td>
+        <td>${(b.datetime||'').slice(0,10)}</td>
+        <td>${b.treatment||'-'}</td>
+        <td>${c.won.toLocaleString()}원</td>
+        <td>${b.hosp_comm_rate||0}%</td>
+        <td>${c.hospComm.toLocaleString()}원</td>
+        <td>${c.hospReceive.toLocaleString()}원</td>
+        <td>${paidYn}</td>
+        <td>${taxYn}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">내역이 없습니다</td></tr>';
+  }
+}
+
+function hpOpenBookingDetail(id){
+  const b = HP_BOOKINGS.find(x => x.id === id);
+  if(!b) return;
+  console.log('예약 상세:', b);
+  // 기존 "예약 상세 / 처리" 모달 채우는 로직 연결
+}
+
+// 병원 소개/기본정보 폼에 데이터 채우기 (있는 경우)
+function hpRenderHospitalInfoForm(){
+  if(!HP_HOSPITAL_INFO) return;
+  const setVal = (sel, val) => { const el = document.querySelector(sel); if(el) el.value = val || ''; };
+  setVal('[data-hp-field="name"]', HP_HOSPITAL_INFO.name);
+  setVal('[data-hp-field="dept"]', HP_HOSPITAL_INFO.dept);
+  setVal('[data-hp-field="contract"]', HP_HOSPITAL_INFO.contract);
+  setVal('[data-hp-field="manager"]', HP_HOSPITAL_INFO.manager);
+  setVal('[data-hp-field="tel"]', HP_HOSPITAL_INFO.tel);
+  setVal('[data-hp-field="commission"]', HP_HOSPITAL_INFO.commission);
+  setVal('[data-hp-field="vat"]', HP_HOSPITAL_INFO.vat);
+  setVal('[data-hp-field="paydate"]', HP_HOSPITAL_INFO.paydate);
+}
+
+// 5분마다 자동 새로고침 (펄스에서 처리한 게 거의 실시간으로 반영되도록)
+setInterval(() => { if(HP_CURRENT_HOSPITAL !== undefined) hpLoadBookings(); }, 5 * 60 * 1000);
+</script>
+
+<style>
+.hp-status-badge{padding:2px 8px;border-radius:10px;font-size:11px;}
+.hp-status-대기{background:#fef9c3;color:#854d0e;}
+.hp-status-확정{background:#dcfce7;color:#15803d;}
+.hp-status-완료{background:#dbeafe;color:#1e40af;}
+.hp-status-취소,.hp-status-노쇼{background:#fee2e2;color:#991b1b;}
+.hp-badge-done{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
+.hp-badge-partial{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
+.hp-badge-pending{background:#f3f4f6;color:#6b7280;padding:3px 10px;border-radius:10px;font-size:11px;}
+</style>
 
 </script>
 
