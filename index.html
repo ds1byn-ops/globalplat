@@ -66,6 +66,30 @@ a{text-decoration:none;color:inherit;}
 .hosp-bottom{display:flex;justify-content:space-between;align-items:center;}
 .btn-book{padding:7px 14px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:var(--white);border-radius:18px;font-size:11px;font-weight:600;border:none;cursor:pointer;}
 .btn-detail{padding:7px 14px;background:var(--white);color:var(--gn2);border-radius:18px;font-size:11px;font-weight:600;border:1px solid var(--gn);cursor:pointer;}
+/* 추천병원 2개 (큰 카드) */
+.hosp-recommend-wrap{margin-bottom:24px;}
+.hosp-recommend-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--dark);margin-bottom:12px;}
+.hosp-recommend-label .star{color:var(--gold);}
+.hosp-recommend-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px;}
+.hosp-recommend-card{position:relative;background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.2s;border:2px solid var(--gold);}
+.hosp-recommend-card:hover{transform:translateY(-4px);}
+.hosp-recommend-card .badge-recommend{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,var(--gold),#b8941f);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:14px;z-index:2;}
+.hosp-recommend-card .hosp-img{height:200px;}
+/* 일반 병원 1/4 사이즈 바둑판 */
+.hosp-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.hosp-grid .hosp-card{border-radius:10px;}
+.hosp-grid .hosp-img{height:80px;font-size:24px;}
+.hosp-grid .hosp-body{padding:8px;}
+.hosp-grid .hosp-name{font-size:11px;margin-bottom:1px;}
+.hosp-grid .hosp-dept{font-size:9px;margin-bottom:4px;}
+.hosp-grid .hosp-tags{display:none;}
+.hosp-grid .hosp-bottom{gap:4px;}
+.hosp-grid .btn-book,.hosp-grid .btn-detail{padding:4px 8px;font-size:9px;border-radius:10px;}
+.hosp-grid .hosp-badge-tag{font-size:8px;padding:2px 6px;top:5px;left:5px;}
+@media(max-width:768px){
+  .hosp-recommend-grid{grid-template-columns:1fr;}
+  .hosp-grid{grid-template-columns:repeat(3,1fr);}
+}
 /* PROCESS */
 .process{background:linear-gradient(135deg,#F0FFF8,#FFF0F4);}
 .step-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;}
@@ -251,6 +275,10 @@ a{text-decoration:none;color:inherit;}
       <div class="sec-eyebrow">HOSPITALS</div>
       <h2 class="sec-title" data-i18n="hosp_title">精选合作医院</h2>
       <p class="sec-sub" data-i18n="hosp_sub">严格筛选，只为您推荐最优质的江南医院</p>
+    </div>
+    <div class="hosp-recommend-wrap">
+      <div class="hosp-recommend-label"><span class="star">⭐</span><span data-i18n="hosp_recommend_label">추천 병원</span></div>
+      <div class="hosp-recommend-grid" id="hosp-recommend-grid"></div>
     </div>
     <div class="hosp-grid" id="hosp-grid"></div>
   </div>
@@ -751,7 +779,7 @@ const I={
     hero_sub:'精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同',
     search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',
     stat1:'服务患者',stat2:'合作医院',stat3:'满意度',
-    cat_title:'选择您的项目',hosp_title:'精选合作医院',hosp_sub:'严格筛选，只为您推荐最优质的江南医院',
+    cat_title:'选择您的项目',hosp_title:'精选合作医院',hosp_sub:'严格筛选，只为您推荐最优质的江南医院',hosp_recommend_label:'推荐医院',
     proc_title:'预约只需4步',review_title:'真实用户评价',
     footer_desc:'专注韩国医美旅游的专业平台\n安全、透明、专业的一站式服务',
     f_h1:'服务项目',f_skin:'皮肤管理',f_plastic:'整形外科',f_stem:'干细胞',
@@ -793,7 +821,7 @@ const I={
     hero_sub:'서울 강남 최고의 의료미용 병원 엄선<br>전문 통역 서비스 · 전 일정 동행',
     search_ph:'병원, 시술 검색...',search_btn:'검색',hero_cta1:'지금 예약하기',hero_cta2:'병원 둘러보기',
     stat1:'서비스 환자',stat2:'제휴 병원',stat3:'만족도',
-    cat_title:'시술을 선택하세요',hosp_title:'제휴 병원',hosp_sub:'엄격한 기준으로 선별한 강남 최고의 병원',
+    cat_title:'시술을 선택하세요',hosp_title:'제휴 병원',hosp_sub:'엄격한 기준으로 선별한 강남 최고의 병원',hosp_recommend_label:'추천 병원',
     proc_title:'4단계로 간편 예약',review_title:'실제 이용 후기',
     footer_desc:'한국 의료관광 전문 플랫폼\n안전하고 투명한 원스톱 서비스',
     f_h1:'서비스',f_skin:'피부관리',f_plastic:'성형외과',f_stem:'줄기세포',
@@ -835,7 +863,7 @@ const I={
     hero_sub:'Top-rated Gangnam medical aesthetic clinics<br>Chinese & English support · Full escort',
     search_ph:'Search clinics, treatments...',search_btn:'Search',hero_cta1:'Book Now',hero_cta2:'Browse Clinics',
     stat1:'Patients Served',stat2:'Partner Clinics',stat3:'Satisfaction',
-    cat_title:'Choose Your Treatment',hosp_title:'Partner Clinics',hosp_sub:'Strictly vetted — only the best Gangnam clinics',
+    cat_title:'Choose Your Treatment',hosp_title:'Partner Clinics',hosp_sub:'Strictly vetted — only the best Gangnam clinics',hosp_recommend_label:'Recommended',
     proc_title:'4 Easy Steps',review_title:'Real Patient Reviews',
     footer_desc:'Korea\'s trusted medical tourism platform\nSafe, transparent & professional',
     f_h1:'Services',f_skin:'Skin Care',f_plastic:'Plastic Surgery',f_stem:'Stem Cell',
@@ -876,7 +904,7 @@ const I={
     hero_sub:'Các bệnh viện thẩm mỹ hàng đầu Gangnam, Seoul<br>Hỗ trợ tiếng Trung & tiếng Anh · Đồng hành toàn trình',
     search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',
     stat1:'Bệnh nhân',stat2:'Bệnh viện đối tác',stat3:'Hài lòng',
-    cat_title:'Chọn dịch vụ của bạn',hosp_title:'Bệnh viện đối tác',hosp_sub:'Chỉ những bệnh viện tốt nhất tại Gangnam',
+    cat_title:'Chọn dịch vụ của bạn',hosp_title:'Bệnh viện đối tác',hosp_sub:'Chỉ những bệnh viện tốt nhất tại Gangnam',hosp_recommend_label:'Đề xuất',
     proc_title:'4 bước đơn giản',review_title:'Đánh giá thực tế',
     footer_desc:'Nền tảng du lịch y tế Hàn Quốc uy tín',
     f_h1:'Dịch vụ',f_skin:'Chăm sóc da',f_plastic:'Phẫu thuật thẩm mỹ',f_stem:'Tế bào gốc',
@@ -906,7 +934,7 @@ const I={
     hero_sub:'คลินิกความงามชั้นนำในกังนัม โซล<br>บริการภาษาจีนและอังกฤษ · ดูแลตลอดการเดินทาง',
     search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',
     stat1:'ผู้ป่วย',stat2:'โรงพยาบาลพาร์ทเนอร์',stat3:'ความพึงพอใจ',
-    cat_title:'เลือกบริการของคุณ',hosp_title:'โรงพยาบาลพาร์ทเนอร์',hosp_sub:'คัดสรรเฉพาะโรงพยาบาลที่ดีที่สุดในกังนัม',
+    cat_title:'เลือกบริการของคุณ',hosp_title:'โรงพยาบาลพาร์ทเนอร์',hosp_sub:'คัดสรรเฉพาะโรงพยาบาลที่ดีที่สุดในกังนัม',hosp_recommend_label:'แนะนำ',
     proc_title:'4 ขั้นตอนง่ายๆ',review_title:'รีวิวจริงจากผู้ป่วย',
     footer_desc:'แพลตฟอร์มท่องเที่ยวเพื่อสุขภาพเกาหลีที่เชื่อถือได้',
     f_h1:'บริการ',f_skin:'ดูแลผิว',f_plastic:'ศัลยกรรม',f_stem:'เซลล์ต้นกำเนิด',
@@ -936,7 +964,7 @@ const I={
     hero_sub:'ソウル江南トップクラスの医療美容クリニック<br>中国語・日本語対応 · 全行程サポート',
     search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',
     stat1:'施術患者数',stat2:'提携病院',stat3:'満足度',
-    cat_title:'施術を選ぶ',hosp_title:'提携病院',hosp_sub:'厳選された江南トップクリニック',
+    cat_title:'施術を選ぶ',hosp_title:'提携病院',hosp_sub:'厳選された江南トップクリニック',hosp_recommend_label:'おすすめ',
     proc_title:'4ステップで簡単予約',review_title:'リアルな口コミ',
     footer_desc:'韓国医療観光の信頼できるプラットフォーム',
     f_h1:'サービス',f_skin:'スキンケア',f_plastic:'整形外科',f_stem:'幹細胞',
@@ -966,7 +994,7 @@ const I={
     hero_sub:'Лучшие клиники красоты Каннама, Сеул<br>Поддержка на китайском и английском · Сопровождение',
     search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',
     stat1:'Пациентов',stat2:'Партнёрских клиник',stat3:'Удовлетворённость',
-    cat_title:'Выберите процедуру',hosp_title:'Партнёрские клиники',hosp_sub:'Лучшие проверенные клиники Каннама',
+    cat_title:'Выберите процедуру',hosp_title:'Партнёрские клиники',hosp_sub:'Лучшие проверенные клиники Каннама',hosp_recommend_label:'Рекомендуем',
     proc_title:'4 простых шага',review_title:'Реальные отзывы',
     footer_desc:'Надёжная платформа медицинского туризма в Корее',
     f_h1:'Услуги',f_skin:'Уход за кожей',f_plastic:'Пластическая хирургия',f_stem:'Стволовые клетки',
@@ -997,7 +1025,7 @@ const I={
     hero_sub:'Сеулын Ганнамын шилдэг гоо сайхны эмнэлгүүд<br>Хятад хэлний үйлчилгээ · Бүрэн дагалдан яваа',
     search_ph:'Эмнэлэг, процедур хайх...',search_btn:'Хайх',hero_cta1:'Одоо захиалах',hero_cta2:'Эмнэлэг үзэх',
     stat1:'Үйлчлэгдсэн өвчтөн',stat2:'Гэрээт эмнэлэг',stat3:'Сэтгэл ханамж',
-    cat_title:'Процедур сонгох',hosp_title:'Гэрээт эмнэлгүүд',
+    cat_title:'Процедур сонгох',hosp_title:'Гэрээт эмнэлгүүд',hosp_recommend_label:'Санал болгох',
     cats:['Бүгд','Пластик','Арьс','Ишмэсэн эс','Эрүүл мэнд','Нүд','Эх барих'],
     cat_all:'Бүгд',cat_plastic:'Пластик мэс засал',cat_skin:'Арьс',cat_stem:'Ишмэсэн эс',cat_health:'Эрүүл мэнд',cat_eye:'Нүд',cat_gyn:'Эх барих',
     review_title:'Үнэн хэрэглэгчийн үнэлгээ',review_sub:'Дэлхийн өвчтөнүүдийн туршлага',
@@ -1032,7 +1060,7 @@ const I={
     hero_sub:'Klinik kecantikan terbaik Gangnam Seoul<br>Layanan bahasa Indonesia · Pendampingan penuh',
     search_ph:'Cari rumah sakit, prosedur...',search_btn:'Cari',hero_cta1:'Pesan Sekarang',hero_cta2:'Lihat Rumah Sakit',
     stat1:'Pasien Dilayani',stat2:'Rumah Sakit Mitra',stat3:'Kepuasan',
-    cat_title:'Pilih Prosedur',hosp_title:'Rumah Sakit Mitra',
+    cat_title:'Pilih Prosedur',hosp_title:'Rumah Sakit Mitra',hosp_recommend_label:'Rekomendasi',
     cats:['Semua','Bedah Plastik','Kulit','Stem Cell','Tubuh','Ginekologi','Mata','Anti-aging','Gigi','Estetik','Lainnya'],
     cat_all:'Semua',cat_plastic:'Bedah Plastik',cat_skin:'Kulit',cat_stem:'Stem Cell',cat_health:'Kesehatan',cat_eye:'Mata',cat_gyn:'Ginekologi',
     review_title:'Ulasan Pengguna Nyata',review_sub:'Pengalaman nyata dari pasien seluruh dunia',
@@ -1714,6 +1742,25 @@ function setCat(cat,el){
   el.classList.add('active');
 }
 
+let FKH_RECOMMENDED_NAMES = []; // 백오피스 "병원 광고 설정"에서 지정한 추천병원명 2개
+
+async function fkhLoadRecommendedSetting(){
+  try{
+    const r = await fetch(`${SUPA_URL}/rest/v1/ad_settings?select=*&order=id.desc&limit=1`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if(!r.ok) return;
+    const all = await r.json();
+    if(Array.isArray(all) && all.length > 0){
+      const setting = all[0].data || all[0];
+      FKH_RECOMMENDED_NAMES = [setting.slot1, setting.slot2].filter(Boolean);
+    }
+  }catch(e){
+    console.warn('[FK] 추천병원 설정 로드 실패, 기본값 사용', e);
+  }
+  filterHosps();
+}
+
 function filterHosps(){
   const q=(document.getElementById('s-input').value||'').toLowerCase();
   const catMap={};
@@ -1730,8 +1777,50 @@ function filterHosps(){
     const mc=!activeCat||h.cat===(catMap[activeCat]||activeCat);
     return mq&&mc;
   });
-  const bBtn=t('book_btn').length>5?t('reserve_btn'):t('reserve_btn');
-  document.getElementById('hosp-grid').innerHTML=filtered.map(h=>{
+
+  // 추천병원 2개 분리 (백오피스 설정값, 없으면 HOSPS 맨 앞 2개 기본값)
+  const recommendNames = FKH_RECOMMENDED_NAMES.length === 2 ? FKH_RECOMMENDED_NAMES : [HOSPS[0].kr, HOSPS[1].kr];
+  const recommended = recommendNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean);
+  const others = filtered.filter(h => !recommendNames.includes(h.kr));
+
+  // 추천병원 렌더링 (큰 카드)
+  const recGrid = document.getElementById('hosp-recommend-grid');
+  if(recGrid){
+    recGrid.innerHTML = recommended.map(h=>{
+      const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
+      const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
+      const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
+      const recLabel = {zh:'⭐ 推荐医院',ko:'⭐ 추천 병원',en:'⭐ Recommended'}[lang] || '⭐ 추천 병원';
+      return`<div class="hosp-recommend-card" data-kr="${h.kr}">
+        <span class="badge-recommend">${recLabel}</span>
+        <div class="hosp-img" style="position:relative;">${h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
+        <div class="hosp-body">
+          <div class="hosp-name" style="font-size:16px;">${name}</div>
+          <div class="hosp-dept">${dept}</div>
+          <div class="hosp-tags">${treats.slice(0,4).map(tr=>`<span class="hosp-tag">${tr}</span>`).join('')}</div>
+          <div class="hosp-bottom">
+            <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
+            <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    recGrid.querySelectorAll('.hosp-recommend-card').forEach(card=>{
+      card.onclick=function(e){
+        const btn=e.target.closest('[data-action]');
+        if(btn){
+          e.stopPropagation();
+          if(btn.dataset.action==='detail')showDetail(btn.dataset.kr);
+          else if(btn.dataset.action==='modal')openModal(btn.dataset.kr);
+        }else{
+          showDetail(this.dataset.kr);
+        }
+      };
+    });
+  }
+
+  // 나머지 병원 1/4 사이즈 바둑판 렌더링 (추천병원 제외)
+  document.getElementById('hosp-grid').innerHTML=others.map(h=>{
     const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
@@ -2143,6 +2232,7 @@ async function submitReview() {
 setLang('zh');
 loadReviews();
 loadHospIntros();
+fkhLoadRecommendedSetting();
 
 // 외부 터치/클릭 시 언어 메뉴 닫기
 document.addEventListener('click',function(e){
