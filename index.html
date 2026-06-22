@@ -3094,6 +3094,146 @@ document.getElementById('fk-ai-overlay')?.addEventListener('click', function(e){
   if(e.target === this) closeAiChat();
 });
 </script>
+<!-- ════════════════════════════════════════════════════════════
+  팔로우코리아 — 통합 버그 수정 패치 (2026.06.22)
+  
+  설치 방법: 이 코드 전체를 </body> 바로 앞, 즉 가장 마지막에
+  추가하세요. 기존 코드는 손대지 않고 이 패치만 맨 끝에 붙이면
+  아래 4가지가 한 번에 해결됩니다.
+
+  ① 견적위젯 트리거 버튼 자동 생성 + 안전한 Submit 함수로 교체
+  ② AI챗봇 닫기 버튼 안 닫히는 문제 (openAiChat/closeAiChat 함수
+     중복 정의 충돌) 해결
+  ③ 우하단 "맨 위로" 스크롤 버튼 추가
+  ④ "기타서비스" 카테고리 클릭 시 병원목록이 사라진 뒤 안 돌아오는
+     문제 해결
+  ════════════════════════════════════════════════════════════ -->
+<style>
+  /* ③ 맨 위로 스크롤 버튼 */
+  #fk-scroll-top-btn{position:fixed;bottom:84px;right:22px;width:44px;height:44px;border-radius:50%;background:#fff;color:#1A1A1A;border:1.5px solid #E5E7EB;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);z-index:899;display:none;align-items:center;justify-content:center;transition:opacity .2s, transform .2s;}
+  #fk-scroll-top-btn.show{display:flex;}
+  #fk-scroll-top-btn:hover{background:#fdf8ef;border-color:#D4AF37;transform:translateY(-2px);}
+
+  /* ① 견적위젯 트리거 플로팅 버튼 (페이지에 버튼이 없을 경우 자동 노출) */
+  #fk-quote-trigger-fab{position:fixed;bottom:148px;right:22px;background:linear-gradient(135deg,#FF8FAD,#FFB5C8);color:#fff;border:none;border-radius:28px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:898;display:none;align-items:center;gap:6px;}
+  #fk-quote-trigger-fab.show{display:flex;}
+</style>
+
+<!-- ③ 맨 위로 가기 버튼 -->
+<button id="fk-scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로">↑</button>
+
+<!-- ① 견적위젯이 어디에서도 호출되지 않을 경우를 위한 백업 버튼 -->
+<button id="fk-quote-trigger-fab" onclick="if(typeof openQuoteWidget==='function') openQuoteWidget();">💰 간편 견적 받기</button>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  ③ 스크롤 시 맨위로 버튼 노출
+// ════════════════════════════════════════════════════════════
+window.addEventListener('scroll', function(){
+  const btn = document.getElementById('fk-scroll-top-btn');
+  if(!btn) return;
+  btn.classList.toggle('show', window.scrollY > 300);
+});
+
+// ════════════════════════════════════════════════════════════
+//  ① 견적위젯 트리거 버튼이 페이지 어디에도 없으면 플로팅 버튼 노출
+//     (이미 메뉴 등에 견적 버튼을 추가하셨다면 이 플로팅 버튼은 끝까지
+//      안 보이도록 자동으로 숨겨집니다)
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+  const hasQuoteTrigger = !!document.querySelector('[onclick*="openQuoteWidget"]:not(#fk-quote-trigger-fab)');
+  if(!hasQuoteTrigger && typeof openQuoteWidget === 'function'){
+    document.getElementById('fk-quote-trigger-fab')?.classList.add('show');
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+//  ② AI챗봇 닫기 버튼 버그 수정
+//     원인: 사이트 기본 AI 모달(#ai-modal-bg)과 견적 패키지에 들어있던
+//     AI 위젯(#fk-ai-overlay)이 똑같이 openAiChat/closeAiChat라는
+//     이름의 함수를 각각 정의해서, 나중에 로드된 쪽이 앞의 것을
+//     덮어써버렸습니다. 그 결과 X버튼을 눌러도 다른 모달의 닫기
+//     로직이 실행되어 창이 안 닫히는 것처럼 보였습니다.
+//
+//     해결: 두 모달을 모두 확실히 닫는 통합 함수로 교체합니다.
+//     (전역 openAiChat/closeAiChat을 이 함수들로 재정의)
+// ════════════════════════════════════════════════════════════
+(function(){
+  // 원래 사이트의 다국어 AI 상담 모달을 여는 원본 동작 보존
+  // (#ai-modal-bg 가 있으면 그걸 우선 사용 - 다국어 단계별 상담이 메인 기능이므로)
+  window.openAiChat = function(){
+    const mainModal = document.getElementById('ai-modal-bg');
+    const widgetModal = document.getElementById('fk-ai-overlay');
+    if(mainModal){
+      mainModal.classList.add('open');
+      // 메인 모달의 초기화 로직이 있다면 실행 (showAiStep0가 정의돼 있는 경우)
+      if(typeof showAiStep0 === 'function' && typeof aiStep !== 'undefined'){
+        try{
+          aiStep = 0; aiHistory = [];
+          document.getElementById('ai-messages').innerHTML='';
+          document.getElementById('ai-input-area').style.display='none';
+          showAiStep0();
+        }catch(e){ /* 이미 초기화된 상태면 무시 */ }
+      }
+    } else if(widgetModal){
+      widgetModal.classList.add('open');
+    }
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeAiChat = function(){
+    // 두 모달을 전부 확실히 닫음 (어느 쪽이 열려있었든 닫힘)
+    document.getElementById('ai-modal-bg')?.classList.remove('open');
+    document.getElementById('fk-ai-overlay')?.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+})();
+
+// ════════════════════════════════════════════════════════════
+//  ④ "기타서비스" 클릭 후 병원목록이 안 돌아오는 문제 수정
+//     원인: setCat() 호출 시 활성 카테고리를 전체("")로 리셋하지
+//     않으면, 기타서비스를 거친 뒤 다른 카테고리를 눌러도
+//     hosp-grid가 다시 표시되지 않는 케이스가 있었습니다.
+//     해결: 기타서비스가 아닌 카테고리를 클릭하면 항상 병원
+//     목록 섹션을 명시적으로 다시 보이게 강제합니다.
+// ════════════════════════════════════════════════════════════
+(function(){
+  const originalSetCat = window.setCat;
+  if(typeof originalSetCat === 'function'){
+    window.setCat = function(cat, el){
+      originalSetCat(cat, el);
+      // EXTRA_CATS_KR에 해당하는지 다시 확인 후 강제 보정
+      const isExtra = (typeof EXTRA_CATS_KR !== 'undefined') && EXTRA_CATS_KR.includes(cat);
+      const extraSec = document.getElementById('sec-extra');
+      const hospSec = document.getElementById('sec-hosps');
+      if(!isExtra){
+        if(extraSec) extraSec.style.display = 'none';
+        if(hospSec) hospSec.style.display = '';
+        if(typeof filterHosps === 'function') filterHosps();
+      }
+    };
+  }
+
+  // "전체" 카테고리(첫번째 카드)를 다시 클릭했을 때도 항상 병원목록이 보이도록 보강
+  document.addEventListener('DOMContentLoaded', function(){
+    const catGrid = document.getElementById('cat-grid');
+    if(catGrid){
+      catGrid.addEventListener('click', function(e){
+        const card = e.target.closest('.cat-card');
+        if(!card) return;
+        const idx = parseInt(card.dataset.cat);
+        // "전체"(인덱스 0)를 클릭하면 무조건 병원목록 복원
+        if(idx === 0){
+          const extraSec = document.getElementById('sec-extra');
+          const hospSec = document.getElementById('sec-hosps');
+          if(extraSec) extraSec.style.display = 'none';
+          if(hospSec) hospSec.style.display = '';
+        }
+      });
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
