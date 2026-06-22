@@ -1541,10 +1541,26 @@ async function sendAiMsgText(msg, showUser=true){
   aiHistory.push({role:'user',content:msg});
   addAiTyping();
   const btn=document.getElementById('ai-send-btn');if(btn)btn.disabled=true;
+
+  // ⚠️ Claude API 키가 아직 발급되지 않은 동안은 FAQ 키워드 매칭으로 응답
+  //    (FK_AI_CONFIG.apiKey에 'sk-ant-...' 키를 넣으면 자동으로 실제 AI 응답으로 전환됩니다)
+  if(!FK_AI_CONFIG.apiKey){
+    await new Promise(r=>setTimeout(r,500+Math.random()*400));
+    document.getElementById('ai-typing')?.remove();
+    const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
+    const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
+    const reply = matched || fallbacks[aiLang] || fallbacks.en;
+    aiHistory.push({role:'assistant',content:reply});
+    addAiMsg('ai',reply);
+    showAiBookingPrompt();
+    if(btn)btn.disabled=false;
+    return;
+  }
+
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json','x-api-key':FK_AI_CONFIG.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
         max_tokens:600,
@@ -3598,10 +3614,11 @@ async function fkaiSend(){
   if(isHandoff) fkaiShowHandoff();
 }
 
-function fkaiMatchFaq(text){
+function fkaiMatchFaq(text, langOverride){
+  const lng = langOverride || fkaiLang;
   const lowerText = text.toLowerCase();
-  const keyField = fkaiLang === 'zh' ? 'keywords_zh' : 'keywords_ko';
-  const ansField = fkaiLang === 'zh' ? 'a_zh' : 'a_ko';
+  const keyField = lng === 'zh' ? 'keywords_zh' : 'keywords_ko';
+  const ansField = lng === 'zh' ? 'a_zh' : 'a_ko';
   for(const item of FK_FAQ){
     for(const kw of item[keyField]){
       if(lowerText.includes(kw.toLowerCase())) return item[ansField];
