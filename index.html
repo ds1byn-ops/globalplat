@@ -249,7 +249,7 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
-      <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn">💰 简易报价</button>
+      <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn" data-i18n="hero_cta_quote">💰 简易报价</button>
       <button class="btn-secondary" onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
     </div>
     <div class="hero-stats">
@@ -778,7 +778,7 @@ const I={
   zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',review_more:'查看全部评价 →',
     hero_badge:'韩国NO.1医美预约平台',hero_title:'打造<em>专属你的</em><br>K-Beauty之旅',
     hero_sub:'精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同',
-    search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',
+    search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',hero_cta_quote:'💰 简易报价',
     stat1:'服务患者',stat2:'合作医院',stat3:'满意度',
     cat_title:'选择您的项目',hosp_title:'精选合作医院',hosp_sub:'严格筛选，只为您推荐最优质的江南医院',hosp_recommend_label:'推荐医院',
     proc_title:'预约只需4步',review_title:'真实用户评价',
@@ -820,7 +820,7 @@ const I={
   ko:{nav_home:'홈',nav_hosps:'병원',nav_concierge:'컨시어지',nav_proc:'예약과정',nav_review:'후기',nav_consult:'무료상담',
     hero_badge:'한국 NO.1 의료관광 예약 플랫폼',hero_title:'<em>나만을 위한</em><br>K-뷰티 메디컬 여행',
     hero_sub:'서울 강남 최고의 의료미용 병원 엄선<br>전문 통역 서비스 · 전 일정 동행',
-    search_ph:'병원, 시술 검색...',search_btn:'검색',hero_cta1:'지금 예약하기',hero_cta2:'병원 둘러보기',
+    search_ph:'병원, 시술 검색...',search_btn:'검색',hero_cta1:'지금 예약하기',hero_cta2:'병원 둘러보기',hero_cta_quote:'💰 간편 견적 받기',
     stat1:'서비스 환자',stat2:'제휴 병원',stat3:'만족도',
     cat_title:'시술을 선택하세요',hosp_title:'제휴 병원',hosp_sub:'엄격한 기준으로 선별한 강남 최고의 병원',hosp_recommend_label:'추천 병원',
     proc_title:'4단계로 간편 예약',review_title:'실제 이용 후기',
@@ -862,7 +862,7 @@ const I={
   en:{nav_home:'Home',nav_hosps:'Hospitals',nav_concierge:'Concierge',nav_proc:'How it Works',nav_review:'Reviews',nav_consult:'Free Consult',
     hero_badge:'Korea\'s #1 Medical Tourism Platform',hero_title:'Your Perfect<br><em>K-Beauty Journey</em>',
     hero_sub:'Top-rated Gangnam medical aesthetic clinics<br>Chinese & English support · Full escort',
-    search_ph:'Search clinics, treatments...',search_btn:'Search',hero_cta1:'Book Now',hero_cta2:'Browse Clinics',
+    search_ph:'Search clinics, treatments...',search_btn:'Search',hero_cta1:'Book Now',hero_cta2:'Browse Clinics',hero_cta_quote:'💰 Quick Quote',
     stat1:'Patients Served',stat2:'Partner Clinics',stat3:'Satisfaction',
     cat_title:'Choose Your Treatment',hosp_title:'Partner Clinics',hosp_sub:'Strictly vetted — only the best Gangnam clinics',hosp_recommend_label:'Recommended',
     proc_title:'4 Easy Steps',review_title:'Real Patient Reviews',
@@ -903,7 +903,7 @@ const I={
   ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',review_more:'Xem tất cả đánh giá →',
     hero_badge:'Nền tảng du lịch thẩm mỹ #1 Hàn Quốc',hero_title:'Hành trình<br><em>K-Beauty</em> của bạn',
     hero_sub:'Các bệnh viện thẩm mỹ hàng đầu Gangnam, Seoul<br>Hỗ trợ tiếng Trung & tiếng Anh · Đồng hành toàn trình',
-    search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',
+    search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',hero_cta_quote:'💰 Báo giá nhanh',
     stat1:'Bệnh nhân',stat2:'Bệnh viện đối tác',stat3:'Hài lòng',
     cat_title:'Chọn dịch vụ của bạn',hosp_title:'Bệnh viện đối tác',hosp_sub:'Chỉ những bệnh viện tốt nhất tại Gangnam',hosp_recommend_label:'Đề xuất',
     proc_title:'4 bước đơn giản',review_title:'Đánh giá thực tế',
@@ -933,7 +933,7 @@ const I={
   ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',review_more:'ดูรีวิวทั้งหมด →',
     hero_badge:'แพลตฟอร์มท่องเที่ยวเพื่อความงาม #1 เกาหลี',hero_title:'การเดินทาง<br><em>K-Beauty</em> ของคุณ',
     hero_sub:'คลินิกความงามชั้นนำในกังนัม โซล<br>บริการภาษาจีนและอังกฤษ · ดูแลตลอดการเดินทาง',
-    search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',
+    search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',hero_cta_quote:'💰 ใบเสนอราคาด่วน',
     stat1:'ผู้ป่วย',stat2:'โรงพยาบาลพาร์ทเนอร์',stat3:'ความพึงพอใจ',
     cat_title:'เลือกบริการของคุณ',hosp_title:'โรงพยาบาลพาร์ทเนอร์',hosp_sub:'คัดสรรเฉพาะโรงพยาบาลที่ดีที่สุดในกังนัม',hosp_recommend_label:'แนะนำ',
     proc_title:'4 ขั้นตอนง่ายๆ',review_title:'รีวิวจริงจากผู้ป่วย',
@@ -963,7 +963,7 @@ const I={
   ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',review_more:'全てのレビューを見る →',
     hero_badge:'韓国No.1医療美容予約プラットフォーム',hero_title:'あなただけの<br><em>K-Beautyの旅</em>へ',
     hero_sub:'ソウル江南トップクラスの医療美容クリニック<br>中国語・日本語対応 · 全行程サポート',
-    search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',
+    search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',hero_cta_quote:'💰 簡単見積もり',
     stat1:'施術患者数',stat2:'提携病院',stat3:'満足度',
     cat_title:'施術を選ぶ',hosp_title:'提携病院',hosp_sub:'厳選された江南トップクリニック',hosp_recommend_label:'おすすめ',
     proc_title:'4ステップで簡単予約',review_title:'リアルな口コミ',
@@ -993,7 +993,7 @@ const I={
   ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',review_more:'Смотреть все отзывы →',
     hero_badge:'Платформа медицинского туризма №1 в Корее',hero_title:'Ваше идеальное<br><em>K-Beauty путешествие</em>',
     hero_sub:'Лучшие клиники красоты Каннама, Сеул<br>Поддержка на китайском и английском · Сопровождение',
-    search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',
+    search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',hero_cta_quote:'💰 Быстрая смета',
     stat1:'Пациентов',stat2:'Партнёрских клиник',stat3:'Удовлетворённость',
     cat_title:'Выберите процедуру',hosp_title:'Партнёрские клиники',hosp_sub:'Лучшие проверенные клиники Каннама',hosp_recommend_label:'Рекомендуем',
     proc_title:'4 простых шага',review_title:'Реальные отзывы',
@@ -1024,7 +1024,7 @@ const I={
   mn:{nav_home:'Нүүр',nav_hosps:'Эмнэлэг',nav_concierge:'Консьерж',nav_proc:'Захиалгын дараалал',nav_review:'Үнэлгээ',nav_consult:'Үнэгүй зөвлөгөө',review_more:'Бүх үнэлгээ харах',
     hero_badge:'Солонгосын No.1 эмнэлгийн аялал',hero_title:'Таны онцгой<br><em>K-Beauty аялал</em>',
     hero_sub:'Сеулын Ганнамын шилдэг гоо сайхны эмнэлгүүд<br>Хятад хэлний үйлчилгээ · Бүрэн дагалдан яваа',
-    search_ph:'Эмнэлэг, процедур хайх...',search_btn:'Хайх',hero_cta1:'Одоо захиалах',hero_cta2:'Эмнэлэг үзэх',
+    search_ph:'Эмнэлэг, процедур хайх...',search_btn:'Хайх',hero_cta1:'Одоо захиалах',hero_cta2:'Эмнэлэг үзэх',hero_cta_quote:'💰 Хурдан үнэлгээ',
     stat1:'Үйлчлэгдсэн өвчтөн',stat2:'Гэрээт эмнэлэг',stat3:'Сэтгэл ханамж',
     cat_title:'Процедур сонгох',hosp_title:'Гэрээт эмнэлгүүд',hosp_recommend_label:'Санал болгох',
     cats:['Бүгд','Пластик','Арьс','Ишмэсэн эс','Эрүүл мэнд','Нүд','Эх барих'],
@@ -1059,7 +1059,7 @@ const I={
   id:{nav_home:'Beranda',nav_hosps:'Rumah Sakit',nav_concierge:'Concierge',nav_proc:'Cara Pesan',nav_review:'Ulasan',nav_consult:'Konsultasi Gratis',review_more:'Lihat Semua Ulasan',
     hero_badge:'Platform Wisata Medis No.1 Korea',hero_title:'Perjalanan<br><em>K-Beauty Eksklusif Anda</em>',
     hero_sub:'Klinik kecantikan terbaik Gangnam Seoul<br>Layanan bahasa Indonesia · Pendampingan penuh',
-    search_ph:'Cari rumah sakit, prosedur...',search_btn:'Cari',hero_cta1:'Pesan Sekarang',hero_cta2:'Lihat Rumah Sakit',
+    search_ph:'Cari rumah sakit, prosedur...',search_btn:'Cari',hero_cta1:'Pesan Sekarang',hero_cta2:'Lihat Rumah Sakit',hero_cta_quote:'💰 Penawaran Cepat',
     stat1:'Pasien Dilayani',stat2:'Rumah Sakit Mitra',stat3:'Kepuasan',
     cat_title:'Pilih Prosedur',hosp_title:'Rumah Sakit Mitra',hosp_recommend_label:'Rekomendasi',
     cats:['Semua','Bedah Plastik','Kulit','Stem Cell','Tubuh','Ginekologi','Mata','Anti-aging','Gigi','Estetik','Lainnya'],
@@ -2460,7 +2460,7 @@ const FKQ_I18N = {
     sent_wechat:'打开微信咨询窗口', close_btn:'✓ 关闭',
     cat_skin:'皮肤科', cat_plastic:'整形外科', cat_stem:'干细胞', cat_women:'女性医院',
     cat_checkup:'体检', cat_wellness:'韩医·健康', cat_extra:'其他服务',
-    nations:[['中国','中国'],['越南','越南'],['泰国','泰国'],['日本','日本'],['美国','美国'],['其他','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   ko:{
     title:'간편 견적 받기', subtitle:'원하는 시술과 방한 일정을 선택하면 예상 견적을 바로 보여드려요',
@@ -2485,7 +2485,7 @@ const FKQ_I18N = {
     sent_wechat:'위챗 상담 창 열기', close_btn:'✓ 닫기',
     cat_skin:'피부과', cat_plastic:'성형외과', cat_stem:'줄기세포', cat_women:'여성의원',
     cat_checkup:'건강검진', cat_wellness:'한방·웰니스', cat_extra:'기타서비스',
-    nations:[['중국','中国'],['베트남','越南'],['태국','泰国'],['일본','日本'],['미국','美国'],['기타','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   en:{
     title:'Get a Quick Quote', subtitle:'Select your treatments and travel dates for an instant estimate',
@@ -2535,7 +2535,7 @@ const FKQ_I18N = {
     sent_wechat:'Mở cửa sổ tư vấn WeChat', close_btn:'✓ Đóng',
     cat_skin:'Da liễu', cat_plastic:'Phẫu thuật thẩm mỹ', cat_stem:'Tế bào gốc', cat_women:'Phòng khám phụ khoa',
     cat_checkup:'Khám sức khỏe', cat_wellness:'Y học cổ truyền & Sức khỏe', cat_extra:'Dịch vụ khác',
-    nations:[['Trung Quốc','中国'],['Việt Nam','越南'],['Thái Lan','泰国'],['Nhật Bản','日本'],['Hoa Kỳ','美国'],['Khác','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   th:{
     title:'รับใบเสนอราคาด่วน', subtitle:'เลือกหัตถการและวันที่เดินทางมาเกาหลีเพื่อดูราคาประเมินทันที',
@@ -2560,7 +2560,7 @@ const FKQ_I18N = {
     sent_wechat:'เปิดหน้าต่างปรึกษา WeChat', close_btn:'✓ ปิด',
     cat_skin:'ผิวหนัง', cat_plastic:'ศัลยกรรมตกแต่ง', cat_stem:'เซลล์ต้นกำเนิด', cat_women:'คลินิกสุขภาพสตรี',
     cat_checkup:'ตรวจสุขภาพ', cat_wellness:'แพทย์แผนเกาหลี & สุขภาพ', cat_extra:'บริการอื่นๆ',
-    nations:[['จีน','中国'],['เวียดนาม','越南'],['ไทย','泰国'],['ญี่ปุ่น','日本'],['สหรัฐอเมริกา','美国'],['อื่นๆ','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   ja:{
     title:'簡単見積もり', subtitle:'希望の施術と訪韓日程を選択すると見積もりがすぐに表示されます',
@@ -2585,7 +2585,7 @@ const FKQ_I18N = {
     sent_wechat:'WeChat相談窓口を開く', close_btn:'✓ 閉じる',
     cat_skin:'皮膚科', cat_plastic:'整形外科', cat_stem:'幹細胞', cat_women:'女性クリニック',
     cat_checkup:'健康診断', cat_wellness:'韓医学・ウェルネス', cat_extra:'その他サービス',
-    nations:[['中国','中国'],['ベトナム','越南'],['タイ','泰国'],['日本','日本'],['アメリカ','美国'],['その他','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   ru:{
     title:'Быстрый расчёт стоимости', subtitle:'Выберите процедуры и даты поездки в Корею для мгновенного расчёта',
@@ -2610,7 +2610,7 @@ const FKQ_I18N = {
     sent_wechat:'Открыть консультацию WeChat', close_btn:'✓ Закрыть',
     cat_skin:'Дерматология', cat_plastic:'Пластическая хирургия', cat_stem:'Стволовые клетки', cat_women:'Женская клиника',
     cat_checkup:'Медосмотр', cat_wellness:'Корейская медицина и здоровье', cat_extra:'Другие услуги',
-    nations:[['Китай','中国'],['Вьетнам','越南'],['Таиланд','泰国'],['Япония','日本'],['США','美国'],['Другое','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   mn:{
     title:'Шуурхай үнийн санал', subtitle:'Хүссэн эмчилгээ болон Солонгост ирэх огноогоо сонгоход шууд тооцоо гарна',
@@ -2635,7 +2635,7 @@ const FKQ_I18N = {
     sent_wechat:'WeChat зөвлөгөөний цонх нээх', close_btn:'✓ Хаах',
     cat_skin:'Арьс судлал', cat_plastic:'Гоо засал мэс засал', cat_stem:'Иштэй эс', cat_women:'Эмэгтэйчүүдийн клиник',
     cat_checkup:'Эрүүл мэндийн үзлэг', cat_wellness:'Солонгос анагаах ухаан & эрүүл мэнд', cat_extra:'Бусад үйлчилгээ',
-    nations:[['Хятад','中国'],['Вьетнам','越南'],['Тайланд','泰国'],['Япон','日本'],['АНУ','美国'],['Бусад','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
   id:{
     title:'Dapatkan Penawaran Cepat', subtitle:'Pilih perawatan dan tanggal kunjungan Anda untuk estimasi instan',
@@ -2660,7 +2660,7 @@ const FKQ_I18N = {
     sent_wechat:'Buka Konsultasi WeChat', close_btn:'✓ Tutup',
     cat_skin:'Dermatologi', cat_plastic:'Bedah Plastik', cat_stem:'Sel Punca', cat_women:'Klinik Wanita',
     cat_checkup:'Pemeriksaan Kesehatan', cat_wellness:'Pengobatan Korea & Kesehatan', cat_extra:'Layanan Lainnya',
-    nations:[['Tiongkok','中国'],['Vietnam','越南'],['Thailand','泰国'],['Jepang','日本'],['AS','美国'],['Lainnya','其他']],
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
   },
 };
 function fkqT(key){
@@ -3496,7 +3496,7 @@ document.getElementById('fk-ai-overlay')?.addEventListener('click', function(e){
 <button id="fk-scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로">↑</button>
 
 <!-- ① 견적위젯이 어디에서도 호출되지 않을 경우를 위한 백업 버튼 -->
-<button id="fk-quote-trigger-fab" onclick="if(typeof openQuoteWidget==='function') openQuoteWidget();">💰 간편 견적 받기</button>
+<button id="fk-quote-trigger-fab" onclick="if(typeof openQuoteWidget==='function') openQuoteWidget();" data-i18n="hero_cta_quote">💰 간편 견적 받기</button>
 
 <script>
 // ════════════════════════════════════════════════════════════
