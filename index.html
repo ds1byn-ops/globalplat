@@ -1706,8 +1706,6 @@ function setLang(l){
     vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
-  const heroQuoteBtn = document.getElementById('hero-quote-btn');
-  if(heroQuoteBtn) heroQuoteBtn.textContent = '💰 ' + (typeof fkqT === 'function' ? fkqT('title') : '간편 견적 받기');
   renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq();
   if(currentHosp) renderDetail(currentHosp);
   initSvcButtons();
