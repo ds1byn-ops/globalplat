@@ -249,6 +249,7 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
+      <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn">💰 简易报价</button>
       <button class="btn-secondary" onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
     </div>
     <div class="hero-stats">
@@ -1692,9 +1693,17 @@ function setLang(l){
     vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
+  const heroQuoteBtn = document.getElementById('hero-quote-btn');
+  if(heroQuoteBtn) heroQuoteBtn.textContent = '💰 ' + (typeof fkqT === 'function' ? fkqT('title') : '간편 견적 받기');
   renderCats(); filterHosps(); renderSteps(); renderReviews();
   if(currentHosp) renderDetail(currentHosp);
   initSvcButtons();
+  // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
+  if(typeof fkqApplyI18n === 'function' && document.getElementById('fk-quote-overlay')?.classList.contains('open')){
+    fkqApplyI18n();
+    if(typeof fkqInitCategories === 'function') fkqInitCategories();
+    if(fkqCurrentStep === 3 && typeof fkqRenderResult === 'function') fkqRenderResult();
+  }
 }
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -2363,12 +2372,12 @@ async function loadSharedWanghongs(){
       <!-- ───────── STEP 1: 부위/시술 다중 선택 ───────── -->
       <div id="fkq-step-1" class="fkq-step">
         <div class="fkq-section-title">
-          <span class="num">1</span> 관심 분야를 선택하세요 (분야·시술 모두 중복 가능)
+          <span class="num">1</span> <span id="fkq-step1-title">관심 분야를 선택하세요 (분야·시술 모두 중복 가능)</span>
         </div>
         <div class="fkq-cat-grid" id="fkq-cat-grid"></div>
         <div class="fkq-selected-bar" id="fkq-selected-bar">
           <span id="fkq-selected-text"></span>
-          <span class="fkq-clear-btn" onclick="fkqClearAll()">전체 초기화</span>
+          <span class="fkq-clear-btn" id="fkq-clear-btn-text" onclick="fkqClearAll()">전체 초기화</span>
         </div>
         <div class="fkq-proc-list" id="fkq-proc-list"></div>
         <div class="fkq-empty" id="fkq-cat-empty">위 분야를 먼저 선택해주세요 (여러 개 선택 가능)</div>
@@ -2376,33 +2385,33 @@ async function loadSharedWanghongs(){
 
       <!-- ───────── STEP 2: 방한 일정 + 정보 ───────── -->
       <div id="fkq-step-2" class="fkq-step" style="display:none;">
-        <div class="fkq-section-title"><span class="num">2</span> 방한 일정</div>
+        <div class="fkq-section-title"><span class="num">2</span> <span id="fkq-step2-title">방한 일정</span></div>
         <div class="fkq-form-grid">
-          <div class="fkq-field"><label>입국 예정일</label><input type="date" id="fkq-arrival"></div>
-          <div class="fkq-field"><label>출국 예정일</label><input type="date" id="fkq-departure"></div>
+          <div class="fkq-field"><label id="fkq-arrival-label">입국 예정일</label><input type="date" id="fkq-arrival"></div>
+          <div class="fkq-field"><label id="fkq-departure-label">출국 예정일</label><input type="date" id="fkq-departure"></div>
         </div>
         <div class="fkq-stay-row" id="fkq-stay-display" style="display:none;">
           <span class="icon">📅</span>
-          <span class="txt">체류 기간: <b id="fkq-stay-days">-</b> · 추천 일정: <b id="fkq-stay-reco">-</b></span>
+          <span class="txt"><span id="fkq-stay-label-text">체류 기간</span>: <b id="fkq-stay-days">-</b> · <span id="fkq-reco-label-text">추천 일정</span>: <b id="fkq-stay-reco">-</b></span>
         </div>
 
-        <div class="fkq-section-title" style="margin-top:18px;"><span class="num">3</span> 연락 정보</div>
+        <div class="fkq-section-title" style="margin-top:18px;"><span class="num">3</span> <span id="fkq-step3-title">연락 정보</span></div>
         <div class="fkq-form-grid">
-          <div class="fkq-field"><label>성명 (여권 영문명) *</label><input type="text" id="fkq-name" placeholder="ZHANG JING"></div>
-          <div class="fkq-field"><label>국적</label>
-            <select id="fkq-nation"><option>中国</option><option>越南</option><option>泰国</option><option>马来西亚</option><option>其他</option></select>
+          <div class="fkq-field"><label id="fkq-name-label">성명 (여권 영문명) *</label><input type="text" id="fkq-name" placeholder="ZHANG JING"></div>
+          <div class="fkq-field"><label id="fkq-nation-label">국적</label>
+            <select id="fkq-nation"></select>
           </div>
         </div>
         <div class="fkq-form-grid">
-          <div class="fkq-field"><label>위챗 / 연락처 *</label><input type="text" id="fkq-contact" placeholder="WeChat ID 또는 전화번호"></div>
-          <div class="fkq-field"><label>희망 병원 (선택)</label><input type="text" id="fkq-hospital" placeholder="미정이면 비워두세요"></div>
+          <div class="fkq-field"><label id="fkq-contact-label">위챗 / 연락처 *</label><input type="text" id="fkq-contact" placeholder="WeChat ID 또는 전화번호"></div>
+          <div class="fkq-field"><label id="fkq-hospital-label">희망 병원 (선택)</label><input type="text" id="fkq-hospital" placeholder="미정이면 비워두세요"></div>
         </div>
       </div>
 
       <!-- ───────── STEP 3: 견적서 결과 ───────── -->
       <div id="fkq-step-3" class="fkq-step" style="display:none;">
         <div class="fkq-result-doc" id="fkq-result-doc"></div>
-        <div class="fkq-disclaimer">
+        <div class="fkq-disclaimer" id="fkq-disclaimer-text">
           ⓘ 본 견적은 협력 병원들의 <b>평균 시세 범위(USD 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.
         </div>
       </div>
@@ -2412,8 +2421,7 @@ async function loadSharedWanghongs(){
     <div class="fkq-footer">
       <button class="fkq-btn fkq-btn-outline" id="fkq-back-btn" onclick="fkqPrevStep()" style="display:none;">이전</button>
       <button class="fkq-btn fkq-btn-primary" id="fkq-next-btn" onclick="fkqNextStep()">다음</button>
-      <button class="fkq-btn fkq-btn-wechat" id="fkq-submit-btn" onclick="fkqSubmit()" style="display:none;">💬 위챗으로 상담받기</button>
-      <button class="fkq-btn fkq-btn-outline" id="fkq-print-btn" onclick="fkqPrintQuote()" style="display:none;">🖨️ 저장</button>
+      <button class="fkq-btn fkq-btn-wechat" id="fkq-submit-btn" onclick="fkqSubmit()" style="display:none;">📤 견적신청 전송</button>
     </div>
   </div>
 </div>
@@ -2424,6 +2432,242 @@ async function loadSharedWanghongs(){
 //  ※ 39개 협력병원 가격표 기반 평균 시세 범위 (USD 환산, 1300원=1$ 적용시 참고)
 //  ※ 정확한 가격은 상담원이 위챗으로 안내. 가격 수정은 fkqProcedureData만 편집.
 // ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  견적위젯 다국어 번역 객체 (FKQ_I18N)
+//  메인 사이트 lang 전역변수를 그대로 사용
+// ════════════════════════════════════════════════════════════
+const FKQ_I18N = {
+  zh:{
+    title:'简易报价', subtitle:'选择您想要的项目和访韩日期，立即查看预估报价',
+    step1_title:'1. 选择感兴趣的领域（领域和项目均可多选）',
+    step1_empty:'请先选择上方领域（可多选）',
+    clear_all:'全部重置',
+    step2_visit:'2. 访韩日程', arrival:'入境日期', departure:'出境日期',
+    stay_label:'停留时间', reco_label:'推荐行程',
+    reco_day:'当天可施术日程', reco_short:'含恢复期短期日程', reco_mid:'施术+观光并行日程', reco_long:'综合施术·恢复充裕日程',
+    step3_contact:'3. 联系方式', name_label:'姓名（护照英文名）*', nation_label:'国籍',
+    contact_label:'微信 / 联系方式 *', hospital_label:'希望医院（可选）', hospital_ph:'未定可留空',
+    step3_title:'预估报价', step3_sub:'确认下方报价单后通过微信咨询',
+    disclaimer:'本报价为合作医院<b>平均市场价范围（USD换算）</b>，仅供参考，实际费用以医院诊断后确定为准。<b>精确报价及行程将由专属顾问通过微信直接为您说明</b>。',
+    btn_prev:'上一步', btn_next:'下一步', btn_consult:'💬 微信咨询', btn_submit:'📤 发送报价申请', btn_save:'🖨️ 保存',
+    select_min1:'请至少选择1个感兴趣的项目。',
+    name_contact_required:'姓名和联系方式为必填项。',
+    doc_title:'预估报价单（仅供参考）', doc_no:'报价编号', doc_issued:'发行',
+    doc_name:'姓名', doc_contact:'联系方式', doc_hospital:'希望医院', doc_visit:'访韩日程',
+    doc_field:'领域', doc_treat:'希望项目', doc_range:'预估范围 (USD)', doc_total:'预估报价总额',
+    doc_match:'咨询后匹配', doc_footer:'💬 精确报价由专属顾问通过微信直接为您说明',
+    sent_title:'报价申请已发送！', sent_desc:'已发送完成，我们将通过微信联系您',
+    sent_wechat:'打开微信咨询窗口', close_btn:'✓ 关闭',
+    cat_skin:'皮肤科', cat_plastic:'整形外科', cat_stem:'干细胞', cat_women:'女性医院',
+    cat_checkup:'体检', cat_wellness:'韩医·健康', cat_extra:'其他服务',
+    nations:[['中国','中国'],['越南','越南'],['泰国','泰国'],['日本','日本'],['美国','美国'],['其他','其他']],
+  },
+  ko:{
+    title:'간편 견적 받기', subtitle:'원하는 시술과 방한 일정을 선택하면 예상 견적을 바로 보여드려요',
+    step1_title:'1. 관심 분야를 선택하세요 (분야·시술 모두 중복 가능)',
+    step1_empty:'위 분야를 먼저 선택해주세요 (여러 개 선택 가능)',
+    clear_all:'전체 초기화',
+    step2_visit:'2. 방한 일정', arrival:'입국 예정일', departure:'출국 예정일',
+    stay_label:'체류 기간', reco_label:'추천 일정',
+    reco_day:'당일 시술 가능 일정', reco_short:'회복 포함 짧은 일정', reco_mid:'시술+관광 병행 일정', reco_long:'복합 시술·회복 여유 일정',
+    step3_contact:'3. 연락 정보', name_label:'성명 (여권 영문명) *', nation_label:'국적',
+    contact_label:'위챗 / 연락처 *', hospital_label:'희망 병원 (선택)', hospital_ph:'미정이면 비워두세요',
+    step3_title:'예상 견적서', step3_sub:'아래 견적서를 확인하고 위챗으로 상담받으세요',
+    disclaimer:'본 견적은 협력 병원들의 <b>평균 시세 범위(USD 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.',
+    btn_prev:'이전', btn_next:'다음', btn_consult:'💬 위챗으로 상담받기', btn_submit:'📤 견적신청 전송', btn_save:'🖨️ 저장',
+    select_min1:'관심 있는 시술을 1개 이상 선택해주세요.',
+    name_contact_required:'성명과 연락처는 필수 입력입니다.',
+    doc_title:'예상 견적서 (참고용)', doc_no:'견적번호', doc_issued:'발행',
+    doc_name:'성명', doc_contact:'연락처', doc_hospital:'희망병원', doc_visit:'방한일정',
+    doc_field:'분야', doc_treat:'희망 시술', doc_range:'예상 범위 (USD)', doc_total:'총 예상 견적 범위',
+    doc_match:'상담 후 매칭', doc_footer:'💬 정확한 견적은 위챗 상담원이 직접 안내드립니다',
+    sent_title:'견적신청이 전송되었습니다!', sent_desc:'전송이 완료되었으니 위챗으로 연락드릴게요',
+    sent_wechat:'위챗 상담 창 열기', close_btn:'✓ 닫기',
+    cat_skin:'피부과', cat_plastic:'성형외과', cat_stem:'줄기세포', cat_women:'여성의원',
+    cat_checkup:'건강검진', cat_wellness:'한방·웰니스', cat_extra:'기타서비스',
+    nations:[['중국','中国'],['베트남','越南'],['태국','泰国'],['일본','日本'],['미국','美国'],['기타','其他']],
+  },
+  en:{
+    title:'Get a Quick Quote', subtitle:'Select your treatments and travel dates for an instant estimate',
+    step1_title:'1. Select areas of interest (multiple selections allowed)',
+    step1_empty:'Please select an area above (multiple selections allowed)',
+    clear_all:'Clear All',
+    step2_visit:'2. Travel Schedule', arrival:'Arrival Date', departure:'Departure Date',
+    stay_label:'Length of Stay', reco_label:'Recommended Schedule',
+    reco_day:'Same-day treatment schedule', reco_short:'Short schedule with recovery', reco_mid:'Treatment + sightseeing schedule', reco_long:'Extended schedule with ample recovery',
+    step3_contact:'3. Contact Information', name_label:'Full Name (as on Passport) *', nation_label:'Nationality',
+    contact_label:'WeChat / Contact *', hospital_label:'Preferred Hospital (optional)', hospital_ph:'Leave blank if undecided',
+    step3_title:'Estimated Quote', step3_sub:'Review the quote below and consult via WeChat',
+    disclaimer:'This quote reflects the <b>average market price range (converted to USD)</b> of partner hospitals for reference only; the actual cost will be confirmed after hospital diagnosis. <b>Your dedicated consultant will provide the exact quote and schedule directly via WeChat.</b>',
+    btn_prev:'Back', btn_next:'Next', btn_consult:'💬 Consult via WeChat', btn_submit:'📤 Send Quote Request', btn_save:'🖨️ Save',
+    select_min1:'Please select at least one treatment of interest.',
+    name_contact_required:'Name and contact information are required.',
+    doc_title:'Estimated Quote (Reference)', doc_no:'Quote No.', doc_issued:'Issued',
+    doc_name:'Name', doc_contact:'Contact', doc_hospital:'Preferred Hospital', doc_visit:'Travel Schedule',
+    doc_field:'Field', doc_treat:'Desired Treatment', doc_range:'Estimated Range (USD)', doc_total:'Total Estimated Range',
+    doc_match:'Matched after consultation', doc_footer:'💬 The exact quote will be provided directly by your consultant via WeChat',
+    sent_title:'Quote Request Sent!', sent_desc:'Your request has been sent. We will contact you via WeChat.',
+    sent_wechat:'Open WeChat Consultation', close_btn:'✓ Close',
+    cat_skin:'Dermatology', cat_plastic:'Plastic Surgery', cat_stem:'Stem Cell', cat_women:"Women's Clinic",
+    cat_checkup:'Health Checkup', cat_wellness:'Korean Medicine & Wellness', cat_extra:'Other Services',
+    nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
+  },
+  vi:{
+    title:'Nhận báo giá nhanh', subtitle:'Chọn liệu trình và ngày sang Hàn để xem báo giá ngay',
+    step1_title:'1. Chọn lĩnh vực quan tâm (có thể chọn nhiều)',
+    step1_empty:'Vui lòng chọn lĩnh vực ở trên (có thể chọn nhiều)',
+    clear_all:'Xóa tất cả',
+    step2_visit:'2. Lịch trình sang Hàn', arrival:'Ngày nhập cảnh', departure:'Ngày xuất cảnh',
+    stay_label:'Thời gian lưu trú', reco_label:'Lịch trình đề xuất',
+    reco_day:'Lịch trình điều trị trong ngày', reco_short:'Lịch trình ngắn kèm hồi phục', reco_mid:'Lịch trình điều trị + du lịch', reco_long:'Lịch trình tổng hợp, đủ thời gian hồi phục',
+    step3_contact:'3. Thông tin liên hệ', name_label:'Họ tên (theo hộ chiếu) *', nation_label:'Quốc tịch',
+    contact_label:'WeChat / Liên hệ *', hospital_label:'Bệnh viện mong muốn (tùy chọn)', hospital_ph:'Để trống nếu chưa quyết định',
+    step3_title:'Báo giá dự kiến', step3_sub:'Xem báo giá dưới đây và tư vấn qua WeChat',
+    disclaimer:'Báo giá này dựa trên <b>khoảng giá trung bình thị trường (quy đổi USD)</b> của các bệnh viện đối tác chỉ để tham khảo; chi phí thực tế sẽ được xác nhận sau khi bệnh viện chẩn đoán. <b>Tư vấn viên chuyên trách sẽ cung cấp báo giá và lịch trình chính xác trực tiếp qua WeChat.</b>',
+    btn_prev:'Quay lại', btn_next:'Tiếp theo', btn_consult:'💬 Tư vấn qua WeChat', btn_submit:'📤 Gửi yêu cầu báo giá', btn_save:'🖨️ Lưu',
+    select_min1:'Vui lòng chọn ít nhất một liệu trình quan tâm.',
+    name_contact_required:'Họ tên và thông tin liên hệ là bắt buộc.',
+    doc_title:'Báo giá dự kiến (Tham khảo)', doc_no:'Số báo giá', doc_issued:'Ngày phát hành',
+    doc_name:'Họ tên', doc_contact:'Liên hệ', doc_hospital:'Bệnh viện mong muốn', doc_visit:'Lịch trình sang Hàn',
+    doc_field:'Lĩnh vực', doc_treat:'Liệu trình mong muốn', doc_range:'Khoảng giá dự kiến (USD)', doc_total:'Tổng báo giá dự kiến',
+    doc_match:'Sẽ chỉ định sau tư vấn', doc_footer:'💬 Báo giá chính xác sẽ do tư vấn viên cung cấp trực tiếp qua WeChat',
+    sent_title:'Đã gửi yêu cầu báo giá!', sent_desc:'Yêu cầu đã được gửi, chúng tôi sẽ liên hệ qua WeChat',
+    sent_wechat:'Mở cửa sổ tư vấn WeChat', close_btn:'✓ Đóng',
+    cat_skin:'Da liễu', cat_plastic:'Phẫu thuật thẩm mỹ', cat_stem:'Tế bào gốc', cat_women:'Phòng khám phụ khoa',
+    cat_checkup:'Khám sức khỏe', cat_wellness:'Y học cổ truyền & Sức khỏe', cat_extra:'Dịch vụ khác',
+    nations:[['Trung Quốc','中国'],['Việt Nam','越南'],['Thái Lan','泰国'],['Nhật Bản','日本'],['Hoa Kỳ','美国'],['Khác','其他']],
+  },
+  th:{
+    title:'รับใบเสนอราคาด่วน', subtitle:'เลือกหัตถการและวันที่เดินทางมาเกาหลีเพื่อดูราคาประเมินทันที',
+    step1_title:'1. เลือกสาขาที่สนใจ (เลือกได้หลายรายการ)',
+    step1_empty:'กรุณาเลือกสาขาด้านบนก่อน (เลือกได้หลายรายการ)',
+    clear_all:'ล้างทั้งหมด',
+    step2_visit:'2. กำหนดการเดินทาง', arrival:'วันที่เดินทางเข้า', departure:'วันที่เดินทางออก',
+    stay_label:'ระยะเวลาพำนัก', reco_label:'กำหนดการที่แนะนำ',
+    reco_day:'กำหนดการทำหัตถการวันเดียว', reco_short:'กำหนดการสั้นพร้อมพักฟื้น', reco_mid:'กำหนดการทำหัตถการ+ท่องเที่ยว', reco_long:'กำหนดการแบบครบและมีเวลาพักฟื้นเพียงพอ',
+    step3_contact:'3. ข้อมูลติดต่อ', name_label:'ชื่อ-นามสกุล (ตามพาสปอร์ต) *', nation_label:'สัญชาติ',
+    contact_label:'WeChat / ติดต่อ *', hospital_label:'โรงพยาบาลที่ต้องการ (ไม่บังคับ)', hospital_ph:'เว้นว่างได้หากยังไม่ตัดสินใจ',
+    step3_title:'ใบเสนอราคาประเมิน', step3_sub:'ตรวจสอบใบเสนอราคาด้านล่างและปรึกษาทาง WeChat',
+    disclaimer:'ใบเสนอราคานี้อ้างอิงจาก <b>ช่วงราคาตลาดเฉลี่ย (แปลงเป็น USD)</b> ของโรงพยาบาลพันธมิตรเพื่อการอ้างอิงเท่านั้น ค่าใช้จ่ายจริงจะยืนยันหลังการวินิจฉัยจากโรงพยาบาล <b>ที่ปรึกษาส่วนตัวของคุณจะให้ใบเสนอราคาและกำหนดการที่แม่นยำโดยตรงทาง WeChat</b>',
+    btn_prev:'ก่อนหน้า', btn_next:'ถัดไป', btn_consult:'💬 ปรึกษาทาง WeChat', btn_submit:'📤 ส่งคำขอใบเสนอราคา', btn_save:'🖨️ บันทึก',
+    select_min1:'กรุณาเลือกหัตถการที่สนใจอย่างน้อย 1 รายการ',
+    name_contact_required:'กรุณากรอกชื่อและข้อมูลติดต่อ',
+    doc_title:'ใบเสนอราคาประเมิน (อ้างอิง)', doc_no:'เลขที่ใบเสนอราคา', doc_issued:'วันที่ออก',
+    doc_name:'ชื่อ', doc_contact:'ติดต่อ', doc_hospital:'โรงพยาบาลที่ต้องการ', doc_visit:'กำหนดการเดินทาง',
+    doc_field:'สาขา', doc_treat:'หัตถการที่ต้องการ', doc_range:'ช่วงราคาประเมิน (USD)', doc_total:'ราคาประเมินรวม',
+    doc_match:'จะจับคู่หลังปรึกษา', doc_footer:'💬 ใบเสนอราคาที่แม่นยำจะให้โดยที่ปรึกษาโดยตรงทาง WeChat',
+    sent_title:'ส่งคำขอใบเสนอราคาแล้ว!', sent_desc:'ส่งเรียบร้อยแล้ว เราจะติดต่อคุณทาง WeChat',
+    sent_wechat:'เปิดหน้าต่างปรึกษา WeChat', close_btn:'✓ ปิด',
+    cat_skin:'ผิวหนัง', cat_plastic:'ศัลยกรรมตกแต่ง', cat_stem:'เซลล์ต้นกำเนิด', cat_women:'คลินิกสุขภาพสตรี',
+    cat_checkup:'ตรวจสุขภาพ', cat_wellness:'แพทย์แผนเกาหลี & สุขภาพ', cat_extra:'บริการอื่นๆ',
+    nations:[['จีน','中国'],['เวียดนาม','越南'],['ไทย','泰国'],['ญี่ปุ่น','日本'],['สหรัฐอเมริกา','美国'],['อื่นๆ','其他']],
+  },
+  ja:{
+    title:'簡単見積もり', subtitle:'希望の施術と訪韓日程を選択すると見積もりがすぐに表示されます',
+    step1_title:'1. ご興味のある分野を選択してください（分野・施術とも複数選択可）',
+    step1_empty:'上記の分野を先に選択してください（複数選択可）',
+    clear_all:'全てリセット',
+    step2_visit:'2. 訪韓日程', arrival:'入国予定日', departure:'出国予定日',
+    stay_label:'滞在期間', reco_label:'おすすめ日程',
+    reco_day:'日帰り施術可能な日程', reco_short:'回復期間を含む短期日程', reco_mid:'施術+観光を組み合わせた日程', reco_long:'複合施術・回復に余裕のある日程',
+    step3_contact:'3. 連絡先情報', name_label:'氏名（パスポート英字）*', nation_label:'国籍',
+    contact_label:'WeChat / 連絡先 *', hospital_label:'希望病院（任意）', hospital_ph:'未定の場合は空欄でOK',
+    step3_title:'予想見積書', step3_sub:'下記の見積書をご確認の上、WeChatでご相談ください',
+    disclaimer:'本見積りは提携病院の<b>平均相場範囲（USD換算）</b>をご案内する参考用であり、実際の診療費は病院診断後に確定します。<b>正確な見積り・日程は専属コーディネーターがWeChatで直接ご案内します。</b>',
+    btn_prev:'戻る', btn_next:'次へ', btn_consult:'💬 WeChatで相談', btn_submit:'📤 見積り申請を送信', btn_save:'🖨️ 保存',
+    select_min1:'ご興味のある施術を1つ以上選択してください。',
+    name_contact_required:'氏名と連絡先は必須項目です。',
+    doc_title:'予想見積書（参考用）', doc_no:'見積番号', doc_issued:'発行日',
+    doc_name:'氏名', doc_contact:'連絡先', doc_hospital:'希望病院', doc_visit:'訪韓日程',
+    doc_field:'分野', doc_treat:'希望施術', doc_range:'予想範囲 (USD)', doc_total:'予想見積総額',
+    doc_match:'相談後マッチング', doc_footer:'💬 正確な見積りは専属コーディネーターがWeChatで直接ご案内します',
+    sent_title:'見積り申請が送信されました！', sent_desc:'送信が完了しました。WeChatでご連絡いたします',
+    sent_wechat:'WeChat相談窓口を開く', close_btn:'✓ 閉じる',
+    cat_skin:'皮膚科', cat_plastic:'整形外科', cat_stem:'幹細胞', cat_women:'女性クリニック',
+    cat_checkup:'健康診断', cat_wellness:'韓医学・ウェルネス', cat_extra:'その他サービス',
+    nations:[['中国','中国'],['ベトナム','越南'],['タイ','泰国'],['日本','日本'],['アメリカ','美国'],['その他','其他']],
+  },
+  ru:{
+    title:'Быстрый расчёт стоимости', subtitle:'Выберите процедуры и даты поездки в Корею для мгновенного расчёта',
+    step1_title:'1. Выберите интересующие направления (можно выбрать несколько)',
+    step1_empty:'Сначала выберите направление выше (можно выбрать несколько)',
+    clear_all:'Очистить всё',
+    step2_visit:'2. Расписание поездки', arrival:'Дата прибытия', departure:'Дата отъезда',
+    stay_label:'Продолжительность пребывания', reco_label:'Рекомендуемый график',
+    reco_day:'График процедур в тот же день', reco_short:'Короткий график с восстановлением', reco_mid:'График процедур + экскурсий', reco_long:'Комплексный график с достаточным восстановлением',
+    step3_contact:'3. Контактная информация', name_label:'Имя (как в паспорте) *', nation_label:'Гражданство',
+    contact_label:'WeChat / Контакт *', hospital_label:'Предпочитаемая клиника (необязательно)', hospital_ph:'Оставьте пустым, если не определено',
+    step3_title:'Предварительный расчёт', step3_sub:'Проверьте расчёт ниже и проконсультируйтесь через WeChat',
+    disclaimer:'Этот расчёт отражает <b>среднюю рыночную цену (в USD)</b> партнёрских клиник только для справки; фактическая стоимость будет подтверждена после диагностики в клинике. <b>Точный расчёт и график предоставит ваш персональный консультант напрямую через WeChat.</b>',
+    btn_prev:'Назад', btn_next:'Далее', btn_consult:'💬 Консультация через WeChat', btn_submit:'📤 Отправить запрос', btn_save:'🖨️ Сохранить',
+    select_min1:'Пожалуйста, выберите хотя бы одну интересующую процедуру.',
+    name_contact_required:'Имя и контактные данные обязательны.',
+    doc_title:'Предварительный расчёт (справочно)', doc_no:'Номер расчёта', doc_issued:'Дата выдачи',
+    doc_name:'Имя', doc_contact:'Контакт', doc_hospital:'Предпочитаемая клиника', doc_visit:'График поездки',
+    doc_field:'Направление', doc_treat:'Желаемая процедура', doc_range:'Расчётный диапазон (USD)', doc_total:'Общий расчётный диапазон',
+    doc_match:'Будет назначено после консультации', doc_footer:'💬 Точный расчёт предоставит ваш консультант напрямую через WeChat',
+    sent_title:'Запрос на расчёт отправлен!', sent_desc:'Запрос отправлен, мы свяжемся с вами через WeChat',
+    sent_wechat:'Открыть консультацию WeChat', close_btn:'✓ Закрыть',
+    cat_skin:'Дерматология', cat_plastic:'Пластическая хирургия', cat_stem:'Стволовые клетки', cat_women:'Женская клиника',
+    cat_checkup:'Медосмотр', cat_wellness:'Корейская медицина и здоровье', cat_extra:'Другие услуги',
+    nations:[['Китай','中国'],['Вьетнам','越南'],['Таиланд','泰国'],['Япония','日本'],['США','美国'],['Другое','其他']],
+  },
+  mn:{
+    title:'Шуурхай үнийн санал', subtitle:'Хүссэн эмчилгээ болон Солонгост ирэх огноогоо сонгоход шууд тооцоо гарна',
+    step1_title:'1. Сонирхсон чиглэлээ сонгоно уу (чиглэл, эмчилгээ хоёуланг нь олныг сонгож болно)',
+    step1_empty:'Эхлээд дээрх чиглэлийг сонгоно уу (олныг сонгож болно)',
+    clear_all:'Бүгдийг арилгах',
+    step2_visit:'2. Солонгост ирэх хуанли', arrival:'Орох огноо', departure:'Гарах огноо',
+    stay_label:'Хугацаа', reco_label:'Санал болгох хуанли',
+    reco_day:'Нэг өдрийн эмчилгээний хуанли', reco_short:'Сэргэлттэй богино хуанли', reco_mid:'Эмчилгээ+аялал хосолсон хуанли', reco_long:'Иж бүрэн эмчилгээ, сэргэлтийн хугацаа бүхий хуанли',
+    step3_contact:'3. Холбоо барих мэдээлэл', name_label:'Нэр (паспортын дагуу) *', nation_label:'Иргэншил',
+    contact_label:'WeChat / Холбоо барих *', hospital_label:'Хүссэн эмнэлэг (заавал биш)', hospital_ph:'Тодорхойгүй бол хоосон орхино уу',
+    step3_title:'Тооцоолсон үнийн санал', step3_sub:'Доорх үнийн саналыг шалгаад WeChat-аар зөвлөгөө аваарай',
+    disclaimer:'Энэ үнийн санал нь түншлэгч эмнэлгүүдийн <b>дундаж зах зээлийн үнийн хязгаар (USD)</b>-ыг лавлагаа болгон харуулж байгаа бөгөөд бодит зардал нь эмнэлгийн оношилгооны дараа тодорхойлогдоно. <b>Тодорхой үнийн санал, хуанли таны хариуцсан зөвлөхөөс WeChat-аар шууд мэдээлэгдэнэ.</b>',
+    btn_prev:'Буцах', btn_next:'Дараах', btn_consult:'💬 WeChat-аар зөвлөгөө авах', btn_submit:'📤 Үнийн саналын хүсэлт илгээх', btn_save:'🖨️ Хадгалах',
+    select_min1:'Сонирхсон эмчилгээгээ доод тал нь 1-ийг сонгоно уу.',
+    name_contact_required:'Нэр болон холбоо барих мэдээлэл заавал шаардлагатай.',
+    doc_title:'Тооцоолсон үнийн санал (Лавлагаа)', doc_no:'Үнийн саналын дугаар', doc_issued:'Гарсан огноо',
+    doc_name:'Нэр', doc_contact:'Холбоо барих', doc_hospital:'Хүссэн эмнэлэг', doc_visit:'Аяллын хуанли',
+    doc_field:'Чиглэл', doc_treat:'Хүссэн эмчилгээ', doc_range:'Тооцоолсон хязгаар (USD)', doc_total:'Нийт тооцоолсон хязгаар',
+    doc_match:'Зөвлөгөөний дараа тохируулна', doc_footer:'💬 Тодорхой үнийн саналыг таны зөвлөх WeChat-аар шууд мэдээлнэ',
+    sent_title:'Үнийн саналын хүсэлт илгээгдлээ!', sent_desc:'Илгээлт амжилттай. Бид тантай WeChat-аар холбогдох болно',
+    sent_wechat:'WeChat зөвлөгөөний цонх нээх', close_btn:'✓ Хаах',
+    cat_skin:'Арьс судлал', cat_plastic:'Гоо засал мэс засал', cat_stem:'Иштэй эс', cat_women:'Эмэгтэйчүүдийн клиник',
+    cat_checkup:'Эрүүл мэндийн үзлэг', cat_wellness:'Солонгос анагаах ухаан & эрүүл мэнд', cat_extra:'Бусад үйлчилгээ',
+    nations:[['Хятад','中国'],['Вьетнам','越南'],['Тайланд','泰国'],['Япон','日本'],['АНУ','美国'],['Бусад','其他']],
+  },
+  id:{
+    title:'Dapatkan Penawaran Cepat', subtitle:'Pilih perawatan dan tanggal kunjungan Anda untuk estimasi instan',
+    step1_title:'1. Pilih bidang yang diminati (bisa pilih lebih dari satu)',
+    step1_empty:'Silakan pilih bidang di atas terlebih dahulu (bisa pilih lebih dari satu)',
+    clear_all:'Hapus Semua',
+    step2_visit:'2. Jadwal Perjalanan', arrival:'Tanggal Kedatangan', departure:'Tanggal Keberangkatan',
+    stay_label:'Lama Tinggal', reco_label:'Jadwal yang Disarankan',
+    reco_day:'Jadwal perawatan satu hari', reco_short:'Jadwal singkat dengan pemulihan', reco_mid:'Jadwal perawatan + wisata', reco_long:'Jadwal lengkap dengan waktu pemulihan cukup',
+    step3_contact:'3. Informasi Kontak', name_label:'Nama Lengkap (sesuai Paspor) *', nation_label:'Kewarganegaraan',
+    contact_label:'WeChat / Kontak *', hospital_label:'Rumah Sakit Pilihan (opsional)', hospital_ph:'Biarkan kosong jika belum ditentukan',
+    step3_title:'Estimasi Penawaran', step3_sub:'Tinjau penawaran di bawah dan konsultasikan via WeChat',
+    disclaimer:'Penawaran ini mencerminkan <b>kisaran harga pasar rata-rata (dikonversi ke USD)</b> dari rumah sakit mitra hanya untuk referensi; biaya aktual akan dikonfirmasi setelah diagnosis rumah sakit. <b>Konsultan khusus Anda akan memberikan penawaran dan jadwal yang akurat langsung melalui WeChat.</b>',
+    btn_prev:'Kembali', btn_next:'Selanjutnya', btn_consult:'💬 Konsultasi via WeChat', btn_submit:'📤 Kirim Permintaan Penawaran', btn_save:'🖨️ Simpan',
+    select_min1:'Silakan pilih setidaknya satu perawatan yang diminati.',
+    name_contact_required:'Nama dan informasi kontak wajib diisi.',
+    doc_title:'Estimasi Penawaran (Referensi)', doc_no:'No. Penawaran', doc_issued:'Diterbitkan',
+    doc_name:'Nama', doc_contact:'Kontak', doc_hospital:'Rumah Sakit Pilihan', doc_visit:'Jadwal Perjalanan',
+    doc_field:'Bidang', doc_treat:'Perawatan yang Diinginkan', doc_range:'Estimasi Kisaran (USD)', doc_total:'Total Estimasi Kisaran',
+    doc_match:'Dicocokkan setelah konsultasi', doc_footer:'💬 Penawaran akurat akan diberikan langsung oleh konsultan Anda melalui WeChat',
+    sent_title:'Permintaan Penawaran Terkirim!', sent_desc:'Permintaan telah terkirim, kami akan menghubungi Anda via WeChat',
+    sent_wechat:'Buka Konsultasi WeChat', close_btn:'✓ Tutup',
+    cat_skin:'Dermatologi', cat_plastic:'Bedah Plastik', cat_stem:'Sel Punca', cat_women:'Klinik Wanita',
+    cat_checkup:'Pemeriksaan Kesehatan', cat_wellness:'Pengobatan Korea & Kesehatan', cat_extra:'Layanan Lainnya',
+    nations:[['Tiongkok','中国'],['Vietnam','越南'],['Thailand','泰国'],['Jepang','日本'],['AS','美国'],['Lainnya','其他']],
+  },
+};
+function fkqT(key){
+  const dict = FKQ_I18N[lang] || FKQ_I18N.ko;
+  return dict[key] !== undefined ? dict[key] : (FKQ_I18N.ko[key] || key);
+}
+
 const FKQ_EXR = 1500; // KRW per USD
 
 function won(min, max){ return { min: Math.round(min/FKQ_EXR), max: Math.round(max/FKQ_EXR) }; }
@@ -2514,14 +2758,53 @@ let fkqSelected = []; // { catKey, idx, catLabel, name, sub, min, max }
 let fkqCurrentStep = 1;
 let fkqActiveCat = null;
 
+// 카테고리 키 → 번역키 매핑 (fkqProcedureData의 한글 키는 내부 식별자로 유지)
+const FKQ_CAT_TKEY = {
+  "피부":"cat_skin", "성형외과":"cat_plastic", "줄기세포":"cat_stem",
+  "여성의원":"cat_women", "건강검진":"cat_checkup", "한방·웰니스":"cat_wellness", "기타서비스":"cat_extra"
+};
+
 function openQuoteWidget(){
   document.getElementById('fk-quote-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-  if(!document.getElementById('fkq-cat-grid').children.length) fkqInitCategories();
+  fkqApplyI18n();
+  fkqInitCategories();
+  fkqGoStep(1);
 }
 function closeQuoteWidget(){
   document.getElementById('fk-quote-overlay').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// ── 견적위젯 전체 다국어 적용 ──
+function fkqApplyI18n(){
+  document.getElementById('fkq-step1-title').textContent = fkqT('step1_title');
+  document.getElementById('fkq-cat-empty').textContent = fkqT('step1_empty');
+  document.getElementById('fkq-clear-btn-text').textContent = fkqT('clear_all');
+  document.getElementById('fkq-step2-title').textContent = fkqT('step2_visit');
+  document.getElementById('fkq-arrival-label').textContent = fkqT('arrival');
+  document.getElementById('fkq-departure-label').textContent = fkqT('departure');
+  document.getElementById('fkq-stay-label-text').textContent = fkqT('stay_label');
+  document.getElementById('fkq-reco-label-text').textContent = fkqT('reco_label');
+  document.getElementById('fkq-step3-title').textContent = fkqT('step3_contact');
+  document.getElementById('fkq-name-label').textContent = fkqT('name_label');
+  document.getElementById('fkq-nation-label').textContent = fkqT('nation_label');
+  document.getElementById('fkq-contact-label').textContent = fkqT('contact_label');
+  document.getElementById('fkq-hospital-label').textContent = fkqT('hospital_label');
+  document.getElementById('fkq-hospital').placeholder = fkqT('hospital_ph');
+  document.getElementById('fkq-disclaimer-text').innerHTML = 'ⓘ ' + fkqT('disclaimer');
+  document.getElementById('fkq-back-btn').textContent = fkqT('btn_prev');
+  document.getElementById('fkq-next-btn').textContent = fkqT('btn_next');
+  document.getElementById('fkq-submit-btn').textContent = fkqT('btn_submit');
+  // 국적 옵션 (영어 표기 + 원문 보조)
+  const nationSel = document.getElementById('fkq-nation');
+  const nations = fkqT('nations');
+  nationSel.innerHTML = nations.map(([label]) => `<option>${label}</option>`).join('');
+  // 카테고리 라벨도 갱신
+  Object.keys(fkqProcedureData).forEach(key => {
+    const tkey = FKQ_CAT_TKEY[key];
+    if(tkey) fkqProcedureData[key].label = fkqT(tkey);
+  });
 }
 
 function fkqInitCategories(){
@@ -2531,6 +2814,7 @@ function fkqInitCategories(){
       <span class="ic">${cat.icon}</span>${cat.label}
       <span class="cnt-badge" id="fkq-badge-${key}" style="display:none;">0</span>
     </button>`).join('');
+  fkqUpdateBadgesAndBar();
 }
 
 function fkqSelectCat(key){
@@ -2577,7 +2861,7 @@ function fkqUpdateBadgesAndBar(){
   const text = document.getElementById('fkq-selected-text');
   if(fkqSelected.length > 0){
     bar.classList.add('show');
-    text.innerHTML = `✅ 총 <b>${fkqSelected.length}개</b> 항목 선택됨 — ` + fkqSelected.map(s => s.name.split('(')[0].trim()).join(', ');
+    text.innerHTML = `✅ ${fkqSelected.length} — ` + fkqSelected.map(s => s.name.split('(')[0].trim()).join(', ');
   } else {
     bar.classList.remove('show');
   }
@@ -2597,11 +2881,11 @@ function fkqCalcStay(){
   const d1 = new Date(arr), d2 = new Date(dep);
   const days = Math.round((d2 - d1) / 86400000);
   if(days <= 0){ display.style.display = 'none'; return; }
-  let reco = '당일 시술 가능 일정';
-  if(days >= 2 && days < 4) reco = '회복 포함 짧은 일정';
-  else if(days >= 4 && days < 7) reco = '시술+관광 병행 일정';
-  else if(days >= 7) reco = '복합 시술·회복 여유 일정';
-  document.getElementById('fkq-stay-days').textContent = days + '일 (' + (days+1) + '박' + days + '일)';
+  let reco = fkqT('reco_day');
+  if(days >= 2 && days < 4) reco = fkqT('reco_short');
+  else if(days >= 4 && days < 7) reco = fkqT('reco_mid');
+  else if(days >= 7) reco = fkqT('reco_long');
+  document.getElementById('fkq-stay-days').textContent = days;
   document.getElementById('fkq-stay-reco').textContent = reco;
   display.style.display = 'flex';
 }
@@ -2616,20 +2900,19 @@ function fkqGoStep(step){
   document.getElementById('fkq-back-btn').style.display = step > 1 ? 'block' : 'none';
   document.getElementById('fkq-next-btn').style.display = step < 3 ? 'block' : 'none';
   document.getElementById('fkq-submit-btn').style.display = step === 3 ? 'block' : 'none';
-  document.getElementById('fkq-print-btn').style.display = step === 3 ? 'block' : 'none';
-  if(step === 1){ document.getElementById('fkq-title').textContent = '간편 견적 받기'; document.getElementById('fkq-subtitle').textContent = '원하는 시술과 방한 일정을 선택하면 예상 견적을 바로 보여드려요'; }
-  if(step === 2){ document.getElementById('fkq-title').textContent = '방한 일정 & 연락처'; document.getElementById('fkq-subtitle').textContent = '일정과 연락처를 입력하면 견적서를 만들어드려요'; }
-  if(step === 3){ document.getElementById('fkq-title').textContent = '예상 견적서'; document.getElementById('fkq-subtitle').textContent = '아래 견적서를 확인하고 위챗으로 상담받으세요'; fkqRenderResult(); }
+  if(step === 1){ document.getElementById('fkq-title').textContent = fkqT('title'); document.getElementById('fkq-subtitle').textContent = fkqT('subtitle'); }
+  if(step === 2){ document.getElementById('fkq-title').textContent = fkqT('step2_visit'); document.getElementById('fkq-subtitle').textContent = fkqT('step3_contact'); }
+  if(step === 3){ document.getElementById('fkq-title').textContent = fkqT('step3_title'); document.getElementById('fkq-subtitle').textContent = fkqT('step3_sub'); fkqRenderResult(); }
 }
 
 function fkqNextStep(){
   if(fkqCurrentStep === 1){
-    if(fkqSelected.length === 0){ alert('관심 있는 시술을 1개 이상 선택해주세요.'); return; }
+    if(fkqSelected.length === 0){ alert(fkqT('select_min1')); return; }
     fkqGoStep(2);
   } else if(fkqCurrentStep === 2){
     const name = document.getElementById('fkq-name').value.trim();
     const contact = document.getElementById('fkq-contact').value.trim();
-    if(!name || !contact){ alert('성명과 연락처는 필수 입력입니다.'); return; }
+    if(!name || !contact){ alert(fkqT('name_contact_required')); return; }
     fkqGoStep(3);
   }
 }
@@ -2639,14 +2922,14 @@ function fkqRenderResult(){
   const name = document.getElementById('fkq-name').value.trim() || '-';
   const nation = document.getElementById('fkq-nation').value;
   const contact = document.getElementById('fkq-contact').value.trim() || '-';
-  const hospital = document.getElementById('fkq-hospital').value.trim() || '상담 후 매칭';
+  const hospital = document.getElementById('fkq-hospital').value.trim() || fkqT('doc_match');
   const arrival = document.getElementById('fkq-arrival').value || '-';
   const departure = document.getElementById('fkq-departure').value || '-';
 
   const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
   const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
   const quoteNo = 'FK' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random()*900+100);
-  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+  const today = new Date().toLocaleDateString(lang==='ko'?'ko-KR':lang==='zh'?'zh-CN':'en-US', {year:'numeric',month:'long',day:'numeric'});
 
   const rows = fkqSelected.map(i => `<tr>
     <td>${i.catLabel}</td>
@@ -2657,48 +2940,29 @@ function fkqRenderResult(){
   document.getElementById('fkq-result-doc').innerHTML = `
     <div class="doc-h">
       <div class="logo">FOLLOW KOREA</div>
-      <div class="title">예상 견적서 (참고용)</div>
-      <div class="no">견적번호 ${quoteNo} · ${today} 발행</div>
+      <div class="title">${fkqT('doc_title')}</div>
+      <div class="no">${fkqT('doc_no')} ${quoteNo} · ${today} ${fkqT('doc_issued')}</div>
     </div>
     <table>
-      <tr><td style="color:#94a3b8;width:90px;">성명</td><td colspan="2">${name} (${nation})</td></tr>
-      <tr><td style="color:#94a3b8;">연락처</td><td colspan="2">${contact}</td></tr>
-      <tr><td style="color:#94a3b8;">희망병원</td><td colspan="2">${hospital}</td></tr>
-      <tr><td style="color:#94a3b8;">방한일정</td><td colspan="2">${arrival} ~ ${departure}</td></tr>
+      <tr><td style="color:#94a3b8;width:90px;">${fkqT('doc_name')}</td><td colspan="2">${name} (${nation})</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_contact')}</td><td colspan="2">${contact}</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_hospital')}</td><td colspan="2">${hospital}</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_visit')}</td><td colspan="2">${arrival} ~ ${departure}</td></tr>
     </table>
     <table>
-      <thead><tr><th>분야</th><th>희망 시술</th><th style="text-align:right;">예상 범위 (USD)</th></tr></thead>
+      <thead><tr><th>${fkqT('doc_field')}</th><th>${fkqT('doc_treat')}</th><th style="text-align:right;">${fkqT('doc_range')}</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr class="grand"><td colspan="2">총 예상 견적 범위</td><td style="text-align:right;white-space:nowrap;">$${totalMin.toLocaleString()}~${totalMax.toLocaleString()}</td></tr></tfoot>
+      <tfoot><tr class="grand"><td colspan="2">${fkqT('doc_total')}</td><td style="text-align:right;white-space:nowrap;">$${totalMin.toLocaleString()}~${totalMax.toLocaleString()}</td></tr></tfoot>
     </table>
-    <div style="text-align:center;"><span class="fkq-badge">💬 정확한 견적은 위챗 상담원이 직접 안내드립니다</span></div>
+    <div style="text-align:center;"><span class="fkq-badge">💬 ${fkqT('doc_footer')}</span></div>
   `;
 }
 
-function fkqPrintQuote(){
-  const docHtml = document.getElementById('fkq-result-doc').outerHTML;
-  const w = window.open('', '_blank', 'width=480,height=720');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Follow Korea 견적서</title>
-    <style>
-      body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;padding:24px;color:#334155;}
-      .fkq-result-doc{border:1px solid #e5e7eb;border-radius:12px;padding:22px;}
-      .doc-h{text-align:center;margin-bottom:16px;}
-      .doc-h .logo{font-size:14px;font-weight:800;letter-spacing:1px;color:#16202e;}
-      .doc-h .title{font-size:18px;font-weight:700;color:#16202e;margin-top:6px;}
-      .doc-h .no{font-size:11px;color:#94a3b8;margin-top:3px;}
-      table{width:100%;border-collapse:collapse;font-size:12px;margin:14px 0;}
-      th{background:#16202e;color:#fff;padding:8px;text-align:left;}
-      td{padding:8px;border-bottom:1px solid #f1f5f9;}
-      .grand{background:#fdf8ef;font-weight:700;color:#16202e;}
-      .fkq-badge{display:inline-block;background:#fdf8ef;color:#b8860b;border:1px solid #f0dfb8;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;margin-top:10px;}
-      @media print{ body{padding:0;} }
-    </style></head><body>${docHtml}
-    <script>window.onload=()=>window.print();<\/script>
-    </body></html>`);
-  w.document.close();
-}
-
-function fkqSubmit(){
+// ── 8번 작업: 위챗/출력 버튼 대신 "전송" 버튼 하나로 통일 ──
+// 전송 버튼 클릭 시: ① quote_requests 테이블에 저장(백오피스 견적신청 관리에 반영)
+//                   ② 고객에게는 "전송 완료, 위챗으로 연락드릴게요" 메시지만 표시
+//                   ③ 위챗 창은 자동으로 열지 않음 (상담원이 먼저 연락하는 방식으로 변경)
+async function fkqSubmit(){
   const name = document.getElementById('fkq-name').value.trim();
   const contact = document.getElementById('fkq-contact').value.trim();
   const nation = document.getElementById('fkq-nation').value;
@@ -2709,40 +2973,60 @@ function fkqSubmit(){
   const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
   const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
 
-  // ── Supabase 저장 (global_platform 프로젝트) ──
-  const FKQ_SUPABASE_URL = 'https://qfncxamqeiyxkbjxwtoi.supabase.co';
-  const FKQ_SUPABASE_KEY = 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV';
+  const submitBtn = document.getElementById('fkq-submit-btn');
+  const originalBtnText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = '...';
 
-  fetch(`${FKQ_SUPABASE_URL}/rest/v1/quote_requests`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': FKQ_SUPABASE_KEY,
-      'Authorization': `Bearer ${FKQ_SUPABASE_KEY}`,
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({
-      name, contact, nationality: nation, hospital: hospital || null,
-      arrival_date: arrival || null, departure_date: departure || null,
-      procedures, quote_min: totalMin, quote_max: totalMax,
-      status: '신규', source: 'patient_web_quote_widget'
-    })
-  }).catch(e => console.warn('[FK] 견적 저장 실패(백오피스 미반영 가능)', e));
+  let sendOk = true;
+  let sendErrorDetail = '';
+  try{
+    const res = await fetch(`${SUPA_URL}/rest/v1/quote_requests`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        name, contact, nationality: nation, hospital: hospital || null,
+        arrival_date: arrival || null, departure_date: departure || null,
+        procedures, quote_min: totalMin, quote_max: totalMax,
+        status: '신규', source: 'patient_web_quote_widget', lang_used: lang
+      })
+    });
+    if(!res.ok){
+      sendOk = false;
+      sendErrorDetail = `status ${res.status}`;
+      console.error('[FK] 견적 전송 실패:', res.status, await res.text());
+    }
+  }catch(e){
+    sendOk = false;
+    sendErrorDetail = e.message;
+    console.error('[FK] 견적 전송 중 네트워크 오류:', e);
+  }
 
-  // 위챗 상담 연결
-  window.open('https://work.weixin.qq.com/kfid/kfc', '_blank');
+  submitBtn.disabled = false;
+  submitBtn.textContent = originalBtnText;
 
+  if(!sendOk){
+    alert((lang==='ko'?'전송 중 오류가 발생했습니다. 다시 시도해주세요. ':
+           lang==='zh'?'发送时发生错误，请重试。':
+           'An error occurred while sending. Please try again.') + ' (' + sendErrorDetail + ')');
+    return;
+  }
+
+  // 전송 성공 → 고객에게 "전송 완료, 위챗으로 연락드릴게요" 메시지 표시
   document.getElementById('fkq-result-doc').innerHTML = `
     <div style="text-align:center;padding:30px 10px;">
-      <div style="font-size:44px;margin-bottom:10px;">🎉</div>
-      <div style="font-size:16px;font-weight:700;color:#16202e;margin-bottom:6px;">위챗 상담 창을 열었습니다!</div>
-      <div style="font-size:13px;color:#64748b;line-height:1.6;">친구 추가 후 문의하시면<br>전담 상담원이 정확한 견적과 일정을 안내드립니다</div>
+      <div style="font-size:44px;margin-bottom:10px;">✅</div>
+      <div style="font-size:16px;font-weight:700;color:#16202e;margin-bottom:6px;">${fkqT('sent_title')}</div>
+      <div style="font-size:13px;color:#64748b;line-height:1.6;">${fkqT('sent_desc')}</div>
       <div style="margin-top:14px;font-size:12px;color:#94a3b8;">WeChat: <b style="color:#16202e;">Followkorea1</b></div>
     </div>`;
   document.getElementById('fkq-submit-btn').style.display = 'none';
   document.getElementById('fkq-back-btn').style.display = 'none';
-  document.getElementById('fkq-print-btn').textContent = '✓ 닫기';
-  document.getElementById('fkq-print-btn').onclick = closeQuoteWidget;
 }
 
 function fkqResetWidget(){
@@ -2750,7 +3034,6 @@ function fkqResetWidget(){
   fkqActiveCat = null;
   fkqCurrentStep = 1;
   ['fkq-name','fkq-contact','fkq-hospital','fkq-arrival','fkq-departure'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-  document.getElementById('fkq-nation').value = '中国';
   fkqGoStep(1);
   document.getElementById('fkq-proc-list').classList.remove('show');
   document.getElementById('fkq-cat-empty').style.display = 'block';
