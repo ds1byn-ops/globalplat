@@ -211,6 +211,7 @@ a{text-decoration:none;color:inherit;}
       <a onclick="showMain();setTimeout(()=>document.getElementById('sec-extra').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_concierge">컨시어지</a>
       <a onclick="showMain();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
       <a onclick="showMain();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
+      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
     </div>
     <div class="nav-right">
       <div class="lang-select-wrap" style="position:relative;">
@@ -378,6 +379,18 @@ a{text-decoration:none;color:inherit;}
       <div style="font-size:36px;margin-bottom:10px;">💬</div>
       <p data-i18n="no_review">还没有评价，来写第一条吧！</p>
     </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="sec-faq" style="background:var(--lgray);">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">FAQ</div>
+      <h2 class="sec-title" id="faq-title" data-i18n="faq_title">常见问题</h2>
+      <p class="sec-sub" id="faq-sub" data-i18n="faq_sub">关于医疗旅游您可能想了解的内容</p>
+    </div>
+    <div id="faq-list" style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </section>
 
@@ -775,7 +788,7 @@ async function dbInsert(table,row){
 }
 
 const I={
-  zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_consult:'免费咨询',review_more:'查看全部评价 →',
+  zh:{nav_home:'首页',nav_hosps:'医院',nav_concierge:'礼宾服务',nav_proc:'预约流程',nav_review:'用户评价',nav_faq:'常见问题',nav_consult:'免费咨询',review_more:'查看全部评价 →',
     hero_badge:'韩国NO.1医美预约平台',hero_title:'打造<em>专属你的</em><br>K-Beauty之旅',
     hero_sub:'精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同',
     search_ph:'搜索医院、项目...',search_btn:'搜索',hero_cta1:'立即预约',hero_cta2:'浏览医院',hero_cta_quote:'💰 简易报价',
@@ -809,7 +822,7 @@ const I={
     svc_selected:'已选服务',
     reserve_btn:'预约',detail_btn:'详情',
     overview_default:'专业医院，提供优质医美服务。中文全程服务，专属顾问陪同。',
-    review_sub:'来自全球患者的真实体验分享',
+    review_sub:'来自全球患者的真实体验分享',faq_title:'常见问题',faq_sub:'关于医疗旅游您可能想了解的内容',
     write_review:'✍️ 写评价',
     no_review:'还没有评价，来写第一条吧！',
     rv_hosp:'选择医院',rv_treat:'项目名称',rv_name:'昵称',rv_nation:'所在地',
@@ -817,7 +830,7 @@ const I={
     rv_done_title:'评价已提交！',rv_done_desc:'感谢您的真实反馈 😊',rv_done_close:'关闭',
     star_hints:['','非常差','一般','还不错','很好','非常满意！'],
   },
-  ko:{nav_home:'홈',nav_hosps:'병원',nav_concierge:'컨시어지',nav_proc:'예약과정',nav_review:'후기',nav_consult:'무료상담',
+  ko:{nav_home:'홈',nav_hosps:'병원',nav_concierge:'컨시어지',nav_proc:'예약과정',nav_review:'후기',nav_faq:'FAQ',nav_consult:'무료상담',
     hero_badge:'한국 NO.1 의료관광 예약 플랫폼',hero_title:'<em>나만을 위한</em><br>K-뷰티 메디컬 여행',
     hero_sub:'서울 강남 최고의 의료미용 병원 엄선<br>전문 통역 서비스 · 전 일정 동행',
     search_ph:'병원, 시술 검색...',search_btn:'검색',hero_cta1:'지금 예약하기',hero_cta2:'병원 둘러보기',hero_cta_quote:'💰 간편 견적 받기',
@@ -851,7 +864,7 @@ const I={
     svc_selected:'选择服务',svc_time_hint:'选择时间',
     reserve_btn:'예약',detail_btn:'상세보기',
     overview_default:'전문 의료진이 최고의 의료미용 서비스를 제공합니다. 중국어 통역 가능, 전담 코디네이터 동행.',
-    review_sub:'전 세계 환자들의 실제 경험 공유',
+    review_sub:'전 세계 환자들의 실제 경험 공유',faq_title:'자주 묻는 질문',faq_sub:'의료관광에 대해 궁금하실 만한 내용을 모았습니다',
     write_review:'✍️ 리뷰 작성',
     no_review:'아직 리뷰가 없습니다. 첫 번째로 작성해보세요!',
     rv_hosp:'병원 선택',rv_treat:'시술명',rv_name:'닉네임',rv_nation:'지역',
@@ -859,7 +872,7 @@ const I={
     rv_done_title:'리뷰가 등록되었습니다!',rv_done_desc:'소중한 후기 감사합니다 😊',rv_done_close:'닫기',
     star_hints:['','매우 불만족','불만족','보통','만족','매우 만족!'],
   },
-  en:{nav_home:'Home',nav_hosps:'Hospitals',nav_concierge:'Concierge',nav_proc:'How it Works',nav_review:'Reviews',nav_consult:'Free Consult',
+  en:{nav_home:'Home',nav_hosps:'Hospitals',nav_concierge:'Concierge',nav_proc:'How it Works',nav_review:'Reviews',nav_faq:'FAQ',nav_consult:'Free Consult',
     hero_badge:'Korea\'s #1 Medical Tourism Platform',hero_title:'Your Perfect<br><em>K-Beauty Journey</em>',
     hero_sub:'Top-rated Gangnam medical aesthetic clinics<br>Chinese & English support · Full escort',
     search_ph:'Search clinics, treatments...',search_btn:'Search',hero_cta1:'Book Now',hero_cta2:'Browse Clinics',hero_cta_quote:'💰 Quick Quote',
@@ -892,7 +905,7 @@ const I={
     svc_selected:'Selected Service',svc_time_hint:'Select Time',
     reserve_btn:'Book',detail_btn:'Details',
     overview_default:'Professional medical aesthetic clinic offering top-quality services with Chinese interpretation.',
-    review_sub:'Real experiences from patients worldwide',
+    review_sub:'Real experiences from patients worldwide',faq_title:'Frequently Asked Questions',faq_sub:'Things you may want to know about medical tourism',
     write_review:'✍️ Write a Review',
     no_review:'No reviews yet. Be the first to share your experience!',
     rv_hosp:'Select Hospital',rv_treat:'Treatment',rv_name:'Nickname',rv_nation:'Location',
@@ -900,7 +913,7 @@ const I={
     rv_done_title:'Review Submitted!',rv_done_desc:'Thank you for sharing your experience 😊',rv_done_close:'Close',
     star_hints:['','Very Poor','Poor','OK','Good','Excellent!'],
   }
-  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_consult:'Tư vấn miễn phí',review_more:'Xem tất cả đánh giá →',
+  ,vi:{nav_home:'Trang chủ',nav_hosps:'Bệnh viện',nav_concierge:'Dịch vụ',nav_proc:'Quy trình',nav_review:'Đánh giá',nav_faq:'Câu hỏi thường gặp',nav_consult:'Tư vấn miễn phí',review_more:'Xem tất cả đánh giá →',
     hero_badge:'Nền tảng du lịch thẩm mỹ #1 Hàn Quốc',hero_title:'Hành trình<br><em>K-Beauty</em> của bạn',
     hero_sub:'Các bệnh viện thẩm mỹ hàng đầu Gangnam, Seoul<br>Hỗ trợ tiếng Trung & tiếng Anh · Đồng hành toàn trình',
     search_ph:'Tìm kiếm bệnh viện, dịch vụ...',search_btn:'Tìm kiếm',hero_cta1:'Đặt lịch ngay',hero_cta2:'Xem bệnh viện',hero_cta_quote:'💰 Báo giá nhanh',
@@ -924,13 +937,13 @@ const I={
     reviews:[{t:'"Kết quả Ulthera tuyệt vời! Nhân viên nói tiếng Anh rất tốt."',n:'Nguyen Thu',f:'Việt Nam · Hà Nội'},{t:'"Lần đầu du lịch thẩm mỹ Hàn Quốc, Follow Korea sắp xếp rất chu đáo!"',n:'Pham Lan',f:'Việt Nam · HCM'},{t:'"Dịch vụ chuyên nghiệp, bác sĩ giỏi. Rất hài lòng!"',n:'Tran Mai',f:'Việt Nam · Đà Nẵng'}],
     loc_gangnam:'Gangnam, Seoul',loc_sinsa:'Sinsa, Gangnam',loc_apgujeong:'Apgujeong, Seoul',
     reserve_btn:'Đặt lịch',detail_btn:'Chi tiết',overview_default:'Phòng khám thẩm mỹ chuyên nghiệp với dịch vụ hỗ trợ ngôn ngữ.',
-    review_sub:'Chia sẻ thực tế từ bệnh nhân toàn cầu',write_review:'✍️ Viết đánh giá',no_review:'Chưa có đánh giá. Hãy là người đầu tiên!',
+    review_sub:'Chia sẻ thực tế từ bệnh nhân toàn cầu',faq_title:'Câu hỏi thường gặp',faq_sub:'Những điều bạn có thể muốn biết về du lịch y tế',write_review:'✍️ Viết đánh giá',no_review:'Chưa có đánh giá. Hãy là người đầu tiên!',
     rv_hosp:'Chọn bệnh viện',rv_treat:'Tên dịch vụ',rv_name:'Biệt danh',rv_nation:'Địa điểm',
     rv_star:'Đánh giá',rv_text:'Nội dung',rv_submit:'Gửi đánh giá',
     rv_done_title:'Đánh giá đã gửi!',rv_done_desc:'Cảm ơn bạn 😊',rv_done_close:'Đóng',
     star_hints:['','Rất tệ','Tệ','Bình thường','Tốt','Xuất sắc!'],
   }
-  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_consult:'ปรึกษาฟรี',review_more:'ดูรีวิวทั้งหมด →',
+  ,th:{nav_home:'หน้าหลัก',nav_hosps:'โรงพยาบาล',nav_concierge:'คอนเซียร์จ',nav_proc:'ขั้นตอน',nav_review:'รีวิว',nav_faq:'คำถามที่พบบ่อย',nav_consult:'ปรึกษาฟรี',review_more:'ดูรีวิวทั้งหมด →',
     hero_badge:'แพลตฟอร์มท่องเที่ยวเพื่อความงาม #1 เกาหลี',hero_title:'การเดินทาง<br><em>K-Beauty</em> ของคุณ',
     hero_sub:'คลินิกความงามชั้นนำในกังนัม โซล<br>บริการภาษาจีนและอังกฤษ · ดูแลตลอดการเดินทาง',
     search_ph:'ค้นหาโรงพยาบาล, บริการ...',search_btn:'ค้นหา',hero_cta1:'จองเลย',hero_cta2:'ดูโรงพยาบาล',hero_cta_quote:'💰 ใบเสนอราคาด่วน',
@@ -954,13 +967,13 @@ const I={
     reviews:[{t:'"ผลลัพธ์ Ulthera ดีมาก! พนักงานพูดภาษาอังกฤษได้ดี"',n:'Siriwan T.',f:'ไทย · กรุงเทพ'},{t:'"ครั้งแรกที่มาเกาหลีทำความงาม Follow Korea ดูแลดีมาก!"',n:'Araya P.',f:'ไทย · เชียงใหม่'},{t:'"บริการดีเยี่ยม หมอเก่งมาก ประทับใจมาก"',n:'Nisa K.',f:'ไทย · ภูเก็ต'}],
     loc_gangnam:'กังนัม โซล',loc_sinsa:'ซินซา กังนัม',loc_apgujeong:'อัปกูจอง โซล',
     reserve_btn:'จอง',detail_btn:'รายละเอียด',overview_default:'คลินิกเสริมความงามมืออาชีพพร้อมบริการหลายภาษา',
-    review_sub:'ประสบการณ์จริงจากผู้ป่วยทั่วโลก',write_review:'✍️ เขียนรีวิว',no_review:'ยังไม่มีรีวิว เป็นคนแรกเลย!',
+    review_sub:'ประสบการณ์จริงจากผู้ป่วยทั่วโลก',faq_title:'คำถามที่พบบ่อย',faq_sub:'สิ่งที่คุณอาจต้องการรู้เกี่ยวกับการท่องเที่ยวเชิงการแพทย์',write_review:'✍️ เขียนรีวิว',no_review:'ยังไม่มีรีวิว เป็นคนแรกเลย!',
     rv_hosp:'เลือกโรงพยาบาล',rv_treat:'ชื่อบริการ',rv_name:'ชื่อเล่น',rv_nation:'ที่อยู่',
     rv_star:'คะแนนความพึงพอใจ',rv_text:'เนื้อหารีวิว',rv_submit:'ส่งรีวิว',
     rv_done_title:'ส่งรีวิวแล้ว!',rv_done_desc:'ขอบคุณสำหรับรีวิวของคุณ 😊',rv_done_close:'ปิด',
     star_hints:['','แย่มาก','แย่','ปานกลาง','ดี','ดีเยี่ยม!'],
   }
-  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_consult:'無料相談',review_more:'全てのレビューを見る →',
+  ,ja:{nav_home:'ホーム',nav_hosps:'病院',nav_concierge:'コンシェルジュ',nav_proc:'予約の流れ',nav_review:'口コミ',nav_faq:'よくある質問',nav_consult:'無料相談',review_more:'全てのレビューを見る →',
     hero_badge:'韓国No.1医療美容予約プラットフォーム',hero_title:'あなただけの<br><em>K-Beautyの旅</em>へ',
     hero_sub:'ソウル江南トップクラスの医療美容クリニック<br>中国語・日本語対応 · 全行程サポート',
     search_ph:'病院・施術を検索...',search_btn:'検索',hero_cta1:'今すぐ予約',hero_cta2:'病院を見る',hero_cta_quote:'💰 簡単見積もり',
@@ -984,13 +997,13 @@ const I={
     reviews:[{t:'"ウルセラの効果が素晴らしかった！スタッフが中国語で対応してくれて安心でした。"',n:'Yuki T.',f:'日本・東京'},{t:'"初めての韓国美容医療。Follow Koreaのおかげで安心でした！"',n:'Akiko M.',f:'日本・大阪'},{t:'"予約から施術まで丁寧なサポートでした。また利用します！"',n:'Hana S.',f:'日本・福岡'}],
     loc_gangnam:'江南、ソウル',loc_sinsa:'新沙、江南',loc_apgujeong:'狎鴎亭、ソウル',
     reserve_btn:'予約',detail_btn:'詳細',overview_default:'専門医療チームによる高品質な美容医療サービス。多言語対応。',
-    review_sub:'世界中の患者様からのリアルな体験談',write_review:'✍️ 口コミを書く',no_review:'まだ口コミがありません。最初の口コミを投稿しよう！',
+    review_sub:'世界中の患者様からのリアルな体験談',faq_title:'よくある質問',faq_sub:'医療観光について知りたい内容をまとめました',write_review:'✍️ 口コミを書く',no_review:'まだ口コミがありません。最初の口コミを投稿しよう！',
     rv_hosp:'病院を選ぶ',rv_treat:'施術名',rv_name:'ニックネーム',rv_nation:'お住まい',
     rv_star:'満足度',rv_text:'口コミ内容',rv_submit:'口コミを投稿',
     rv_done_title:'口コミ投稿完了！',rv_done_desc:'貴重なご意見ありがとうございます 😊',rv_done_close:'閉じる',
     star_hints:['','とても悪い','悪い','普通','良い','とても満足！'],
   }
-  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_consult:'Бесплатная консультация',review_more:'Смотреть все отзывы →',
+  ,ru:{nav_home:'Главная',nav_hosps:'Клиники',nav_concierge:'Консьерж',nav_proc:'Как это работает',nav_review:'Отзывы',nav_faq:'Частые вопросы',nav_consult:'Бесплатная консультация',review_more:'Смотреть все отзывы →',
     hero_badge:'Платформа медицинского туризма №1 в Корее',hero_title:'Ваше идеальное<br><em>K-Beauty путешествие</em>',
     hero_sub:'Лучшие клиники красоты Каннама, Сеул<br>Поддержка на китайском и английском · Сопровождение',
     search_ph:'Поиск клиник, процедур...',search_btn:'Поиск',hero_cta1:'Записаться',hero_cta2:'Смотреть клиники',hero_cta_quote:'💰 Быстрая смета',
@@ -1014,14 +1027,14 @@ const I={
     reviews:[{t:'"Результат Ulthera превзошёл ожидания! Персонал говорит по-английски."',n:'Anna K.',f:'Россия · Москва'},{t:'"Первый раз в медицинском туризме — Follow Korea позаботилась обо всём!"',n:'Maria S.',f:'Россия · СПб'},{t:'"Профессиональный сервис. Очень довольна результатом!"',n:'Elena V.',f:'Казахстан · Алматы'}],
     loc_gangnam:'Каннам, Сеул',loc_sinsa:'Синса, Каннам',loc_apgujeong:'Апкуджон, Сеул',
     reserve_btn:'Записаться',detail_btn:'Подробнее',overview_default:'Профессиональная клиника эстетической медицины с многоязычной поддержкой.',
-    review_sub:'Реальный опыт пациентов со всего мира',write_review:'✍️ Написать отзыв',no_review:'Отзывов пока нет. Станьте первым!',
+    review_sub:'Реальный опыт пациентов со всего мира',faq_title:'Частые вопросы',faq_sub:'То, что вы хотели бы знать о медицинском туризме',write_review:'✍️ Написать отзыв',no_review:'Отзывов пока нет. Станьте первым!',
     rv_hosp:'Выберите клинику',rv_treat:'Процедура',rv_name:'Никнейм',rv_nation:'Местоположение',
     rv_star:'Оценка',rv_text:'Текст отзыва',rv_submit:'Отправить отзыв',
     rv_done_title:'Отзыв отправлен!',rv_done_desc:'Спасибо за ваш отзыв 😊',rv_done_close:'Закрыть',
     star_hints:['','Очень плохо','Плохо','Нормально','Хорошо','Отлично!'],
   },
 
-  mn:{nav_home:'Нүүр',nav_hosps:'Эмнэлэг',nav_concierge:'Консьерж',nav_proc:'Захиалгын дараалал',nav_review:'Үнэлгээ',nav_consult:'Үнэгүй зөвлөгөө',review_more:'Бүх үнэлгээ харах',
+  mn:{nav_home:'Нүүр',nav_hosps:'Эмнэлэг',nav_concierge:'Консьерж',nav_proc:'Захиалгын дараалал',nav_review:'Үнэлгээ',nav_faq:'Түгээмэл асуулт',nav_consult:'Үнэгүй зөвлөгөө',review_more:'Бүх үнэлгээ харах',
     hero_badge:'Солонгосын No.1 эмнэлгийн аялал',hero_title:'Таны онцгой<br><em>K-Beauty аялал</em>',
     hero_sub:'Сеулын Ганнамын шилдэг гоо сайхны эмнэлгүүд<br>Хятад хэлний үйлчилгээ · Бүрэн дагалдан яваа',
     search_ph:'Эмнэлэг, процедур хайх...',search_btn:'Хайх',hero_cta1:'Одоо захиалах',hero_cta2:'Эмнэлэг үзэх',hero_cta_quote:'💰 Хурдан үнэлгээ',
@@ -1029,7 +1042,7 @@ const I={
     cat_title:'Процедур сонгох',hosp_title:'Гэрээт эмнэлгүүд',hosp_recommend_label:'Санал болгох',
     cats:['Бүгд','Пластик','Арьс','Ишмэсэн эс','Эрүүл мэнд','Нүд','Эх барих'],
     cat_all:'Бүгд',cat_plastic:'Пластик мэс засал',cat_skin:'Арьс',cat_stem:'Ишмэсэн эс',cat_health:'Эрүүл мэнд',cat_eye:'Нүд',cat_gyn:'Эх барих',
-    review_title:'Үнэн хэрэглэгчийн үнэлгээ',review_sub:'Дэлхийн өвчтөнүүдийн туршлага',
+    review_title:'Үнэн хэрэглэгчийн үнэлгээ',review_sub:'Дэлхийн өвчтөнүүдийн туршлага',faq_title:'Түгээмэл асуулт',faq_sub:'Эмнэлгийн аяллын тухай мэдэхийг хүсэж байгаа зүйлс',
     write_review:'Үнэлгээ бичих',no_review:'Одоохондоо үнэлгээ байхгүй байна',
     book_title:'Захиалга хийх',book_sub:'Мэдээлэл оруулна уу',
     book_name:'Нэр',book_sex:'Хүйс',book_m:'Эрэгтэй',book_f:'Эмэгтэй',
@@ -1056,7 +1069,7 @@ const I={
     rv_done_title:'Үнэлгээ илгээгдлээ!',rv_done_desc:'Баярлалаа 😊',rv_done_close:'Хаах',
     star_hints:['','Муу','Хангалттай биш','Дундаж','Сайн','Маш сайн!'],
   },
-  id:{nav_home:'Beranda',nav_hosps:'Rumah Sakit',nav_concierge:'Concierge',nav_proc:'Cara Pesan',nav_review:'Ulasan',nav_consult:'Konsultasi Gratis',review_more:'Lihat Semua Ulasan',
+  id:{nav_home:'Beranda',nav_hosps:'Rumah Sakit',nav_concierge:'Concierge',nav_proc:'Cara Pesan',nav_review:'Ulasan',nav_faq:'FAQ',nav_consult:'Konsultasi Gratis',review_more:'Lihat Semua Ulasan',
     hero_badge:'Platform Wisata Medis No.1 Korea',hero_title:'Perjalanan<br><em>K-Beauty Eksklusif Anda</em>',
     hero_sub:'Klinik kecantikan terbaik Gangnam Seoul<br>Layanan bahasa Indonesia · Pendampingan penuh',
     search_ph:'Cari rumah sakit, prosedur...',search_btn:'Cari',hero_cta1:'Pesan Sekarang',hero_cta2:'Lihat Rumah Sakit',hero_cta_quote:'💰 Penawaran Cepat',
@@ -1064,7 +1077,7 @@ const I={
     cat_title:'Pilih Prosedur',hosp_title:'Rumah Sakit Mitra',hosp_recommend_label:'Rekomendasi',
     cats:['Semua','Bedah Plastik','Kulit','Stem Cell','Tubuh','Ginekologi','Mata','Anti-aging','Gigi','Estetik','Lainnya'],
     cat_all:'Semua',cat_plastic:'Bedah Plastik',cat_skin:'Kulit',cat_stem:'Stem Cell',cat_health:'Kesehatan',cat_eye:'Mata',cat_gyn:'Ginekologi',
-    review_title:'Ulasan Pengguna Nyata',review_sub:'Pengalaman nyata dari pasien seluruh dunia',
+    review_title:'Ulasan Pengguna Nyata',review_sub:'Pengalaman nyata dari pasien seluruh dunia',faq_title:'Pertanyaan yang Sering Diajukan',faq_sub:'Hal-hal yang mungkin ingin Anda ketahui tentang wisata medis',
     write_review:'Tulis Ulasan',no_review:'Belum ada ulasan, jadilah yang pertama!',
     book_title:'Buat Reservasi',book_sub:'Masukkan informasi Anda',
     book_name:'Nama',book_sex:'Jenis Kelamin',book_m:'Pria',book_f:'Wanita',
@@ -1695,7 +1708,7 @@ function setLang(l){
   applyI18n();
   const heroQuoteBtn = document.getElementById('hero-quote-btn');
   if(heroQuoteBtn) heroQuoteBtn.textContent = '💰 ' + (typeof fkqT === 'function' ? fkqT('title') : '간편 견적 받기');
-  renderCats(); filterHosps(); renderSteps(); renderReviews();
+  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq();
   if(currentHosp) renderDetail(currentHosp);
   initSvcButtons();
   // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
@@ -1868,6 +1881,30 @@ function renderSteps(){
   const steps=t('steps');
   document.getElementById('step-grid').innerHTML=steps.map(s=>`
     <div class="step"><div class="step-num">${s[0]}</div><div class="step-title">${s[1]}</div><div class="step-desc">${s[2]}</div></div>`).join('');
+}
+// ── FAQ 섹션 렌더링 (FK_FAQ_PAGE 사용, AI챗봇용 FK_FAQ와는 별개) ──
+function renderFaq(){
+  const list = document.getElementById('faq-list');
+  if(!list || typeof FK_FAQ_PAGE === 'undefined') return;
+  list.innerHTML = FK_FAQ_PAGE.map((item, idx) => {
+    const q = item.q[lang] || item.q.en || item.q.ko;
+    const a = item.a[lang] || item.a.en || item.a.ko;
+    return `<div class="faq-item" style="background:var(--white);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;">
+      <button onclick="toggleFaq(${idx})" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:none;border:none;cursor:pointer;text-align:left;font-size:14px;font-weight:700;color:var(--dark);">
+        <span>Q. ${q}</span>
+        <span id="faq-arrow-${idx}" style="font-size:12px;color:var(--gray);transition:transform .2s;">▼</span>
+      </button>
+      <div id="faq-answer-${idx}" style="display:none;padding:0 18px 16px;font-size:13px;color:var(--gray);line-height:1.8;white-space:pre-wrap;">${a}</div>
+    </div>`;
+  }).join('');
+}
+function toggleFaq(idx){
+  const ans = document.getElementById(`faq-answer-${idx}`);
+  const arrow = document.getElementById(`faq-arrow-${idx}`);
+  if(!ans) return;
+  const isOpen = ans.style.display !== 'none';
+  ans.style.display = isOpen ? 'none' : 'block';
+  if(arrow) arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 function renderReviews(){
   const revs=t('reviews');
@@ -2237,6 +2274,141 @@ async function submitReview() {
   if(doneTitle) doneTitle.textContent = {zh:'评价提交成功！',ko:'리뷰가 제출되었습니다!',en:'Review Submitted!',vi:'Đã gửi đánh giá!',th:'ส่งรีวิวแล้ว!',ja:'口コミを投稿しました！',ru:'Отзыв отправлен!'}[lang]||'리뷰가 제출되었습니다!';
   if(doneDesc) doneDesc.textContent = {zh:'管理员审核通过后将会显示，感谢您的评价 😊',ko:'관리자 승인 후 게시됩니다. 소중한 후기 감사합니다 😊',en:'Will be shown after admin approval. Thank you 😊',vi:'Sẽ hiện sau khi quản trị viên duyệt 😊',th:'จะแสดงหลังจากผู้ดูแลอนุมัติ 😊',ja:'管理者の承認後に表示されます 😊',ru:'Появится после одобрения администратора 😊'}[lang]||'관리자 승인 후 게시됩니다 😊';
 }
+
+// ════════════════════════════════════════════════════════════
+//  FAQ 페이지 데이터 — 기존 FK_FAQ(AI챗봇용 키워드매칭)를 기반으로
+//  사람이 직접 읽는 FAQ 페이지용으로 질문 제목 + 9개 언어 답변을 구성
+//  ════════════════════════════════════════════════════════════
+const FK_FAQ_PAGE = [
+  {
+    q: { zh:'治疗费用大概多少？', ko:'시술 비용은 어느 정도인가요?', en:'How much do treatments cost?',
+         vi:'Chi phí điều trị khoảng bao nhiêu?', th:'ค่ารักษาประมาณเท่าไหร่?', ja:'施術費用はどのくらいですか？',
+         ru:'Сколько стоит лечение?', mn:'Эмчилгээний үнэ хэр байна вэ?', id:'Berapa kira-kira biaya perawatannya?' },
+    a: {
+      zh:'具体价格因医院和项目而有所不同。我们可以根据您想做的项目提供大概的价格区间，详细报价需要医生面诊后确认。\n\n您可以点击"간편 견적 받기(获取报价)"按钮，选择想做的项目，即可获得参考价格范围～',
+      ko:'가격은 병원과 시술 종류에 따라 다릅니다. 원하시는 시술을 알려주시면 대략적인 가격 범위를 안내드릴 수 있고, 정확한 견적은 의사 상담 후 확정됩니다.\n\n메인 화면의 "간편 견적 받기" 버튼으로 원하는 시술을 선택하시면 참고 가격대를 바로 보실 수 있어요.',
+      en:'Prices vary by hospital and treatment type. We can give you an approximate price range based on your desired treatment; the exact quote is confirmed after a doctor consultation.\n\nUse the "Quick Quote" button on the main page to see reference price ranges right away.',
+      vi:'Giá cả tùy thuộc vào bệnh viện và loại dịch vụ. Chúng tôi có thể cung cấp khoảng giá tham khảo theo dịch vụ bạn mong muốn, báo giá chính xác sẽ được xác nhận sau khi bác sĩ tư vấn.\n\nNhấn nút "Báo giá nhanh" ở trang chính để xem khoảng giá tham khảo ngay.',
+      th:'ราคาจะแตกต่างกันไปตามโรงพยาบาลและประเภทการรักษา เราสามารถให้ช่วงราคาประมาณตามที่คุณต้องการได้ ใบเสนอราคาที่แน่นอนจะยืนยันหลังจากปรึกษาแพทย์\n\nกดปุ่ม "ใบเสนอราคาด่วน" ที่หน้าหลักเพื่อดูช่วงราคาอ้างอิงได้เลย',
+      ja:'費用は病院や施術内容によって異なります。ご希望の施術に応じて大まかな価格帯をご案内し、正確な見積りは医師の診察後に確定します。\n\nメイン画面の「簡単見積もり」ボタンから、希望の施術を選ぶと参考価格帯をすぐにご覧いただけます。',
+      ru:'Цены зависят от клиники и вида процедуры. Мы можем предоставить примерный диапазон цен по вашей процедуре; точная смета подтверждается после консультации врача.\n\nНажмите кнопку "Быстрый расчёт" на главной странице, чтобы сразу увидеть ориентировочные цены.',
+      mn:'Үнэ нь эмнэлэг болон процедурын төрлөөс хамаарч өөр өөр байна. Хүссэн процедурын дагуу ойролцоо үнийн хязгаарыг өгөх боломжтой бөгөөд эмчтэй уулзсаны дараа нарийвчилсан үнийн санал баталгаажна.\n\nГол хуудасны "Шуурхай үнийн санал" товчийг дарж жишиг үнийг шууд харах боломжтой.',
+      id:'Harga bervariasi menurut rumah sakit dan jenis prosedur. Kami dapat memberikan kisaran harga perkiraan berdasarkan prosedur yang Anda inginkan; penawaran pasti dikonfirmasi setelah konsultasi dokter.\n\nGunakan tombol "Penawaran Cepat" di halaman utama untuk melihat kisaran harga referensi langsung.',
+    }
+  },
+  {
+    q: { zh:'预约流程是怎样的？', ko:'예약 절차가 어떻게 되나요?', en:'What is the booking process?',
+         vi:'Quy trình đặt lịch như thế nào?', th:'ขั้นตอนการจองเป็นอย่างไร?', ja:'予約の流れはどうなっていますか？',
+         ru:'Как происходит процесс записи?', mn:'Захиалгын дараалал ямар байдаг вэ?', id:'Bagaimana proses pemesanannya?' },
+    a: {
+      zh:'预约流程很简单，分为4步：\n① 选择心仪的医院和项目\n② 在线咨询，确认方案和价格\n③ 确定日期并支付定金\n④ 来韩国接受治疗，专属顾问全程陪同\n\n整个过程我们都会用中文为您服务～',
+      ko:'예약 절차는 4단계입니다:\n① 원하는 병원·시술 선택\n② 온라인 상담으로 일정·가격 확인\n③ 날짜 확정 및 예약금 결제\n④ 방한 후 시술, 전담 코디네이터 동행\n\n전 과정 편하게 안내드립니다.',
+      en:'Booking is simple, in 4 steps:\n① Choose your preferred hospital and treatment\n② Online consultation to confirm plan and price\n③ Confirm dates and pay deposit\n④ Visit Korea for treatment with full coordinator support\n\nWe support you throughout the entire process.',
+      vi:'Quy trình đặt lịch rất đơn giản, gồm 4 bước:\n① Chọn bệnh viện và dịch vụ mong muốn\n② Tư vấn trực tuyến để xác nhận kế hoạch và giá\n③ Xác nhận ngày và đặt cọc\n④ Sang Hàn Quốc điều trị với sự đồng hành của điều phối viên\n\nChúng tôi hỗ trợ bạn trong toàn bộ quá trình.',
+      th:'ขั้นตอนการจองง่ายมาก มี 4 ขั้นตอน:\n① เลือกโรงพยาบาลและบริการที่ต้องการ\n② ปรึกษาออนไลน์เพื่อยืนยันแผนและราคา\n③ ยืนยันวันที่และมัดจำ\n④ มาเกาหลีเพื่อรับการรักษาพร้อมผู้ประสานงานดูแลตลอด\n\nเราดูแลคุณตลอดทุกขั้นตอน',
+      ja:'予約は簡単な4ステップです：\n①ご希望の病院・施術を選択\n②オンライン相談でプランと価格を確認\n③日程確定とデポジットお支払い\n④来韓して施術、コーディネーターが全行程同行\n\n全過程を丁寧にサポートいたします。',
+      ru:'Запись проста и состоит из 4 шагов:\n① Выберите клинику и процедуру\n② Онлайн-консультация для подтверждения плана и цены\n③ Подтвердите даты и внесите депозит\n④ Приезжайте в Корею на лечение с полной поддержкой координатора\n\nМы сопровождаем вас на всех этапах.',
+      mn:'Захиалга маш энгийн бөгөөд 4 алхамтай:\n① Хүссэн эмнэлэг, процедураа сонгоно\n② Онлайн зөвлөгөөгөөр төлөвлөгөө, үнийг баталгаажуулна\n③ Огноог баталгаажуулж, барьцаа төлбөр төлнө\n④ Координатортой хамт Солонгос руу ирж эмчилгээ хийнэ\n\nБид бүхэл хугацаанд танд туслана.',
+      id:'Pemesanan sangat mudah, dalam 4 langkah:\n① Pilih rumah sakit dan prosedur yang diinginkan\n② Konsultasi online untuk konfirmasi rencana dan harga\n③ Konfirmasi tanggal dan bayar deposit\n④ Kunjungi Korea untuk perawatan dengan pendampingan koordinator penuh\n\nKami mendukung Anda di seluruh proses.',
+    }
+  },
+  {
+    q: { zh:'需要办理签证吗？', ko:'비자가 필요한가요?', en:'Do I need a visa?',
+         vi:'Tôi có cần visa không?', th:'ต้องขอวีซ่าหรือไม่?', ja:'ビザは必要ですか？',
+         ru:'Нужна ли виза?', mn:'Визa хэрэгтэй юу?', id:'Apakah saya perlu visa?' },
+    a: {
+      zh:'一般情况下，中国游客可以使用旅游签证（短期访问）入境韩国接受医美/医疗服务。如果是长期治疗或手术恢复期较长，建议办理医疗签证（C-3-3）。\n\n具体签证类型建议咨询后根据您的项目和停留时间为您确认～',
+      ko:'일반적으로 단기 시술은 관광 비자로 가능합니다. 장기 치료나 수술 후 회복기간이 긴 경우 의료관광 비자(C-3-3) 발급을 권장드립니다.\n\n원하시는 시술과 체류 기간을 알려주시면 정확히 안내드릴게요.',
+      en:'In general, short-term treatments can be done with a tourist visa. For longer treatments or surgeries with extended recovery, a medical visa (C-3-3) is recommended.\n\nTell us your treatment and stay duration and we will confirm the exact visa type for you.',
+      vi:'Thông thường, các dịch vụ ngắn hạn có thể dùng visa du lịch. Với điều trị dài hạn hoặc phục hồi sau phẫu thuật kéo dài, nên xin visa y tế (C-3-3).\n\nCho chúng tôi biết dịch vụ và thời gian lưu trú để được xác nhận chính xác.',
+      th:'โดยทั่วไป การรักษาระยะสั้นสามารถใช้วีซ่าท่องเที่ยวได้ สำหรับการรักษาระยะยาวหรือพักฟื้นหลังผ่าตัดนาน แนะนำให้ขอวีซ่าทางการแพทย์ (C-3-3)\n\nแจ้งบริการและระยะเวลาพักของคุณเพื่อรับคำแนะนำที่ถูกต้อง',
+      ja:'一般的に、短期施術は観光ビザで可能です。長期治療や術後の回復期間が長い場合は、医療ビザ（C-3-3）の取得をお勧めします。\n\n施術内容と滞在期間を教えていただければ正確にご案内します。',
+      ru:'Как правило, краткосрочные процедуры можно проходить по туристической визе. Для длительного лечения или длительного восстановления рекомендуется медицинская виза (C-3-3).\n\nСообщите нам процедуру и срок пребывания — мы уточним точный тип визы.',
+      mn:'Ерөнхийдөө богино хугацааны эмчилгээг жуулчны визээр хийх боломжтой. Урт хугацааны эмчилгээ, мэс заслын дараа сэргэлт урт байвал эмнэлгийн виз (C-3-3) авахыг зөвлөж байна.\n\nХүссэн эмчилгээ, оршин суух хугацааг хэлж өгвөл нарийвчлан тайлбарлана.',
+      id:'Umumnya, perawatan jangka pendek dapat menggunakan visa wisata. Untuk perawatan jangka panjang atau pemulihan pasca operasi yang lama, disarankan visa medis (C-3-3).\n\nBeri tahu kami prosedur dan durasi tinggal Anda, kami akan konfirmasi jenis visa yang tepat.',
+    }
+  },
+  {
+    q: { zh:'有住宿和翻译陪同安排吗？', ko:'숙소와 통역 동행 안내도 되나요?', en:'Do you arrange accommodation and interpretation?',
+         vi:'Có hỗ trợ chỗ ở và phiên dịch đi cùng không?', th:'มีจัดที่พักและล่ามไปด้วยหรือไม่?', ja:'宿泊や通訳の同行はありますか？',
+         ru:'Помогаете с проживанием и переводом?', mn:'Байр, орчуулагч хамт явах боломжтой юу?', id:'Apakah ada bantuan akomodasi dan penerjemah?' },
+    a: {
+      zh:'我们提供VVIP贵宾礼宾服务，包括：\n· 专属翻译陪同（中文/越南语/泰语/英语）\n· 机场接送\n· 酒店/住宿推荐及预订协助\n· 医院全程陪同\n\n详情可以看主页的"기타 서비스(其他服务)"板块～',
+      ko:'VVIP 컨시어지 서비스로 다음을 제공합니다:\n· 전담 통역 동행 (중국어/베트남어/태국어/영어)\n· 공항 픽업/샌딩\n· 숙소 추천 및 예약 지원\n· 병원 방문 전체 동행\n\n자세한 내용은 메인 화면 "기타 서비스" 섹션을 참고해주세요.',
+      en:'We offer VVIP concierge services including:\n· Dedicated interpreter (Chinese/Vietnamese/Thai/English)\n· Airport pickup/drop-off\n· Hotel recommendation and booking assistance\n· Full escort during hospital visits\n\nSee the "Other Services" section on the main page for details.',
+      vi:'Chúng tôi cung cấp dịch vụ VVIP gồm:\n· Phiên dịch riêng (Trung/Việt/Thái/Anh)\n· Đưa đón sân bay\n· Hỗ trợ tư vấn và đặt khách sạn\n· Đồng hành toàn trình khi đến bệnh viện\n\nXem chi tiết tại mục "Dịch vụ khác" trên trang chính.',
+      th:'เรามีบริการ VVIP concierge รวมถึง:\n· ล่ามส่วนตัว (จีน/เวียดนาม/ไทย/อังกฤษ)\n· รับส่งสนามบิน\n· แนะนำและช่วยจองโรงแรม\n· ดูแลตลอดการไปโรงพยาบาล\n\nดูรายละเอียดที่หัวข้อ "บริการอื่นๆ" ในหน้าหลัก',
+      ja:'VVIPコンシェルジュサービスをご提供：\n・専属通訳同行（中国語/ベトナム語/タイ語/英語）\n・空港送迎\n・ホテルのご案内・予約サポート\n・病院訪問の全行程同行\n\n詳細はメイン画面の「その他サービス」をご覧ください。',
+      ru:'Мы предлагаем VVIP консьерж-услуги:\n· Личный переводчик (китайский/вьетнамский/тайский/английский)\n· Трансфер из аэропорта\n· Помощь с отелем и бронированием\n· Полное сопровождение при посещении клиники\n\nПодробности в разделе "Другие услуги" на главной странице.',
+      mn:'Бид дараах VVIP консьерж үйлчилгээг үзүүлнэ:\n· Хувийн орчуулагч (хятад/вьетнам/тайланд/англи)\n· Нисэх онгоцны буудлаас тосож авах\n· Зочид буудал санал болгох, захиалгад туслах\n· Эмнэлэгт зочлох бүх хугацаанд дагалдах\n\nДэлгэрэнгүйг гол хуудасны "Бусад үйлчилгээ" хэсгээс үзнэ үү.',
+      id:'Kami menyediakan layanan concierge VVIP termasuk:\n· Penerjemah khusus (Mandarin/Vietnam/Thailand/Inggris)\n· Antar-jemput bandara\n· Rekomendasi dan bantuan reservasi hotel\n· Pendampingan penuh saat kunjungan rumah sakit\n\nLihat bagian "Layanan Lainnya" di halaman utama untuk detail.',
+    }
+  },
+  {
+    q: { zh:'退款政策是怎样的？', ko:'환불 정책이 어떻게 되나요?', en:'What is the refund policy?',
+         vi:'Chính sách hoàn tiền như thế nào?', th:'นโยบายการคืนเงินเป็นอย่างไร?', ja:'キャンセル・返金ポリシーはどうなっていますか？',
+         ru:'Какая политика возврата средств?', mn:'Мөнгө буцаах бодлого ямар вэ?', id:'Bagaimana kebijakan pengembalian dana?' },
+    a: {
+      zh:'关于退款政策：\n· 治疗前7天以上取消，全额退还定金\n· 治疗前3-6天取消，退还50%\n· 治疗前1-2天取消，退还20%\n· 当天取消或未到场，不予退款\n· 因医院或不可抗力原因取消，全额退还\n\n具体条款会在预约确认时书面告知您，如需取消请尽快联系您的专属顾问～',
+      ko:'환불 정책 안내:\n· 시술 7일 전까지 취소 시 예약금 전액 환불\n· 3~6일 전 취소 시 50% 환불\n· 1~2일 전 취소 시 20% 환불\n· 당일 취소·노쇼는 환불 불가\n· 병원·천재지변 등 불가피한 사유는 전액 환불\n\n정확한 조건은 예약 확정 시 서면으로 안내드립니다.',
+      en:'Refund policy:\n· Cancel 7+ days before treatment: full deposit refund\n· Cancel 3-6 days before: 50% refund\n· Cancel 1-2 days before: 20% refund\n· Same-day cancellation/no-show: no refund\n· Cancellation due to hospital or force majeure: full refund\n\nExact terms will be provided in writing when your booking is confirmed.',
+      vi:'Chính sách hoàn tiền:\n· Hủy trước 7 ngày: hoàn 100% tiền cọc\n· Hủy trước 3-6 ngày: hoàn 50%\n· Hủy trước 1-2 ngày: hoàn 20%\n· Hủy trong ngày/không đến: không hoàn tiền\n· Hủy do bệnh viện hoặc bất khả kháng: hoàn 100%\n\nĐiều khoản chính xác sẽ được thông báo bằng văn bản khi xác nhận đặt lịch.',
+      th:'นโยบายการคืนเงิน:\n· ยกเลิกก่อน 7 วัน: คืนมัดจำเต็มจำนวน\n· ยกเลิกก่อน 3-6 วัน: คืน 50%\n· ยกเลิกก่อน 1-2 วัน: คืน 20%\n· ยกเลิกวันเดียวกัน/ไม่มา: ไม่คืนเงิน\n· ยกเลิกเนื่องจากโรงพยาบาลหรือเหตุสุดวิสัย: คืนเต็มจำนวน\n\nเงื่อนไขที่แน่นอนจะแจ้งเป็นลายลักษณ์อักษรเมื่อยืนยันการจอง',
+      ja:'キャンセル・返金ポリシー：\n・施術7日以上前のキャンセル：デポジット全額返金\n・3〜6日前：50%返金\n・1〜2日前：20%返金\n・当日キャンセル・無断不参加：返金不可\n・病院都合または不可抗力による場合：全額返金\n\n正確な条件は予約確定時に書面でご案内します。',
+      ru:'Политика возврата:\n· Отмена за 7+ дней: полный возврат депозита\n· Отмена за 3-6 дней: возврат 50%\n· Отмена за 1-2 дня: возврат 20%\n· Отмена в день процедуры/неявка: без возврата\n· Отмена по вине клиники или форс-мажор: полный возврат\n\nТочные условия будут предоставлены письменно при подтверждении записи.',
+      mn:'Мөнгө буцаах бодлого:\n· Эмчилгээнээс 7+ хоногийн өмнө цуцлах: барьцаа мөнгийг бүрэн буцаана\n· 3-6 хоногийн өмнө: 50% буцаана\n· 1-2 хоногийн өмнө: 20% буцаана\n· Тухайн өдөр цуцлах/ирэхгүй байх: буцаахгүй\n· Эмнэлэг эсвэл давагдашгүй хүчин зүйлээс шалтгаалсан бол: бүрэн буцаана\n\nНарийвчилсан нөхцлийг захиалга баталгаажих үед бичгээр мэдэгдэнэ.',
+      id:'Kebijakan pengembalian dana:\n· Batal 7+ hari sebelumnya: refund deposit 100%\n· Batal 3-6 hari sebelumnya: refund 50%\n· Batal 1-2 hari sebelumnya: refund 20%\n· Batal hari yang sama/tidak datang: tidak ada refund\n· Batal karena rumah sakit atau force majeure: refund 100%\n\nKetentuan pasti akan diberikan secara tertulis saat konfirmasi pemesanan.',
+    }
+  },
+  {
+    q: { zh:'来韩国前需要准备什么？', ko:'방한 전 무엇을 준비해야 하나요?', en:'What should I prepare before coming to Korea?',
+         vi:'Tôi cần chuẩn bị gì trước khi sang Hàn Quốc?', th:'ต้องเตรียมอะไรก่อนมาเกาหลี?', ja:'来韓前に何を準備すればいいですか？',
+         ru:'Что нужно подготовить перед поездкой в Корею?', mn:'Солонгос руу ирэхээсээ өмнө юу бэлдэх ёстой вэ?', id:'Apa yang perlu disiapkan sebelum ke Korea?' },
+    a: {
+      zh:'来韩国接受医疗服务前，建议准备以下物品和资料：\n\n📄 文件类\n· 护照（有效期需6个月以上）\n· 签证\n· K-ETA电子旅行许可（免签入境国家必须提前申请）\n· 英文病历/用药记录（如有）\n· 医院预约确认函\n\n🏨 住宿与交通\n· 选择离医院近、方便术后恢复的住宿\n\n💳 其他准备\n· 可在境外使用的信用卡/借记卡\n· 少量现金\n· 宽松易穿脱的衣物\n· 多功能转换插头（韩国电压220V）\n\n具体清单可以发送给您的专属顾问，帮您逐项确认～',
+      ko:'방한 전 준비하시면 좋은 항목을 정리해드릴게요:\n\n📄 서류 준비\n· 여권 (유효기간 6개월 이상)\n· 비자\n· K-ETA 전자여행허가\n· 영문 진료기록/복용약 목록 (있는 경우)\n· 병원 예약 확인서\n\n🏨 숙소·교통\n· 병원과 가깝고 회복에 적합한 숙소 선택\n\n💳 기타 준비물\n· 해외 사용 가능한 신용/체크카드\n· 소액 현금\n· 입고 벗기 편한 헐렁한 옷\n· 멀티 어댑터 (한국 전압 220V)\n\n자세한 체크리스트는 전담 상담원이 위챗으로 하나씩 같이 확인해드릴게요~',
+      en:'Before coming to Korea for treatment, prepare:\n\n📄 Documents\n· Passport (valid 6+ months)\n· Visa\n· K-ETA travel authorization\n· English medical records/medication list (if any)\n· Hospital appointment confirmation\n\n🏨 Accommodation\n· Choose lodging near the hospital, suitable for recovery\n\n💳 Other items\n· International credit/debit card\n· Small amount of cash\n· Loose, comfortable clothing\n· Universal adapter (Korea uses 220V)\n\nOur dedicated coordinator will help you check off the full list via WeChat.',
+      vi:'Trước khi sang Hàn Quốc điều trị, hãy chuẩn bị:\n\n📄 Giấy tờ\n· Hộ chiếu (còn hạn trên 6 tháng)\n· Visa\n· Giấy phép du lịch điện tử K-ETA\n· Hồ sơ bệnh án/thuốc tiếng Anh (nếu có)\n· Xác nhận lịch hẹn bệnh viện\n\n🏨 Chỗ ở\n· Chọn nơi gần bệnh viện, phù hợp để phục hồi\n\n💳 Vật dụng khác\n· Thẻ tín dụng/ghi nợ quốc tế\n· Một ít tiền mặt\n· Quần áo rộng rãi, thoải mái\n· Adapter đa năng (Hàn Quốc dùng điện 220V)\n\nĐiều phối viên sẽ giúp bạn kiểm tra danh sách đầy đủ qua WeChat.',
+      th:'ก่อนมาเกาหลีเพื่อรับการรักษา เตรียม:\n\n📄 เอกสาร\n· พาสปอร์ต (อายุเหลือ 6 เดือนขึ้นไป)\n· วีซ่า\n· K-ETA\n· ประวัติการรักษา/ยาภาษาอังกฤษ (ถ้ามี)\n· ใบยืนยันนัดโรงพยาบาล\n\n🏨 ที่พัก\n· เลือกที่พักใกล้โรงพยาบาล เหมาะกับการพักฟื้น\n\n💳 ของอื่นๆ\n· บัตรเครดิต/เดบิตที่ใช้ต่างประเทศได้\n· เงินสดเล็กน้อย\n· เสื้อผ้าหลวมสบาย\n· ปลั๊กแปลงไฟ (เกาหลีใช้ไฟ 220V)\n\nผู้ประสานงานจะช่วยตรวจสอบรายการให้ทาง WeChat',
+      ja:'治療のため来韓する前に準備するもの：\n\n📄 必要書類\n・パスポート（有効期限6ヶ月以上）\n・ビザ\n・K-ETA電子渡航認証\n・英文診療記録/服薬リスト（ある場合）\n・病院予約確認書\n\n🏨 宿泊\n・病院に近く回復に適した宿泊先を選択\n\n💳 その他\n・海外利用可能なクレジット/デビットカード\n・少額の現金\n・ゆったりした楽な服\n・マルチ変換プラグ（韓国は220V）\n\n詳細なチェックリストは専属コーディネーターがWeChatでご案内します。',
+      ru:'Перед поездкой в Корею на лечение подготовьте:\n\n📄 Документы\n· Паспорт (срок действия 6+ месяцев)\n· Виза\n· K-ETA электронное разрешение\n· Медицинская карта/список лекарств на английском (если есть)\n· Подтверждение записи в клинику\n\n🏨 Проживание\n· Выберите жильё рядом с клиникой, удобное для восстановления\n\n💳 Прочее\n· Международная кредитная/дебетовая карта\n· Небольшая сумма наличных\n· Свободная удобная одежда\n· Универсальный адаптер (в Корее 220В)\n\nНаш координатор поможет проверить весь список через WeChat.',
+      mn:'Эмчилгээ хийхээр Солонгос руу ирэхээсээ өмнө бэлдэх зүйлс:\n\n📄 Бичиг баримт\n· Гадаад паспорт (хүчинтэй хугацаа 6+ сар)\n· Виз\n· K-ETA цахим зөвшөөрөл\n· Англи хэл дээрх эмчилгээний түүх/эмийн жагсаалт (байгаа бол)\n· Эмнэлгийн цаг авсан баталгаа\n\n🏨 Байр\n· Эмнэлэгт ойр, сэргэлтэнд тохиромжтой байр сонгоно\n\n💳 Бусад зүйлс\n· Олон улсын карт\n· Бага хэмжээний бэлэн мөнгө\n· Сул, тухтай хувцас\n· Дасан зохицуулагч залгуур (Солонгост 220В)\n\nКоординатор маань WeChat-аар бүх жагсаалтыг шалгахад тусална.',
+      id:'Sebelum ke Korea untuk perawatan, siapkan:\n\n📄 Dokumen\n· Paspor (berlaku 6+ bulan)\n· Visa\n· Otorisasi perjalanan K-ETA\n· Riwayat medis/daftar obat dalam bahasa Inggris (jika ada)\n· Konfirmasi jadwal rumah sakit\n\n🏨 Akomodasi\n· Pilih penginapan dekat rumah sakit, sesuai untuk pemulihan\n\n💳 Barang lainnya\n· Kartu kredit/debit internasional\n· Sedikit uang tunai\n· Pakaian yang nyaman dan longgar\n· Adaptor universal (Korea menggunakan 220V)\n\nKoordinator kami akan membantu Anda memeriksa daftar lengkap melalui WeChat.',
+    }
+  },
+  {
+    q: { zh:'术后恢复期需要多久？', ko:'시술 후 회복기간은 얼마나 걸리나요?', en:'How long is the recovery period?',
+         vi:'Thời gian phục hồi sau điều trị bao lâu?', th:'ระยะพักฟื้นหลังการรักษานานแค่ไหน?', ja:'施術後の回復期間はどのくらいですか？',
+         ru:'Сколько длится период восстановления?', mn:'Эмчилгээний дараах сэргэлтийн хугацаа хэр вэ?', id:'Berapa lama masa pemulihan setelah perawatan?' },
+    a: {
+      zh:'恢复期因项目而异：\n· 皮肤管理类（超声刀、热玛吉等）：基本无需恢复期\n· 注射类（玻尿酸、肉毒素）：1-3天消肿\n· 手术类（眼鼻整形等）：7-14天基础恢复，完全恢复需1-3个月\n\n具体恢复时间建议咨询医生，方便为您安排合适的逗留天数～',
+      ko:'시술별 회복기간:\n· 피부시술(울쎄라/써마지 등): 다운타임 거의 없음\n· 주사시술(필러/보톡스): 1~3일 부기\n· 수술(눈/코성형 등): 기본 7~14일, 완전회복 1~3개월\n\n정확한 일정은 의사 상담 후 체류기간을 맞춰드립니다.',
+      en:'Recovery time depends on the treatment:\n· Skin treatments (Ulthera, Thermage, etc.): almost no downtime\n· Injections (fillers, Botox): 1-3 days of swelling\n· Surgery (eye/nose surgery, etc.): 7-14 days basic recovery, 1-3 months full recovery\n\nWe will help plan your stay length after consulting the doctor for exact timing.',
+      vi:'Thời gian phục hồi tùy theo dịch vụ:\n· Điều trị da (Ulthera, Thermage,...): hầu như không cần nghỉ dưỡng\n· Tiêm (filler, Botox): sưng 1-3 ngày\n· Phẫu thuật (mắt/mũi,...): phục hồi cơ bản 7-14 ngày, hồi phục hoàn toàn 1-3 tháng\n\nChúng tôi sẽ giúp lên lịch lưu trú sau khi bác sĩ tư vấn thời gian chính xác.',
+      th:'ระยะพักฟื้นขึ้นอยู่กับการรักษา:\n· การรักษาผิว (Ulthera, Thermage ฯลฯ): แทบไม่มี downtime\n· การฉีด (ฟิลเลอร์, โบทอกซ์): บวม 1-3 วัน\n· การผ่าตัด (ตา/จมูก ฯลฯ): ฟื้นตัวพื้นฐาน 7-14 วัน ฟื้นตัวเต็มที่ 1-3 เดือน\n\nเราจะช่วยวางแผนระยะเวลาพักหลังปรึกษาแพทย์เพื่อกำหนดเวลาที่แน่นอน',
+      ja:'回復期間は施術により異なります：\n・スキン施術（ウルセラ、サーマクールなど）：ダウンタイムほぼなし\n・注射施術（フィラー、ボトックス）：1〜3日の腫れ\n・手術（目・鼻整形など）：基本回復7〜14日、完全回復1〜3ヶ月\n\n正確な期間は医師相談後にご滞在日程を調整いたします。',
+      ru:'Время восстановления зависит от процедуры:\n· Уход за кожей (Ulthera, Thermage и т.д.): почти без простоя\n· Инъекции (филлеры, ботокс): отёк 1-3 дня\n· Операции (глаза/нос и т.д.): базовое восстановление 7-14 дней, полное — 1-3 месяца\n\nМы поможем спланировать продолжительность поездки после консультации врача.',
+      mn:'Сэргэлтийн хугацаа эмчилгээний төрлөөс хамаарна:\n· Арьсны эмчилгээ (Ultherapy, Thermage гэх мэт): бараг сэргэлт хэрэггүй\n· Тарилга (филлер, Botox): 1-3 хоног хавагнана\n· Мэс засал (нүд/хамар гэх мэт): үндсэн сэргэлт 7-14 хоног, бүрэн сэргэлт 1-3 сар\n\nЭмчтэй зөвлөлдсөний дараа оршин суух хугацааг тодорхой төлөвлөнө.',
+      id:'Waktu pemulihan bergantung pada prosedur:\n· Perawatan kulit (Ulthera, Thermage, dll): hampir tanpa downtime\n· Suntikan (filler, Botox): bengkak 1-3 hari\n· Operasi (mata/hidung, dll): pemulihan dasar 7-14 hari, pemulihan penuh 1-3 bulan\n\nKami akan membantu merencanakan durasi tinggal setelah konsultasi dokter untuk waktu yang tepat.',
+    }
+  },
+  {
+    q: { zh:'有哪些合作医院？', ko:'어느 병원들과 제휴하고 있나요?', en:'Which hospitals do you partner with?',
+         vi:'Các bệnh viện đối tác là gì?', th:'มีโรงพยาบาลพาร์ทเนอร์ที่ไหนบ้าง?', ja:'提携病院はどこですか？',
+         ru:'С какими клиниками вы сотрудничаете?', mn:'Ямар эмнэлгүүдтэй гэрээ хийсэн бэ?', id:'Rumah sakit mitra mana yang Anda miliki?' },
+    a: {
+      zh:'我们与首尔江南区多家顶级医美/整形医院深度合作，覆盖皮肤管理、整形外科、干细胞、妇科、体检、韩医等6大领域。\n\n可以告诉我您想做的项目，我帮您推荐合适的医院～',
+      ko:'강남 소재 여러 우수 의료기관과 협력하고 있으며, 피부·성형외과·줄기세포·여성의원·건강검진·한방까지 6개 분야를 다루고 있습니다.\n\n원하시는 시술을 알려주시면 적합한 병원을 추천해드릴게요.',
+      en:'We deeply partner with top medical aesthetic/plastic surgery hospitals in Gangnam, Seoul, covering 6 fields: skin care, plastic surgery, stem cell, women\'s health, health checkups, and Korean medicine.\n\nTell us your desired treatment and we will recommend a suitable hospital.',
+      vi:'Chúng tôi hợp tác sâu rộng với các bệnh viện thẩm mỹ/phẫu thuật hàng đầu tại Gangnam, Seoul, bao gồm 6 lĩnh vực: chăm sóc da, phẫu thuật thẩm mỹ, tế bào gốc, y tế phụ nữ, khám sức khỏe, và y học Hàn Quốc.\n\nCho chúng tôi biết dịch vụ bạn muốn, chúng tôi sẽ đề xuất bệnh viện phù hợp.',
+      th:'เราร่วมมือกับโรงพยาบาลความงาม/ศัลยกรรมชั้นนำในกังนัม โซล ครอบคลุม 6 ด้าน: ดูแลผิว ศัลยกรรม เซลล์ต้นกำเนิด สุขภาพสตรี ตรวจสุขภาพ และแพทย์แผนเกาหลี\n\nแจ้งบริการที่คุณต้องการ เราจะแนะนำโรงพยาบาลที่เหมาะสม',
+      ja:'ソウル江南の最高級医療美容・整形外科病院と深く提携し、皮膚管理・整形外科・幹細胞・女性医学・健康診断・韓医学の6分野をカバーしています。\n\nご希望の施術を教えていただければ、適切な病院をご紹介します。',
+      ru:'Мы тесно сотрудничаем с ведущими клиниками эстетической медицины/пластической хирургии в Каннаме, Сеул, в 6 областях: уход за кожей, пластическая хирургия, стволовые клетки, женское здоровье, медосмотры и корейская медицина.\n\nСообщите нужную процедуру — мы порекомендуем подходящую клинику.',
+      mn:'Бид Сөүлийн Ганнам дүүргийн шилдэг гоо сайхан/мэс заслын эмнэлгүүдтэй нягт хамтран ажилладаг бөгөөд арьсны арчилгаа, мэс засал, ишмэл эс, эмэгтэйчүүдийн эрүүл мэнд, эрүүл мэндийн үзлэг, солонгос анагаах ухаан гэсэн 6 чиглэлийг хамардаг.\n\nХүссэн эмчилгээгээ хэлж өгвөл тохирох эмнэлгийг санал болгоно.',
+      id:'Kami bermitra erat dengan rumah sakit estetika medis/bedah plastik terbaik di Gangnam, Seoul, mencakup 6 bidang: perawatan kulit, bedah plastik, sel punca, kesehatan wanita, pemeriksaan kesehatan, dan obat tradisional Korea.\n\nBeri tahu kami prosedur yang Anda inginkan, kami akan merekomendasikan rumah sakit yang sesuai.',
+    }
+  },
+];
 
 setLang('zh');
 loadReviews();
@@ -3160,6 +3332,7 @@ const FK_AI_CONFIG = {
 //  FAQ 데이터 — 백오피스에서 추후 관리 가능하도록 구조화
 //  각 항목: 키워드 배열로 매칭, zh/ko 양쪽 답변 보유
 // ════════════════════════════════════════════════════════════
+
 const FK_FAQ = [
   {
     keywords_zh: ['价格','费用','多少钱','报价','贵不贵'],
