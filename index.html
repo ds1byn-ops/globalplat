@@ -206,12 +206,12 @@ a{text-decoration:none;color:inherit;}
       <div class="logo-sub">K-BEAUTY MEDICAL</div>
     </div>
         <div class="nav-links">
-      <a onclick="showMain()" data-i18n="nav_home">首页</a>
-      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_hosps">병원</a>
-      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-extra').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_concierge">컨시어지</a>
-      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
-      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
-      <a onclick="showMain();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
+      <a onclick="showMain();fkhRestoreHospSection();" data-i18n="nav_home">首页</a>
+      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_hosps">병원</a>
+      <a onclick="showMain();fkhShowExtraSection();" data-i18n="nav_concierge">컨시어지</a>
+      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
+      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
+      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
     </div>
     <div class="nav-right">
       <div class="lang-select-wrap" style="position:relative;">
@@ -251,7 +251,7 @@ a{text-decoration:none;color:inherit;}
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
       <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn" data-i18n="hero_cta_quote">💰 简易报价</button>
-      <button class="btn-secondary" onclick="document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
+      <button class="btn-secondary" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="num">2,000+</div><div class="lbl" data-i18n="stat1">服务患者</div></div>
@@ -1762,6 +1762,45 @@ function setCat(cat,el){
   if(!isExtra)filterHosps();
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
+}
+
+// ── 5번 작업: 상단 네비게이션 "컨시어지" 메뉴 → 기타서비스(sec-extra) 펼친 화면으로 이동 ──
+// 기존 setCat()은 카테고리 카드 클릭(el 인자)을 전제로 동작하므로,
+// 카드 클릭 없이 네비게이션 메뉴에서 곧장 호출 가능한 전용 함수를 분리
+// ── 5번 작업 보강: 컨시어지(기타서비스) 화면에서 다른 메뉴로 이동할 때
+//    sec-hosps가 계속 숨겨진 채로 남는 문제 방지 — "기타서비스가 아닌"
+//    모든 네비게이션 메뉴/버튼은 클릭 시 이 함수를 먼저 호출해 정상 상태로 복원
+function fkhRestoreHospSection(){
+  const extraSec=document.getElementById('sec-extra');
+  const hospSec=document.getElementById('sec-hosps');
+  if(extraSec) extraSec.style.display='none';
+  if(hospSec) hospSec.style.display='';
+  // 카테고리 카드도 "전체"로 되돌림 (기타서비스 카드 활성화 해제)
+  activeCat='';
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
+  const firstCard=document.querySelector('.cat-card:first-child');
+  if(firstCard) firstCard.classList.add('active');
+}
+
+function fkhShowExtraSection(){
+  const extraSec=document.getElementById('sec-extra');
+  const hospSec=document.getElementById('sec-hosps');
+  if(!extraSec) return;
+  // 기타서비스 섹션 표시, 병원 목록 숨김 (setCat의 isExtra=true 분기와 동일)
+  extraSec.style.display='';
+  if(hospSec) hospSec.style.display='none';
+  // 카테고리 카드 중 "기타서비스" 카드가 있으면 활성 표시로 동기화
+  const extraCatLabel = EXTRA_CATS_KR.find(c => true); // 현재 언어의 기타서비스 라벨
+  const cats = t('cats');
+  activeCat = cats[cats.length-1]; // 카테고리 배열의 마지막 항목이 항상 "기타서비스"
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
+  const lastCard = document.querySelector('.cat-card:last-child');
+  if(lastCard) lastCard.classList.add('active');
+  // 스크롤 + 서비스 버튼 초기화
+  setTimeout(()=>{
+    extraSec.scrollIntoView({behavior:'smooth',block:'start'});
+    initSvcButtons();
+  },100);
 }
 
 let FKH_RECOMMENDED_NAMES = []; // 백오피스 "병원 광고 설정"에서 지정한 추천병원명 2개
