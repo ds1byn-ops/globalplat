@@ -182,8 +182,8 @@ a{text-decoration:none;color:inherit;}
   /* 히어로 */
   .hero-inner{padding:40px 16px 32px;}
   .hero-stats{gap:16px;}
-  /* 병원 카드 1열 */
-  .hosp-grid{grid-template-columns:1fr!important;}
+  /* 병원 카드 2열 바둑판 (1/4 사이즈) */
+  .hosp-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;}
   /* 리뷰 카드 1열 */
   .testi-grid{grid-template-columns:1fr!important;}
   /* 섹션 패딩 */
@@ -1749,9 +1749,8 @@ function setCat(cat,el){
   const isExtra=EXTRA_CATS_KR.includes(cat);
   const extraSec=document.getElementById('sec-extra');
   const hospSec=document.getElementById('sec-hosps');
-  // 기타서비스: 기타서비스 섹션 표시, 병원 목록 숨김
+  // 기타서비스: 기타서비스 섹션도 함께 표시 (병원 목록은 그대로 유지)
   if(extraSec)extraSec.style.display=isExtra?'':'none';
-  if(hospSec)hospSec.style.display=isExtra?'none':'';
   // 기타서비스 섹션으로 스크롤
   if(isExtra&&extraSec){
     setTimeout(()=>{
@@ -1786,9 +1785,8 @@ function fkhShowExtraSection(){
   const extraSec=document.getElementById('sec-extra');
   const hospSec=document.getElementById('sec-hosps');
   if(!extraSec) return;
-  // 기타서비스 섹션 표시, 병원 목록 숨김 (setCat의 isExtra=true 분기와 동일)
+  // 기타서비스 섹션 표시 (병원 목록은 그대로 유지, setCat의 isExtra=true 분기와 동일)
   extraSec.style.display='';
-  if(hospSec) hospSec.style.display='none';
   // 카테고리 카드 중 "기타서비스" 카드가 있으면 활성 표시로 동기화
   const extraCatLabel = EXTRA_CATS_KR.find(c => true); // 현재 언어의 기타서비스 라벨
   const cats = t('cats');
@@ -1852,9 +1850,12 @@ function filterHosps(){
       const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
       const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
       const recLabel = {zh:'⭐ 推荐医院',ko:'⭐ 추천 병원',en:'⭐ Recommended'}[lang] || '⭐ 추천 병원';
+      const recIntro=HOSP_INTROS[h.kr];
+      const recImg=recIntro&&recIntro.images&&recIntro.images[0]?
+        `<img src="${recIntro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
       return`<div class="hosp-recommend-card" data-kr="${h.kr}">
         <span class="badge-recommend">${recLabel}</span>
-        <div class="hosp-img" style="position:relative;">${h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
+        <div class="hosp-img" style="position:relative;">${recImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
         <div class="hosp-body">
           <div class="hosp-name" style="font-size:16px;">${name}</div>
           <div class="hosp-dept">${dept}</div>
@@ -2632,6 +2633,7 @@ async function loadSharedWanghongs(){
     <div class="fkq-footer">
       <button class="fkq-btn fkq-btn-outline" id="fkq-back-btn" onclick="fkqPrevStep()" style="display:none;">이전</button>
       <button class="fkq-btn fkq-btn-primary" id="fkq-next-btn" onclick="fkqNextStep()">다음</button>
+      <button class="fkq-btn fkq-btn-outline" id="fkq-print-btn" onclick="fkqPrint()" style="display:none;flex:0.8;font-size:13px;">🖨️ 출력하기</button>
       <button class="fkq-btn fkq-btn-wechat" id="fkq-submit-btn" onclick="fkqSubmit()" style="display:none;">📤 견적신청 전송</button>
     </div>
   </div>
@@ -3007,6 +3009,7 @@ function fkqApplyI18n(){
   document.getElementById('fkq-back-btn').textContent = fkqT('btn_prev');
   document.getElementById('fkq-next-btn').textContent = fkqT('btn_next');
   document.getElementById('fkq-submit-btn').textContent = fkqT('btn_submit');
+  document.getElementById('fkq-print-btn').textContent = fkqT('btn_save');
   // 국적 옵션 (영어 표기 + 원문 보조)
   const nationSel = document.getElementById('fkq-nation');
   const nations = fkqT('nations');
@@ -3111,6 +3114,7 @@ function fkqGoStep(step){
   document.getElementById('fkq-back-btn').style.display = step > 1 ? 'block' : 'none';
   document.getElementById('fkq-next-btn').style.display = step < 3 ? 'block' : 'none';
   document.getElementById('fkq-submit-btn').style.display = step === 3 ? 'block' : 'none';
+  document.getElementById('fkq-print-btn').style.display = step === 3 ? 'block' : 'none';
   if(step === 1){ document.getElementById('fkq-title').textContent = fkqT('title'); document.getElementById('fkq-subtitle').textContent = fkqT('subtitle'); }
   if(step === 2){ document.getElementById('fkq-title').textContent = fkqT('step2_visit'); document.getElementById('fkq-subtitle').textContent = fkqT('step3_contact'); }
   if(step === 3){ document.getElementById('fkq-title').textContent = fkqT('step3_title'); document.getElementById('fkq-subtitle').textContent = fkqT('step3_sub'); fkqRenderResult(); }
@@ -3238,6 +3242,38 @@ async function fkqSubmit(){
     </div>`;
   document.getElementById('fkq-submit-btn').style.display = 'none';
   document.getElementById('fkq-back-btn').style.display = 'none';
+}
+
+// ── 4번 요청: 견적서 "출력하기" 버튼 — 새 창에 견적서만 깔끔하게 띄워 인쇄(또는 PDF로 저장) ──
+function fkqPrint(){
+  const docHtml = document.getElementById('fkq-result-doc').innerHTML;
+  if(!docHtml){ return; }
+  const w = window.open('', '_blank');
+  if(!w){
+    alert(lang==='ko'?'팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.':
+          lang==='zh'?'弹窗被阻止，请允许弹窗后重试。':
+          'Popup blocked. Please allow popups and try again.');
+    return;
+  }
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>FOLLOW KOREA - ${fkqT('doc_title')}</title>
+    <style>
+      *{box-sizing:border-box;}
+      body{font-family:'Apple SD Gothic Neo','PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;padding:32px;color:#16202e;max-width:640px;margin:0 auto;}
+      .doc-h{text-align:center;margin-bottom:20px;}
+      .doc-h .logo{font-size:14px;font-weight:800;letter-spacing:1px;color:#16202e;}
+      .doc-h .title{font-size:21px;font-weight:700;margin-top:8px;}
+      .doc-h .no{font-size:11px;color:#94a3b8;margin-top:4px;}
+      table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0;}
+      th{background:#16202e;color:#fff;padding:9px 10px;text-align:left;font-weight:600;}
+      td{padding:9px 10px;border-bottom:1px solid #f1f5f9;color:#334155;}
+      .grand{background:#fdf8ef;font-weight:700;color:#16202e;}
+      .fkq-badge{display:inline-block;background:#fdf8ef;color:#b8860b;border:1px solid #f0dfb8;font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;margin-top:10px;}
+      @media print{ body{padding:8px;} }
+    </style></head><body>${docHtml}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 350);
 }
 
 function fkqResetWidget(){
