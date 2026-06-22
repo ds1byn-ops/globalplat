@@ -1,261 +1,1006 @@
-<!-- ════════════════════════════════════════════════════════════
-  팔로우코리아 hospital-portal.html ↔ 펄스(backoffice.html) 연동 패치
-  
-  핵심 원리:
-  - 펄스와 병원포털은 이미 같은 Supabase(global_platform)를 보고 있음
-  - 펄스에서 bookings/hospitals 데이터를 저장하면, 병원포털이 "로그인한
-    병원명"으로 필터링해서 자기 병원 데이터만 화면에 표시
-  - 정산 완료/세금계산서 발행 등 상태값도 펄스에서 바뀌면 병원포털에
-    실시간(또는 새로고침 시) 반영됨 — 같은 DB를 보니 "전송"이 아니라
-    "같은 곳을 보는" 구조
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow Korea | 병원 포털</title>
+<style>
+:root{--gn:#4CAF8C;--gn2:#1A6B4A;--gold:#D4AF37;--bg:#F5F5F0;--white:#fff;--dark:#1a1a1a;--gray:#6B7280;--lgray:#F3F4F6;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,0.07);--r:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--dark);font-size:13px;}
+.header{background:var(--dark);color:#fff;padding:0 20px;display:flex;align-items:center;height:52px;gap:12px;position:sticky;top:0;z-index:200;}
+.logo{font-size:16px;font-weight:700;color:var(--gold);}
+.header-sub{font-size:11px;color:#888;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.hosp-badge{background:#2d2d2d;border:1px solid #444;border-radius:20px;padding:4px 12px;font-size:11px;color:#aaa;}
+.hosp-badge b{color:#fff;}
+.sidebar{width:200px;background:var(--white);height:calc(100vh - 52px);position:fixed;top:52px;left:0;border-right:1px solid var(--border);padding:16px 0;overflow-y:auto;z-index:100;}
+.sidebar-menu a{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:12px;color:var(--gray);cursor:pointer;transition:all 0.15s;text-decoration:none;}
+.sidebar-menu a:hover,.sidebar-menu a.active{background:var(--lgray);color:var(--gn2);font-weight:600;}
+.sidebar-menu a .ic{font-size:14px;width:18px;text-align:center;}
+.sidebar-section{font-size:10px;font-weight:700;color:#ccc;padding:12px 18px 4px;letter-spacing:1px;text-transform:uppercase;}
+.main{margin-left:200px;padding:20px;min-height:calc(100vh - 52px);}
+.page{display:none;}.page.active{display:block;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.sc{background:var(--white);border-radius:var(--r);padding:14px 16px;border:1px solid var(--border);}
+.sc .sl{font-size:10px;color:var(--gray);margin-bottom:4px;}
+.sc .sv{font-size:20px;font-weight:700;}
+.sc .ss{font-size:10px;color:#aaa;margin-top:2px;}
+.sc.green .sv{color:var(--gn2);}.sc.gold .sv{color:#B8960C;}.sc.blue .sv{color:#2563eb;}.sc.red .sv{color:#dc2626;}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--dark);}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--lgray);font-size:11px;font-weight:600;color:var(--gray);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid #f5f5f5;font-size:11px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafaf8;}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:500;}
+.badge.확정{background:#dcfce7;color:#15803d;}
+.badge.대기{background:#fef9c3;color:#854d0e;}
+.badge.완료{background:#dbeafe;color:#1e40af;}
+.badge.취소,.badge.노쇼{background:#fee2e2;color:#991b1b;}
+.badge.new{background:#ede9fe;color:#5b21b6;}
+.badge.confirmed{background:#dcfce7;color:#15803d;}
+.btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;cursor:pointer;color:var(--dark);}
+.btn:hover{background:var(--lgray);}
+.btn.primary{background:var(--gn2);color:#fff;border-color:var(--gn2);}
+.btn.sm{padding:3px 8px;font-size:10px;}
+.toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.toolbar input,.toolbar select{padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:11px;background:var(--white);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day-hdr{text-align:center;font-size:10px;color:var(--gray);padding:4px;}
+.cal-cell{min-height:70px;border:1px solid var(--border);border-radius:6px;padding:5px;background:var(--white);cursor:pointer;}
+.cal-cell:hover{border-color:var(--gn);}
+.cal-cell.today{border-color:var(--gn2);background:#f0fff8;}
+.cal-cell .day-num{font-size:11px;font-weight:600;margin-bottom:3px;}
+.cal-event{font-size:9px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-event.pending{background:#D4AF37;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:12px;padding:22px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;}
+.modal h3 button{background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg .full{grid-column:1/-1;}
+.fitem{display:flex;flex-direction:column;gap:3px;}
+.fitem label{font-size:10px;color:var(--gray);font-weight:600;}
+.fitem input,.fitem select,.fitem textarea{padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;}
+.fitem input:focus,.fitem select:focus{border-color:var(--gn);}
+.fitem textarea{height:60px;resize:none;}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid var(--border);}
+.notif{background:#f0fff8;border:1px solid var(--gn);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--gn2);margin-bottom:14px;}
+.login-screen{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--white);border-radius:14px;padding:36px;width:320px;text-align:center;}
+.login-box .logo-lg{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.login-box .sub{font-size:12px;color:var(--gray);margin-bottom:24px;}
+.login-box input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:10px;outline:none;}
+.login-box input:focus{border-color:var(--gn);}
+.login-box button{width:100%;padding:11px;background:var(--gn2);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+.login-box .err{color:#dc2626;font-size:11px;margin-top:6px;min-height:16px;}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:12px;}}
+</style>
+</head>
+<body>
 
-  설치 방법: hospital-portal.html의 기존 <script> 블록 안에
-  이 코드를 추가하고, 로그인 성공 시 loadHospitalData()를 호출하세요.
-  ════════════════════════════════════════════════════════════ -->
+<!-- 로그인 -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="logo-lg">Follow Korea</div>
+    <div class="sub">병원 파트너 포털</div>
+    <input type="text" id="l-id" placeholder="병원 아이디" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+    <input type="password" id="l-pw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">로그인</button>
+    <div class="err" id="l-err"></div>
+    <div style="margin-top:14px;font-size:11px;color:#aaa;">문의: contact@followkorea.co.kr</div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+<div class="header">
+  <div class="logo">FK</div>
+  <div class="header-sub">병원 파트너 포털</div>
+  <div class="header-right">
+    <div class="hosp-badge" onclick="openChangePwModal()" style="cursor:pointer;" title="클릭하여 비밀번호 변경">🏥 <b id="hosp-name-badge">신상성형외과</b> <span style="font-size:10px;color:#aaa;">🔑</span></div>
+    <button class="btn" onclick="doLogout()" style="font-size:11px;color:#aaa;border-color:#444;">로그아웃</button>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-section">예약 관리</div>
+  <div class="sidebar-menu">
+    <a class="active" onclick="showPage('dashboard')"><span class="ic">📊</span>대시보드</a>
+    <a onclick="showPage('bookings')"><span class="ic">📋</span>예약 목록</a>
+    <a onclick="showPage('calendar')"><span class="ic">📅</span>일정 캘린더</a>
+    <a onclick="showPage('new-booking')"><span class="ic">➕</span>예약 직접 등록</a>
+  </div>
+  <div class="sidebar-section">정산</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('settlement')"><span class="ic">💰</span>수수료 정산</a>
+    <a onclick="showPage('history')"><span class="ic">📈</span>실적 내역</a>
+  </div>
+  <div class="sidebar-section">병원 관리</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('intro')"><span class="ic">📝</span>병원 소개 관리</a>
+    <a onclick="showPage('profile')"><span class="ic">🏥</span>병원 기본 정보</a>
+    <a onclick="showPage('notice')"><span class="ic">📢</span>공지사항</a>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- 대시보드 -->
+<div class="page active" id="page-dashboard">
+  <div class="notif" id="notif-new" style="display:none;"></div>
+  <div class="stats-row">
+    <div class="sc green"><div class="sl">이번달 예약</div><div class="sv" id="d-monthly">0</div><div class="ss">건</div></div>
+    <div class="sc"><div class="sl">오늘 예약</div><div class="sv" id="d-today">0</div><div class="ss">건</div></div>
+    <div class="sc gold"><div class="sl">이번달 매출</div><div class="sv" id="d-rev">-</div><div class="ss">원</div></div>
+    <div class="sc blue"><div class="sl">수수료 예정</div><div class="sv" id="d-comm">-</div><div class="ss">원</div></div>
+    <div class="sc red"><div class="sl">미확인 예약</div><div class="sv" id="d-new">0</div><div class="ss">건</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 최근 예약 (최신 10건)</div>
+    <div style="overflow-x:auto;"><table>
+      <thead><tr><th>환자명</th><th>예약일시</th><th>시술</th><th>유입</th><th>상태</th><th>처리</th></tr></thead>
+      <tbody id="dash-recent"></tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 이번주 일정</div>
+    <div id="dash-week"></div>
+  </div>
+</div>
+
+<!-- 예약 목록 -->
+<div class="page" id="page-bookings">
+  <div class="toolbar">
+    <input type="text" id="bk-q" placeholder="이름·시술 검색..." oninput="renderBookings()" style="width:160px;">
+    <select id="bk-status" onchange="renderBookings()">
+      <option value="">전체 상태</option>
+      <option>대기</option><option>확정</option><option>완료</option><option>취소</option><option>노쇼</option>
+    </select>
+    <select id="bk-month" onchange="renderBookings()">
+      <option value="">전체 기간</option>
+      <option value="2026-05">5월</option><option value="2026-06">6월</option>
+      <option value="2026-07">7월</option><option value="2026-08">8월</option>
+    </select>
+    <span id="bk-count" style="margin-left:auto;font-size:11px;color:var(--gray);"></span>
+  </div>
+  <div class="card" style="padding:0;">
+    <div style="overflow-x:auto;"><table>
+      <thead><tr>
+        <th>No</th><th>환자명</th><th>예약일시</th><th>시술</th><th>성별</th><th>국적</th>
+        <th>유입경로</th><th>결제금액</th><th>상태</th><th>처리</th>
+      </tr></thead>
+      <tbody id="bk-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- 캘린더 -->
+<div class="page" id="page-calendar">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <button class="btn" onclick="calChange(-1)">◀ 이전달</button>
+    <h2 style="font-size:14px;font-weight:700;" id="cal-title"></h2>
+    <button class="btn" onclick="calChange(1)">다음달 ▶</button>
+  </div>
+  <div class="cal-grid" style="margin-bottom:6px;">
+    <div class="cal-day-hdr" style="color:#dc2626;">일</div>
+    <div class="cal-day-hdr">월</div><div class="cal-day-hdr">화</div>
+    <div class="cal-day-hdr">수</div><div class="cal-day-hdr">목</div>
+    <div class="cal-day-hdr">금</div><div class="cal-day-hdr" style="color:#2563eb;">토</div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div id="cal-detail" style="display:none;margin-top:12px;"></div>
+</div>
+
+<!-- 직접 예약 등록 -->
+<div class="page" id="page-new-booking">
+  <div class="card" style="max-width:520px;">
+    <div class="card-title">➕ 예약 직접 등록</div>
+    <div class="fg">
+      <div class="fitem"><label>환자명 (영문)</label><input type="text" id="nb-name" placeholder="ZHANG JING"></div>
+      <div class="fitem"><label>예약 일시</label><input type="datetime-local" id="nb-dt"></div>
+      <div class="fitem"><label>시술</label><input type="text" id="nb-treat" placeholder="超声刀、热玛吉"></div>
+      <div class="fitem"><label>성별</label><select id="nb-gender"><option value="F">여성(F)</option><option value="M">남성(M)</option></select></div>
+      <div class="fitem"><label>국적</label><input type="text" id="nb-nation" value="중국"></div>
+      <div class="fitem"><label>연락처</label><input type="text" id="nb-contact" placeholder="WeChat ID"></div>
+      <div class="fitem"><label>결제금액 (만원)</label><input type="number" id="nb-amt" placeholder="0" step="0.01"></div>
+      <div class="fitem"><label>유입경로</label>
+        <select id="nb-inflow">
+          <option value="왕홍">왕홍</option><option value="가이드">가이드</option>
+          <option value="에이전시">에이전시</option><option value="플랫폼">플랫폼</option><option value="직접">직접</option>
+        </select>
+      </div>
+      <div class="fitem full"><label>메모</label><textarea id="nb-note" placeholder="특이사항 등"></textarea></div>
+    </div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn primary" onclick="saveNewBooking()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수수료 정산 -->
+<div class="page" id="page-settlement">
+  <div class="stats-row">
+    <div class="sc gold"><div class="sl">이번달 총 매출</div><div class="sv" id="st-rev">-</div></div>
+    <div class="sc green"><div class="sl">FK 수수료</div><div class="sv" id="st-comm">-</div></div>
+    <div class="sc blue"><div class="sl">병원 수령액</div><div class="sv" id="st-net">-</div></div>
+    <div class="sc red"><div class="sl">미정산 잔액</div><div class="sv" id="st-unpaid">-</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 월별 정산 현황</div>
+    <table><thead><tr><th>월</th><th>예약건수</th><th>총 매출</th><th>수수료율</th><th>FK 수수료</th><th>병원 수령액</th><th>정산상태</th></tr></thead>
+    <tbody id="st-tbody"></tbody></table>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 건별 정산 내역</div>
+    <div style="overflow-x:auto;"><table><thead><tr>
+      <th>환자명</th><th>시술일</th><th>시술</th><th>결제금액</th><th>수수료율</th><th>FK수수료</th><th>병원수령</th><th>입금여부</th>
+    </tr></thead><tbody id="st-detail-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- 실적 내역 -->
+<div class="page" id="page-history">
+  <div class="card">
+    <div class="card-title">📈 월별 실적 추이</div>
+    <div id="history-chart" style="display:flex;gap:6px;align-items:flex-end;height:120px;overflow-x:auto;padding:8px 0;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 환자 분석</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="patient-analysis"></div>
+  </div>
+</div>
+
+
+<!-- 병원 소개 관리 -->
+<div class="page" id="page-intro">
+  <div class="card" style="max-width:700px;">
+    <div class="card-title">🏥 병원 소개 관리 (고객 B2C 플랫폼 표시용)</div>
+    <div class="notif" style="display:block;margin-bottom:14px;font-size:11px;">
+      💡 여기서 작성한 내용이 팔로우코리아 플랫폼 병원 상세 페이지에 표시됩니다.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="fitem"><label>병원 소개 (중국어 — 환자에게 표시)</label>
+        <textarea id="intro-zh" style="height:100px;width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;resize:vertical;" placeholder="中文介绍..."></textarea>
+      </div>
+      <div class="fitem"><label>병원 소개 (한국어)</label>
+        <textarea id="intro-ko" style="height:80px;width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;resize:vertical;" placeholder="병원 소개..."></textarea>
+      </div>
+      <div class="fitem"><label>병원 소개 (영어)</label>
+        <textarea id="intro-en" style="height:80px;width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;resize:vertical;" placeholder="English description..."></textarea>
+      </div>
+      <div class="fitem"><label>대표 이미지 (최대 3장, 각 2MB 이하)</label>
+        <div id="img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--lgray);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gn2);">
+          📷 이미지 추가
+          <input type="file" id="intro-img-input" accept="image/*" multiple style="display:none;" onchange="handleImgUpload(event)">
+        </label>
+        <div style="font-size:10px;color:var(--gray);margin-top:4px;">JPG/PNG, 각 2MB 이하, 최대 3장</div>
+      </div>
+      <div class="fitem"><label>주요 시술 (쉼표로 구분)</label>
+        <input type="text" id="intro-treats" placeholder="눈성형, 코성형, 가슴성형" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+      </div>
+      <div class="fitem"><label>홈페이지 URL</label>
+        <input type="text" id="intro-link" placeholder="https://" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+      </div>
+      <div style="text-align:right;">
+        <button class="btn primary" onclick="saveIntro()">저장 및 플랫폼 반영</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 병원 정보 -->
+<div class="page" id="page-profile">
+  <div class="card" style="max-width:560px;">
+    <div class="card-title">🏥 병원 기본 정보</div>
+    <div class="fg">
+      <div class="fitem full"><label>병원명</label><input type="text" id="pr-name" readonly style="background:#f5f5f5;"></div>
+      <div class="fitem"><label>진료과목</label><input type="text" id="pr-dept"></div>
+      <div class="fitem"><label>계약 상태</label><input type="text" id="pr-contract" readonly style="background:#f5f5f5;"></div>
+      <div class="fitem"><label>담당자</label><input type="text" id="pr-mgr"></div>
+      <div class="fitem"><label>연락처</label><input type="text" id="pr-tel"></div>
+      <div class="fitem"><label>FK 수수료율</label><input type="text" id="pr-comm" readonly style="background:#f5f5f5;"></div>
+      <div class="fitem"><label>부가세</label><input type="text" id="pr-vat" readonly style="background:#f5f5f5;"></div>
+      <div class="fitem"><label>수수료 지급일</label><input type="text" id="pr-paydate"></div>
+      <div class="fitem full"><label>홈페이지</label><input type="text" id="pr-link"></div>
+      <div class="fitem full"><label>메모</label><input type="text" id="pr-note"></div>
+    </div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn primary" onclick="saveProfile()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 공지사항 -->
+<div class="page" id="page-notice">
+  <div class="card">
+    <div class="card-title">📢 팔로우코리아 공지사항</div>
+    <div id="notice-list"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- 예약 상세 모달 -->
+<div class="modal-bg" id="bk-modal" onclick="if(event.target===this)closeBkModal()">
+<div class="modal">
+  <h3>예약 상세 / 처리 <button onclick="closeBkModal()">✕</button></h3>
+  <div class="fg">
+    <div class="fitem"><label>환자명</label><input type="text" id="m-name" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>예약 병원</label><input type="text" id="m-hosp" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>예약 일시</label><input type="text" id="m-dt" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>시술</label><input type="text" id="m-treat" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>성별</label><input type="text" id="m-gender" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>국적</label><input type="text" id="m-nation" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>결제금액</label><input type="text" id="m-amt" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>연락처</label><input type="text" id="m-contact" readonly style="background:#f5f5f5;"></div>
+    <div class="fitem"><label>상태 변경</label>
+      <select id="m-status">
+        <option>대기</option><option>확정</option><option>완료</option><option>취소</option><option>노쇼</option>
+      </select>
+    </div>
+    <div class="fitem"><label>결제금액 입력 (만원)</label><input type="number" id="m-amt-edit" step="0.01" placeholder="0"></div>
+    <div class="fitem full"><label>메모</label><textarea id="m-note"></textarea></div>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeBkModal()">닫기</button>
+    <button class="btn primary" onclick="saveBkStatus()">저장</button>
+  </div>
+</div>
+</div>
+
 <script>
-// ════════════════════════════════════════════════════════════
-//  Supabase 연결 — 펄스와 동일한 global_platform 프로젝트
-// ════════════════════════════════════════════════════════════
-const HP_SUPA_URL = 'https://qfncxamqeiyxkbjxwtoi.supabase.co';
-const HP_SUPA_KEY = 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV';
-const hpHeaders = { 'apikey': HP_SUPA_KEY, 'Authorization': `Bearer ${HP_SUPA_KEY}`, 'Content-Type': 'application/json' };
+const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 
-// ── 로그인 계정 ↔ 병원명 매핑 ──
-// ⚠️ 운영 정책 결정 필요: 병원마다 별도 ID/PW를 발급할지,
-//    지금처럼 통합계정(fkmaster)으로 운영하고 로그인 후 병원을 선택하게 할지
-//    아래는 실제 등록된 27개 병원명 기준 매핑 예시입니다 (계정ID는 임의 지정,
-//    실제 운영 시 원하는 로그인 ID로 자유롭게 바꾸시면 됩니다)
-const HP_ACCOUNT_HOSPITAL_MAP = {
-  'wonjin': '원진성형외과피부과',
-  'gu': '지유의원 (사적인아름다움)',
-  'shinsang': '신상성형외과',
-  'dream': '드림성형외과',
-  'cellinique': '셀리닉의원',
-  'chaum': '차움',
-  'onecell': '원셀의원',
-  'glovi': '글로비성형외과',
-  'lamiche': '라미체의원',
-  'view': '뷰성형외과',
-  'barunhifu': '바른길산부인과',
-  'gangnamdaum': '강남다움의원',
-  'thebeauty': '더뷰티성형외과',
-  'sinsoa': '신소애여성의원',
-  'heerskin': '히어피부과',
-  'heerwomens': '히어산부인과',
-  'cellora': '셀로라의원 (with 지유)',
-  'lifton': '리프톤의원',
-  'cheongdam': '청담서클의원',
-  'ruby': '루비성형외과(신사점)',
-  'benjamin': '벤자민의원',
-  'gowoonmom': '고운몸의원',
-  'trtrinity': '티알 트리니티라파엘로 청담의원',
-  'gv': 'GV 성형외과',
-  'faceline': '페이스라인성형외과의원',
-  'gangnamseoul': '강남서울안과의원',
-  'jd': 'JD피부성형(장덕)',
-  'fkmaster': null, // 통합 관리자 계정 — 전체 병원 데이터 조회 가능 (운영팀용)
-};
+// 마스터 계정
+const MASTER_ID='fkmaster';
+const MASTER_PW=(function(){return atob('Rm9sbG93S29yZWEyMDI2IUA=');})();
 
-let HP_CURRENT_HOSPITAL = null; // 로그인한 병원명
-let HP_BOOKINGS = [];
-let HP_HOSPITAL_INFO = null;
+// 병원 계정 목록 (아이디:비번:병원명:수수료율)
+const HOSP_ACCOUNTS=[
+  {id:'gv',pw:'fkGV2026!',name:'GV성형외과',rate:20},
+  {id:'jd',pw:'fkJD2026!',name:'JD피부성형센터(장덕한방)',rate:30},
+  {id:'gangnamdawoom',pw:'fkDawoom2026!',name:'강남다움의원',rate:30},
+  {id:'seoulaneye',pw:'fkEye2026!',name:'강남서울안과',rate:20},
+  {id:'smart',pw:'fkSmart2026!',name:'강남스마트',rate:20},
+  {id:'gounmom',pw:'fkGoun2026!',name:'고운몸의원',rate:20},
+  {id:'glovi',pw:'fkGlovi2026!',name:'글로비성형외과',rate:20},
+  {id:'thebeauty',pw:'fkBeauty2026!',name:'더뷰티성형외과',rate:20},
+  {id:'dream',pw:'fkDream2026!',name:'드림성형외과',rate:20},
+  {id:'lamiche',pw:'fkLamiche2026!',name:'라미체의원',rate:20},
+  {id:'ruby',pw:'fkRuby2026!',name:'루비성형외과(신사점)',rate:30},
+  {id:'lifton',pw:'fkLifton2026!',name:'리프톤의원',rate:20},
+  {id:'barungil',pw:'fkBaru2026!',name:'바른길산부인과',rate:20},
+  {id:'benjamin',pw:'fkBen2026!',name:'벤자민의원',rate:12},
+  {id:'view',pw:'fkView2026!',name:'뷰성형외과',rate:30},
+  {id:'cellora',pw:'fkCellora2026!',name:'셀로라의원',rate:20},
+  {id:'cellinique',pw:'fkCellin2026!',name:'셀리닉의원',rate:20},
+  {id:'shinsang',pw:'fkShin2026!',name:'신상성형외과',rate:30},
+  {id:'sinsoa',pw:'fkSoa2026!',name:'신소애여성의원',rate:20},
+  {id:'oakwood',pw:'fkOak2026!',name:'오크우드봄의원',rate:20},
+  {id:'onecell',pw:'fkOnecell2026!',name:'원셀의원',rate:15},
+  {id:'wonjin',pw:'fkWon2026!',name:'원진성형외과피부과',rate:20},
+  {id:'escheongdam',pw:'fkES2026!',name:'이에스청담성형외과',rate:20},
+  {id:'gu',pw:'fkGu2026!',name:'지유의원(사적인아름다움)',rate:10},
+  {id:'chaum',pw:'fkChaum2026!',name:'차움',rate:20},
+  {id:'circle',pw:'fkCircle2026!',name:'청담서클의원',rate:20},
+  {id:'trinity',pw:'fkTrinity2026!',name:'트리니티라파엘로청담의원',rate:20},
+  {id:'faceline',pw:'fkFace2026!',name:'페이스라인성형외과',rate:20},
+  {id:'hereob',pw:'fkHereOb2026!',name:'히어산부인과',rate:20},
+  {id:'hereskin',pw:'fkHereSkin2026!',name:'히어피부과',rate:20},
+];
 
-// ════════════════════════════════════════════════════════════
-//  로그인 시 병원 식별 — 기존 로그인 함수에서 호출
-//  예: doLogin() 성공 시 → setHospitalContext(loginId) 추가
-// ════════════════════════════════════════════════════════════
-function hpSetHospitalContext(loginId){
-  HP_CURRENT_HOSPITAL = HP_ACCOUNT_HOSPITAL_MAP[loginId] || null;
-  // 헤더에 병원명 표시 (기존 "🏥 신상성형외과 🔑" 영역)
-  const headerEl = document.querySelector('[data-hp-hospital-name]');
-  if(headerEl) headerEl.textContent = HP_CURRENT_HOSPITAL || '전체 병원 (관리자)';
-  hpLoadBookings();
-  hpLoadHospitalInfo();
+let currentHosp=null, BK=[], calY=2026, calM=5, editBkId=null;
+
+// ── Supabase ──
+async function dbLoad(){
+  const r=await fetch(`${SUPA_URL}/rest/v1/bookings?select=*&order=id.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  const data=await r.json();
+  return Array.isArray(data)?data.map(x=>x.data).filter(Boolean):[];
 }
-
-// ════════════════════════════════════════════════════════════
-//  예약 데이터 로드 — 펄스가 쓰는 동일한 bookings 테이블에서
-//  자기 병원명으로 필터링
-// ════════════════════════════════════════════════════════════
-async function hpLoadBookings(){
-  try{
-    const res = await fetch(`${HP_SUPA_URL}/rest/v1/bookings?select=*&order=id.asc`, { headers: hpHeaders });
-    const raw = await res.json();
-    let all = Array.isArray(raw) ? raw.map(x => x.data).filter(Boolean) : [];
-
-    // 통합관리자(fkmaster)가 아니면 자기 병원 것만 필터링
-    if(HP_CURRENT_HOSPITAL){
-      HP_BOOKINGS = all.filter(b => b.hospital === HP_CURRENT_HOSPITAL);
-    } else {
-      HP_BOOKINGS = all; // 관리자는 전체 조회
-    }
-    hpRenderDashboard();
-    hpRenderBookingList();
-    hpRenderSettlement();
-  }catch(e){
-    console.error('[병원포털] 예약 데이터 로드 실패', e);
-  }
-}
-
-// ════════════════════════════════════════════════════════════
-//  병원 정보 로드 — hospitals 테이블에서 자기 병원 정보 가져오기
-//  (병원 소개 관리, 기본정보, 정산상태 등에 사용)
-//  ⚠️ hospitals 테이블은 bookings와 달리 {data:jsonb} 구조가 아니라
-//     컬럼별 구조입니다: id(uuid), name, category, contact,
-//     contract_rate, contract_status, note, created_at
-// ════════════════════════════════════════════════════════════
-async function hpLoadHospitalInfo(){
-  if(!HP_CURRENT_HOSPITAL) return;
-  try{
-    const res = await fetch(`${HP_SUPA_URL}/rest/v1/hospitals?select=*&order=name.asc`, { headers: hpHeaders });
-    const all = await res.json();
-    HP_HOSPITAL_INFO = Array.isArray(all) ? all.find(h => h.name === HP_CURRENT_HOSPITAL) || null : null;
-    if(HP_HOSPITAL_INFO) hpRenderHospitalInfoForm();
-  }catch(e){
-    console.error('[병원포털] 병원 정보 로드 실패', e);
-  }
-}
-
-// ════════════════════════════════════════════════════════════
-//  대시보드 통계 렌더링 (이번달 예약/매출/수수료/미확인 예약)
-// ════════════════════════════════════════════════════════════
-function hpCalcFee(b){
-  const won = Math.round((b.amount||0) * 10000);
-  const hospComm = Math.round(won * (b.hosp_comm_rate||0) / 100);
-  return { won, hospComm, hospReceive: won - hospComm };
-}
-
-function hpRenderDashboard(){
-  const thisMonth = new Date().toISOString().slice(0,7);
-  const today = new Date().toISOString().slice(0,10);
-  const monthBookings = HP_BOOKINGS.filter(b => b.datetime && b.datetime.startsWith(thisMonth));
-  const todayBookings = HP_BOOKINGS.filter(b => b.datetime && b.datetime.startsWith(today));
-  const pendingBookings = HP_BOOKINGS.filter(b => b.status === '대기');
-
-  const monthRevenue = monthBookings.reduce((s,b) => s + hpCalcFee(b).won, 0);
-  const monthFee = monthBookings.reduce((s,b) => s + hpCalcFee(b).hospComm, 0);
-
-  const setText = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = val; };
-  setText('[data-hp-stat="month-count"]', monthBookings.length);
-  setText('[data-hp-stat="today-count"]', todayBookings.length);
-  setText('[data-hp-stat="month-revenue"]', monthRevenue > 0 ? monthRevenue.toLocaleString()+'원' : '-');
-  setText('[data-hp-stat="month-fee"]', monthFee > 0 ? monthFee.toLocaleString()+'원' : '-');
-  setText('[data-hp-stat="pending-count"]', pendingBookings.length);
-}
-
-// ════════════════════════════════════════════════════════════
-//  예약 목록 렌더링 — 펄스에서 등록/수정한 예약이 그대로 보임
-// ════════════════════════════════════════════════════════════
-function hpRenderBookingList(){
-  const tbody = document.querySelector('[data-hp-booking-tbody]');
-  if(!tbody) return;
-  const sorted = [...HP_BOOKINGS].sort((a,b) => (b.datetime||'').localeCompare(a.datetime||''));
-  tbody.innerHTML = sorted.map(b => `
-    <tr>
-      <td>${b.name}</td>
-      <td>${b.datetime}</td>
-      <td>${b.treatment || '-'}</td>
-      <td>${b.inflow_type || '-'}</td>
-      <td><span class="hp-status-badge hp-status-${b.status}">${b.status}</span></td>
-      <td><button onclick="hpOpenBookingDetail('${b.id}')">처리</button></td>
-    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">예약이 없습니다</td></tr>';
-}
-
-// ════════════════════════════════════════════════════════════
-//  정산 현황 렌더링 — 펄스의 hosp_paydate, hosp_paidamt,
-//  tax_invoice 필드를 그대로 읽어와서 "정산 완료" 여부 표시
-//  ★ 이게 11번 요청의 핵심: 펄스에서 입금완료/세금계산서 처리하면
-//     이 화면에 자동으로 "완료"로 보임 (같은 데이터를 보는 것이므로
-//     별도의 "전송" 로직이 필요 없음)
-// ════════════════════════════════════════════════════════════
-function hpRenderSettlement(){
-  const monthMap = {};
-  HP_BOOKINGS.forEach(b => {
-    const m = (b.datetime||'').slice(0,7);
-    if(!m) return;
-    if(!monthMap[m]) monthMap[m] = { count:0, revenue:0, fee:0, hospReceive:0, paid:0, taxInvoiceCount:0 };
-    const c = hpCalcFee(b);
-    monthMap[m].count++;
-    monthMap[m].revenue += c.won;
-    monthMap[m].fee += c.hospComm;
-    monthMap[m].hospReceive += c.hospReceive;
-    monthMap[m].paid += Math.round((b.hosp_paidamt||0) * 10000);
-    if(b.tax_invoice === 'Y') monthMap[m].taxInvoiceCount++;
+async function dbSaveAll(rows){
+  // 전체 삭제 (id > 0 조건으로 필터)
+  await fetch(`${SUPA_URL}/rest/v1/bookings?id=gt.0`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
   });
+  if(!rows.length)return;
+  // 재삽입
+  await fetch(`${SUPA_URL}/rest/v1/bookings`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(rows.map(r=>({data:r})))
+  });
+}
+async function dbUpdateOne(row){
+  const all=await dbLoad();
+  const idx=all.findIndex(b=>b.id===row.id);
+  if(idx>=0)all[idx]=row;
+  await dbSaveAll(all);
+}
 
-  const tbody = document.querySelector('[data-hp-settlement-tbody]');
-  if(!tbody) return;
-  tbody.innerHTML = Object.entries(monthMap).sort((a,b) => b[0].localeCompare(a[0])).map(([m, v]) => {
-    const isFullyPaid = v.paid >= v.hospReceive && v.hospReceive > 0;
-    const statusBadge = isFullyPaid
-      ? '<span class="hp-badge-done">✅ 정산완료</span>'
-      : v.paid > 0
-        ? '<span class="hp-badge-partial">⏳ 부분정산</span>'
-        : '<span class="hp-badge-pending">대기중</span>';
-    return `<tr>
-      <td>${m}</td>
-      <td>${v.count}건</td>
-      <td>${v.revenue.toLocaleString()}원</td>
-      <td>${v.count > 0 ? Math.round(v.fee/v.revenue*100) : 0}%</td>
-      <td>${v.fee.toLocaleString()}원</td>
-      <td>${v.hospReceive.toLocaleString()}원</td>
-      <td>${statusBadge}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">정산 데이터가 없습니다</td></tr>';
-
-  // 건별 정산 내역 (세금계산서 발행 여부 포함)
-  const detailTbody = document.querySelector('[data-hp-settlement-detail-tbody]');
-  if(detailTbody){
-    detailTbody.innerHTML = HP_BOOKINGS.map(b => {
-      const c = hpCalcFee(b);
-      const paidYn = (b.hosp_paidamt||0) > 0 ? '✅ 입금완료' : '⏳ 대기';
-      const taxYn = b.tax_invoice === 'Y' ? '✅ 발행완료' : '-';
-      return `<tr>
-        <td>${b.name}</td>
-        <td>${(b.datetime||'').slice(0,10)}</td>
-        <td>${b.treatment||'-'}</td>
-        <td>${c.won.toLocaleString()}원</td>
-        <td>${b.hosp_comm_rate||0}%</td>
-        <td>${c.hospComm.toLocaleString()}원</td>
-        <td>${c.hospReceive.toLocaleString()}원</td>
-        <td>${paidYn}</td>
-        <td>${taxYn}</td>
-      </tr>`;
-    }).join('') || '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">내역이 없습니다</td></tr>';
+// ── 로그인 ──
+function doLogin(){
+  const id=document.getElementById('l-id').value.trim();
+  const pw=document.getElementById('l-pw').value;
+  // 마스터 계정 확인
+  if(id===MASTER_ID&&pw===MASTER_PW){
+    currentHosp={id:'master',pw:MASTER_PW,name:'FK 마스터 관리자',rate:0,isMaster:true};
+    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
+    document.getElementById('hosp-name-badge').textContent='FK 마스터';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='flex';
+    dbLoad();return;
+  }
+  const acc=HOSP_ACCOUNTS.find(a=>a.id===id&&a.pw===pw);
+  if(acc){
+    currentHosp=acc;
+    sessionStorage.setItem('hportal',JSON.stringify(acc));
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='';
+    document.getElementById('hosp-name-badge').textContent=acc.name;
+    loadAndRender();
+  }else{
+    document.getElementById('l-err').textContent='아이디 또는 비밀번호가 틀렸습니다.';
   }
 }
+function doLogout(){sessionStorage.removeItem('hportal');location.reload();}
 
-function hpOpenBookingDetail(id){
-  const b = HP_BOOKINGS.find(x => x.id === id);
-  if(!b) return;
-  console.log('예약 상세:', b);
-  // 기존 "예약 상세 / 처리" 모달 채우는 로직 연결
+async function loadAndRender(){
+  BK=await dbLoad();
+  renderDashboard();
+  setTimeout(checkNoticePopup,1500);
 }
 
-// 병원 소개/기본정보 폼에 데이터 채우기 (있는 경우)
-// 실제 hospitals 컬럼: name, category, contact, contract_rate, contract_status, note
-function hpRenderHospitalInfoForm(){
-  if(!HP_HOSPITAL_INFO) return;
-  const setVal = (sel, val) => { const el = document.querySelector(sel); if(el) el.value = val || ''; };
-  setVal('[data-hp-field="name"]', HP_HOSPITAL_INFO.name);
-  setVal('[data-hp-field="dept"]', HP_HOSPITAL_INFO.category);
-  setVal('[data-hp-field="contract"]', HP_HOSPITAL_INFO.contract_status);
-  setVal('[data-hp-field="tel"]', HP_HOSPITAL_INFO.contact);
-  setVal('[data-hp-field="commission"]', HP_HOSPITAL_INFO.contract_rate);
-  setVal('[data-hp-field="note"]', HP_HOSPITAL_INFO.note);
+function hospBK(){return BK.filter(b=>b.hospital===currentHosp.name);}
+function r2w(v){return Math.round((v||0)*10000);}
+function fw(w){return w>0?w.toLocaleString()+'원':'-';}
+
+// ── 대시보드 ──
+function renderDashboard(){
+  const hbk=hospBK();
+  const today=new Date().toISOString().slice(0,10);
+  const month=new Date().toISOString().slice(0,7);
+  const todayBk=hbk.filter(b=>b.datetime&&b.datetime.startsWith(today));
+  const monthBk=hbk.filter(b=>b.datetime&&b.datetime.startsWith(month));
+  const newBk=hbk.filter(b=>b.status==='대기');
+  const monthRev=monthBk.reduce((s,b)=>s+r2w(b.amount),0);
+  const monthComm=Math.round(monthRev*(currentHosp.rate/100));
+  document.getElementById('d-monthly').textContent=monthBk.length;
+  document.getElementById('d-today').textContent=todayBk.length;
+  document.getElementById('d-rev').textContent=monthRev>0?monthRev.toLocaleString():'-';
+  document.getElementById('d-comm').textContent=monthComm>0?monthComm.toLocaleString():'-';
+  document.getElementById('d-new').textContent=newBk.length;
+  if(newBk.length>0){
+    document.getElementById('notif-new').style.display='';
+    document.getElementById('notif-new').textContent=`🔔 새 예약 ${newBk.length}건이 확인을 기다리고 있습니다.`;
+  }
+  const recent=[...hbk].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
+  document.getElementById('dash-recent').innerHTML=recent.map(b=>`
+    <tr>
+      <td style="font-weight:500;">${b.name}</td>
+      <td style="color:#555;">${b.datetime}</td>
+      <td style="font-size:10px;color:#888;">${b.treatment||'-'}</td>
+      <td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:1px 6px;border-radius:8px;">${b.inflow_type||'-'}</span></td>
+      <td><span class="badge ${b.status}">${b.status}</span></td>
+      <td><button class="btn sm" onclick="openBkModal(${b.id})">처리</button></td>
+    </tr>`).join('');
+  // 이번주
+  const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+  const weekDays=Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(d.getDate()+i);return d.toISOString().slice(0,10);});
+  document.getElementById('dash-week').innerHTML=weekDays.map(d=>{
+    const dayBk=hbk.filter(b=>b.datetime&&b.datetime.startsWith(d));
+    if(!dayBk.length)return`<div style="padding:4px 0;font-size:11px;color:#ccc;">${d}: 예약 없음</div>`;
+    return`<div style="padding:4px 0;border-bottom:1px solid #f5f5f5;">
+      <span style="font-size:11px;font-weight:600;color:var(--gn2);">${d}</span>
+      ${dayBk.map(b=>`<span style="margin-left:8px;font-size:11px;">${b.name} (${b.datetime.split(' ')[1]||''}) <span class="badge ${b.status}">${b.status}</span></span>`).join('')}
+    </div>`;
+  }).join('');
 }
 
-// 5분마다 자동 새로고침 (펄스에서 처리한 게 거의 실시간으로 반영되도록)
-setInterval(() => { if(HP_CURRENT_HOSPITAL !== undefined) hpLoadBookings(); }, 5 * 60 * 1000);
+// ── 예약 목록 ──
+function renderBookings(){
+  const q=(document.getElementById('bk-q').value||'').toLowerCase();
+  const st=document.getElementById('bk-status').value;
+  const mo=document.getElementById('bk-month').value;
+  const hbk=hospBK().filter(b=>{
+    const mq=!q||b.name.toLowerCase().includes(q)||(b.treatment||'').toLowerCase().includes(q);
+    const ms=!st||b.status===st;
+    const mm=!mo||b.datetime.startsWith(mo);
+    return mq&&ms&&mm;
+  }).sort((a,b)=>a.datetime.localeCompare(b.datetime));
+  document.getElementById('bk-count').textContent=`총 ${hbk.length}건`;
+  document.getElementById('bk-tbody').innerHTML=hbk.map((b,i)=>{
+    const won=r2w(b.amount);
+    return`<tr>
+      <td style="color:#ccc;">${i+1}</td>
+      <td style="font-weight:500;">${b.name}</td>
+      <td style="color:#555;white-space:nowrap;">${b.datetime}</td>
+      <td style="font-size:10px;color:#888;">${b.treatment||'-'}</td>
+      <td style="text-align:center;">${b.gender||'-'}</td>
+      <td>${b.nationality||'중국'}</td>
+      <td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:1px 6px;border-radius:8px;">${b.inflow_type||'-'}</span></td>
+      <td style="color:#B8960C;white-space:nowrap;">${won>0?won.toLocaleString()+'원':'-'}</td>
+      <td><span class="badge ${b.status}">${b.status}</span></td>
+      <td><button class="btn sm" onclick="openBkModal(${b.id})">처리</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 캘린더 ──
+function renderCalendar(){
+  const ml=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('cal-title').textContent=`${calY}년 ${ml[calM]}`;
+  const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  const first=new Date(calY,calM,1).getDay();
+  const days=new Date(calY,calM+1,0).getDate();
+  const hbk=hospBK();
+  const byDay={};
+  hbk.forEach(b=>{const d=b.datetime.slice(0,10);if(!byDay[d])byDay[d]=[];byDay[d].push(b);});
+  const today=new Date().toISOString().slice(0,10);
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.style.minHeight='70px';grid.appendChild(d);}
+  for(let d=1;d<=days;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const items=byDay[ds]||[];
+    const div=document.createElement('div');
+    div.className='cal-cell'+(ds===today?' today':'');
+    div.innerHTML=`<div class="day-num">${d}</div>`+items.slice(0,3).map(b=>`<div class="cal-event${b.status==='대기'?' pending':''}">${b.name}</div>`).join('')+(items.length>3?`<div style="font-size:9px;color:var(--gray);">+${items.length-3}건</div>`:'');
+    div.onclick=()=>{
+      document.getElementById('cal-detail').style.display='block';
+      document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
+      (items.length?`<table><thead><tr><th>환자명</th><th>시간</th><th>시술</th><th>상태</th><th>처리</th></tr></thead><tbody>`+
+      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.status}">${b.status}</span></td><td style="display:flex;gap:4px;"><button class="btn sm" onclick="openBkModal(${b.id})">처리</button><button class="btn sm" onclick="deleteCalBk(${b.id})" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5;">삭제</button></td></tr>`).join('')+`</tbody></table>`
+      :`<div style="color:#aaa;padding:8px;font-size:12px;">예약 없음</div>`)+`</div>`;
+    };
+    grid.appendChild(div);
+  }
+}
+function calChange(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCalendar();}
+
+// ── 신규 예약 저장 ──
+async function saveNewBooking(){
+  const name=document.getElementById('nb-name').value.trim().toUpperCase();
+  if(!name){alert('환자명을 입력하세요');return;}
+  const bk={
+    id:Date.now(),name,hospital:currentHosp.name,
+    datetime:document.getElementById('nb-dt').value.replace('T',' '),
+    treatment:document.getElementById('nb-treat').value.trim(),
+    gender:document.getElementById('nb-gender').value,
+    nationality:document.getElementById('nb-nation').value||'중국',
+    contact:document.getElementById('nb-contact').value.trim(),
+    amount:parseFloat(document.getElementById('nb-amt').value)||0,
+    inflow_type:document.getElementById('nb-inflow').value,
+    note:document.getElementById('nb-note').value.trim(),
+    status:'확정',hosp_comm_rate:currentHosp.rate,
+    dept:'피부',dob:'',noshow:'N',hosp_paydate:'',hosp_paidamt:0,paid_comm:0,
+    expected:0,vat:'별도',tax_invoice:'N',introducer:currentHosp.name,
+  };
+  BK.push(bk);
+  await dbSaveAll(BK);
+  alert('예약이 등록되었습니다!');
+  ['nb-name','nb-treat','nb-contact','nb-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nb-amt').value='';
+  renderDashboard();
+}
+
+// ── 정산 ──
+function renderSettlement(){
+  const hbk=hospBK();
+  const rate=currentHosp.rate;
+  const map={};
+  hbk.forEach(b=>{
+    const m=b.datetime.slice(0,7);
+    if(!map[m])map[m]={cnt:0,rev:0,comm:0,paid:0};
+    const won=r2w(b.amount);
+    map[m].cnt++;map[m].rev+=won;map[m].comm+=Math.round(won*rate/100);
+    map[m].paid+=r2w(b.hosp_paidamt||0);
+  });
+  const totalRev=Object.values(map).reduce((s,v)=>s+v.rev,0);
+  const totalComm=Object.values(map).reduce((s,v)=>s+v.comm,0);
+  const totalPaid=Object.values(map).reduce((s,v)=>s+v.paid,0);
+  document.getElementById('st-rev').textContent=fw(totalRev);
+  document.getElementById('st-comm').textContent=fw(totalComm);
+  document.getElementById('st-net').textContent=fw(totalRev-totalComm);
+  document.getElementById('st-unpaid').textContent=fw(totalComm-totalPaid);
+  document.getElementById('st-tbody').innerHTML=Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0])).map(([m,v])=>`
+    <tr>
+      <td>${m}</td><td style="text-align:center;">${v.cnt}건</td>
+      <td style="color:#B8960C;">${fw(v.rev)}</td>
+      <td style="text-align:center;">${rate}%</td>
+      <td style="color:#dc2626;">${fw(v.comm)}</td>
+      <td style="color:var(--gn2);">${fw(v.rev-v.comm)}</td>
+      <td><span class="badge ${v.paid>=v.comm?'확정':'대기'}">${v.paid>=v.comm?'정산완료':'미정산'}</span></td>
+    </tr>`).join('');
+  document.getElementById('st-detail-tbody').innerHTML=hbk.filter(b=>r2w(b.amount)>0).sort((a,b)=>a.datetime.localeCompare(b.datetime)).map(b=>{
+    const won=r2w(b.amount);const comm=Math.round(won*rate/100);const net=won-comm;
+    return`<tr>
+      <td style="font-weight:500;">${b.name}</td>
+      <td style="color:#555;">${b.datetime.slice(0,10)}</td>
+      <td style="font-size:10px;">${b.treatment||'-'}</td>
+      <td style="color:#B8960C;">${fw(won)}</td>
+      <td style="text-align:center;">${rate}%</td>
+      <td style="color:#dc2626;">${fw(comm)}</td>
+      <td style="color:var(--gn2);">${fw(net)}</td>
+      <td><span class="badge ${b.hosp_paidamt>0?'확정':'대기'}">${b.hosp_paidamt>0?'완료':'미완료'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 실적 차트 ──
+function renderHistory(){
+  const hbk=hospBK();
+  const map={};
+  hbk.forEach(b=>{const m=b.datetime.slice(0,7);map[m]=(map[m]||0)+1;});
+  const entries=Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0]));
+  const max=Math.max(...entries.map(e=>e[1]),1);
+  document.getElementById('history-chart').innerHTML=entries.map(([m,cnt])=>{
+    const h=Math.round(cnt/max*100);
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:44px;">
+      <div style="font-size:9px;font-weight:600;color:var(--gray);">${cnt}</div>
+      <div style="width:28px;height:${h}px;background:var(--gn2);border-radius:3px 3px 0 0;"></div>
+      <div style="font-size:9px;color:var(--gray);">${m.slice(5)}월</div>
+    </div>`;
+  }).join('');
+  // 환자 분석
+  const natMap={},treatMap={};
+  hbk.forEach(b=>{
+    const n=b.nationality||'중국';natMap[n]=(natMap[n]||0)+1;
+    if(b.treatment)b.treatment.split(/[、,]/).forEach(t=>{const tr=t.trim();if(tr)treatMap[tr]=(treatMap[tr]||0)+1;});
+  });
+  const total=hbk.length||1;
+  document.getElementById('patient-analysis').innerHTML=`
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">🌍 국적별</div>
+      ${Object.entries(natMap).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:11px;">${n}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:80px;height:6px;background:var(--lgray);border-radius:3px;overflow:hidden;">
+              <div style="width:${Math.round(c/total*100)}%;height:100%;background:var(--gn);"></div>
+            </div>
+            <span style="font-size:10px;color:var(--gray);">${c}명</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">💉 주요 시술</div>
+      ${Object.entries(treatMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:11px;">${t}</span>
+          <span style="font-size:10px;background:var(--lgray);padding:1px 7px;border-radius:8px;">${c}건</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── 병원 정보 ──
+function renderProfile(){
+  // 여기서는 로컬 정보 표시 (실제로는 HD에서 가져옴)
+  document.getElementById('pr-name').value=currentHosp.name;
+  document.getElementById('pr-contract').value='계약완료';
+  document.getElementById('pr-comm').value=currentHosp.rate+'%';
+}
+function saveProfile(){alert('저장되었습니다.');}
+
+// ── 공지사항 ──
+async function renderNotice(){
+  const el=document.getElementById('notice-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:30px;">로딩 중...</div>';
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=50',{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(!r.ok){el.innerHTML='<div style="color:#dc2626;padding:20px;">공지 로드 실패('+r.status+')</div>';return;}
+    const all=await r.json();
+    const hn=currentHosp?currentHosp.name:'';
+    const list=all.map(function(x){return x.data||x;}).filter(function(n){
+      return n&&(n.target==='all'||n.target===hn);
+    });
+    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280;">📭 공지사항이 없습니다.</div>';return;}
+    const TL={general:'📌',urgent:'🚨',settlement:'💰',schedule:'📅'};
+    el.innerHTML=list.map(function(n){
+      var u=n.type==='urgent';
+      return '<div style="padding:14px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;margin-bottom:8px;background:'+(u?'#fef2f2':'#fff')+'">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;">'+(TL[n.type]||'📌')
+        +' <b style="font-size:12px;">'+(n.title||'')+'</b>'
+        +(n.target==='all'?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:8px;">전체</span>':'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;">개별</span>')
+        +'</div><span style="font-size:10px;color:#9ca3af;">'+(n.created_at||n.date||'').slice(0,10)+'</span></div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.7;white-space:pre-line;">'+(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:5px;">작성: '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<div style="color:#dc2626;padding:20px;">오류: '+e.message+'</div>';}
+}
+
+function openBkModal(id){
+  editBkId=id;
+  const b=BK.find(x=>x.id===id);if(!b)return;
+  const won=r2w(b.amount);
+  document.getElementById('m-name').value=b.name;
+  document.getElementById('m-hosp').value=b.hospital;
+  document.getElementById('m-dt').value=b.datetime;
+  document.getElementById('m-treat').value=b.treatment||'';
+  document.getElementById('m-gender').value=b.gender||'';
+  document.getElementById('m-nation').value=b.nationality||'중국';
+  document.getElementById('m-amt').value=won>0?won.toLocaleString()+'원':'-';
+  document.getElementById('m-contact').value=b.contact||'';
+  document.getElementById('m-status').value=b.status;
+  document.getElementById('m-amt-edit').value=b.amount||'';
+  document.getElementById('m-note').value=b.note||'';
+  document.getElementById('bk-modal').classList.add('open');
+}
+function closeBkModal(){document.getElementById('bk-modal').classList.remove('open');}
+async function saveBkStatus(){
+  const b=BK.find(x=>x.id===editBkId);if(!b)return;
+  b.status=document.getElementById('m-status').value;
+  b.note=document.getElementById('m-note').value;
+  const newAmt=parseFloat(document.getElementById('m-amt-edit').value);
+  if(!isNaN(newAmt))b.amount=newAmt;
+  closeBkModal();
+  await dbSaveAll(BK);
+  renderDashboard();
+  renderBookings();
+}
+
+// ── 페이지 전환 ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`.sidebar-menu a[onclick="showPage('${id}')"]`)?.classList.add('active');
+  if(id==='bookings')renderBookings();
+  if(id==='calendar')renderCalendar();
+  if(id==='settlement')renderSettlement();
+  if(id==='history')renderHistory();
+  if(id==='profile')renderProfile();
+  if(id==='notice')renderNotice();
+  if(id==='intro')loadIntro();
+}
+
+
+// ── 병원 소개 관리 ──
+let introImgs = []; // base64 이미지 배열
+
+async function loadIntro(){
+  try{
+    // hosp_intro 테이블에서 로드 (saveIntro와 동일한 테이블)
+    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const all=await r.json();
+    const row=Array.isArray(all)?all.find(x=>x.data&&x.data.name===currentHosp.name):null;
+    if(row&&row.data){
+      const h=row.data;
+      document.getElementById('intro-zh').value=h.overview_zh||'';
+      document.getElementById('intro-ko').value=h.overview_ko||'';
+      document.getElementById('intro-en').value=h.overview_en||'';
+      document.getElementById('intro-treats').value=(h.treats||[]).join(', ');
+      document.getElementById('intro-link').value=h.link||'';
+      introImgs=h.images||[];
+      renderImgPreview();
+    }else{
+      // hosp_intro에 없으면 hospitals 테이블에서도 시도
+      const r2=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+      const all2=await r2.json();
+      const hospData=Array.isArray(all2)?all2.map(x=>x.data||x).filter(x=>x&&x.name===currentHosp.name):[];
+      if(hospData.length>0){
+        const h=hospData[0];
+        document.getElementById('intro-zh').value=h.overview_zh||'';
+        document.getElementById('intro-ko').value=h.overview_ko||'';
+        document.getElementById('intro-en').value=h.overview_en||'';
+        document.getElementById('intro-treats').value=(h.treats||[]).join(', ');
+        document.getElementById('intro-link').value=h.link||'';
+        introImgs=h.images||[];
+        renderImgPreview();
+      }
+    }
+  }catch(e){console.error('loadIntro 오류:',e);}
+}
+
+async function saveIntro(){
+  const introData={
+    name:currentHosp.name,
+    overview_zh:document.getElementById('intro-zh').value.trim(),
+    overview_ko:document.getElementById('intro-ko').value.trim(),
+    overview_en:document.getElementById('intro-en').value.trim(),
+    treats:document.getElementById('intro-treats').value.split(',').map(s=>s.trim()).filter(Boolean),
+    link:document.getElementById('intro-link').value.trim(),
+    images:introImgs,
+    updated:new Date().toISOString().slice(0,10),
+  };
+  try{
+    // 기존 데이터 찾아서 업데이트
+    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const all=await r.json();
+    const existing=Array.isArray(all)?all.find(x=>x.data&&x.data.name===currentHosp.name):null;
+    if(existing){
+      await fetch(`${SUPA_URL}/rest/v1/hosp_intro?id=eq.${existing.id}`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({data:introData})});
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/hosp_intro`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({data:introData})});
+    }
+    alert('저장되었습니다! 플랫폼에 즉시 반영됩니다.');
+  }catch(e){alert('저장 실패: '+e.message);}
+}
+
+// ── 자동 로그인 확인 ──
+const saved=sessionStorage.getItem('hportal');
+if(saved){
+  try{
+    currentHosp=JSON.parse(saved);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='';
+    document.getElementById('hosp-name-badge').textContent=currentHosp.name;
+    loadAndRender();
+  }catch(e){sessionStorage.removeItem('hportal');}
+}
 </script>
 
-<style>
-.hp-status-badge{padding:2px 8px;border-radius:10px;font-size:11px;}
-.hp-status-대기{background:#fef9c3;color:#854d0e;}
-.hp-status-확정{background:#dcfce7;color:#15803d;}
-.hp-status-완료{background:#dbeafe;color:#1e40af;}
-.hp-status-취소,.hp-status-노쇼{background:#fee2e2;color:#991b1b;}
-.hp-badge-done{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
-.hp-badge-partial{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
-.hp-badge-pending{background:#f3f4f6;color:#6b7280;padding:3px 10px;border-radius:10px;font-size:11px;}
-</style>
+<div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticePopup()">
+  <div style="background:#fff;border-radius:16px;width:460px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+    <div style="background:linear-gradient(135deg,#1A6B4A,#4CAF8C);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:14px;font-weight:800;color:#fff;">📢 팔로우코리아 공지사항</div><div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div></div>
+      <button onclick="closeNoticePopup()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:26px;height:26px;color:#fff;cursor:pointer;">✕</button>
+    </div>
+    <div id="popup-notice-list" style="padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="padding:10px 16px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#888;cursor:pointer;"><input type="checkbox" id="no-popup-today" onchange="setNoPopupToday()"> 오늘 하루 보지 않기</label>
+      <button onclick="closeNoticePopup()" style="padding:6px 16px;background:linear-gradient(135deg,#4CAF8C,#1A6B4A);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">확인</button>
+    </div>
+  </div>
+</div>
+<script>
+async function checkNoticePopup(){
+  if(localStorage.getItem('fk_no_popup_date')===new Date().toISOString().slice(0,10))return;
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=20',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(!r.ok)return;
+    var all=await r.json();
+    var hn=currentHosp?currentHosp.name:'';
+    var list=all.map(function(x){return x.data||x;}).filter(function(n){return n&&(n.target==='all'||n.target===hn);});
+    if(!list.length)return;
+    var TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    var urg=list.filter(function(n){return n.type==='urgent';}).length;
+    document.getElementById('popup-badge').textContent=urg?('🚨 긴급 '+urg+'건 포함'):('공지 '+list.length+'건');
+    document.getElementById('popup-notice-list').innerHTML=list.map(function(n){
+      var u=n.type==='urgent';
+      return '<div style="padding:12px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;background:'+(u?'#fef2f2':'#fafafa')+'">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
+        +'<span style="font-size:11px;background:'+(u?'#dc2626':'#f3f4f6')+';color:'+(u?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'📌 일반')+'</span>'
+        +'<b style="font-size:13px;">'+(n.title||'')+'</b></div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:4px;">'+(n.created_at||n.date||'').slice(0,10)+' · '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'</div>';
+    }).join('');
+    document.getElementById('notice-popup-bg').style.display='flex';
+  }catch(e){console.error(e);}
+}
+function closeNoticePopup(){document.getElementById('notice-popup-bg').style.display='none';}
+function setNoPopupToday(){
+  if(document.getElementById('no-popup-today').checked)localStorage.setItem('fk_no_popup_date',new Date().toISOString().slice(0,10));
+  else localStorage.removeItem('fk_no_popup_date');
+}
+
+// ── 비밀번호 변경 ──
+function openChangePwModal(){
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  document.getElementById('change-pw-modal').style.display='flex';
+}
+function closeChangePwModal(){document.getElementById('change-pw-modal').style.display='none';}
+async function doChangePw(){
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  if(cur!==currentHosp.pw){alert('현재 비밀번호가 틀립니다.');return;}
+  if(!nw){alert('새 비밀번호를 입력하세요.');return;}
+  if(nw!==cf){alert('새 비밀번호가 일치하지 않습니다.');return;}
+  try{
+    // Supabase hospitals 테이블에 저장
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const all=await r.json();
+    const row=all.find(x=>(x.data||x).name===currentHosp.name);
+    if(row){
+      const newData=Object.assign({},row.data||row,{portal_pw:nw});
+      await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
+        method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:newData})
+      });
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify({data:{name:currentHosp.name,portal_pw:nw}})
+      });
+    }
+    currentHosp.pw=nw;
+    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
+    alert('비밀번호가 변경되었습니다.');
+    closeChangePwModal();
+  }catch(e){alert('오류: '+e.message);}
+}
+
+// ── 이미지 업로드 (리사이즈 포함) ──
+function handleImgUpload(e){
+  var files=Array.from(e.target.files);
+  if(introImgs.length+files.length>3){alert('이미지는 최대 3장까지 가능합니다.');return;}
+  files.forEach(function(file){
+    if(file.size>10*1024*1024){alert(file.name+': 10MB를 초과합니다.');return;}
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var img=new Image();
+      img.onload=function(){
+        var MAX=800;
+        var w=img.width,h=img.height;
+        if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+        if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+        var canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        var resized=canvas.toDataURL('image/jpeg',0.75);
+        introImgs.push(resized);
+        renderImgPreview();
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function removeIntroImg(idx){introImgs.splice(idx,1);renderImgPreview();}
+
+function deleteCalEvent(idx){
+  if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  BK.splice(idx,1);
+  saveWmData&&saveWmData();
+  renderCal&&renderCal();
+  alert('삭제되었습니다.');
+}
+
+async function deleteCalBk(id){
+  if(!confirm('이 예약을 삭제하시겠습니까?'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/bookings?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    await dbLoad();
+    document.getElementById('cal-detail').style.display='none';
+    renderCalendar();
+    alert('삭제되었습니다.');
+  }catch(e){alert('삭제 실패: '+e.message);}
+}
+</script>
+
+<!-- 비밀번호 변경 모달 -->
+<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:900;align-items:center;justify-content:center;" onclick="if(event.target===this)closeChangePwModal()">
+<div style="background:#fff;border-radius:16px;width:340px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🔑 비밀번호 변경</h3>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">현재 비밀번호</label>
+    <input type="password" id="pw-current" placeholder="현재 비밀번호" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호</label>
+    <input type="password" id="pw-new" placeholder="새 비밀번호" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="margin-bottom:14px;">
+    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">새 비밀번호 확인</label>
+    <input type="password" id="pw-confirm" placeholder="새 비밀번호 확인" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="doChangePw()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">변경</button>
+    <button onclick="closeChangePwModal()" style="padding:10px 16px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;">취소</button>
+  </div>
+</div>
+</div>
+</body>
+</html>
