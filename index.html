@@ -2171,5 +2171,929 @@ async function loadSharedWanghongs(){
   }catch(e){}
 }
 </script>
+  <!-- ════════════════════════════════════════════════════════════
+  팔로우코리아 — 견적서 자동 생성 위젯 v2
+  설치 방법: 이 코드 전체를 followkorea.kr 의 </body> 바로 앞에 붙여넣기
+  버튼 트리거: <button onclick="openQuoteWidget()">간편 견적 받기</button>
+
+  v2 변경사항:
+  - 6대 분야 + 기타서비스로 카테고리 확장, 다중선택 가능
+  - 실제 병원 수가표 기반 평균가격 반영 (USD 환산)
+  - 정확한 가격은 위챗 상담원 안내로 명확히 문구 추가
+  ════════════════════════════════════════════════════════════ -->
+<style>
+  #fk-quote-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,23,0.6);z-index:9990;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);}
+  #fk-quote-overlay.open{display:flex;}
+  #fk-quote-modal{background:#fff;border-radius:18px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  #fk-quote-modal::-webkit-scrollbar{width:6px;}
+  #fk-quote-modal::-webkit-scrollbar-thumb{background:#d4af6a;border-radius:3px;}
+  .fkq-header{background:linear-gradient(135deg,#16202e,#0f1620);color:#fff;padding:22px 24px 20px;border-radius:18px 18px 0 0;position:sticky;top:0;z-index:5;}
+  .fkq-header h2{font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:0.3px;}
+  .fkq-header p{font-size:12px;color:#b8c4d4;margin:0;}
+  .fkq-close{position:absolute;top:16px;right:18px;background:rgba(255,255,255,0.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;}
+  .fkq-close:hover{background:rgba(255,255,255,0.2);}
+  .fkq-steps{display:flex;gap:6px;padding:14px 24px 0;}
+  .fkq-step-dot{flex:1;height:3px;border-radius:2px;background:#e5e7eb;transition:.3s;}
+  .fkq-step-dot.active{background:#d4af6a;}
+  .fkq-body{padding:20px 24px 8px;}
+  .fkq-section-title{font-size:13px;font-weight:700;color:#16202e;margin:0 0 12px;display:flex;align-items:center;gap:6px;}
+  .fkq-section-title .num{background:#d4af6a;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .fkq-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .fkq-cat-btn{border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 6px;background:#fff;cursor:pointer;text-align:center;transition:.15s;font-size:10.5px;color:#475569;position:relative;}
+  .fkq-cat-btn .ic{font-size:19px;display:block;margin-bottom:4px;}
+  .fkq-cat-btn:hover{border-color:#d4af6a;}
+  .fkq-cat-btn.active{border-color:#d4af6a;background:#fdf8ef;color:#16202e;font-weight:700;}
+  .fkq-cat-btn .cnt-badge{position:absolute;top:-6px;right:-6px;background:#d4af6a;color:#fff;font-size:9px;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .fkq-proc-list{display:none;border-top:1px dashed #e5e7eb;padding-top:12px;margin-bottom:14px;max-height:280px;overflow-y:auto;}
+  .fkq-proc-list.show{display:block;}
+  .fkq-proc-item{display:flex;align-items:center;padding:9px 12px;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s;}
+  .fkq-proc-item:hover{border-color:#d4af6a;background:#fdf8ef;}
+  .fkq-proc-item.checked{border-color:#d4af6a;background:#fdf8ef;}
+  .fkq-proc-item .pname{font-size:12.5px;color:#16202e;font-weight:600;flex:1;}
+  .fkq-proc-item .pname .sub{font-size:10px;color:#94a3b8;font-weight:400;display:block;margin-top:1px;}
+  .fkq-proc-item .prange{font-size:11px;color:#d4af6a;font-weight:700;white-space:nowrap;margin-left:8px;}
+  .fkq-proc-item .chk{width:18px;height:18px;border:1.5px solid #cbd5e1;border-radius:5px;flex-shrink:0;margin-right:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+  .fkq-proc-item.checked .chk{background:#d4af6a;border-color:#d4af6a;}
+  .fkq-selected-bar{background:#fdf8ef;border:1px solid #f0dfb8;border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:11.5px;color:#92621a;display:none;}
+  .fkq-selected-bar.show{display:block;}
+  .fkq-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .fkq-field label{font-size:11px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;}
+  .fkq-field input,.fkq-field select{width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;color:#16202e;background:#fff;}
+  .fkq-field input:focus,.fkq-field select:focus{outline:none;border-color:#d4af6a;}
+  .fkq-summary-box{background:#fdf8ef;border:1px solid #f0dfb8;border-radius:12px;padding:16px;margin:16px 0;}
+  .fkq-disclaimer{font-size:10.5px;color:#94a3b8;line-height:1.7;background:#f8fafc;border-radius:8px;padding:11px 13px;margin-bottom:16px;}
+  .fkq-disclaimer b{color:#64748b;}
+  .fkq-footer{padding:14px 24px 22px;display:flex;gap:10px;position:sticky;bottom:0;background:#fff;border-top:1px solid #f1f5f9;border-radius:0 0 18px 18px;}
+  .fkq-btn{flex:1;padding:13px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+  .fkq-btn-outline{background:#fff;border:1.5px solid #e5e7eb;color:#64748b;}
+  .fkq-btn-outline:hover{background:#f8fafc;}
+  .fkq-btn-primary{background:linear-gradient(135deg,#16202e,#0f1620);color:#fff;}
+  .fkq-btn-primary:hover{opacity:0.92;}
+  .fkq-btn-gold{background:linear-gradient(135deg,#d4af6a,#c79b4a);color:#fff;}
+  .fkq-btn-gold:hover{opacity:0.92;}
+  .fkq-btn-wechat{background:#07C160;color:#fff;}
+  .fkq-btn-wechat:hover{opacity:0.92;}
+  .fkq-result-doc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px;margin-bottom:16px;}
+  .fkq-result-doc .doc-h{text-align:center;margin-bottom:16px;}
+  .fkq-result-doc .doc-h .logo{font-size:13px;font-weight:800;color:#16202e;letter-spacing:1px;}
+  .fkq-result-doc .doc-h .title{font-size:17px;font-weight:700;color:#16202e;margin-top:6px;}
+  .fkq-result-doc .doc-h .no{font-size:10px;color:#94a3b8;margin-top:3px;}
+  .fkq-result-doc table{width:100%;border-collapse:collapse;font-size:11.5px;margin:14px 0;}
+  .fkq-result-doc th{background:#16202e;color:#fff;padding:7px 8px;text-align:left;font-weight:600;}
+  .fkq-result-doc td{padding:7px 8px;border-bottom:1px solid #f1f5f9;color:#334155;}
+  .fkq-result-doc .grand{background:#fdf8ef;font-weight:700;color:#16202e;}
+  .fkq-badge{display:inline-block;background:#fdf8ef;color:#b8860b;border:1px solid #f0dfb8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:8px;}
+  .fkq-empty{text-align:center;padding:30px 0;color:#94a3b8;font-size:12px;}
+  .fkq-stay-row{display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:10px;padding:10px 12px;margin-bottom:14px;}
+  .fkq-stay-row .icon{font-size:18px;}
+  .fkq-stay-row .txt{font-size:12px;color:#475569;}
+  .fkq-stay-row .txt b{color:#16202e;}
+  .fkq-clear-btn{font-size:11px;color:#94a3b8;cursor:pointer;text-decoration:underline;margin-left:auto;}
+  @media (max-width:480px){
+    .fkq-cat-grid{grid-template-columns:repeat(3,1fr);}
+    #fk-quote-modal{border-radius:14px;}
+  }
+</style>
+
+<div id="fk-quote-overlay" onclick="if(event.target===this) closeQuoteWidget()">
+  <div id="fk-quote-modal">
+    <div class="fkq-header">
+      <button class="fkq-close" onclick="closeQuoteWidget()">✕</button>
+      <h2 id="fkq-title">간편 견적 받기</h2>
+      <p id="fkq-subtitle">원하는 시술과 방한 일정을 선택하면 예상 견적을 바로 보여드려요</p>
+      <div class="fkq-steps">
+        <div class="fkq-step-dot active" data-step="1"></div>
+        <div class="fkq-step-dot" data-step="2"></div>
+        <div class="fkq-step-dot" data-step="3"></div>
+      </div>
+    </div>
+
+    <div class="fkq-body">
+
+      <!-- ───────── STEP 1: 부위/시술 다중 선택 ───────── -->
+      <div id="fkq-step-1" class="fkq-step">
+        <div class="fkq-section-title">
+          <span class="num">1</span> 관심 분야를 선택하세요 (분야·시술 모두 중복 가능)
+        </div>
+        <div class="fkq-cat-grid" id="fkq-cat-grid"></div>
+        <div class="fkq-selected-bar" id="fkq-selected-bar">
+          <span id="fkq-selected-text"></span>
+          <span class="fkq-clear-btn" onclick="fkqClearAll()">전체 초기화</span>
+        </div>
+        <div class="fkq-proc-list" id="fkq-proc-list"></div>
+        <div class="fkq-empty" id="fkq-cat-empty">위 분야를 먼저 선택해주세요 (여러 개 선택 가능)</div>
+      </div>
+
+      <!-- ───────── STEP 2: 방한 일정 + 정보 ───────── -->
+      <div id="fkq-step-2" class="fkq-step" style="display:none;">
+        <div class="fkq-section-title"><span class="num">2</span> 방한 일정</div>
+        <div class="fkq-form-grid">
+          <div class="fkq-field"><label>입국 예정일</label><input type="date" id="fkq-arrival"></div>
+          <div class="fkq-field"><label>출국 예정일</label><input type="date" id="fkq-departure"></div>
+        </div>
+        <div class="fkq-stay-row" id="fkq-stay-display" style="display:none;">
+          <span class="icon">📅</span>
+          <span class="txt">체류 기간: <b id="fkq-stay-days">-</b> · 추천 일정: <b id="fkq-stay-reco">-</b></span>
+        </div>
+
+        <div class="fkq-section-title" style="margin-top:18px;"><span class="num">3</span> 연락 정보</div>
+        <div class="fkq-form-grid">
+          <div class="fkq-field"><label>성명 (여권 영문명) *</label><input type="text" id="fkq-name" placeholder="ZHANG JING"></div>
+          <div class="fkq-field"><label>국적</label>
+            <select id="fkq-nation"><option>中国</option><option>越南</option><option>泰国</option><option>马来西亚</option><option>其他</option></select>
+          </div>
+        </div>
+        <div class="fkq-form-grid">
+          <div class="fkq-field"><label>위챗 / 연락처 *</label><input type="text" id="fkq-contact" placeholder="WeChat ID 또는 전화번호"></div>
+          <div class="fkq-field"><label>희망 병원 (선택)</label><input type="text" id="fkq-hospital" placeholder="미정이면 비워두세요"></div>
+        </div>
+      </div>
+
+      <!-- ───────── STEP 3: 견적서 결과 ───────── -->
+      <div id="fkq-step-3" class="fkq-step" style="display:none;">
+        <div class="fkq-result-doc" id="fkq-result-doc"></div>
+        <div class="fkq-disclaimer">
+          ⓘ 본 견적은 협력 병원들의 <b>평균 시세 범위(USD 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="fkq-footer">
+      <button class="fkq-btn fkq-btn-outline" id="fkq-back-btn" onclick="fkqPrevStep()" style="display:none;">이전</button>
+      <button class="fkq-btn fkq-btn-primary" id="fkq-next-btn" onclick="fkqNextStep()">다음</button>
+      <button class="fkq-btn fkq-btn-wechat" id="fkq-submit-btn" onclick="fkqSubmit()" style="display:none;">💬 위챗으로 상담받기</button>
+      <button class="fkq-btn fkq-btn-outline" id="fkq-print-btn" onclick="fkqPrintQuote()" style="display:none;">🖨️ 저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  견적서 데이터 — 6대 분야 + 기타서비스
+//  ※ 39개 협력병원 가격표 기반 평균 시세 범위 (USD 환산, 1300원=1$ 적용시 참고)
+//  ※ 정확한 가격은 상담원이 위챗으로 안내. 가격 수정은 fkqProcedureData만 편집.
+// ════════════════════════════════════════════════════════════
+const FKQ_EXR = 1500; // KRW per USD
+
+function won(min, max){ return { min: Math.round(min/FKQ_EXR), max: Math.round(max/FKQ_EXR) }; }
+
+const fkqProcedureData = {
+  "피부": {
+    icon: "✨", label: "피부과",
+    items: [
+      { name: "超声刀 (울쎄라)", sub: "300~600샷", ...won(800000,3300000) },
+      { name: "热玛吉FLX (써마지)", sub: "300~600샷", ...won(1580000,3600000) },
+      { name: "肉毒素 (보톡스)", sub: "이마/사각턱", ...won(80000,490000) },
+      { name: "玻尿酸 (필러)", sub: "1cc 기준", ...won(170000,900000) },
+      { name: "丽珠兰 (리쥬란)", sub: "2cc", ...won(198000,400000) },
+      { name: "皮秒嫩肤 (피코토닝)", sub: "1회", ...won(130000,190000) },
+      { name: "INMODE (인모드)", sub: "FX+FORMA", ...won(1300000,2500000) },
+      { name: "ONDA (온다)", sub: "60~100KJ", ...won(660000,1500000) },
+    ]
+  },
+  "성형외과": {
+    icon: "💎", label: "성형외과",
+    items: [
+      { name: "双眼皮 (눈성형)", sub: "매몰/절개", ...won(1500000,4000000) },
+      { name: "隆鼻 (코성형)", sub: "콧대/코끝", ...won(1800000,6000000) },
+      { name: "下颌角缩小 (사각턱)", sub: "윤곽수술", ...won(4000000,7000000) },
+      { name: "顴骨缩小 (광대축소)", sub: "윤곽수술", ...won(4000000,7000000) },
+      { name: "V-line面部轮廓 (V라인)", sub: "복합윤곽", ...won(13000000,21000000) },
+      { name: "隆胸 (가슴성형)", sub: "보형물", ...won(9000000,18000000) },
+      { name: "腹部吸脂 (지방흡입-복부)", sub: "", ...won(4500000,9500000) },
+      { name: "大腿吸脂 (지방흡입-허벅지)", sub: "", ...won(6000000,16000000) },
+    ]
+  },
+  "줄기세포": {
+    icon: "🧬", label: "줄기세포",
+    items: [
+      { name: "血液干细胞 (혈액줄기세포)", sub: "1회", ...won(990000,2390000) },
+      { name: "血液干细胞 프리미엄(3회)", sub: "패키지", ...won(5000000,17325000) },
+      { name: "脂肪干细胞SVF (지방줄기세포)", sub: "1회", ...won(14000000,19500000) },
+      { name: "脂肪+全身套餐 (지방+전신패키지)", sub: "", ...won(44550000,108570000) },
+      { name: "骨髓干细胞 (골수줄기세포)", sub: "패키지", ...won(53872500,211420000) },
+      { name: "Rev'ita Cell Premium (VVIP)", sub: "최고급형", ...won(26500000,88000000) },
+      { name: "局部注射 (국소주사)", sub: "1회", ...won(6000000,6000000) },
+    ]
+  },
+  "여성의원": {
+    icon: "🌸", label: "여성의원",
+    items: [
+      { name: "阴唇整形 (소음순성형)", sub: "", ...won(1500000,3000000) },
+      { name: "阴道缩紧 (질축소)", sub: "", ...won(3000000,6000000) },
+      { name: "压力性尿失禁手术 (요실금)", sub: "", ...won(3000000,5000000) },
+      { name: "私密整形美白 (Y존 미백)", sub: "", ...won(400000,900000) },
+      { name: "阴道激光 (질레이저)", sub: "", ...won(700000,2000000) },
+    ]
+  },
+  "건강검진": {
+    icon: "🩺", label: "건강검진",
+    items: [
+      { name: "综合体检 (종합건강검진)", sub: "기본", ...won(500000,1500000) },
+      { name: "白内障手术 (백내장수술)", sub: "프리미엄렌즈", ...won(12500000,13500000) },
+      { name: "MRI精密检查 (MRI검진)", sub: "", ...won(300000,1000000) },
+      { name: "乳腺癌筛查 (유방암검진)", sub: "패키지", ...won(1000000,3000000) },
+    ]
+  },
+  "한방·웰니스": {
+    icon: "🍃", label: "한방·웰니스",
+    items: [
+      { name: "头皮干细胞脱发护理 (탈모케어)", sub: "줄기세포패키지", ...won(2700000,5000000) },
+      { name: "韩医减肥溶脂针 (한방다이어트)", sub: "지방분해주사", ...won(420000,1920000) },
+      { name: "营养注射 (영양주사)", sub: "마늘/백옥/칵테일", ...won(120000,1800000) },
+      { name: "头皮强化针 (두피강화)", sub: "20회", ...won(2400000,2400000) },
+      { name: "全身韩医管理 (전신한방관리)", sub: "", ...won(300000,800000) },
+    ]
+  },
+};
+
+const FK_QUICK_OTHER = {
+  icon: "👑", label: "기타서비스",
+  items: [
+    { name: "VVIP컨시어지 (1박2일)", sub: "코디네이터 동행", min: 200, max: 400 },
+    { name: "VVIP컨시어지 (3박4일)", sub: "코디네이터 동행", min: 500, max: 900 },
+    { name: "통역서비스 (반일 4시간)", sub: "", min: 80, max: 150 },
+    { name: "통역서비스 (종일 8시간)", sub: "", min: 150, max: 280 },
+    { name: "차량서비스 (1일)", sub: "공항픽업 포함", min: 100, max: 200 },
+  ]
+};
+fkqProcedureData["기타서비스"] = FK_QUICK_OTHER;
+
+let fkqSelected = []; // { catKey, idx, catLabel, name, sub, min, max }
+let fkqCurrentStep = 1;
+let fkqActiveCat = null;
+
+function openQuoteWidget(){
+  document.getElementById('fk-quote-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if(!document.getElementById('fkq-cat-grid').children.length) fkqInitCategories();
+}
+function closeQuoteWidget(){
+  document.getElementById('fk-quote-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function fkqInitCategories(){
+  const grid = document.getElementById('fkq-cat-grid');
+  grid.innerHTML = Object.entries(fkqProcedureData).map(([key, cat]) => `
+    <button class="fkq-cat-btn" data-cat="${key}" onclick="fkqSelectCat('${key}')">
+      <span class="ic">${cat.icon}</span>${cat.label}
+      <span class="cnt-badge" id="fkq-badge-${key}" style="display:none;">0</span>
+    </button>`).join('');
+}
+
+function fkqSelectCat(key){
+  fkqActiveCat = key;
+  document.querySelectorAll('.fkq-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === key));
+  document.getElementById('fkq-cat-empty').style.display = 'none';
+  const list = document.getElementById('fkq-proc-list');
+  list.classList.add('show');
+  const cat = fkqProcedureData[key];
+  list.innerHTML = cat.items.map((item, idx) => {
+    const checked = fkqSelected.some(s => s.catKey === key && s.idx === idx);
+    return `<div class="fkq-proc-item ${checked ? 'checked' : ''}" onclick="fkqToggleItem('${key}', ${idx})" data-cat="${key}" data-idx="${idx}">
+      <div class="chk">${checked ? '✓' : ''}</div>
+      <div class="pname">${item.name}${item.sub ? '<span class="sub">'+item.sub+'</span>' : ''}</div>
+      <div class="prange">$${item.min.toLocaleString()}~${item.max.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function fkqToggleItem(catKey, idx){
+  const existIdx = fkqSelected.findIndex(s => s.catKey === catKey && s.idx === idx);
+  if(existIdx >= 0){
+    fkqSelected.splice(existIdx, 1);
+  } else {
+    const item = fkqProcedureData[catKey].items[idx];
+    fkqSelected.push({ catKey, idx, catLabel: fkqProcedureData[catKey].label, ...item });
+  }
+  fkqSelectCat(catKey);
+  fkqUpdateBadgesAndBar();
+}
+
+function fkqUpdateBadgesAndBar(){
+  // 카테고리별 선택 개수 뱃지
+  Object.keys(fkqProcedureData).forEach(key => {
+    const cnt = fkqSelected.filter(s => s.catKey === key).length;
+    const badge = document.getElementById(`fkq-badge-${key}`);
+    if(badge){
+      badge.style.display = cnt > 0 ? 'flex' : 'none';
+      badge.textContent = cnt;
+    }
+  });
+  // 선택 요약 바
+  const bar = document.getElementById('fkq-selected-bar');
+  const text = document.getElementById('fkq-selected-text');
+  if(fkqSelected.length > 0){
+    bar.classList.add('show');
+    text.innerHTML = `✅ 총 <b>${fkqSelected.length}개</b> 항목 선택됨 — ` + fkqSelected.map(s => s.name.split('(')[0].trim()).join(', ');
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function fkqClearAll(){
+  fkqSelected = [];
+  if(fkqActiveCat) fkqSelectCat(fkqActiveCat);
+  fkqUpdateBadgesAndBar();
+}
+
+function fkqCalcStay(){
+  const arr = document.getElementById('fkq-arrival').value;
+  const dep = document.getElementById('fkq-departure').value;
+  const display = document.getElementById('fkq-stay-display');
+  if(!arr || !dep){ display.style.display = 'none'; return; }
+  const d1 = new Date(arr), d2 = new Date(dep);
+  const days = Math.round((d2 - d1) / 86400000);
+  if(days <= 0){ display.style.display = 'none'; return; }
+  let reco = '당일 시술 가능 일정';
+  if(days >= 2 && days < 4) reco = '회복 포함 짧은 일정';
+  else if(days >= 4 && days < 7) reco = '시술+관광 병행 일정';
+  else if(days >= 7) reco = '복합 시술·회복 여유 일정';
+  document.getElementById('fkq-stay-days').textContent = days + '일 (' + (days+1) + '박' + days + '일)';
+  document.getElementById('fkq-stay-reco').textContent = reco;
+  display.style.display = 'flex';
+}
+document.addEventListener('change', function(e){
+  if(e.target && (e.target.id === 'fkq-arrival' || e.target.id === 'fkq-departure')) fkqCalcStay();
+});
+
+function fkqGoStep(step){
+  fkqCurrentStep = step;
+  document.querySelectorAll('.fkq-step').forEach((el,i) => el.style.display = (i+1===step) ? 'block' : 'none');
+  document.querySelectorAll('.fkq-step-dot').forEach(dot => dot.classList.toggle('active', parseInt(dot.dataset.step) <= step));
+  document.getElementById('fkq-back-btn').style.display = step > 1 ? 'block' : 'none';
+  document.getElementById('fkq-next-btn').style.display = step < 3 ? 'block' : 'none';
+  document.getElementById('fkq-submit-btn').style.display = step === 3 ? 'block' : 'none';
+  document.getElementById('fkq-print-btn').style.display = step === 3 ? 'block' : 'none';
+  if(step === 1){ document.getElementById('fkq-title').textContent = '간편 견적 받기'; document.getElementById('fkq-subtitle').textContent = '원하는 시술과 방한 일정을 선택하면 예상 견적을 바로 보여드려요'; }
+  if(step === 2){ document.getElementById('fkq-title').textContent = '방한 일정 & 연락처'; document.getElementById('fkq-subtitle').textContent = '일정과 연락처를 입력하면 견적서를 만들어드려요'; }
+  if(step === 3){ document.getElementById('fkq-title').textContent = '예상 견적서'; document.getElementById('fkq-subtitle').textContent = '아래 견적서를 확인하고 위챗으로 상담받으세요'; fkqRenderResult(); }
+}
+
+function fkqNextStep(){
+  if(fkqCurrentStep === 1){
+    if(fkqSelected.length === 0){ alert('관심 있는 시술을 1개 이상 선택해주세요.'); return; }
+    fkqGoStep(2);
+  } else if(fkqCurrentStep === 2){
+    const name = document.getElementById('fkq-name').value.trim();
+    const contact = document.getElementById('fkq-contact').value.trim();
+    if(!name || !contact){ alert('성명과 연락처는 필수 입력입니다.'); return; }
+    fkqGoStep(3);
+  }
+}
+function fkqPrevStep(){ if(fkqCurrentStep > 1) fkqGoStep(fkqCurrentStep - 1); }
+
+function fkqRenderResult(){
+  const name = document.getElementById('fkq-name').value.trim() || '-';
+  const nation = document.getElementById('fkq-nation').value;
+  const contact = document.getElementById('fkq-contact').value.trim() || '-';
+  const hospital = document.getElementById('fkq-hospital').value.trim() || '상담 후 매칭';
+  const arrival = document.getElementById('fkq-arrival').value || '-';
+  const departure = document.getElementById('fkq-departure').value || '-';
+
+  const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
+  const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
+  const quoteNo = 'FK' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random()*900+100);
+  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+
+  const rows = fkqSelected.map(i => `<tr>
+    <td>${i.catLabel}</td>
+    <td>${i.name}${i.sub ? '<br><span style="font-size:10px;color:#94a3b8;">'+i.sub+'</span>' : ''}</td>
+    <td style="text-align:right;white-space:nowrap;">$${i.min.toLocaleString()}~${i.max.toLocaleString()}</td>
+  </tr>`).join('');
+
+  document.getElementById('fkq-result-doc').innerHTML = `
+    <div class="doc-h">
+      <div class="logo">FOLLOW KOREA</div>
+      <div class="title">예상 견적서 (참고용)</div>
+      <div class="no">견적번호 ${quoteNo} · ${today} 발행</div>
+    </div>
+    <table>
+      <tr><td style="color:#94a3b8;width:90px;">성명</td><td colspan="2">${name} (${nation})</td></tr>
+      <tr><td style="color:#94a3b8;">연락처</td><td colspan="2">${contact}</td></tr>
+      <tr><td style="color:#94a3b8;">희망병원</td><td colspan="2">${hospital}</td></tr>
+      <tr><td style="color:#94a3b8;">방한일정</td><td colspan="2">${arrival} ~ ${departure}</td></tr>
+    </table>
+    <table>
+      <thead><tr><th>분야</th><th>희망 시술</th><th style="text-align:right;">예상 범위 (USD)</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="grand"><td colspan="2">총 예상 견적 범위</td><td style="text-align:right;white-space:nowrap;">$${totalMin.toLocaleString()}~${totalMax.toLocaleString()}</td></tr></tfoot>
+    </table>
+    <div style="text-align:center;"><span class="fkq-badge">💬 정확한 견적은 위챗 상담원이 직접 안내드립니다</span></div>
+  `;
+}
+
+function fkqPrintQuote(){
+  const docHtml = document.getElementById('fkq-result-doc').outerHTML;
+  const w = window.open('', '_blank', 'width=480,height=720');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Follow Korea 견적서</title>
+    <style>
+      body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;padding:24px;color:#334155;}
+      .fkq-result-doc{border:1px solid #e5e7eb;border-radius:12px;padding:22px;}
+      .doc-h{text-align:center;margin-bottom:16px;}
+      .doc-h .logo{font-size:14px;font-weight:800;letter-spacing:1px;color:#16202e;}
+      .doc-h .title{font-size:18px;font-weight:700;color:#16202e;margin-top:6px;}
+      .doc-h .no{font-size:11px;color:#94a3b8;margin-top:3px;}
+      table{width:100%;border-collapse:collapse;font-size:12px;margin:14px 0;}
+      th{background:#16202e;color:#fff;padding:8px;text-align:left;}
+      td{padding:8px;border-bottom:1px solid #f1f5f9;}
+      .grand{background:#fdf8ef;font-weight:700;color:#16202e;}
+      .fkq-badge{display:inline-block;background:#fdf8ef;color:#b8860b;border:1px solid #f0dfb8;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;margin-top:10px;}
+      @media print{ body{padding:0;} }
+    </style></head><body>${docHtml}
+    <script>window.onload=()=>window.print();<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+function fkqSubmit(){
+  const name = document.getElementById('fkq-name').value.trim();
+  const contact = document.getElementById('fkq-contact').value.trim();
+  const nation = document.getElementById('fkq-nation').value;
+  const hospital = document.getElementById('fkq-hospital').value.trim();
+  const arrival = document.getElementById('fkq-arrival').value;
+  const departure = document.getElementById('fkq-departure').value;
+  const procedures = fkqSelected.map(i => `${i.catLabel}-${i.name}`).join(', ');
+  const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
+  const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
+
+  // ── Supabase 저장 (global_platform 프로젝트) ──
+  const FKQ_SUPABASE_URL = 'https://qfncxamqeiyxkbjxwtoi.supabase.co';
+  const FKQ_SUPABASE_KEY = 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV';
+
+  fetch(`${FKQ_SUPABASE_URL}/rest/v1/quote_requests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': FKQ_SUPABASE_KEY,
+      'Authorization': `Bearer ${FKQ_SUPABASE_KEY}`,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({
+      name, contact, nationality: nation, hospital: hospital || null,
+      arrival_date: arrival || null, departure_date: departure || null,
+      procedures, quote_min: totalMin, quote_max: totalMax,
+      status: '신규', source: 'patient_web_quote_widget'
+    })
+  }).catch(e => console.warn('[FK] 견적 저장 실패(백오피스 미반영 가능)', e));
+
+  // 위챗 상담 연결
+  window.open('https://work.weixin.qq.com/kfid/kfc', '_blank');
+
+  document.getElementById('fkq-result-doc').innerHTML = `
+    <div style="text-align:center;padding:30px 10px;">
+      <div style="font-size:44px;margin-bottom:10px;">🎉</div>
+      <div style="font-size:16px;font-weight:700;color:#16202e;margin-bottom:6px;">위챗 상담 창을 열었습니다!</div>
+      <div style="font-size:13px;color:#64748b;line-height:1.6;">친구 추가 후 문의하시면<br>전담 상담원이 정확한 견적과 일정을 안내드립니다</div>
+      <div style="margin-top:14px;font-size:12px;color:#94a3b8;">WeChat: <b style="color:#16202e;">Followkorea1</b></div>
+    </div>`;
+  document.getElementById('fkq-submit-btn').style.display = 'none';
+  document.getElementById('fkq-back-btn').style.display = 'none';
+  document.getElementById('fkq-print-btn').textContent = '✓ 닫기';
+  document.getElementById('fkq-print-btn').onclick = closeQuoteWidget;
+}
+
+function fkqResetWidget(){
+  fkqSelected = [];
+  fkqActiveCat = null;
+  fkqCurrentStep = 1;
+  ['fkq-name','fkq-contact','fkq-hospital','fkq-arrival','fkq-departure'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('fkq-nation').value = '中国';
+  fkqGoStep(1);
+  document.getElementById('fkq-proc-list').classList.remove('show');
+  document.getElementById('fkq-cat-empty').style.display = 'block';
+  document.querySelectorAll('.fkq-cat-btn').forEach(b => b.classList.remove('active'));
+  fkqUpdateBadgesAndBar();
+}
+</script>
+<!-- ════════════════════════════════════════════════════════════
+  팔로우코리아 — AI 상담 챗봇 위젯
+  설치 방법: 이 코드 전체를 followkorea.kr 의 </body> 바로 앞에 붙여넣기
+  
+  기존 "🤖 Follow Korea AI 상담" 버튼의 onclick을 openAiChat()으로 연결하거나,
+  아래 fkAiChatInit()이 자동으로 기존 버튼을 찾아 연결을 시도합니다.
+
+  ⚠️ 운영 방법:
+  - API 키가 없는 동안: FK_AI_CONFIG.apiKey = '' 상태 → FAQ 키워드 매칭으로만 응답
+  - API 키 발급 후: FK_AI_CONFIG.apiKey = 'sk-ant-...' 한 줄만 채우면
+    자동으로 실제 Claude API 응답으로 전환됩니다 (코드 변경 불필요)
+  ════════════════════════════════════════════════════════════ -->
+<style>
+  #fk-ai-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,23,0.55);z-index:9985;align-items:flex-end;justify-content:flex-end;padding:0;}
+  #fk-ai-overlay.open{display:flex;}
+  @media (min-width:560px){
+    #fk-ai-overlay{align-items:center;justify-content:center;padding:16px;}
+  }
+  #fk-ai-modal{background:#fff;width:100%;max-width:400px;height:100%;max-height:680px;border-radius:0;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  @media (min-width:560px){ #fk-ai-modal{border-radius:18px;height:88vh;} }
+  .fkai-header{background:linear-gradient(135deg,#16202e,#0f1620);color:#fff;padding:16px 18px;display:flex;align-items:center;gap:10px;border-radius:0;flex-shrink:0;}
+  @media (min-width:560px){ .fkai-header{border-radius:18px 18px 0 0;} }
+  .fkai-header .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d4af6a,#c79b4a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .fkai-header .info{flex:1;}
+  .fkai-header .name{font-size:14px;font-weight:700;}
+  .fkai-header .status{font-size:11px;color:#9fb3c8;display:flex;align-items:center;gap:5px;}
+  .fkai-header .status .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;}
+  .fkai-header .lang-select{background:rgba(255,255,255,0.12);border:none;color:#fff;border-radius:8px;padding:5px 8px;font-size:11px;cursor:pointer;}
+  .fkai-header .lang-select option{color:#16202e;}
+  .fkai-close{background:rgba(255,255,255,0.1);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;}
+  .fkai-close:hover{background:rgba(255,255,255,0.2);}
+  .fkai-lang-gate{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;}
+  .fkai-lang-gate .title{font-size:14px;color:#475569;text-align:center;}
+  .fkai-lang-gate .lang-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .fkai-lang-btn{padding:12px 22px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:#16202e;transition:.15s;}
+  .fkai-lang-btn:hover{border-color:#d4af6a;background:#fdf8ef;}
+  .fkai-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f8fafc;}
+  .fkai-msg{display:flex;gap:8px;max-width:88%;}
+  .fkai-msg.user{align-self:flex-end;flex-direction:row-reverse;}
+  .fkai-msg .bubble-avatar{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .fkai-msg.bot .bubble-avatar{background:linear-gradient(135deg,#d4af6a,#c79b4a);color:#fff;}
+  .fkai-msg.user .bubble-avatar{background:#e2e8f0;color:#475569;}
+  .fkai-msg .bubble{padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.55;white-space:pre-wrap;}
+  .fkai-msg.bot .bubble{background:#fff;color:#1e293b;border:1px solid #e5e7eb;border-top-left-radius:4px;}
+  .fkai-msg.user .bubble{background:#16202e;color:#fff;border-top-right-radius:4px;}
+  .fkai-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px;background:#f8fafc;}
+  .fkai-quick-btn{font-size:11.5px;padding:7px 12px;border-radius:14px;border:1px solid #d4af6a;background:#fff;color:#b8860b;cursor:pointer;white-space:nowrap;}
+  .fkai-quick-btn:hover{background:#fdf8ef;}
+  .fkai-handoff{margin:6px 16px 0;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;font-size:12px;color:#9a3412;display:flex;align-items:center;gap:10px;}
+  .fkai-handoff button{margin-left:auto;background:#16202e;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .fkai-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid #f1f5f9;background:#fff;border-radius:0;flex-shrink:0;}
+  @media (min-width:560px){ .fkai-input-row{border-radius:0 0 18px 18px;} }
+  .fkai-input-row input{flex:1;border:1.5px solid #e5e7eb;border-radius:20px;padding:10px 16px;font-size:13px;outline:none;}
+  .fkai-input-row input:focus{border-color:#d4af6a;}
+  .fkai-input-row button{width:38px;height:38px;border-radius:50%;border:none;background:#16202e;color:#fff;cursor:pointer;font-size:15px;flex-shrink:0;}
+  .fkai-input-row button:hover{opacity:0.9;}
+  .fkai-typing{display:flex;gap:4px;padding:10px 13px;}
+  .fkai-typing span{width:6px;height:6px;border-radius:50%;background:#cbd5e1;animation:fkai-bounce 1.2s infinite;}
+  .fkai-typing span:nth-child(2){animation-delay:.15s;}
+  .fkai-typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes fkai-bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+  #fk-ai-trigger-fab{position:fixed;bottom:20px;right:20px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#16202e,#0f1620);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.25);z-index:900;display:none;align-items:center;justify-content:center;}
+  #fk-ai-trigger-fab.show{display:flex;}
+</style>
+
+<div id="fk-ai-overlay" onclick="if(event.target===this) closeAiChat()">
+  <div id="fk-ai-modal">
+    <div class="fkai-header">
+      <div class="avatar">🤖</div>
+      <div class="info">
+        <div class="name" id="fkai-title">Follow Korea AI 상담</div>
+        <div class="status"><span class="dot"></span><span id="fkai-status-text">온라인 · 즉시 응답</span></div>
+      </div>
+      <select class="lang-select" id="fkai-lang-switch" onchange="fkaiSwitchLang(this.value)" style="display:none;">
+        <option value="zh">中文</option>
+        <option value="ko">한국어</option>
+      </select>
+      <button class="fkai-close" onclick="closeAiChat()">✕</button>
+    </div>
+
+    <!-- 언어 선택 게이트 -->
+    <div class="fkai-lang-gate" id="fkai-lang-gate">
+      <div class="title" id="fkai-gate-title">언어를 선택해 주세요 / 请选择语言</div>
+      <div class="lang-btns">
+        <button class="fkai-lang-btn" onclick="fkaiStartChat('zh')">🇨🇳 中文</button>
+        <button class="fkai-lang-btn" onclick="fkaiStartChat('ko')">🇰🇷 한국어</button>
+      </div>
+    </div>
+
+    <!-- 채팅 본문 (초기 숨김) -->
+    <div class="fkai-body" id="fkai-body" style="display:none;"></div>
+    <div class="fkai-quick" id="fkai-quick" style="display:none;"></div>
+    <div id="fkai-handoff-slot"></div>
+    <div class="fkai-input-row" id="fkai-input-row" style="display:none;">
+      <input type="text" id="fkai-input" placeholder="..." onkeydown="if(event.key==='Enter')fkaiSend()">
+      <button onclick="fkaiSend()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- 플로팅 버튼 (기존 버튼이 없는 페이지를 위한 백업) -->
+<button id="fk-ai-trigger-fab" onclick="openAiChat()" title="AI 상담">🤖</button>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  설정 — API 키가 들어오면 이 한 줄만 채우세요
+// ════════════════════════════════════════════════════════════
+const FK_AI_CONFIG = {
+  apiKey: '',  // ← Claude API 키 발급되면 'sk-ant-...' 형태로 여기 입력
+  model: 'claude-sonnet-4-6',
+  // Supabase 연동 (상담원 연결 로그 저장용 - 견적위젯과 동일 프로젝트)
+  supabaseUrl: 'https://qfncxamqeiyxkbjxwtoi.supabase.co',
+  supabaseKey: 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV',
+};
+
+// ════════════════════════════════════════════════════════════
+//  FAQ 데이터 — 백오피스에서 추후 관리 가능하도록 구조화
+//  각 항목: 키워드 배열로 매칭, zh/ko 양쪽 답변 보유
+// ════════════════════════════════════════════════════════════
+const FK_FAQ = [
+  {
+    keywords_zh: ['价格','费用','多少钱','报价','贵不贵'],
+    keywords_ko: ['가격','비용','얼마','요금','견적'],
+    a_zh: '具体价格因医院和项目而有所不同。我们可以根据您想做的项目提供大概的价格区间，详细报价需要医生面诊后确认。\n\n您可以点击"간편 견적 받기(获取报价)"按钮，选择想做的项目，即可获得参考价格范围～',
+    a_ko: '가격은 병원과 시술 종류에 따라 다릅니다. 원하시는 시술을 알려주시면 대략적인 가격 범위를 안내드릴 수 있고, 정확한 견적은 의사 상담 후 확정됩니다.\n\n메인 화면의 "간편 견적 받기" 버튼으로 원하는 시술을 선택하시면 참고 가격대를 바로 보실 수 있어요.'
+  },
+  {
+    keywords_zh: ['流程','怎么预约','如何预约','预约步骤','步骤'],
+    keywords_ko: ['절차','과정','예약방법','어떻게예약','단계'],
+    a_zh: '预约流程很简单，分为4步：\n① 选择心仪的医院和项目\n② 在线咨询，确认方案和价格\n③ 确定日期并支付定金\n④ 来韩国接受治疗，专属顾问全程陪同\n\n整个过程我们都会用中文为您服务～',
+    a_ko: '예약 절차는 4단계입니다:\n① 원하는 병원·시술 선택\n② 온라인 상담으로 일정·가격 확인\n③ 날짜 확정 및 예약금 결제\n④ 방한 후 시술, 전담 코디네이터 동행\n\n전 과정 편하게 안내드립니다.'
+  },
+  {
+    keywords_zh: ['签证','怎么入境','护照','需要什么证件','医疗签证'],
+    keywords_ko: ['비자','입국','여권','서류','의료비자'],
+    a_zh: '一般情况下，中国游客可以使用旅游签证（短期访问）入境韩国接受医美/医疗服务。如果是长期治疗或手术恢复期较长，建议办理医疗签证（C-3-3）。\n\n具体签证类型建议咨询后根据您的项目和停留时间为您确认～',
+    a_ko: '일반적으로 단기 시술은 관광 비자로 가능합니다. 장기 치료나 수술 후 회복기간이 긴 경우 의료관광 비자(C-3-3) 발급을 권장드립니다.\n\n원하시는 시술과 체류 기간을 알려주시면 정확히 안내드릴게요.'
+  },
+  {
+    keywords_zh: ['住宿','酒店','住哪里','陪同','翻译服务'],
+    keywords_ko: ['숙소','호텔','어디묵','동행','통역서비스'],
+    a_zh: '我们提供VVIP贵宾礼宾服务，包括：\n· 专属翻译陪同（中文/越南语/泰语/英语）\n· 机场接送\n· 酒店/住宿推荐及预订协助\n· 医院全程陪同\n\n详情可以看主页的"기타 서비스(其他服务)"板块～',
+    a_ko: 'VVIP 컨시어지 서비스로 다음을 제공합니다:\n· 전담 통역 동행 (중국어/베트남어/태국어/영어)\n· 공항 픽업/샌딩\n· 숙소 추천 및 예약 지원\n· 병원 방문 전체 동행\n\n자세한 내용은 메인 화면 "기타 서비스" 섹션을 참고해주세요.'
+  },
+  {
+    keywords_zh: ['退款','取消','可以退钱吗','取消预约'],
+    keywords_ko: ['환불','취소','예약취소','돈돌려'],
+    a_zh: '关于退款政策：\n· 治疗前7天以上取消，全额退还定金\n· 治疗前3-6天取消，退还50%\n· 治疗前1-2天取消，退还20%\n· 当天取消或未到场，不予退款\n· 因医院或不可抗力原因取消，全额退还\n\n具体条款会在预约确认时书面告知您，如需取消请尽快联系您的专属顾问～',
+    a_ko: '환불 정책 안내:\n· 시술 7일 전까지 취소 시 예약금 전액 환불\n· 3~6일 전 취소 시 50% 환불\n· 1~2일 전 취소 시 20% 환불\n· 당일 취소·노쇼는 환불 불가\n· 병원·천재지변 등 불가피한 사유는 전액 환불\n\n정확한 조건은 예약 확정 시 서면으로 안내드립니다. 취소가 필요하시면 담당 상담원에게 바로 연락주세요.'
+  },
+  {
+    keywords_zh: ['准备','需要带什么','行前准备','出发前','签证','怎么入境','护照','需要什么证件','医疗签证','K-ETA','插头','转换器','电压'],
+    keywords_ko: ['준비물','챙겨야','출발전','준비사항','비자','입국','여권','서류','의료비자','케타','어댑터','전압','콘센트'],
+    a_zh: '来韩国接受医疗服务前，建议准备以下物品和资料：\n\n📄 文件类\n· 护照（有效期需6个月以上）\n· 签证（短期医美可用旅游签证；长期治疗建议办理医疗签证C-3-3）\n· K-ETA电子旅行许可（免签入境国家必须提前申请）\n· 英文病历/用药记录（如有）\n· 医院预约确认函\n\n🏨 住宿与交通\n· 选择离医院近、方便术后恢复的住宿\n· 提前确认是否有医院合作住宿或接送服务\n\n💳 其他准备\n· 可在境外使用的信用卡/借记卡\n· 少量现金（打车等零用）\n· 宽松易穿脱的衣物（避免压迫术部位）\n· 多功能转换插头（韩国电压220V）\n\n具体清单可以发送给您的专属顾问，帮您逐项确认～',
+    a_ko: '방한 전 준비하시면 좋은 항목을 정리해드릴게요:\n\n📄 서류 준비\n· 여권 (유효기간 6개월 이상)\n· 비자 (단기 시술은 관광비자 가능, 장기치료는 의료비자 C-3-3 권장)\n· K-ETA 전자여행허가 (무비자국은 출발 전 필수 신청)\n· 영문 진료기록/복용약 목록 (있는 경우)\n· 병원 예약 확인서\n\n🏨 숙소·교통\n· 병원과 가깝고 회복에 적합한 숙소 선택\n· 병원 연계 숙소·픽업 서비스 사전 확인\n\n💳 기타 준비물\n· 해외 사용 가능한 신용/체크카드\n· 소액 현금 (택시비 등)\n· 입고 벗기 편한 헐렁한 옷 (수술부위 압박 방지)\n· 멀티 어댑터 (한국 전압 220V)\n\n자세한 체크리스트는 전담 상담원이 위챗으로 하나씩 같이 확인해드릴게요~'
+  },
+  {
+    keywords_zh: ['恢复','多久能恢复','术后','恢复期'],
+    keywords_ko: ['회복','회복기간','시술후','다운타임'],
+    a_zh: '恢复期因项目而异：\n· 皮肤管理类（超声刀、热玛吉等）：基本无需恢复期\n· 注射类（玻尿酸、肉毒素）：1-3天消肿\n· 手术类（眼鼻整形等）：7-14天基础恢复，完全恢复需1-3个月\n\n具体恢复时间建议咨询医生，方便为您安排合适的逗留天数～',
+    a_ko: '시술별 회복기간:\n· 피부시술(울쎄라/써마지 등): 다운타임 거의 없음\n· 주사시술(필러/보톡스): 1~3일 부기\n· 수술(눈/코성형 등): 기본 7~14일, 완전회복 1~3개월\n\n정확한 일정은 의사 상담 후 체류기간을 맞춰드립니다.'
+  },
+  {
+    keywords_zh: ['医院','哪家医院','推荐医院','合作医院'],
+    keywords_ko: ['병원','어느병원','추천병원','제휴병원'],
+    a_zh: '我们与首尔江南区多家顶级医美/整形医院深度合作，覆盖皮肤管理、整形外科、干细胞、妇科、体检、韩医等6大领域。\n\n可以告诉我您想做的项目，我帮您推荐合适的医院～',
+    a_ko: '강남 소재 여러 우수 의료기관과 협력하고 있으며, 피부·성형외과·줄기세포·여성의원·건강검진·한방까지 6개 분야를 다루고 있습니다.\n\n원하시는 시술을 알려주시면 적합한 병원을 추천해드릴게요.'
+  },
+];
+
+const FK_QUICK_REPLIES = {
+  zh:['价格大概多少？','预约流程是什么？','需要签证吗？','有住宿安排吗？'],
+  ko:['가격이 어느정도인가요?','예약 절차가 어떻게 되나요?','비자가 필요한가요?','숙소 안내도 되나요?']
+};
+
+const FK_GREETING = {
+  zh:'您好！我是Follow Korea AI助手 🤖\n请问有什么可以帮您的？您可以直接提问，或点击下方常见问题～',
+  ko:'안녕하세요! 팔로우코리아 AI 상담입니다 🤖\n무엇을 도와드릴까요? 자유롭게 질문하시거나 아래 자주 묻는 질문을 선택해주세요.'
+};
+
+const FK_HANDOFF_MSG = {
+  zh:'抱歉，这个问题需要专属顾问为您详细解答 🙏',
+  ko:'죄송해요, 이 부분은 전담 상담원이 자세히 안내드리는 게 좋을 것 같아요 🙏'
+};
+
+const FK_HANDOFF_BTN = { zh:'联系顾问', ko:'상담원 연결' };
+
+// ════════════════════════════════════════════════════════════
+//  상태
+// ════════════════════════════════════════════════════════════
+let fkaiLang = 'zh';
+let fkaiHistory = []; // [{role:'user'|'assistant', content:'...'}]
+let fkaiStarted = false;
+
+function openAiChat(){
+  document.getElementById('fk-ai-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAiChat(){
+  document.getElementById('fk-ai-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function fkaiStartChat(lang){
+  fkaiLang = lang;
+  fkaiStarted = true;
+  document.getElementById('fkai-lang-gate').style.display = 'none';
+  document.getElementById('fkai-body').style.display = 'flex';
+  document.getElementById('fkai-quick').style.display = 'flex';
+  document.getElementById('fkai-input-row').style.display = 'flex';
+  document.getElementById('fkai-lang-switch').style.display = 'block';
+  document.getElementById('fkai-lang-switch').value = lang;
+  document.getElementById('fkai-title').textContent = lang === 'zh' ? 'Follow Korea AI 客服' : 'Follow Korea AI 상담';
+  document.getElementById('fkai-status-text').textContent = lang === 'zh' ? '在线 · 即时回复' : '온라인 · 즉시 응답';
+  document.getElementById('fkai-input').placeholder = lang === 'zh' ? '请输入您的问题...' : '질문을 입력해주세요...';
+  fkaiAddMsg('bot', FK_GREETING[lang]);
+  fkaiRenderQuick();
+}
+
+function fkaiSwitchLang(lang){
+  fkaiLang = lang;
+  document.getElementById('fkai-title').textContent = lang === 'zh' ? 'Follow Korea AI 客服' : 'Follow Korea AI 상담';
+  document.getElementById('fkai-input').placeholder = lang === 'zh' ? '请输入您的问题...' : '질문을 입력해주세요...';
+  fkaiRenderQuick();
+}
+
+function fkaiEsc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fkaiRenderQuick(){
+  const quick = FK_QUICK_REPLIES[fkaiLang];
+  document.getElementById('fkai-quick').innerHTML = quick.map((q,idx) =>
+    `<button class="fkai-quick-btn" data-q-idx="${idx}" data-q-lang="${fkaiLang}">${q}</button>`
+  ).join('');
+  document.querySelectorAll('.fkai-quick-btn').forEach(btn => {
+    btn.onclick = function(){
+      const idx = parseInt(this.dataset.qIdx);
+      const lang = this.dataset.qLang;
+      fkaiSendText(FK_QUICK_REPLIES[lang][idx]);
+    };
+  });
+}
+
+function fkaiAddMsg(role, text){
+  const body = document.getElementById('fkai-body');
+  const div = document.createElement('div');
+  div.className = `fkai-msg ${role}`;
+  div.innerHTML = `<div class="bubble-avatar">${role === 'bot' ? '🤖' : '🙂'}</div><div class="bubble"></div>`;
+  div.querySelector('.bubble').textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function fkaiShowTyping(){
+  const body = document.getElementById('fkai-body');
+  const div = document.createElement('div');
+  div.className = 'fkai-msg bot';
+  div.id = 'fkai-typing-indicator';
+  div.innerHTML = `<div class="bubble-avatar">🤖</div><div class="fkai-typing"><span></span><span></span><span></span></div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+function fkaiHideTyping(){
+  const el = document.getElementById('fkai-typing-indicator');
+  if(el) el.remove();
+}
+
+function fkaiSendText(text){
+  document.getElementById('fkai-input').value = text;
+  fkaiSend();
+}
+
+async function fkaiSend(){
+  const input = document.getElementById('fkai-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  fkaiAddMsg('user', text);
+  fkaiHistory.push({role:'user', content:text});
+  fkaiShowTyping();
+
+  await new Promise(r => setTimeout(r, 500 + Math.random()*400)); // 자연스러운 응답 지연
+
+  let reply, isHandoff = false;
+  if(FK_AI_CONFIG.apiKey){
+    // API 키가 있으면 실제 Claude API 호출
+    try{
+      reply = await fkaiCallClaudeAPI(text);
+    }catch(e){
+      console.error('AI API 오류', e);
+      reply = null;
+    }
+  }
+  if(!reply){
+    // FAQ 매칭 모드 (API 키 없거나 호출 실패 시 폴백)
+    const matched = fkaiMatchFaq(text);
+    if(matched){
+      reply = matched;
+    }else{
+      reply = FK_HANDOFF_MSG[fkaiLang];
+      isHandoff = true;
+    }
+  }
+
+  fkaiHideTyping();
+  fkaiAddMsg('bot', reply);
+  fkaiHistory.push({role:'assistant', content:reply});
+
+  if(isHandoff) fkaiShowHandoff();
+}
+
+function fkaiMatchFaq(text){
+  const lowerText = text.toLowerCase();
+  const keyField = fkaiLang === 'zh' ? 'keywords_zh' : 'keywords_ko';
+  const ansField = fkaiLang === 'zh' ? 'a_zh' : 'a_ko';
+  for(const item of FK_FAQ){
+    for(const kw of item[keyField]){
+      if(lowerText.includes(kw.toLowerCase())) return item[ansField];
+    }
+  }
+  return null;
+}
+
+async function fkaiCallClaudeAPI(userText){
+  // FAQ를 컨텍스트로 제공하는 시스템 프롬프트
+  // 답변 스타일: 강남언니 앱의 운영 철학("감정보다 이성, 신뢰 우선, 데이터·검증 기반 정보 제공")을 참고하여
+  // 막연한 위로보다 근거(평균가 범위, 회복기간 수치 등)를 먼저 제시하고, 그 다음 친근하게 마무리하는 톤 유지
+  const faqContext = FK_FAQ.map(f => fkaiLang === 'zh' ? f.a_zh : f.a_ko).join('\n---\n');
+  const styleGuide_zh = `回答风格参考"强南阿姨(강남언니)"App的运营理念：以数据和验证为基础，先给出具体依据（价格区间、恢复天数等数字），再用亲切语气收尾。避免空泛的安慰话，优先呈现可验证的信息。`;
+  const styleGuide_ko = `답변 스타일은 강남언니 앱의 운영 철학을 참고합니다: 데이터와 근거를 먼저 제시(가격 범위, 회복기간 등 구체적 수치)하고, 그 다음 친근한 어투로 마무리합니다. 막연한 위로보다 검증 가능한 정보를 우선합니다.`;
+  const systemPrompt = fkaiLang === 'zh'
+    ? `你是Follow Korea医美旅游平台的AI客服。请用简洁友好的中文回答用户问题。${styleGuide_zh}\n\n以下是常见问题参考资料：\n${faqContext}\n\n如果问题超出你的知识范围或涉及具体价格确认、付款等敏感操作，请回复"NEED_HANDOFF"。`
+    : `당신은 팔로우코리아 의료관광 플랫폼의 AI 상담원입니다. 친절하고 간결한 한국어로 답하세요. ${styleGuide_ko}\n\n참고 자료:\n${faqContext}\n\n답할 수 없는 질문이거나 정확한 가격 확정, 결제 등 민감한 요청이면 "NEED_HANDOFF"라고만 답하세요.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': FK_AI_CONFIG.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: FK_AI_CONFIG.model,
+      max_tokens: 500,
+      system: systemPrompt,
+      messages: fkaiHistory.slice(-8)
+    })
+  });
+  if(!res.ok) throw new Error('API ' + res.status);
+  const data = await res.json();
+  const text = data.content?.[0]?.text || '';
+  if(text.includes('NEED_HANDOFF')) return null;
+  return text;
+}
+
+function fkaiShowHandoff(){
+  const slot = document.getElementById('fkai-handoff-slot');
+  slot.innerHTML = `<div class="fkai-handoff">
+    <span>👤</span>
+    <span>${fkaiLang === 'zh' ? '需要人工客服协助' : '상담원 연결이 필요합니다'}</span>
+    <button onclick="fkaiConnectHuman()">${FK_HANDOFF_BTN[fkaiLang]}</button>
+  </div>`;
+}
+
+function fkaiConnectHuman(){
+  // 위챗 연결 안내 + 상담 로그 저장
+  fkaiSaveHandoffLog();
+  window.open('https://work.weixin.qq.com/kfid/kfc', '_blank');
+  document.getElementById('fkai-handoff-slot').innerHTML = '';
+  fkaiAddMsg('bot', fkaiLang === 'zh' ? '已为您打开微信客服窗口，请添加好友咨询～' : '위챗 상담 창을 열었습니다. 친구 추가 후 문의해주세요~');
+}
+
+async function fkaiSaveHandoffLog(){
+  try{
+    await fetch(`${FK_AI_CONFIG.supabaseUrl}/rest/v1/ai_chat_handoffs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': FK_AI_CONFIG.supabaseKey,
+        'Authorization': `Bearer ${FK_AI_CONFIG.supabaseKey}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        language: fkaiLang,
+        conversation: JSON.stringify(fkaiHistory),
+        created_at: new Date().toISOString()
+      })
+    });
+  }catch(e){
+    console.warn('상담 로그 저장 실패 (테이블 미생성 가능)', e);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  초기화 — 기존 "🤖 Follow Korea AI 상담" 버튼을 찾아 자동 연결
+// ════════════════════════════════════════════════════════════
+function fkAiChatInit(){
+  // 텍스트로 기존 버튼을 찾아 onclick 연결 (정확한 선택자를 모르므로 텍스트 매칭)
+  const allClickable = document.querySelectorAll('button, a, div[onclick], [role="button"]');
+  let foundExisting = false;
+  allClickable.forEach(el => {
+    if(el.textContent && el.textContent.includes('AI 상담') && el.id !== 'fk-ai-trigger-fab'){
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        openAiChat();
+      });
+      foundExisting = true;
+    }
+  });
+  // 기존 버튼을 못 찾았으면 플로팅 버튼 노출
+  if(!foundExisting){
+    document.getElementById('fk-ai-trigger-fab').classList.add('show');
+  }
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', fkAiChatInit);
+}else{
+  fkAiChatInit();
+}
+
+document.getElementById('fk-ai-overlay')?.addEventListener('click', function(e){
+  if(e.target === this) closeAiChat();
+});
+</script>
+
 </body>
 </html>
