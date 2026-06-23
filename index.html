@@ -3701,9 +3701,11 @@ async function fkaiSaveHandoffLog(){
 //  초기화 — 기존 "🤖 Follow Korea AI 상담" 버튼을 찾아 자동 연결
 // ════════════════════════════════════════════════════════════
 function fkAiChatInit(){
-  // 텍스트로 기존 버튼을 찾아 onclick 연결 (정확한 선택자를 모르므로 텍스트 매칭)
+  // .float-btn(우측 하단 기존 AI 상담 버튼)이 이미 있으면 그게 정식 트리거이므로
+  // 추가 플로팅 버튼(fk-ai-trigger-fab)을 또 띄우지 않음
+  let foundExisting = !!document.querySelector('.float-btn');
+  // 텍스트로 기존 버튼을 찾아 onclick 연결 (정확한 선택자를 모르므로 텍스트 매칭) — 보조 수단
   const allClickable = document.querySelectorAll('button, a, div[onclick], [role="button"]');
-  let foundExisting = false;
   allClickable.forEach(el => {
     if(el.textContent && el.textContent.includes('AI 상담') && el.id !== 'fk-ai-trigger-fab'
        && !el.closest('#ai-modal-bg') && !el.closest('#fk-ai-overlay')){
