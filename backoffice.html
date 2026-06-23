@@ -1389,6 +1389,12 @@ async function loadQuoteRequests(){
   }
 }
 function qrBadgeClass(s){const m={신규:'대기',상담중:'협의중',완료:'확정',취소:'취소'};return m[s]||'미정';}
+// ── 보안: 사용자 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
+function escapeHtml(str){
+  if(str===null||str===undefined)return '';
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function renderQuoteRequests(){
   const sf=(document.getElementById('qr-status-f')||{value:''}).value;
   const list=sf?QR.filter(q=>q.status===sf):QR;
@@ -1402,15 +1408,15 @@ function renderQuoteRequests(){
     const quote=(q.quote_min||q.quote_max)?`${q.quote_min}~${q.quote_max}만원`:'-';
     return`<tr style="${(q.status==='신규'||!q.status)?'background:#fffbf0;':''}">
       <td style="font-size:10px;color:#888;white-space:nowrap;">${created}</td>
-      <td style="font-weight:500;">${q.name||'-'}</td>
-      <td>${q.nationality||'-'}</td>
-      <td style="font-size:11px;">${q.contact||'-'}</td>
-      <td style="font-size:11px;">${q.hospital||'상담 후 매칭'}</td>
+      <td style="font-weight:500;">${escapeHtml(q.name)||'-'}</td>
+      <td>${escapeHtml(q.nationality)||'-'}</td>
+      <td style="font-size:11px;">${escapeHtml(q.contact)||'-'}</td>
+      <td style="font-size:11px;">${escapeHtml(q.hospital)||'상담 후 매칭'}</td>
       <td style="font-size:10px;color:#888;white-space:nowrap;">${stay}</td>
-      <td style="font-size:10px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${q.procedures||''}">${q.procedures||'-'}</td>
+      <td style="font-size:10px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(q.procedures)}">${escapeHtml(q.procedures)||'-'}</td>
       <td style="color:#B8960C;white-space:nowrap;">${quote}</td>
-      <td style="font-size:11px;">${q.assigned_to||'-'}</td>
-      <td><span class="badge ${qrBadgeClass(q.status)}">${q.status||'신규'}</span></td>
+      <td style="font-size:11px;">${escapeHtml(q.assigned_to)||'-'}</td>
+      <td><span class="badge ${qrBadgeClass(q.status)}">${escapeHtml(q.status)||'신규'}</span></td>
       <td><button class="btn sm" onclick="openQrModal('${q.id}')">처리</button></td>
     </tr>`;
   }).join('')||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#aaa;">견적신청이 없습니다</td></tr>';
@@ -1422,10 +1428,10 @@ function openQrModal(id){
   document.getElementById('qr-status-edit').value=q.status||'신규';
   document.getElementById('qr-note-edit').value=q.note||'';
   document.getElementById('qr-detail-view').innerHTML=`
-    <b>${q.name}</b> (${q.nationality}) · ${q.contact}<br>
-    희망병원: ${q.hospital||'상담 후 매칭'}<br>
+    <b>${escapeHtml(q.name)}</b> (${escapeHtml(q.nationality)}) · ${escapeHtml(q.contact)}<br>
+    희망병원: ${escapeHtml(q.hospital)||'상담 후 매칭'}<br>
     방한일정: ${q.arrival_date||'-'} ~ ${q.departure_date||'-'}<br>
-    희망시술: ${q.procedures||'-'}<br>
+    희망시술: ${escapeHtml(q.procedures)||'-'}<br>
     예상견적: <span style="color:#B8960C;font-weight:600;">${q.quote_min}~${q.quote_max}만원</span>
   `;
   document.getElementById('qr-modal').classList.add('open');

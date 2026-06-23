@@ -2098,18 +2098,24 @@ let rvCurrentPage=0;
 const RV_PER_PAGE=4;
 let rvAutoTimer=null;
 
+// ── 보안: 사용자/DB 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
+function escapeHtml(str){
+  if(str===null||str===undefined)return '';
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function rvCardHTML(r){
   const stars='★'.repeat(r.star||5)+'☆'.repeat(5-(r.star||5));
   const badge=allReviews.includes(r)?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 7px;border-radius:8px;margin-left:4px;">인증</span>':'';
   return '<div class="testi-card">'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
     +'<div style="color:#D4AF37;letter-spacing:2px;font-size:13px;">'+stars+'</div>'
-    +'<span style="font-size:10px;color:#aaa;">'+(r.date||'')+'</span></div>'
-    +'<div style="font-size:11px;background:#f0fff8;color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">'+(r.hospital||'')+' · '+(r.treatment||'')+'</div>'
-    +'<div class="testi-text">'+(r.text||'')+'</div>'
-    +'<div class="testi-user"><div class="testi-avatar">'+(r.name||'?')[0]+'</div>'
-    +'<div><div style="font-size:12px;font-weight:600;">'+(r.name||'')+badge+'</div>'
-    +'<div style="font-size:10px;color:var(--gray);">'+(r.from||'')+'</div></div></div></div>';
+    +'<span style="font-size:10px;color:#aaa;">'+escapeHtml(r.date||'')+'</span></div>'
+    +'<div style="font-size:11px;background:#f0fff8;color:var(--gn2);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">'+escapeHtml(r.hospital||'')+' · '+escapeHtml(r.treatment||'')+'</div>'
+    +'<div class="testi-text">'+escapeHtml(r.text||'')+'</div>'
+    +'<div class="testi-user"><div class="testi-avatar">'+escapeHtml((r.name||'?')[0])+'</div>'
+    +'<div><div style="font-size:12px;font-weight:600;">'+escapeHtml(r.name||'')+badge+'</div>'
+    +'<div style="font-size:10px;color:var(--gray);">'+escapeHtml(r.from||'')+'</div></div></div></div>';
 }
 
 function renderReviews(){
