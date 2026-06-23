@@ -1382,6 +1382,7 @@ COMPANY INFO:
 - License: Ministry of Health & Welfare registered foreign patient attraction agency (A-2026-01-01-06622)
 - Tourism License: 2026-000022
 - Contact: WeChat Followkorea1 | Line: Followkorea | Email: contact@followkorea.co.kr
+- Official Website: https://www.followkorea.co.kr (you may mention/share this link when introducing the company or when the user wants more details)
 
 PARTNER HOSPITALS (26 clinics in Gangnam):
 Plastic Surgery: Wonjin, Shinsang, Dream, Glovi, Faceline, The Beauty, View, Ruby(Sinsa)
@@ -1423,7 +1424,7 @@ function showAiStep0(){
     const langNames={zh:'中文',ko:'한국어',en:'English',vi:'Tiếng Việt',th:'ภาษาไทย',ja:'日本語',ru:'Русский'};
     addAiMsg('user','🌐 '+langNames[val]);
     document.getElementById('ai-step-indicator').textContent={
-      zh:'상담 주제 선택',ko:'상담 주제 선택',en:'Select Topic',
+      zh:'选择咨询主题',ko:'상담 주제 선택',en:'Select Topic',
       vi:'Chọn chủ đề',th:'เลือกหัวข้อ',ja:'テーマ選択',ru:'Выберите тему'
     }[val]||'Select Topic';
     showAiStep1();
@@ -1434,6 +1435,12 @@ function showAiStep1(){
   const topicFlow=AI_FLOW.topic;
   const f=topicFlow[aiLang]||topicFlow.en;
   addAiMsg('ai',f.msg);
+  showAiTopicOptions();
+}
+
+// 주제 선택 옵션 — 자유채팅 모드에서도 계속 같이 보여주기 위해 재사용 가능한 함수로 분리
+function showAiTopicOptions(){
+  const f=AI_FLOW.topic[aiLang]||AI_FLOW.topic.en;
   showAiOptions(f.opts,(val)=>{
     aiTopic=val;
     const label=f.opts.find(o=>o.val===val)?.label||val;
@@ -1476,13 +1483,14 @@ function askAiAbout(topic){
 }
 
 function goFreeChat(initialMsg){
-  clearAiOptions();
   const inputArea=document.getElementById('ai-input-area');
   inputArea.style.display='flex';
   document.getElementById('ai-step-indicator').textContent={
     zh:'自由提问模式',ko:'자유 질문 모드',en:'Free Chat Mode',
     vi:'Chế độ tự do',th:'โหมดถามอิสระ',ja:'自由質問モード',ru:'Свободный чат'
   }[aiLang]||'Free Chat';
+  // 주제 버튼을 계속 같이 보여줘서, 빠른 선택과 자유 입력을 동시에 쓸 수 있게 함
+  showAiTopicOptions();
   if(initialMsg){
     sendAiMsgText(initialMsg,false);
   }else{
