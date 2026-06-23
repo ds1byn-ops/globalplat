@@ -529,7 +529,7 @@ tr:hover td{background:#fafaf8;}
 
 <!-- 병원 모달 -->
 <div class="modal-bg" id="hd-modal" onclick="if(event.target===this)document.getElementById('hd-modal').classList.remove('open')">
-<div class="modal">
+<div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto;">
   <h3 id="hd-modal-title">병원 추가/수정 <button onclick="document.getElementById('hd-modal').classList.remove('open')">✕</button></h3>
   <div class="fg">
     <div class="fitem full"><label>병원명 *</label><input type="text" id="hd-name" placeholder="병원명"></div>
@@ -545,6 +545,54 @@ tr:hover td{background:#fafaf8;}
     <div class="fitem"><label>홈페이지</label><input type="text" id="hd-link" placeholder="https://..."></div>
     <div class="fitem full"><label>메모</label><input type="text" id="hd-note"></div>
   </div>
+
+  <div style="margin:18px 0 12px;padding-top:14px;border-top:2px dashed var(--border);">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer;">
+      <input type="checkbox" id="hd-show-main" onchange="document.getElementById('hd-main-section').style.display=this.checked?'block':'none'" style="width:18px;height:18px;">
+      🌐 메인 사이트(followkorea.kr)에 노출
+    </label>
+    <div style="font-size:11px;color:var(--gray);margin-top:4px;">체크하면 환자용 메인 홈페이지의 병원 목록에 이 병원이 나타납니다.</div>
+  </div>
+
+  <div id="hd-main-section" style="display:none;background:#fafaf9;border-radius:10px;padding:14px;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="btn sm" onclick="hdAiTranslate()" id="hd-ai-btn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;">✨ AI 자동번역 (한국어→중국어/영어)</button>
+    </div>
+    <div class="fg">
+      <div class="fitem"><label>중문명</label><input type="text" id="hd-name-zh" placeholder="中文 이름"></div>
+      <div class="fitem"><label>영문명</label><input type="text" id="hd-name-en" placeholder="English Name"></div>
+      <div class="fitem"><label>진료부서(한)</label><input type="text" id="hd-dept-kr" placeholder="예: 성형외과/피부과"></div>
+      <div class="fitem"><label>진료부서(중)</label><input type="text" id="hd-dept-zh"></div>
+      <div class="fitem"><label>진료부서(영)</label><input type="text" id="hd-dept-en"></div>
+      <div class="fitem"><label>카테고리</label>
+        <select id="hd-cat">
+          <option value="성형외과">성형외과</option><option value="피부">피부</option><option value="줄기세포">줄기세포</option>
+          <option value="체형">체형</option><option value="여성의학">여성의학</option><option value="안과">안과</option>
+          <option value="항노화">항노화</option><option value="치과">치과</option><option value="에스테틱">에스테틱</option>
+          <option value="기타서비스">기타서비스</option>
+        </select>
+      </div>
+      <div class="fitem"><label>아이콘(이모지)</label><input type="text" id="hd-icon" placeholder="🏥" maxlength="4"></div>
+      <div class="fitem"><label>뱃지 문구</label><input type="text" id="hd-badge" placeholder="예: NEW, BEST, 추천"></div>
+      <div class="fitem"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="hd-badge-pk" style="width:16px;height:16px;">뱃지 강조(핑크)</label></div>
+      <div class="fitem full"><label>주요시술(한, 쉼표로 구분)</label><input type="text" id="hd-treats-kr" placeholder="예: 눈,코,가슴"></div>
+      <div class="fitem"><label>주요시술(중)</label><input type="text" id="hd-treats-zh" placeholder="쉼표로 구분"></div>
+      <div class="fitem"><label>주요시술(영)</label><input type="text" id="hd-treats-en" placeholder="쉼표로 구분"></div>
+      <div class="fitem full"><label>운영시간</label><input type="text" id="hd-hours" placeholder="예: Mon-Fri 10:00-19:00 / Sat 10:00-17:00"></div>
+      <div class="fitem"><label>위치(한)</label><input type="text" id="hd-loc-kr" placeholder="예: 서울 강남"></div>
+      <div class="fitem"><label>위치(중)</label><input type="text" id="hd-loc-zh"></div>
+      <div class="fitem"><label>위치(영)</label><input type="text" id="hd-loc-en"></div>
+      <div class="fitem full"><label>소개글(한)</label><input type="text" id="hd-overview-kr" placeholder="병원 소개 한 문단"></div>
+      <div class="fitem full"><label>소개글(중)</label><input type="text" id="hd-overview-zh"></div>
+      <div class="fitem full"><label>소개글(영)</label><input type="text" id="hd-overview-en"></div>
+      <div class="fitem full">
+        <label>대표 이미지</label>
+        <input type="file" id="hd-img-input" accept="image/*" onchange="hdImgUpload(event)">
+        <div id="hd-img-preview" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-btns">
     <button class="btn danger sm" id="hd-del-btn" onclick="deleteHd()" style="display:none;margin-right:auto;">🗑 삭제</button>
     <button class="btn" onclick="document.getElementById('hd-modal').classList.remove('open')">취소</button>
@@ -636,19 +684,33 @@ function hdToDbRow(h){
   // note 컬럼 안에 JSON 형태로 같이 보관해서 정보 손실 없이 저장합니다.
   const extra = { dept:h.dept||'', manager:h.manager||'', tel:h.tel||'', commission:h.commission||'',
                   vat:h.vat||'별도', paydate:h.paydate||'', link:h.link||'', no:h.no||0, note_text:h.note||'' };
+  // 메인 사이트 노출용 정보는 display(jsonb) 컬럼에 그대로 저장
+  const display = h.showMain ? {
+    name_zh:h.nameZh||'', name_en:h.nameEn||'',
+    dept_kr:h.deptKr||'', dept_zh:h.deptZh||'', dept_en:h.deptEn||'',
+    cat:h.cat||'', icon:h.icon||'', badge:h.badge||'', badge_pk:!!h.badgePk,
+    treats_kr:h.treatsKr||[], treats_zh:h.treatsZh||[], treats_en:h.treatsEn||[],
+    hours:h.hoursMain||'', link:h.link||'',
+    loc_kr:h.locKr||'', loc_zh:h.locZh||'', loc_en:h.locEn||'',
+    overview_kr:h.overviewKr||'', overview_zh:h.overviewZh||'', overview_en:h.overviewEn||'',
+    cover_image:h.coverImage||'',
+  } : {};
   return {
     name: h.name,
     category: h.dept || '',
     contact: h.tel || '',
     contract_rate: parseFloat(h.commission) || 0,
     contract_status: h.contract || '미정',
-    note: JSON.stringify(extra)
+    note: JSON.stringify(extra),
+    display,
+    show_on_main: !!h.showMain,
   };
 }
 function dbRowToHd(row, idx){
   // 실제 컬럼 → 화면용 필드로 변환 (note 안의 JSON을 풀어서 복원)
   let extra = {};
   try{ extra = JSON.parse(row.note || '{}'); }catch(e){ extra = {}; }
+  const d = row.display || {};
   return {
     no: extra.no || (idx+1),
     name: row.name || '',
@@ -661,7 +723,17 @@ function dbRowToHd(row, idx){
     paydate: extra.paydate || '',
     link: extra.link || '',
     note: extra.note_text || (typeof extra.no === 'undefined' ? (row.note||'') : ''),
-    _dbId: row.id // 실제 uuid 보관 (삭제 시 필요)
+    _dbId: row.id, // 실제 uuid 보관 (삭제 시 필요)
+    // 메인 사이트 노출 정보 복원
+    showMain: !!row.show_on_main,
+    nameZh: d.name_zh||'', nameEn: d.name_en||'',
+    deptKr: d.dept_kr||'', deptZh: d.dept_zh||'', deptEn: d.dept_en||'',
+    cat: d.cat||'성형외과', icon: d.icon||'', badge: d.badge||'', badgePk: !!d.badge_pk,
+    treatsKr: d.treats_kr||[], treatsZh: d.treats_zh||[], treatsEn: d.treats_en||[],
+    hoursMain: d.hours||'',
+    locKr: d.loc_kr||'', locZh: d.loc_zh||'', locEn: d.loc_en||'',
+    overviewKr: d.overview_kr||'', overviewZh: d.overview_zh||'', overviewEn: d.overview_en||'',
+    coverImage: d.cover_image||'',
   };
 }
 async function dbLoadHospitals(){
@@ -1085,16 +1157,163 @@ function openHdModal(no){
     document.getElementById('hd-paydate').value=h.paydate||'';
     document.getElementById('hd-link').value=h.link||'';
     document.getElementById('hd-note').value=h.note||'';
+    // 메인 노출 정보
+    const showMain=!!h.showMain;
+    document.getElementById('hd-show-main').checked=showMain;
+    document.getElementById('hd-main-section').style.display=showMain?'block':'none';
+    document.getElementById('hd-name-zh').value=h.nameZh||'';
+    document.getElementById('hd-name-en').value=h.nameEn||'';
+    document.getElementById('hd-dept-kr').value=h.deptKr||'';
+    document.getElementById('hd-dept-zh').value=h.deptZh||'';
+    document.getElementById('hd-dept-en').value=h.deptEn||'';
+    document.getElementById('hd-cat').value=h.cat||'성형외과';
+    document.getElementById('hd-icon').value=h.icon||'';
+    document.getElementById('hd-badge').value=h.badge||'';
+    document.getElementById('hd-badge-pk').checked=!!h.badgePk;
+    document.getElementById('hd-treats-kr').value=(h.treatsKr||[]).join(',');
+    document.getElementById('hd-treats-zh').value=(h.treatsZh||[]).join(',');
+    document.getElementById('hd-treats-en').value=(h.treatsEn||[]).join(',');
+    document.getElementById('hd-hours').value=h.hoursMain||'';
+    document.getElementById('hd-loc-kr').value=h.locKr||'';
+    document.getElementById('hd-loc-zh').value=h.locZh||'';
+    document.getElementById('hd-loc-en').value=h.locEn||'';
+    document.getElementById('hd-overview-kr').value=h.overviewKr||'';
+    document.getElementById('hd-overview-zh').value=h.overviewZh||'';
+    document.getElementById('hd-overview-en').value=h.overviewEn||'';
+    hdCoverImage=h.coverImage||'';
+    renderHdImgPreview();
   }else{
-    ['hd-name','hd-dept','hd-mgr','hd-tel','hd-comm','hd-paydate','hd-link','hd-note'].forEach(id=>document.getElementById(id).value='');
+    ['hd-name','hd-dept','hd-mgr','hd-tel','hd-comm','hd-paydate','hd-link','hd-note',
+     'hd-name-zh','hd-name-en','hd-dept-kr','hd-dept-zh','hd-dept-en','hd-icon','hd-badge',
+     'hd-treats-kr','hd-treats-zh','hd-treats-en','hd-hours','hd-loc-kr','hd-loc-zh','hd-loc-en',
+     'hd-overview-kr','hd-overview-zh','hd-overview-en'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('hd-contract').value='미정';
+    document.getElementById('hd-cat').value='성형외과';
+    document.getElementById('hd-show-main').checked=false;
+    document.getElementById('hd-main-section').style.display='none';
+    document.getElementById('hd-badge-pk').checked=false;
+    hdCoverImage='';
+    renderHdImgPreview();
   }
   document.getElementById('hd-modal').classList.add('open');
+}
+let hdCoverImage='';
+function renderHdImgPreview(){
+  const el=document.getElementById('hd-img-preview');
+  el.innerHTML=hdCoverImage?`<div style="position:relative;display:inline-block;"><img src="${hdCoverImage}" style="width:140px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><button onclick="hdCoverImage='';renderHdImgPreview();" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;font-size:11px;">✕</button></div>`:'<div style="font-size:11px;color:var(--gray);">이미지 없음</div>';
+}
+function hdImgUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>10*1024*1024){alert('10MB를 초과합니다.');return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=800;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      hdCoverImage=canvas.toDataURL('image/jpeg',0.75);
+      renderHdImgPreview();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+// AI로 한국어 입력값을 중국어/영어로 한번에 자동번역 (Edge Function 프록시 경유, 클라이언트에 API키 노출 없음)
+async function hdAiTranslate(){
+  const nameKr=document.getElementById('hd-name').value.trim();
+  const deptKr=document.getElementById('hd-dept-kr').value.trim()||document.getElementById('hd-dept').value.trim();
+  const treatsKr=document.getElementById('hd-treats-kr').value.trim();
+  const locKr=document.getElementById('hd-loc-kr').value.trim();
+  const overviewKr=document.getElementById('hd-overview-kr').value.trim();
+  if(!nameKr){alert('병원명을 먼저 입력하세요.');return;}
+  const btn=document.getElementById('hd-ai-btn');
+  btn.disabled=true;btn.textContent='⏳ 번역 중...';
+  try{
+    const prompt=`다음 한국 병원 정보를 중국어(간체)와 영어로 번역해서 정확히 이 JSON 형식으로만 답하세요. 다른 말은 절대 하지 마세요:
+{"name_zh":"","name_en":"","dept_zh":"","dept_en":"","treats_zh":"","treats_en":"","loc_zh":"","loc_en":"","overview_zh":"","overview_en":""}
+
+병원명: ${nameKr}
+진료부서: ${deptKr}
+주요시술(쉼표구분): ${treatsKr}
+위치: ${locKr}
+소개글: ${overviewKr}
+
+treats_zh/treats_en도 원본처럼 쉼표로 구분해서 각 항목을 번역하세요.`;
+    const res=await fetch(`${SUPA_URL}/functions/v1/ai-chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
+      body:JSON.stringify({messages:[{role:'user',content:prompt}],max_tokens:800})
+    });
+    const isStream=(res.headers.get('content-type')||'').includes('text/event-stream');
+    let text='';
+    if(isStream){
+      const reader=res.body.getReader();const decoder=new TextDecoder();let buffer='';
+      while(true){
+        const{done,value}=await reader.read();if(done)break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n');buffer=lines.pop();
+        for(const line of lines){
+          if(!line.startsWith('data:'))continue;
+          const j=line.slice(5).trim();if(!j||j==='[DONE]')continue;
+          try{const evt=JSON.parse(j);if(evt.type==='content_block_delta'&&evt.delta?.type==='text_delta')text+=evt.delta.text;}catch(e){}
+        }
+      }
+    }else{
+      const data=await res.json();
+      if(data.error==='NO_API_KEY'){alert('AI 번역 키가 아직 설정되지 않았습니다. 직접 입력해주세요.');btn.disabled=false;btn.textContent='✨ AI 자동번역 (한국어→중국어/영어)';return;}
+      text=data.content?.[0]?.text||'';
+    }
+    const match=text.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error('AI 응답을 해석하지 못했습니다');
+    const result=JSON.parse(match[0]);
+    document.getElementById('hd-name-zh').value=result.name_zh||'';
+    document.getElementById('hd-name-en').value=result.name_en||'';
+    document.getElementById('hd-dept-zh').value=result.dept_zh||'';
+    document.getElementById('hd-dept-en').value=result.dept_en||'';
+    document.getElementById('hd-treats-zh').value=result.treats_zh||'';
+    document.getElementById('hd-treats-en').value=result.treats_en||'';
+    document.getElementById('hd-loc-zh').value=result.loc_zh||'';
+    document.getElementById('hd-loc-en').value=result.loc_en||'';
+    document.getElementById('hd-overview-zh').value=result.overview_zh||'';
+    document.getElementById('hd-overview-en').value=result.overview_en||'';
+  }catch(e){
+    alert('AI 번역 중 오류가 발생했습니다: '+e.message+'\n직접 입력해주세요.');
+  }
+  btn.disabled=false;btn.textContent='✨ AI 자동번역 (한국어→중국어/영어)';
 }
 async function saveHd(){
   const name=document.getElementById('hd-name').value.trim();
   if(!name){alert('병원명을 입력하세요');return;}
-  const data={name,dept:document.getElementById('hd-dept').value.trim(),contract:document.getElementById('hd-contract').value,manager:document.getElementById('hd-mgr').value.trim(),tel:document.getElementById('hd-tel').value.trim(),commission:document.getElementById('hd-comm').value.trim(),vat:document.getElementById('hd-vat').value,paydate:document.getElementById('hd-paydate').value.trim(),link:document.getElementById('hd-link').value.trim(),note:document.getElementById('hd-note').value.trim()};
+  const data={name,dept:document.getElementById('hd-dept').value.trim(),contract:document.getElementById('hd-contract').value,manager:document.getElementById('hd-mgr').value.trim(),tel:document.getElementById('hd-tel').value.trim(),commission:document.getElementById('hd-comm').value.trim(),vat:document.getElementById('hd-vat').value,paydate:document.getElementById('hd-paydate').value.trim(),link:document.getElementById('hd-link').value.trim(),note:document.getElementById('hd-note').value.trim(),
+    showMain:document.getElementById('hd-show-main').checked,
+    nameZh:document.getElementById('hd-name-zh').value.trim(),
+    nameEn:document.getElementById('hd-name-en').value.trim(),
+    deptKr:document.getElementById('hd-dept-kr').value.trim(),
+    deptZh:document.getElementById('hd-dept-zh').value.trim(),
+    deptEn:document.getElementById('hd-dept-en').value.trim(),
+    cat:document.getElementById('hd-cat').value,
+    icon:document.getElementById('hd-icon').value.trim(),
+    badge:document.getElementById('hd-badge').value.trim(),
+    badgePk:document.getElementById('hd-badge-pk').checked,
+    treatsKr:document.getElementById('hd-treats-kr').value.split(',').map(s=>s.trim()).filter(Boolean),
+    treatsZh:document.getElementById('hd-treats-zh').value.split(',').map(s=>s.trim()).filter(Boolean),
+    treatsEn:document.getElementById('hd-treats-en').value.split(',').map(s=>s.trim()).filter(Boolean),
+    hoursMain:document.getElementById('hd-hours').value.trim(),
+    locKr:document.getElementById('hd-loc-kr').value.trim(),
+    locZh:document.getElementById('hd-loc-zh').value.trim(),
+    locEn:document.getElementById('hd-loc-en').value.trim(),
+    overviewKr:document.getElementById('hd-overview-kr').value.trim(),
+    overviewZh:document.getElementById('hd-overview-zh').value.trim(),
+    overviewEn:document.getElementById('hd-overview-en').value.trim(),
+    coverImage:hdCoverImage,
+  };
+  if(data.showMain && (!data.nameZh && !data.nameEn)){
+    if(!confirm('메인 노출용 중문/영문 이름이 비어있습니다. 그래도 저장하시겠습니까? (메인 페이지에 안 보일 수 있어요)'))return;
+  }
   if(hdEditId!==null){const i=HD.findIndex(h=>h.no===hdEditId);if(i>=0)HD[i]={...HD[i],...data};}
   else{data.no=HD.reduce((m,h)=>Math.max(m,h.no||0),0)+1;HD.push(data);}
   document.getElementById('hd-modal').classList.remove('open');

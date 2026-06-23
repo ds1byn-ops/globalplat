@@ -1615,8 +1615,9 @@ function filterHosps(){
       const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
       const recLabel = {zh:'⭐ 推荐医院',ko:'⭐ 추천 병원',en:'⭐ Recommended'}[lang] || '⭐ 추천 병원';
       const recIntro=HOSP_INTROS[h.kr];
-      const recImg=recIntro&&recIntro.images&&recIntro.images[0]?
-        `<img src="${recIntro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
+      const recImgSrc=(recIntro&&recIntro.images&&recIntro.images[0])||h.dynamicImage||'';
+      const recImg=recImgSrc?
+        `<img src="${recImgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
       return`<div class="hosp-recommend-card" data-kr="${h.kr}">
         <span class="badge-recommend">${recLabel}</span>
         <div class="hosp-img" style="position:relative;">${recImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
@@ -1651,8 +1652,9 @@ function filterHosps(){
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
     const intro=HOSP_INTROS[h.kr];
-    const cardImg=intro&&intro.images&&intro.images[0]?
-      `<img src="${intro.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
+    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||'';
+    const cardImg=imgSrc?
+      `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     return`<div class="hosp-card" data-kr="${h.kr}">
       <div class="hosp-img" style="position:relative;">${cardImg||h.icon}<div class="hosp-badge-tag${h.badgePk?' pk':''}" style="position:absolute;">${badgeLabel(h.badge)}</div></div>
       <div class="hosp-body">
@@ -1731,7 +1733,7 @@ function renderDetail(kr){
   document.getElementById('d-icon').textContent=h.icon;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-en').textContent=h.en;
-  document.getElementById('d-loc').textContent=t(h.loc);
+  document.getElementById('d-loc').textContent=h.locMap?(h.locMap[lang]||h.locMap.zh||h.locMap.en):t(h.loc);
   document.getElementById('d-hours').textContent=h.hours;
   document.getElementById('d-link').href=h.link;document.getElementById('d-link').textContent=h.link;
   // DB에서 소개 이미지/텍스트 추가 로드
@@ -2212,10 +2214,43 @@ const FK_FAQ_PAGE = [
   },
 ];
 
+// 백오피스에서 "메인 노출" 체크한 신규 병원을 불러와 HOSPS에 합침
+async function loadDynamicHospitals(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=id,name,display&show_on_main=eq.true`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const rows=await r.json();
+    if(!Array.isArray(rows))return;
+    rows.forEach(row=>{
+      const d=row.display||{};
+      if(!d.name_zh && !d.name_en)return; // 필수 정보 없으면 건너뜀
+      HOSPS.push({
+        kr:row.name,
+        zh:d.name_zh||row.name,
+        en:d.name_en||row.name,
+        dept_kr:d.dept_kr||'',dept_zh:d.dept_zh||'',dept_en:d.dept_en||'',
+        cat:d.cat||'기타서비스',
+        icon:d.icon||'🏥',
+        badge:d.badge||'NEW',
+        badgePk:!!d.badge_pk,
+        treats_kr:d.treats_kr||[],treats_zh:d.treats_zh||[],treats_en:d.treats_en||[],
+        hours:d.hours||'-',
+        link:d.link||'#',
+        locMap:(d.loc_kr||d.loc_zh||d.loc_en)?{ko:d.loc_kr,zh:d.loc_zh,en:d.loc_en}:null,
+        overview_ko:d.overview_kr||'',overview_zh:d.overview_zh||'',overview_en:d.overview_en||'',
+        dynamicImage:d.cover_image||'',
+      });
+    });
+    if(rows.length){renderCats();filterHosps();}
+  }catch(e){ console.error('동적 병원 로딩 실패', e); }
+}
+
 setLang('zh');
 loadReviews();
 loadHospIntros();
 fkhLoadRecommendedSetting();
+loadDynamicHospitals();
 
 // 외부 터치/클릭 시 언어 메뉴 닫기
 document.addEventListener('click',function(e){
