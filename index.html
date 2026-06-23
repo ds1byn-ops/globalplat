@@ -3705,7 +3705,8 @@ function fkAiChatInit(){
   const allClickable = document.querySelectorAll('button, a, div[onclick], [role="button"]');
   let foundExisting = false;
   allClickable.forEach(el => {
-    if(el.textContent && el.textContent.includes('AI 상담') && el.id !== 'fk-ai-trigger-fab'){
+    if(el.textContent && el.textContent.includes('AI 상담') && el.id !== 'fk-ai-trigger-fab'
+       && !el.closest('#ai-modal-bg') && !el.closest('#fk-ai-overlay')){
       el.addEventListener('click', function(e){
         e.preventDefault();
         openAiChat();
