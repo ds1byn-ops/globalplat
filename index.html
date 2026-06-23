@@ -1213,6 +1213,48 @@ function addAiMsg(role,text){
   el.scrollTop=el.scrollHeight;
 }
 
+// 스트리밍용: 빈 말풍선을 만들고, 안의 텍스트를 계속 채워나갈 수 있는 엘리먼트를 반환
+function addAiMsgStream(role){
+  const el=document.getElementById('ai-messages');
+  const isAi=role==='ai';
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`display:flex;justify-content:${isAi?'flex-start':'flex-end'};`;
+  const inner=document.createElement('div');
+  inner.style.cssText=`max-width:82%;padding:10px 13px;border-radius:${isAi?'4px 14px 14px 14px':'14px 4px 14px 14px'};background:${isAi?'var(--white)':'linear-gradient(135deg,var(--gn),var(--gn2))'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.65;white-space:pre-wrap;box-shadow:0 1px 4px rgba(0,0,0,0.06);min-height:1.2em;`;
+  wrap.appendChild(inner);
+  el.appendChild(wrap);
+  el.scrollTop=el.scrollHeight;
+  return inner;
+}
+
+// 공용: Claude API의 SSE 스트림을 읽어서 글자가 도착할 때마다 onDelta로 전달 (타이핑 효과)
+async function readClaudeStream(res, onDelta){
+  const reader=res.body.getReader();
+  const decoder=new TextDecoder();
+  let buffer='';
+  let full='';
+  while(true){
+    const {done,value}=await reader.read();
+    if(done)break;
+    buffer+=decoder.decode(value,{stream:true});
+    const lines=buffer.split('\n');
+    buffer=lines.pop(); // 마지막 줄은 아직 안 끝났을 수 있으니 다음 루프로 넘김
+    for(const line of lines){
+      if(!line.startsWith('data:'))continue;
+      const jsonStr=line.slice(5).trim();
+      if(!jsonStr||jsonStr==='[DONE]')continue;
+      try{
+        const evt=JSON.parse(jsonStr);
+        if(evt.type==='content_block_delta' && evt.delta?.type==='text_delta'){
+          full+=evt.delta.text;
+          onDelta(full,evt.delta.text);
+        }
+      }catch(e){ /* 한 청크가 잘려서 온 경우 — 다음 루프에서 자연히 무시 */ }
+    }
+  }
+  return full;
+}
+
 function addAiTyping(){
   const el=document.getElementById('ai-messages');
   const div=document.createElement('div');
@@ -1246,15 +1288,25 @@ async function sendAiMsgText(msg, showUser=true){
         max_tokens:600,
       })
     });
-    const data=await res.json();
+
+    const isStream=(res.headers.get('content-type')||'').includes('text/event-stream');
     document.getElementById('ai-typing')?.remove();
 
-    if(data.error==='NO_API_KEY'){
-      // ⚠️ 서버(Supabase Edge Function)에 Claude API 키가 아직 설정되지 않은 상태
-      //    → FAQ 키워드 매칭으로 폴백 (Anthropic 콘솔에서 키 발급 후 Supabase 시크릿에 등록하면 자동으로 실제 AI 응답으로 전환됩니다)
-      const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
-      const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
-      const reply = matched || fallbacks[aiLang] || fallbacks.en;
+    if(!isStream){
+      const data=await res.json();
+      if(data.error==='NO_API_KEY'){
+        // ⚠️ 서버(Supabase Edge Function)에 Claude API 키가 아직 설정되지 않은 상태
+        //    → FAQ 키워드 매칭으로 폴백 (Anthropic 콘솔에서 키 발급 후 Supabase 시크릿에 등록하면 자동으로 실제 AI 응답으로 전환됩니다)
+        const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
+        const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
+        const reply = matched || fallbacks[aiLang] || fallbacks.en;
+        aiHistory.push({role:'assistant',content:reply});
+        addAiMsg('ai',reply);
+        showAiBookingPrompt();
+        if(btn)btn.disabled=false;
+        return;
+      }
+      const reply=data.content?.[0]?.text||'...';
       aiHistory.push({role:'assistant',content:reply});
       addAiMsg('ai',reply);
       showAiBookingPrompt();
@@ -1262,9 +1314,14 @@ async function sendAiMsgText(msg, showUser=true){
       return;
     }
 
-    const reply=data.content?.[0]?.text||'...';
-    aiHistory.push({role:'assistant',content:reply});
-    addAiMsg('ai',reply);
+    // 실시간 타이핑 효과로 스트리밍 출력
+    const bubble=addAiMsgStream('ai');
+    const elMsgs=document.getElementById('ai-messages');
+    const fullText=await readClaudeStream(res,(full)=>{
+      bubble.textContent=full;
+      elMsgs.scrollTop=elMsgs.scrollHeight;
+    });
+    aiHistory.push({role:'assistant',content:fullText||'...'});
     // 예약 버튼 표시
     showAiBookingPrompt();
   }catch(e){
@@ -3247,6 +3304,17 @@ function fkaiAddMsg(role, text){
   body.scrollTop = body.scrollHeight;
 }
 
+// 스트리밍용: 빈 말풍선을 만들고, 채워나갈 .bubble 엘리먼트와 부모 div를 함께 반환
+function fkaiAddMsgStream(){
+  const body = document.getElementById('fkai-body');
+  const div = document.createElement('div');
+  div.className = 'fkai-msg bot';
+  div.innerHTML = `<div class="bubble-avatar">🤖</div><div class="bubble"></div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  return {wrap:div, bubble:div.querySelector('.bubble')};
+}
+
 function fkaiShowTyping(){
   const body = document.getElementById('fkai-body');
   const div = document.createElement('div');
@@ -3278,16 +3346,20 @@ async function fkaiSend(){
   await new Promise(r => setTimeout(r, 500 + Math.random()*400)); // 자연스러운 응답 지연
 
   let reply, isHandoff = false;
-  // Edge Function 프록시를 항상 호출 시도 — 서버에 Claude API 키가 없으면
-  // fkaiCallClaudeAPI가 null을 반환하고 아래에서 FAQ 매칭으로 자동 폴백됩니다.
+  // Edge Function 프록시를 항상 호출 시도 — 서버에 Claude API 키가 없거나
+  // NEED_HANDOFF 신호면 fkaiCallClaudeAPI가 null을 반환하고 아래에서 FAQ 매칭으로 자동 폴백됩니다.
+  // 정상 응답인 경우 fkaiCallClaudeAPI 내부에서 이미 실시간 스트리밍으로 화면에 글자가 채워집니다.
   try{
     reply = await fkaiCallClaudeAPI(text);
   }catch(e){
     console.error('AI API 오류', e);
+    fkaiHideTyping();
     reply = null;
   }
-  if(!reply){
-    // FAQ 매칭 모드 (API 키 없거나 호출 실패 시 폴백)
+
+  if(reply === null){
+    // FAQ 매칭 모드 (API 키 없거나 NEED_HANDOFF, 또는 호출 실패 시 폴백) — 스트리밍 버블이 없는 상태이므로 새 말풍선으로 표시
+    fkaiHideTyping();
     const matched = fkaiMatchFaq(text);
     if(matched){
       reply = matched;
@@ -3295,13 +3367,14 @@ async function fkaiSend(){
       reply = FK_HANDOFF_MSG[fkaiLang];
       isHandoff = true;
     }
+    fkaiAddMsg('bot', reply);
+    fkaiHistory.push({role:'assistant', content:reply});
+    if(isHandoff) fkaiShowHandoff();
+    return;
   }
 
-  fkaiHideTyping();
-  fkaiAddMsg('bot', reply);
+  // 스트리밍으로 이미 화면에 표시 완료된 경우
   fkaiHistory.push({role:'assistant', content:reply});
-
-  if(isHandoff) fkaiShowHandoff();
 }
 
 function fkaiMatchFaq(text, langOverride){
@@ -3342,11 +3415,30 @@ async function fkaiCallClaudeAPI(userText){
     })
   });
   if(!res.ok) throw new Error('API ' + res.status);
-  const data = await res.json();
-  if(data.error === 'NO_API_KEY') return null; // 서버(Supabase) 쪽에 Claude API 키가 아직 설정되지 않음 → FAQ 폴백
-  const text = data.content?.[0]?.text || '';
-  if(text.includes('NEED_HANDOFF')) return null;
-  return text;
+
+  const isStream = (res.headers.get('content-type')||'').includes('text/event-stream');
+  if(!isStream){
+    const data = await res.json();
+    if(data.error === 'NO_API_KEY') return null; // 서버(Supabase) 쪽에 Claude API 키가 아직 설정되지 않음 → FAQ 폴백
+    const text = data.content?.[0]?.text || '';
+    if(text.includes('NEED_HANDOFF')) return null;
+    return text;
+  }
+
+  // 실시간 타이핑 효과로 스트리밍 출력 (첫 글자가 오면 typing indicator 숨기고 말풍선으로 교체)
+  fkaiHideTyping();
+  const {wrap, bubble} = fkaiAddMsgStream();
+  const body = document.getElementById('fkai-body');
+  const fullText = await readClaudeStream(res, (full)=>{
+    bubble.textContent = full;
+    body.scrollTop = body.scrollHeight;
+  });
+
+  if(!fullText || fullText.includes('NEED_HANDOFF')){
+    wrap.remove(); // 핸드오프 신호면 화면에 보여줬던 버블을 지우고 FAQ/상담원 연결 메시지로 대체
+    return null;
+  }
+  return fullText;
 }
 
 function fkaiShowHandoff(){
