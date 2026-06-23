@@ -674,7 +674,7 @@ let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
 let calY=2026, calM=5;
 
 // ── Supabase ──
-const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d','Content-Type':'application/json'};
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
@@ -684,7 +684,7 @@ async function dbSave(table,rows){
   // 전체 삭제 (id > 0 조건 필터)
   await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
     method:'DELETE',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'}
   });
   if(!rows.length)return;
   // 재삽입
@@ -695,7 +695,7 @@ async function dbSave(table,rows){
   });
 }
 async function dbDeleteAll(table){
-  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'}});
 }
 
 // ── 로그인 ──
@@ -1394,13 +1394,13 @@ async function submitNotice(){
     if(editingNoticeId){
       res=await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${editingNoticeId}`,{
         method:'PATCH',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d','Prefer':'return=minimal'},
         body:JSON.stringify({data:nd})
       });
     }else{
       res=await fetch(`${SUPA_URL}/rest/v1/notices`,{
         method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d','Prefer':'return=minimal'},
         body:JSON.stringify({data:nd})
       });
     }
@@ -1416,7 +1416,7 @@ async function loadNotices(){
   const fType=document.getElementById('notice-filter-type')?.value||'';
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/notices?select=*&order=id.desc&limit=200`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'}
     });
     let notices=(await r.json()).map(x=>x.data||x).filter(Boolean);
     if(fTarget==='all')notices=notices.filter(n=>n.target==='all');
@@ -1450,7 +1450,7 @@ async function deleteNotice(id){
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/notices?data->>id=eq.${id}`,{
       method:'DELETE',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'}
     });
     if(r.ok){alert('삭제되었습니다.');loadNotices();}
     else alert('삭제 실패');

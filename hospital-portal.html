@@ -355,6 +355,8 @@ tr:hover td{background:#fafaf8;}
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
+// 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원/병원포털 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
+const STAFF_KEY='be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d';
 
 // 마스터 계정
 const MASTER_ID='fkmaster';
@@ -398,7 +400,7 @@ let currentHosp=null, BK=[], calY=2026, calM=5, editBkId=null;
 
 // ── Supabase ──
 async function dbLoad(){
-  const r=await fetch(`${SUPA_URL}/rest/v1/bookings?select=*&order=id.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  const r=await fetch(`${SUPA_URL}/rest/v1/bookings?select=*&order=id.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}});
   const data=await r.json();
   return Array.isArray(data)?data.map(x=>x.data).filter(Boolean):[];
 }
@@ -406,13 +408,13 @@ async function dbSaveAll(rows){
   // 전체 삭제 (id > 0 조건으로 필터)
   await fetch(`${SUPA_URL}/rest/v1/bookings?id=gt.0`,{
     method:'DELETE',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
   });
   if(!rows.length)return;
   // 재삽입
   await fetch(`${SUPA_URL}/rest/v1/bookings`,{
     method:'POST',
-    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
     body:JSON.stringify(rows.map(r=>({data:r})))
   });
 }
@@ -692,7 +694,7 @@ async function renderNotice(){
   el.innerHTML='<div style="text-align:center;padding:30px;">로딩 중...</div>';
   try{
     const r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=50',{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
     });
     if(!r.ok){el.innerHTML='<div style="color:#dc2626;padding:20px;">공지 로드 실패('+r.status+')</div>';return;}
     const all=await r.json();
@@ -770,7 +772,7 @@ async function loadIntro(){
   try{
     // hosp_intro 테이블에서 로드 (saveIntro와 동일한 테이블)
     const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
     });
     const all=await r.json();
     const row=Array.isArray(all)?all.find(x=>x.data&&x.data.name===currentHosp.name):null;
@@ -786,7 +788,7 @@ async function loadIntro(){
     }else{
       // hosp_intro에 없으면 hospitals 테이블에서도 시도
       const r2=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{
-        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
       });
       const all2=await r2.json();
       const hospData=Array.isArray(all2)?all2.map(x=>x.data||x).filter(x=>x&&x.name===currentHosp.name):[];
@@ -817,13 +819,13 @@ async function saveIntro(){
   };
   try{
     // 기존 데이터 찾아서 업데이트
-    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const r=await fetch(`${SUPA_URL}/rest/v1/hosp_intro?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}});
     const all=await r.json();
     const existing=Array.isArray(all)?all.find(x=>x.data&&x.data.name===currentHosp.name):null;
     if(existing){
-      await fetch(`${SUPA_URL}/rest/v1/hosp_intro?id=eq.${existing.id}`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({data:introData})});
+      await fetch(`${SUPA_URL}/rest/v1/hosp_intro?id=eq.${existing.id}`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Content-Type':'application/json'},body:JSON.stringify({data:introData})});
     }else{
-      await fetch(`${SUPA_URL}/rest/v1/hosp_intro`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({data:introData})});
+      await fetch(`${SUPA_URL}/rest/v1/hosp_intro`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({data:introData})});
     }
     alert('저장되었습니다! 플랫폼에 즉시 반영됩니다.');
   }catch(e){alert('저장 실패: '+e.message);}
@@ -859,7 +861,7 @@ if(saved){
 async function checkNoticePopup(){
   if(localStorage.getItem('fk_no_popup_date')===new Date().toISOString().slice(0,10))return;
   try{
-    var r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=20',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    var r=await fetch(SUPA_URL+'/rest/v1/notices?select=*&order=id.desc&limit=20',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}});
     if(!r.ok)return;
     var all=await r.json();
     var hn=currentHosp?currentHosp.name:'';
@@ -904,18 +906,18 @@ async function doChangePw(){
   if(nw!==cf){alert('새 비밀번호가 일치하지 않습니다.');return;}
   try{
     // Supabase hospitals 테이블에 저장
-    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}});
     const all=await r.json();
     const row=all.find(x=>(x.data||x).name===currentHosp.name);
     if(row){
       const newData=Object.assign({},row.data||row,{portal_pw:nw});
       await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
-        method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
         body:JSON.stringify({data:newData})
       });
     }else{
       await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
-        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
         body:JSON.stringify({data:{name:currentHosp.name,portal_pw:nw}})
       });
     }
@@ -970,7 +972,7 @@ async function deleteCalBk(id){
   try{
     await fetch(`${SUPA_URL}/rest/v1/bookings?id=eq.${id}`,{
       method:'DELETE',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
     });
     await dbLoad();
     document.getElementById('cal-detail').style.display='none';

@@ -605,7 +605,8 @@ let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
 let calY=2026, calM=5;
 
 // ── Supabase ──
-const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+// 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
+const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'};
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
@@ -614,7 +615,7 @@ async function dbLoad(table){
 async function dbSave(table,rows){
   await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
     method:'DELETE',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    headers:{...headers}
   });
   if(!rows.length)return;
   await fetch(`${SUPA_URL}/rest/v1/${table}`,{
@@ -672,7 +673,7 @@ async function dbSaveHospitals(rows){
   // 전체를 지우고 다시 넣는 기존 dbSave 패턴과 동일하게 동작
   await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
     method:'DELETE',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'}
+    headers:{...headers,'Prefer':'return=minimal'}
   });
   if(!rows.length)return;
   await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
@@ -682,7 +683,7 @@ async function dbSaveHospitals(rows){
   });
 }
 async function dbDeleteAll(table){
-  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{...headers}});
 }
 
 // ── 로그인 ──
