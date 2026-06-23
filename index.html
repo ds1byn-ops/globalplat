@@ -395,7 +395,7 @@ a{text-decoration:none;color:inherit;}
 </section>
 
 <!-- 전체 리뷰 모달 -->
-<div id="all-reviews-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:800;overflow-y:auto;padding:16px;" onclick="if(event.target===this)closeAllReviews()">
+<div id="all-reviews-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:800;overflow-y:auto;padding:16px;" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeAllReviews() }">
   <div style="background:#fff;border-radius:16px;max-width:900px;margin:20px auto;padding:24px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <h2 style="font-size:18px;font-weight:800;" data-i18n="review_title">真实用户评价</h2>
@@ -521,7 +521,7 @@ a{text-decoration:none;color:inherit;}
 
 </div>
 <!-- AI 다국어 상담 모달 -->
-<div class="modal-bg" id="ai-modal-bg" onclick="if(event.target===this)closeAiChat()">
+<div class="modal-bg" id="ai-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeAiChat() }">
 <div class="modal" style="width:500px;max-height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:20px;">
   <!-- 헤더 -->
   <div style="background:linear-gradient(135deg,#4CAF8C,#1A6B4A);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
@@ -543,7 +543,7 @@ a{text-decoration:none;color:inherit;}
 </div>
 </div>
 <!-- 예약 모달 -->
-<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+<div class="modal-bg" id="modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeModal() }">
 <div class="modal">
   <h2><span data-i18n="modal_title">预约咨询</span><button onclick="closeModal()">✕</button></h2>
   <div id="modal-step1">
@@ -573,6 +573,7 @@ a{text-decoration:none;color:inherit;}
       </div>
       <div class="fitem"><label data-i18n="f_date">希望日期</label><input type="date" id="f-date"></div>
       <div class="fitem"><label data-i18n="f_contact">微信/联系方式</label><input type="text" id="f-contact" placeholder="WeChat ID"></div>
+      <div class="fitem"><label id="f-introducer-label">소개자 코드 (선택)</label><input type="text" id="f-introducer" placeholder="4자리 숫자" maxlength="4" inputmode="numeric" pattern="[0-9]*"></div>
       <div class="fitem"><label data-i18n="f_note">备注</label><textarea id="f-note" placeholder="..."></textarea></div>
       <button class="btn-full" onclick="submitBooking()" data-i18n="f_submit">提交预约申请 ✓</button>
     </div>
@@ -592,7 +593,7 @@ a{text-decoration:none;color:inherit;}
 
 
 <!-- 서비스 신청 모달 -->
-<div class="modal-bg" id="svc-modal-bg" onclick="if(event.target===this)closeSvcModal()">
+<div class="modal-bg" id="svc-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeSvcModal() }">
 <div class="modal">
   <h2><span id="svc-modal-title">서비스 신청</span><button onclick="closeSvcModal()">✕</button></h2>
   <div id="svc-form">
@@ -633,7 +634,7 @@ a{text-decoration:none;color:inherit;}
 </div>
 
 <!-- 회사소개 모달 -->
-<div class="modal-bg" id="about-modal-bg" onclick="if(event.target===this)document.getElementById('about-modal-bg').classList.remove('open')">
+<div class="modal-bg" id="about-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ document.getElementById('about-modal-bg').classList.remove('open') }">
 <div class="modal" style="width:600px;max-height:85vh;overflow-y:auto;">
   <h2>
     <span data-i18n="f_about">关于我们</span>
@@ -700,7 +701,7 @@ a{text-decoration:none;color:inherit;}
 </div>
 </div>
 <!-- 리뷰 작성 모달 -->
-<div class="modal-bg" id="review-modal-bg" onclick="if(event.target===this)closeReviewModal()">
+<div class="modal-bg" id="review-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeReviewModal() }">
 <div class="modal" style="max-width:440px;">
   <h2 id="review-modal-title"><span>리뷰 작성</span><button onclick="closeReviewModal()">✕</button></h2>
   <div id="review-form">
@@ -1779,6 +1780,11 @@ function closeModal(){document.getElementById('modal-bg').classList.remove('open
 async function submitBooking(){
   const name=document.getElementById('f-name').value.trim();
   if(!name){alert(lang==='ko'?'성명을 입력하세요':lang==='zh'?'请输入姓名':'Please enter your name');return;}
+  const introducerRaw=document.getElementById('f-introducer').value.trim();
+  if(introducerRaw && !/^\d{4}$/.test(introducerRaw)){
+    alert(lang==='ko'?'소개자 코드는 숫자 4자리로 입력해주세요.':lang==='zh'?'介绍人代码请输入4位数字。':'Referrer code must be 4 digits.');
+    return;
+  }
   const booking={
     name,hospital:document.getElementById('f-hosp').value,
     treatment:document.getElementById('f-treat').value,
@@ -1787,12 +1793,16 @@ async function submitBooking(){
     datetime:document.getElementById('f-date').value+' 00:00',
     contact:document.getElementById('f-contact').value,
     note:document.getElementById('f-note').value,
-    status:'대기',source:'B2C_WEB',inflow_type:'플랫폼',introducer:'플랫폼',
+    status:'대기',source:'B2C_WEB',inflow_type:'플랫폼',introducer:introducerRaw||'플랫폼',
     hosp_comm_rate:20,dob:'',noshow:'N',hosp_paydate:'',hosp_paidamt:0,paid_comm:0,
     dept:'피부',amount:0,expected:0,vat:'별도',tax_invoice:'N',
     id:Date.now(),
   };
-  await dbInsert('bookings',booking);
+  const ok=await dbInsert('bookings',booking);
+  if(!ok){
+    alert(lang==='ko'?'전송 중 오류가 발생했습니다. 다시 시도해주세요.':lang==='zh'?'发送时发生错误，请重试。':'An error occurred. Please try again.');
+    return;
+  }
   document.getElementById('modal-step1').style.display='none';
   document.getElementById('modal-done').style.display='';
 }
@@ -2363,7 +2373,7 @@ async function loadSharedWanghongs(){
   }
 </style>
 
-<div id="fk-quote-overlay" onclick="if(event.target===this) closeQuoteWidget()">
+<div id="fk-quote-overlay" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeQuoteWidget() }">
   <div id="fk-quote-modal">
     <div class="fkq-header">
       <button class="fkq-close" onclick="closeQuoteWidget()">✕</button>
@@ -2414,6 +2424,9 @@ async function loadSharedWanghongs(){
         <div class="fkq-form-grid">
           <div class="fkq-field"><label id="fkq-contact-label">위챗 / 연락처 *</label><input type="text" id="fkq-contact" placeholder="WeChat ID 또는 전화번호"></div>
           <div class="fkq-field"><label id="fkq-hospital-label">희망 병원 (선택)</label><input type="text" id="fkq-hospital" placeholder="미정이면 비워두세요"></div>
+        </div>
+        <div class="fkq-form-grid">
+          <div class="fkq-field"><label id="fkq-introducer-label">소개자 코드 (선택)</label><input type="text" id="fkq-introducer" placeholder="4자리 숫자" maxlength="4" inputmode="numeric" pattern="[0-9]*"></div>
         </div>
       </div>
 
@@ -2981,6 +2994,11 @@ async function fkqSubmit(){
   const hospital = document.getElementById('fkq-hospital').value.trim();
   const arrival = document.getElementById('fkq-arrival').value;
   const departure = document.getElementById('fkq-departure').value;
+  const introducerRaw = document.getElementById('fkq-introducer').value.trim();
+  if(introducerRaw && !/^\d{4}$/.test(introducerRaw)){
+    alert(lang==='ko'?'소개자 코드는 숫자 4자리로 입력해주세요.':lang==='zh'?'介绍人代码请输入4位数字。':'Referrer code must be 4 digits.');
+    return;
+  }
   const procedures = fkqSelected.map(i => `${i.catLabel}-${i.name}`).join(', ');
   const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
   const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
@@ -3005,7 +3023,8 @@ async function fkqSubmit(){
         name, contact, nationality: nation, hospital: hospital || null,
         arrival_date: arrival || null, departure_date: departure || null,
         procedures, quote_min: totalMin, quote_max: totalMax,
-        status: '신규', source: 'patient_web_quote_widget'
+        status: '신규', source: 'patient_web_quote_widget',
+        introducer_code: introducerRaw || null
       })
     });
     if(!res.ok){
@@ -3152,7 +3171,7 @@ function fkqResetWidget(){
   #fk-ai-trigger-fab.show{display:flex;}
 </style>
 
-<div id="fk-ai-overlay" onclick="if(event.target===this) closeAiChat()">
+<div id="fk-ai-overlay" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeAiChat() }">
   <div id="fk-ai-modal">
     <div class="fkai-header">
       <div class="avatar">🤖</div>

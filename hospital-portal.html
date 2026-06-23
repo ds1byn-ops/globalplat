@@ -325,7 +325,7 @@ tr:hover td{background:#fafaf8;}
 </div><!-- /app -->
 
 <!-- 예약 상세 모달 -->
-<div class="modal-bg" id="bk-modal" onclick="if(event.target===this)closeBkModal()">
+<div class="modal-bg" id="bk-modal" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeBkModal() }">
 <div class="modal">
   <h3>예약 상세 / 처리 <button onclick="closeBkModal()">✕</button></h3>
   <div class="fg">
@@ -844,7 +844,7 @@ if(saved){
 }
 </script>
 
-<div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeNoticePopup()">
+<div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeNoticePopup() }">
   <div style="background:#fff;border-radius:16px;width:460px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
     <div style="background:linear-gradient(135deg,#1A6B4A,#4CAF8C);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
       <div><div style="font-size:14px;font-weight:800;color:#fff;">📢 팔로우코리아 공지사항</div><div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div></div>
@@ -983,7 +983,7 @@ async function deleteCalBk(id){
 </script>
 
 <!-- 비밀번호 변경 모달 -->
-<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:900;align-items:center;justify-content:center;" onclick="if(event.target===this)closeChangePwModal()">
+<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:900;align-items:center;justify-content:center;" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeChangePwModal() }">
 <div style="background:#fff;border-radius:16px;width:340px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
   <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🔑 비밀번호 변경</h3>
   <div style="margin-bottom:10px;">
