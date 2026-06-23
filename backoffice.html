@@ -743,7 +743,9 @@ async function dbLoadHospitals(){
 }
 async function dbSaveHospitals(rows){
   // 전체를 지우고 다시 넣는 기존 dbSave 패턴과 동일하게 동작
-  await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
+  // ⚠️ DELETE에 조건절이 없으면 PostgREST가 안전상 거부해서 기존 데이터가 안 지워지고
+  //    계속 쌓이는 버그가 있었음 — id가 null이 아닌 모든 행을 지우는 조건을 추가
+  await fetch(`${SUPA_URL}/rest/v1/hospitals?id=not.is.null`,{
     method:'DELETE',
     headers:{...headers,'Prefer':'return=minimal'}
   });
