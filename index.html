@@ -1276,9 +1276,10 @@ async function sendAiMsgText(msg, showUser=true){
 }
 
 function showAiBookingPrompt(){
+  // 주제 버튼을 다시 채워서, 예약/계속질문 버튼과 함께 같이 보이게 함
+  showAiTopicOptions();
   const options=document.getElementById('ai-options');
   options.style.display='flex';
-  options.innerHTML='';
   const bookLabels={zh:'📅 立即预约',ko:'📅 지금 예약하기',en:'📅 Book Now',vi:'📅 Đặt lịch',th:'📅 จองเลย',ja:'📅 今すぐ予約',ru:'📅 Записаться'};
   const moreLabels={zh:'💬 继续提问',ko:'💬 계속 질문',en:'💬 Keep asking',vi:'💬 Hỏi thêm',th:'💬 ถามต่อ',ja:'💬 続ける',ru:'💬 Продолжить'};
   const bookBtn=document.createElement('button');
@@ -1288,7 +1289,7 @@ function showAiBookingPrompt(){
   const moreBtn=document.createElement('button');
   moreBtn.textContent=moreLabels[aiLang]||moreLabels.en;
   moreBtn.style.cssText='padding:8px 14px;background:var(--white);color:var(--gn2);border:1px solid var(--gn);border-radius:20px;font-size:12px;cursor:pointer;';
-  moreBtn.onclick=()=>{clearAiOptions();document.getElementById('ai-input').focus();};
+  moreBtn.onclick=()=>{document.getElementById('ai-input').focus();};
   options.appendChild(bookBtn);
   options.appendChild(moreBtn);
 }
