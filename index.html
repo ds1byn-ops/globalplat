@@ -781,6 +781,9 @@ a{text-decoration:none;color:inherit;}
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
+// AI 챗봇 프록시 — Anthropic API 키를 브라우저에 노출하지 않기 위해
+// Supabase Edge Function을 거쳐서 호출 (키는 서버 쪽 Secret으로만 보관)
+const FK_AI_PROXY_URL = SUPA_URL + '/functions/v1/ai-chat';
 
 async function dbInsert(table,row){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},body:JSON.stringify({data:row})});
@@ -1542,34 +1545,32 @@ async function sendAiMsgText(msg, showUser=true){
   addAiTyping();
   const btn=document.getElementById('ai-send-btn');if(btn)btn.disabled=true;
 
-  // ⚠️ Claude API 키가 아직 발급되지 않은 동안은 FAQ 키워드 매칭으로 응답
-  //    (FK_AI_CONFIG.apiKey에 'sk-ant-...' 키를 넣으면 자동으로 실제 AI 응답으로 전환됩니다)
-  if(!FK_AI_CONFIG.apiKey){
-    await new Promise(r=>setTimeout(r,500+Math.random()*400));
-    document.getElementById('ai-typing')?.remove();
-    const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
-    const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
-    const reply = matched || fallbacks[aiLang] || fallbacks.en;
-    aiHistory.push({role:'assistant',content:reply});
-    addAiMsg('ai',reply);
-    showAiBookingPrompt();
-    if(btn)btn.disabled=false;
-    return;
-  }
-
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch(FK_AI_PROXY_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':FK_AI_CONFIG.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
       body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:600,
         system:AI_SYSTEM_PROMPT+`\n\nUSER LANGUAGE: ${aiLang}. Always respond in this language.`,
         messages:aiHistory.slice(-8),
+        max_tokens:600,
       })
     });
     const data=await res.json();
     document.getElementById('ai-typing')?.remove();
+
+    if(data.error==='NO_API_KEY'){
+      // ⚠️ 서버(Supabase Edge Function)에 Claude API 키가 아직 설정되지 않은 상태
+      //    → FAQ 키워드 매칭으로 폴백 (Anthropic 콘솔에서 키 발급 후 Supabase 시크릿에 등록하면 자동으로 실제 AI 응답으로 전환됩니다)
+      const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
+      const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
+      const reply = matched || fallbacks[aiLang] || fallbacks.en;
+      aiHistory.push({role:'assistant',content:reply});
+      addAiMsg('ai',reply);
+      showAiBookingPrompt();
+      if(btn)btn.disabled=false;
+      return;
+    }
+
     const reply=data.content?.[0]?.text||'...';
     aiHistory.push({role:'assistant',content:reply});
     addAiMsg('ai',reply);
@@ -3310,9 +3311,11 @@ function fkqResetWidget(){
   아래 fkAiChatInit()이 자동으로 기존 버튼을 찾아 연결을 시도합니다.
 
   ⚠️ 운영 방법:
-  - API 키가 없는 동안: FK_AI_CONFIG.apiKey = '' 상태 → FAQ 키워드 매칭으로만 응답
-  - API 키 발급 후: FK_AI_CONFIG.apiKey = 'sk-ant-...' 한 줄만 채우면
-    자동으로 실제 Claude API 응답으로 전환됩니다 (코드 변경 불필요)
+  - Claude API 키는 브라우저 코드가 아니라 Supabase Edge Function(ai-chat)의
+    Secret(ANTHROPIC_API_KEY)으로만 보관됩니다 — 페이지 소스에는 절대 노출되지 않습니다.
+  - 키가 아직 등록되지 않은 동안: FAQ 키워드 매칭으로만 응답
+  - Anthropic 콘솔에서 키 발급 후, Supabase 대시보드 → Edge Functions → ai-chat
+    → Secrets에 ANTHROPIC_API_KEY를 등록하면 코드 변경 없이 자동으로 실제 Claude 응답으로 전환됩니다
   ════════════════════════════════════════════════════════════ -->
 <style>
   #fk-ai-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,23,0.55);z-index:9985;align-items:flex-end;justify-content:flex-end;padding:0;}
@@ -3407,11 +3410,9 @@ function fkqResetWidget(){
 
 <script>
 // ════════════════════════════════════════════════════════════
-//  설정 — API 키가 들어오면 이 한 줄만 채우세요
+//  설정 — Claude API 키는 더이상 여기 없습니다 (Supabase Edge Function Secret으로 이전)
 // ════════════════════════════════════════════════════════════
 const FK_AI_CONFIG = {
-  apiKey: '',  // ← Claude API 키 발급되면 'sk-ant-...' 형태로 여기 입력
-  model: 'claude-sonnet-4-6',
   // Supabase 연동 (상담원 연결 로그 저장용 - 견적위젯과 동일 프로젝트)
   supabaseUrl: 'https://qfncxamqeiyxkbjxwtoi.supabase.co',
   supabaseKey: 'sb_publishable_qaah2ieLZHqjBFsvi6Zwag_QsKYhWhV',
@@ -3587,14 +3588,13 @@ async function fkaiSend(){
   await new Promise(r => setTimeout(r, 500 + Math.random()*400)); // 자연스러운 응답 지연
 
   let reply, isHandoff = false;
-  if(FK_AI_CONFIG.apiKey){
-    // API 키가 있으면 실제 Claude API 호출
-    try{
-      reply = await fkaiCallClaudeAPI(text);
-    }catch(e){
-      console.error('AI API 오류', e);
-      reply = null;
-    }
+  // Edge Function 프록시를 항상 호출 시도 — 서버에 Claude API 키가 없으면
+  // fkaiCallClaudeAPI가 null을 반환하고 아래에서 FAQ 매칭으로 자동 폴백됩니다.
+  try{
+    reply = await fkaiCallClaudeAPI(text);
+  }catch(e){
+    console.error('AI API 오류', e);
+    reply = null;
   }
   if(!reply){
     // FAQ 매칭 모드 (API 키 없거나 호출 실패 시 폴백)
@@ -3638,23 +3638,22 @@ async function fkaiCallClaudeAPI(userText){
     ? `你是Follow Korea医美旅游平台的AI客服。请用简洁友好的中文回答用户问题。${styleGuide_zh}\n\n以下是常见问题参考资料：\n${faqContext}\n\n如果问题超出你的知识范围或涉及具体价格确认、付款等敏感操作，请回复"NEED_HANDOFF"。`
     : `당신은 팔로우코리아 의료관광 플랫폼의 AI 상담원입니다. 친절하고 간결한 한국어로 답하세요. ${styleGuide_ko}\n\n참고 자료:\n${faqContext}\n\n답할 수 없는 질문이거나 정확한 가격 확정, 결제 등 민감한 요청이면 "NEED_HANDOFF"라고만 답하세요.`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(FK_AI_PROXY_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': FK_AI_CONFIG.apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY
     },
     body: JSON.stringify({
-      model: FK_AI_CONFIG.model,
-      max_tokens: 500,
       system: systemPrompt,
-      messages: fkaiHistory.slice(-8)
+      messages: fkaiHistory.slice(-8),
+      max_tokens: 500
     })
   });
   if(!res.ok) throw new Error('API ' + res.status);
   const data = await res.json();
+  if(data.error === 'NO_API_KEY') return null; // 서버(Supabase) 쪽에 Claude API 키가 아직 설정되지 않음 → FAQ 폴백
   const text = data.content?.[0]?.text || '';
   if(text.includes('NEED_HANDOFF')) return null;
   return text;
