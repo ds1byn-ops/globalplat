@@ -356,47 +356,22 @@ tr:hover td{background:#fafaf8;}
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 // 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원/병원포털 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
-const STAFF_KEY='be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d';
+const STAFF_KEY='1decb948c26632d73fc42efcee23273d09e673711b1385cf361242816551cc4c';
 
-// 마스터 계정
+// ── 보안 패치(2026-06-24) ──
+// 기존에는 마스터 비밀번호(base64 "위장")와 30개 병원 계정의 평문 비밀번호가
+// 이 파일에 그대로 노출되어 있었음(공개 GitHub 저장소 + 공개 웹페이지 소스).
+// 전체 비밀번호를 새로 발급하고, 해시(bcrypt)로 DB에 저장한 뒤 RPC로만 검증하도록 변경.
+// 비밀번호 원문은 더 이상 이 파일에 존재하지 않음.
 const MASTER_ID='fkmaster';
-const MASTER_PW=(function(){return atob('Rm9sbG93S29yZWEyMDI2IUA=');})();
-
-// 병원 계정 목록 (아이디:비번:병원명:수수료율)
-const HOSP_ACCOUNTS=[
-  {id:'gv',pw:'fkGV2026!',name:'GV성형외과',rate:20},
-  {id:'jd',pw:'fkJD2026!',name:'JD피부성형센터(장덕한방)',rate:30},
-  {id:'gangnamdawoom',pw:'fkDawoom2026!',name:'강남다움의원',rate:30},
-  {id:'seoulaneye',pw:'fkEye2026!',name:'강남서울안과',rate:20},
-  {id:'smart',pw:'fkSmart2026!',name:'강남스마트',rate:20},
-  {id:'gounmom',pw:'fkGoun2026!',name:'고운몸의원',rate:20},
-  {id:'glovi',pw:'fkGlovi2026!',name:'글로비성형외과',rate:20},
-  {id:'thebeauty',pw:'fkBeauty2026!',name:'더뷰티성형외과',rate:20},
-  {id:'dream',pw:'fkDream2026!',name:'드림성형외과',rate:20},
-  {id:'lamiche',pw:'fkLamiche2026!',name:'라미체의원',rate:20},
-  {id:'ruby',pw:'fkRuby2026!',name:'루비성형외과(신사점)',rate:30},
-  {id:'lifton',pw:'fkLifton2026!',name:'리프톤의원',rate:20},
-  {id:'barungil',pw:'fkBaru2026!',name:'바른길산부인과',rate:20},
-  {id:'benjamin',pw:'fkBen2026!',name:'벤자민의원',rate:12},
-  {id:'view',pw:'fkView2026!',name:'뷰성형외과',rate:30},
-  {id:'cellora',pw:'fkCellora2026!',name:'셀로라의원',rate:20},
-  {id:'cellinique',pw:'fkCellin2026!',name:'셀리닉의원',rate:20},
-  {id:'shinsang',pw:'fkShin2026!',name:'신상성형외과',rate:30},
-  {id:'sinsoa',pw:'fkSoa2026!',name:'신소애여성의원',rate:20},
-  {id:'oakwood',pw:'fkOak2026!',name:'오크우드봄의원',rate:20},
-  {id:'onecell',pw:'fkOnecell2026!',name:'원셀의원',rate:15},
-  {id:'wonjin',pw:'fkWon2026!',name:'원진성형외과피부과',rate:20},
-  {id:'escheongdam',pw:'fkES2026!',name:'이에스청담성형외과',rate:20},
-  {id:'gu',pw:'fkGu2026!',name:'지유의원(사적인아름다움)',rate:10},
-  {id:'chaum',pw:'fkChaum2026!',name:'차움',rate:20},
-  {id:'circle',pw:'fkCircle2026!',name:'청담서클의원',rate:20},
-  {id:'trinity',pw:'fkTrinity2026!',name:'트리니티라파엘로청담의원',rate:20},
-  {id:'faceline',pw:'fkFace2026!',name:'페이스라인성형외과',rate:20},
-  {id:'hereob',pw:'fkHereOb2026!',name:'히어산부인과',rate:20},
-  {id:'hereskin',pw:'fkHereSkin2026!',name:'히어피부과',rate:20},
-];
 
 let currentHosp=null, BK=[], calY=2026, calM=5, editBkId=null;
+
+// ── 보안: 사용자/DB 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
+function escapeHtml(str){
+  if(str===null||str===undefined)return '';
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 // ── Supabase ──
 async function dbLoad(){
@@ -418,36 +393,50 @@ async function dbSaveAll(rows){
     body:JSON.stringify(rows.map(r=>({data:r})))
   });
 }
+// ── 보안 패치(2026-06-24): 예약 1건 수정 시 전체 삭제 후 재삽입하던 방식을
+//    해당 id만 PATCH하는 방식으로 변경 (다른 병원 데이터까지 함께 날아갈 위험 제거) ──
 async function dbUpdateOne(row){
-  const all=await dbLoad();
-  const idx=all.findIndex(b=>b.id===row.id);
-  if(idx>=0)all[idx]=row;
-  await dbSaveAll(all);
+  await fetch(`${SUPA_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(row.id)}`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify({data:row})
+  });
 }
 
-// ── 로그인 ──
-function doLogin(){
+// ── 로그인 (서버 측 RPC로 비밀번호 해시 검증) ──
+async function doLogin(){
   const id=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
-  // 마스터 계정 확인
-  if(id===MASTER_ID&&pw===MASTER_PW){
-    currentHosp={id:'master',pw:MASTER_PW,name:'FK 마스터 관리자',rate:0,isMaster:true};
-    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
-    document.getElementById('hosp-name-badge').textContent='FK 마스터';
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='flex';
-    dbLoad();return;
+  const errEl=document.getElementById('l-err');
+  errEl.textContent='';
+  if(!id||!pw){ errEl.textContent='아이디와 비밀번호를 입력해주세요.'; return; }
+  let res;
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/rpc/verify_hospital_login`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
+      body:JSON.stringify({p_id:id,p_password:pw})
+    });
+    res=await r.json();
+  }catch(e){
+    errEl.textContent='로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+    return;
   }
-  const acc=HOSP_ACCOUNTS.find(a=>a.id===id&&a.pw===pw);
-  if(acc){
-    currentHosp=acc;
-    sessionStorage.setItem('hportal',JSON.stringify(acc));
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='';
-    document.getElementById('hosp-name-badge').textContent=acc.name;
-    loadAndRender();
+  if(!res||!res.ok){
+    errEl.textContent='아이디 또는 비밀번호가 틀렸습니다.';
+    return;
+  }
+  currentHosp={id:res.id,name:res.name,rate:res.rate,isMaster:!!res.is_master};
+  sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
+  document.getElementById('login-screen').style.display='none';
+  if(currentHosp.isMaster){
+    document.getElementById('hosp-name-badge').textContent='FK 마스터';
+    document.getElementById('app-screen').style.display='flex';
+    dbLoad();
   }else{
-    document.getElementById('l-err').textContent='아이디 또는 비밀번호가 틀렸습니다.';
+    document.getElementById('app').style.display='';
+    document.getElementById('hosp-name-badge').textContent=currentHosp.name;
+    loadAndRender();
   }
 }
 function doLogout(){sessionStorage.removeItem('hportal');location.reload();}
@@ -484,9 +473,9 @@ function renderDashboard(){
   const recent=[...hbk].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
   document.getElementById('dash-recent').innerHTML=recent.map(b=>`
     <tr>
-      <td style="font-weight:500;">${b.name}</td>
+      <td style="font-weight:500;">${escapeHtml(b.name)}</td>
       <td style="color:#555;">${b.datetime}</td>
-      <td style="font-size:10px;color:#888;">${b.treatment||'-'}</td>
+      <td style="font-size:10px;color:#888;">${escapeHtml(b.treatment)||'-'}</td>
       <td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:1px 6px;border-radius:8px;">${b.inflow_type||'-'}</span></td>
       <td><span class="badge ${b.status}">${b.status}</span></td>
       <td><button class="btn sm" onclick="openBkModal(${b.id})">처리</button></td>
@@ -499,7 +488,7 @@ function renderDashboard(){
     if(!dayBk.length)return`<div style="padding:4px 0;font-size:11px;color:#ccc;">${d}: 예약 없음</div>`;
     return`<div style="padding:4px 0;border-bottom:1px solid #f5f5f5;">
       <span style="font-size:11px;font-weight:600;color:var(--gn2);">${d}</span>
-      ${dayBk.map(b=>`<span style="margin-left:8px;font-size:11px;">${b.name} (${b.datetime.split(' ')[1]||''}) <span class="badge ${b.status}">${b.status}</span></span>`).join('')}
+      ${dayBk.map(b=>`<span style="margin-left:8px;font-size:11px;">${escapeHtml(b.name)} (${b.datetime.split(' ')[1]||''}) <span class="badge ${b.status}">${b.status}</span></span>`).join('')}
     </div>`;
   }).join('');
 }
@@ -520,9 +509,9 @@ function renderBookings(){
     const won=r2w(b.amount);
     return`<tr>
       <td style="color:#ccc;">${i+1}</td>
-      <td style="font-weight:500;">${b.name}</td>
+      <td style="font-weight:500;">${escapeHtml(b.name)}</td>
       <td style="color:#555;white-space:nowrap;">${b.datetime}</td>
-      <td style="font-size:10px;color:#888;">${b.treatment||'-'}</td>
+      <td style="font-size:10px;color:#888;">${escapeHtml(b.treatment)||'-'}</td>
       <td style="text-align:center;">${b.gender||'-'}</td>
       <td>${b.nationality||'중국'}</td>
       <td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:1px 6px;border-radius:8px;">${b.inflow_type||'-'}</span></td>
@@ -550,12 +539,12 @@ function renderCalendar(){
     const items=byDay[ds]||[];
     const div=document.createElement('div');
     div.className='cal-cell'+(ds===today?' today':'');
-    div.innerHTML=`<div class="day-num">${d}</div>`+items.slice(0,3).map(b=>`<div class="cal-event${b.status==='대기'?' pending':''}">${b.name}</div>`).join('')+(items.length>3?`<div style="font-size:9px;color:var(--gray);">+${items.length-3}건</div>`:'');
+    div.innerHTML=`<div class="day-num">${d}</div>`+items.slice(0,3).map(b=>`<div class="cal-event${b.status==='대기'?' pending':''}">${escapeHtml(b.name)}</div>`).join('')+(items.length>3?`<div style="font-size:9px;color:var(--gray);">+${items.length-3}건</div>`:'');
     div.onclick=()=>{
       document.getElementById('cal-detail').style.display='block';
       document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
       (items.length?`<table><thead><tr><th>환자명</th><th>시간</th><th>시술</th><th>상태</th><th>처리</th></tr></thead><tbody>`+
-      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.status}">${b.status}</span></td><td style="display:flex;gap:4px;"><button class="btn sm" onclick="openBkModal(${b.id})">처리</button><button class="btn sm" onclick="deleteCalBk(${b.id})" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5;">삭제</button></td></tr>`).join('')+`</tbody></table>`
+      items.map(b=>`<tr><td style="font-weight:500;">${escapeHtml(b.name)}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${escapeHtml(b.treatment)||'-'}</td><td><span class="badge ${b.status}">${b.status}</span></td><td style="display:flex;gap:4px;"><button class="btn sm" onclick="openBkModal(${b.id})">처리</button><button class="btn sm" onclick="deleteCalBk(${b.id})" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5;">삭제</button></td></tr>`).join('')+`</tbody></table>`
       :`<div style="color:#aaa;padding:8px;font-size:12px;">예약 없음</div>`)+`</div>`;
     };
     grid.appendChild(div);
@@ -620,9 +609,9 @@ function renderSettlement(){
   document.getElementById('st-detail-tbody').innerHTML=hbk.filter(b=>r2w(b.amount)>0).sort((a,b)=>a.datetime.localeCompare(b.datetime)).map(b=>{
     const won=r2w(b.amount);const comm=Math.round(won*rate/100);const net=won-comm;
     return`<tr>
-      <td style="font-weight:500;">${b.name}</td>
+      <td style="font-weight:500;">${escapeHtml(b.name)}</td>
       <td style="color:#555;">${b.datetime.slice(0,10)}</td>
-      <td style="font-size:10px;">${b.treatment||'-'}</td>
+      <td style="font-size:10px;">${escapeHtml(b.treatment)||'-'}</td>
       <td style="color:#B8960C;">${fw(won)}</td>
       <td style="text-align:center;">${rate}%</td>
       <td style="color:#dc2626;">${fw(comm)}</td>
@@ -709,11 +698,11 @@ async function renderNotice(){
       return '<div style="padding:14px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;margin-bottom:8px;background:'+(u?'#fef2f2':'#fff')+'">'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
         +'<div style="display:flex;align-items:center;gap:6px;">'+(TL[n.type]||'📌')
-        +' <b style="font-size:12px;">'+(n.title||'')+'</b>'
+        +' <b style="font-size:12px;">'+escapeHtml(n.title||'')+'</b>'
         +(n.target==='all'?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:8px;">전체</span>':'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;">개별</span>')
         +'</div><span style="font-size:10px;color:#9ca3af;">'+(n.created_at||n.date||'').slice(0,10)+'</span></div>'
-        +'<div style="font-size:12px;color:#6b7280;line-height:1.7;white-space:pre-line;">'+(n.content||'')+'</div>'
-        +'<div style="font-size:10px;color:#d1d5db;margin-top:5px;">작성: '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.7;white-space:pre-line;">'+escapeHtml(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:5px;">작성: '+escapeHtml(n.author||'Follow Korea 운영팀')+'</div>'
         +'</div>';
     }).join('');
   }catch(e){el.innerHTML='<div style="color:#dc2626;padding:20px;">오류: '+e.message+'</div>';}
@@ -787,11 +776,12 @@ async function loadIntro(){
       renderImgPreview();
     }else{
       // hosp_intro에 없으면 hospitals 테이블에서도 시도
-      const r2=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{
-        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}
+      // 보안 패치(2026-06-24): hospitals 직접 select=* 대신 is_staff() 검증 RPC 사용
+      const r2=await fetch(`${SUPA_URL}/rest/v1/rpc/get_hospitals_full`,{
+        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY},body:JSON.stringify({})
       });
       const all2=await r2.json();
-      const hospData=Array.isArray(all2)?all2.map(x=>x.data||x).filter(x=>x&&x.name===currentHosp.name):[];
+      const hospData=Array.isArray(all2)?all2.filter(x=>x&&x.name===currentHosp.name):[];
       if(hospData.length>0){
         const h=hospData[0];
         document.getElementById('intro-zh').value=h.overview_zh||'';
@@ -875,9 +865,9 @@ async function checkNoticePopup(){
       return '<div style="padding:12px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;background:'+(u?'#fef2f2':'#fafafa')+'">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
         +'<span style="font-size:11px;background:'+(u?'#dc2626':'#f3f4f6')+';color:'+(u?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'📌 일반')+'</span>'
-        +'<b style="font-size:13px;">'+(n.title||'')+'</b></div>'
-        +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+(n.content||'')+'</div>'
-        +'<div style="font-size:10px;color:#d1d5db;margin-top:4px;">'+(n.created_at||n.date||'').slice(0,10)+' · '+(n.author||'Follow Korea 운영팀')+'</div>'
+        +'<b style="font-size:13px;">'+escapeHtml(n.title||'')+'</b></div>'
+        +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+escapeHtml(n.content||'')+'</div>'
+        +'<div style="font-size:10px;color:#d1d5db;margin-top:4px;">'+(n.created_at||n.date||'').slice(0,10)+' · '+escapeHtml(n.author||'Follow Korea 운영팀')+'</div>'
         +'</div>';
     }).join('');
     document.getElementById('notice-popup-bg').style.display='flex';
@@ -901,28 +891,22 @@ async function doChangePw(){
   const cur=document.getElementById('pw-current').value;
   const nw=document.getElementById('pw-new').value;
   const cf=document.getElementById('pw-confirm').value;
-  if(cur!==currentHosp.pw){alert('현재 비밀번호가 틀립니다.');return;}
-  if(!nw){alert('새 비밀번호를 입력하세요.');return;}
+  if(!cur){alert('현재 비밀번호를 입력하세요.');return;}
+  if(!nw||nw.length<8){alert('새 비밀번호는 8자 이상으로 입력하세요.');return;}
   if(nw!==cf){alert('새 비밀번호가 일치하지 않습니다.');return;}
   try{
-    // Supabase hospitals 테이블에 저장
-    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY}});
-    const all=await r.json();
-    const row=all.find(x=>(x.data||x).name===currentHosp.name);
-    if(row){
-      const newData=Object.assign({},row.data||row,{portal_pw:nw});
-      await fetch(`${SUPA_URL}/rest/v1/hospitals?id=eq.${row.id}`,{
-        method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify({data:newData})
-      });
-    }else{
-      await fetch(`${SUPA_URL}/rest/v1/hospitals`,{
-        method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'x-staff-key':STAFF_KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify({data:{name:currentHosp.name,portal_pw:nw}})
-      });
+    // 보안 패치(2026-06-24): 비밀번호는 hospital_accounts 테이블에 해시로 저장되며,
+    // 변경도 서버 측 RPC(change_hospital_password)를 통해서만 가능
+    const r=await fetch(`${SUPA_URL}/rest/v1/rpc/change_hospital_password`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
+      body:JSON.stringify({p_id:currentHosp.id,p_old_password:cur,p_new_password:nw})
+    });
+    const res=await r.json();
+    if(!res||!res.ok){
+      alert(res&&res.error==='wrong_password'?'현재 비밀번호가 틀립니다.':'비밀번호 변경에 실패했습니다.');
+      return;
     }
-    currentHosp.pw=nw;
-    sessionStorage.setItem('hportal',JSON.stringify(currentHosp));
     alert('비밀번호가 변경되었습니다.');
     closeChangePwModal();
   }catch(e){alert('오류: '+e.message);}
