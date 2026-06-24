@@ -1391,7 +1391,6 @@ async function loadHospIntros(){
         });
       });
     }
-    filterHosps();
   }catch(e){console.error('hosp_intro 로드 오류:',e);}
 }
 
@@ -1582,7 +1581,6 @@ async function fkhLoadRecommendedSetting(){
   }catch(e){
     console.warn('[FK] 추천병원 설정 로드 실패, 기본값 사용', e);
   }
-  filterHosps();
 }
 
 function filterHosps(){
@@ -2227,7 +2225,7 @@ const FK_FAQ_PAGE = [
 // 백오피스에서 "메인 노출" 체크한 신규 병원을 불러와 HOSPS에 합침
 async function loadDynamicHospitals(){
   try{
-    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=id,name,display&show_on_main=eq.true`,{
+    const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=id,name,display&show_on_main=eq.true&order=id.asc`,{
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
     });
     const rows=await r.json();
@@ -2252,15 +2250,18 @@ async function loadDynamicHospitals(){
         dynamicImage:d.cover_image||'',
       });
     });
-    if(rows.length){renderCats();filterHosps();}
   }catch(e){ console.error('동적 병원 로딩 실패', e); }
 }
 
 setLang('zh');
 loadReviews();
-loadHospIntros();
-fkhLoadRecommendedSetting();
-loadDynamicHospitals();
+// ⚠️ 추천병원 설정·병원소개·동적병원 데이터를 모두 기다린 후 딱 한 번만 최종 렌더링.
+//    (이전에는 각자 따로 filterHosps()를 호출해서, 네트워크 응답 순서가 매번 달라질 때마다
+//    화면에 보이는 병원 순서가 들쭉날쭉했던 문제 — 이제 항상 동일한 순서로 고정됩니다)
+Promise.all([loadHospIntros(), fkhLoadRecommendedSetting(), loadDynamicHospitals()]).then(()=>{
+  renderCats();
+  filterHosps();
+});
 
 // 외부 터치/클릭 시 언어 메뉴 닫기
 document.addEventListener('click',function(e){
