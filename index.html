@@ -2277,18 +2277,11 @@ document.addEventListener('touchstart',function(e){
   }},{passive:true});
 
 // ── 펄스 동기화 왕홍 데이터 로드 ──
+// 보안 패치(2026-06-24): 이 함수는 실제로 어디서도 사용되지 않는 죽은 코드였고,
+// wanghongs(왕홍/소개자) 테이블 전체를 anon 권한으로 무인증 조회하고 있어
+// 이름·연락처·수수료율·누적매출 등 민감 정보가 새고 있었음. RLS에서 공개 읽기
+// 정책을 제거했으며, 미사용 코드이므로 완전히 삭제함.
 let SHARED_WM=[];
-async function loadSharedWanghongs(){
-  try{
-    const r=await fetch('https://qfncxamqeiyxkbjxwtoi.supabase.co/rest/v1/wanghongs?select=*',{
-      headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE'}
-    });
-    const all=await r.json();
-    if(Array.isArray(all)){
-      SHARED_WM=all.map(x=>x.data||x).filter(Boolean);
-    }
-  }catch(e){}
-}
 </script>
   <!-- ════════════════════════════════════════════════════════════
   팔로우코리아 — 견적서 자동 생성 위젯 v2
@@ -2972,10 +2965,10 @@ function fkqRenderResult(){
       <div class="no">${fkqT('doc_no')} ${quoteNo} · ${today} ${fkqT('doc_issued')}</div>
     </div>
     <table>
-      <tr><td style="color:#94a3b8;width:90px;">${fkqT('doc_name')}</td><td colspan="2">${name} (${nation})</td></tr>
-      <tr><td style="color:#94a3b8;">${fkqT('doc_contact')}</td><td colspan="2">${contact}</td></tr>
-      <tr><td style="color:#94a3b8;">${fkqT('doc_hospital')}</td><td colspan="2">${hospital}</td></tr>
-      <tr><td style="color:#94a3b8;">${fkqT('doc_visit')}</td><td colspan="2">${arrival} ~ ${departure}</td></tr>
+      <tr><td style="color:#94a3b8;width:90px;">${fkqT('doc_name')}</td><td colspan="2">${escapeHtml(name)} (${escapeHtml(nation)})</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_contact')}</td><td colspan="2">${escapeHtml(contact)}</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_hospital')}</td><td colspan="2">${escapeHtml(hospital)}</td></tr>
+      <tr><td style="color:#94a3b8;">${fkqT('doc_visit')}</td><td colspan="2">${escapeHtml(arrival)} ~ ${escapeHtml(departure)}</td></tr>
     </table>
     <table>
       <thead><tr><th>${fkqT('doc_field')}</th><th>${fkqT('doc_treat')}</th><th style="text-align:right;">${fkqT('doc_range')}</th></tr></thead>
