@@ -235,35 +235,14 @@ tr:hover td{background:#fafaf8;}
   </div>
 </div>
 
-<!-- 병원별 입금 -->
+<!-- 병원별 입금 (펄스 동기화 데이터 기준 표시) -->
 <div class="page" id="page-hospital_rev">
   <div class="card">
-    <div class="card-title">병원별 매출 / 입금 현황</div>
+    <div class="card-title">병원별 매출 / 입금 현황 <span style="font-size:11px;color:var(--gray);font-weight:400;">(펄스에서 "🔄 동기화" 누르면 최신 반영)</span></div>
     <div style="overflow-x:auto;"><table><thead><tr>
-      <th>병원명</th><th>내원건수</th><th>총 결제</th><th>수수료율</th><th>FK수수료</th><th>병원수령</th><th>입금예정일</th><th>입금완료</th><th>세금계산서</th><th>미입금</th><th>상태</th><th>처리</th>
+      <th>병원명</th><th>내원건수</th><th>총 결제</th><th>수수료율</th><th>FK수수료</th><th>병원수령</th><th>입금예정일</th><th>입금완료</th><th>세금계산서</th><th>미입금</th><th>상태</th>
     </tr></thead><tbody id="hrv-tbody"></tbody></table></div>
   </div>
-</div>
-
-<!-- 입금처리 모달 -->
-<div class="modal-bg" id="settle-modal" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ document.getElementById('settle-modal').classList.remove('open') }">
-<div class="modal">
-  <h3 id="settle-modal-title">입금 처리 <button onclick="document.getElementById('settle-modal').classList.remove('open')">✕</button></h3>
-  <div id="settle-summary" style="background:#fafaf9;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);"></div>
-  <div class="fg">
-    <div class="fitem"><label>입금예정일</label><input type="date" id="settle-expected"></div>
-    <div class="fitem"><label>입금액</label><input type="number" id="settle-amount" placeholder="병원수령 기준 자동입력"></div>
-    <div class="fitem"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="settle-paid" style="width:16px;height:16px;" onchange="document.getElementById('settle-paiddate-wrap').style.display=this.checked?'':'none'">입금 완료</label></div>
-    <div class="fitem" id="settle-paiddate-wrap" style="display:none;"><label>입금 완료일</label><input type="date" id="settle-paiddate"></div>
-    <div class="fitem"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="settle-tax" style="width:16px;height:16px;" onchange="document.getElementById('settle-taxdate-wrap').style.display=this.checked?'':'none'">세금계산서 발행</label></div>
-    <div class="fitem" id="settle-taxdate-wrap" style="display:none;"><label>발행일</label><input type="date" id="settle-taxdate"></div>
-    <div class="fitem full"><label>메모</label><input type="text" id="settle-memo" placeholder="예: 6월 25일 입금 확인, 계산서 발행 요청함"></div>
-  </div>
-  <div class="modal-btns">
-    <button class="btn" onclick="document.getElementById('settle-modal').classList.remove('open')">취소</button>
-    <button class="btn primary" onclick="saveSettlement()">저장</button>
-  </div>
-</div>
 </div>
 
 <!-- 왕홍별 실적 -->
@@ -1085,32 +1064,21 @@ function renderRevenue(){
   }).join('');
 }
 
-// ── 병원별 입금 ──
-let SETTLEMENTS = {}; // 병원명 -> 정산기록
-async function loadSettlements(){
-  try{
-    const r = await fetch(`${SUPA_URL}/rest/v1/hospital_settlements?select=*`, {headers});
-    const rows = await r.json();
-    SETTLEMENTS = {};
-    if(Array.isArray(rows)) rows.forEach(s => { SETTLEMENTS[s.hospital_name] = s; });
-  }catch(e){ console.error('정산기록 로드 실패', e); }
-}
+// ── 병원별 입금 (펄스가 기준 — 여기는 동기화된 데이터를 보여주기만 함) ──
 function renderHospitalRev(){
   const map={};
   BK.forEach(b=>{
-    const h=b.hospital;if(!map[h])map[h]={cnt:0,rev:0,comm:0,paid:0};
+    const h=b.hospital;if(!map[h])map[h]={cnt:0,rev:0,comm:0,paid:0,taxY:0};
     const c=calcC(b);map[h].cnt++;map[h].rev+=c.won;map[h].comm+=c.hc;
     map[h].paid+=r2w(b.hosp_paidamt||0);
+    if(b.tax_invoice==='Y')map[h].taxY++;
   });
   document.getElementById('hrv-tbody').innerHTML=Object.entries(map).sort((a,b)=>b[1].rev-a[1].rev).map(([h,v])=>{
     const hd=HD.find(x=>x.name===h);
     const rate=hd?hd.commission:'-';const pd=hd?hd.paydate:'-';
-    const s=SETTLEMENTS[h]; // 수동 입금처리 기록 (있으면 자동계산 대신 이걸 우선 표시)
     const hospReceive=v.rev-v.comm;
-    const unpaid=s&&s.paid?0:(hospReceive-(s?(s.paid_amount||0):v.paid));
-    const expectedDate=s&&s.expected_pay_date?s.expected_pay_date:pd;
-    const isPaid=s?!!s.paid:(v.paid>0&&unpaid<=0);
-    const isTax=s?!!s.tax_invoice:false;
+    const unpaid=hospReceive-v.paid;
+    const isPaid=v.paid>0&&unpaid<=0;
     return`<tr>
       <td style="font-size:11px;font-weight:500;">${escapeHtml(h)}</td>
       <td style="text-align:center;">${v.cnt}건</td>
@@ -1118,57 +1086,13 @@ function renderHospitalRev(){
       <td style="font-size:10px;color:var(--gray);">${escapeHtml(rate)}</td>
       <td style="color:var(--gn2);">${fw(v.comm)}</td>
       <td>${fw(hospReceive)}</td>
-      <td style="font-size:10px;color:var(--gray);">${expectedDate||'-'}</td>
-      <td>${isPaid?`<span class="badge 확정">완료${s&&s.paid_date?' '+s.paid_date.slice(5):''}</span>`:'<span style="color:var(--gray);">-</span>'}</td>
-      <td>${isTax?`<span class="badge 확정">발행${s&&s.tax_invoice_date?' '+s.tax_invoice_date.slice(5):''}</span>`:'<span style="color:var(--gray);">-</span>'}</td>
+      <td style="font-size:10px;color:var(--gray);">${escapeHtml(pd)}</td>
+      <td style="color:#555;">${fw(v.paid)}</td>
+      <td style="font-size:11px;color:${v.taxY===v.cnt?'var(--gn2)':v.taxY>0?'#B8960C':'var(--gray)'};">${v.taxY}/${v.cnt}건</td>
       <td style="color:${unpaid>0?'#dc2626':'var(--gn2)'};">${unpaid>0?fw(unpaid):'-'}</td>
       <td><span class="badge ${isPaid?'확정':'대기'}">${isPaid?'완료':'미완료'}</span></td>
-      <td><button class="btn sm" onclick="openSettleModal('${encodeURIComponent(h)}',${hospReceive})">처리</button></td>
     </tr>`;
   }).join('');
-}
-function openSettleModal(hospEncoded, hospReceive){
-  const h = decodeURIComponent(hospEncoded);
-  window._settleHosp = h;
-  const s = SETTLEMENTS[h] || {};
-  document.getElementById('settle-modal-title').innerHTML = `${escapeHtml(h)} 입금 처리 <button onclick="document.getElementById('settle-modal').classList.remove('open')">✕</button>`;
-  document.getElementById('settle-summary').textContent = `병원수령 예정금액: ${fw(hospReceive)}`;
-  document.getElementById('settle-expected').value = s.expected_pay_date || '';
-  document.getElementById('settle-amount').value = s.paid_amount || hospReceive;
-  document.getElementById('settle-paid').checked = !!s.paid;
-  document.getElementById('settle-paiddate-wrap').style.display = s.paid ? '' : 'none';
-  document.getElementById('settle-paiddate').value = s.paid_date || '';
-  document.getElementById('settle-tax').checked = !!s.tax_invoice;
-  document.getElementById('settle-taxdate-wrap').style.display = s.tax_invoice ? '' : 'none';
-  document.getElementById('settle-taxdate').value = s.tax_invoice_date || '';
-  document.getElementById('settle-memo').value = s.memo || '';
-  document.getElementById('settle-modal').classList.add('open');
-}
-async function saveSettlement(){
-  const h = window._settleHosp;
-  const body = {
-    hospital_name: h,
-    expected_pay_date: document.getElementById('settle-expected').value || null,
-    paid: document.getElementById('settle-paid').checked,
-    paid_date: document.getElementById('settle-paiddate').value || null,
-    paid_amount: parseFloat(document.getElementById('settle-amount').value) || 0,
-    tax_invoice: document.getElementById('settle-tax').checked,
-    tax_invoice_date: document.getElementById('settle-taxdate').value || null,
-    memo: document.getElementById('settle-memo').value || '',
-    updated_at: new Date().toISOString(),
-  };
-  try{
-    await fetch(`${SUPA_URL}/rest/v1/hospital_settlements?on_conflict=hospital_name`, {
-      method:'POST',
-      headers:{...headers,'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body: JSON.stringify(body)
-    });
-    SETTLEMENTS[h] = body;
-    document.getElementById('settle-modal').classList.remove('open');
-    renderHospitalRev();
-  }catch(e){
-    alert('저장 중 오류가 발생했습니다: ' + e.message);
-  }
 }
 
 // ── 왕홍별 실적 ──
@@ -1665,7 +1589,7 @@ function showPage(id){
   if(id==='bookings')renderBk();
   if(id==='calendar')renderCalendar();
   if(id==='revenue')renderRevenue();
-  if(id==='hospital_rev'){ loadSettlements().then(renderHospitalRev); renderHospitalRev(); }
+  if(id==='hospital_rev')renderHospitalRev();
   if(id==='wanghong_rev')renderWanghongRev();
   if(id==='hospitals')renderHospitals();
   if(id==='ad_settings')loadAdSettingsPage();
