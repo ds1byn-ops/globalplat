@@ -654,7 +654,7 @@ let calY=2026, calM=5;
 
 // ── Supabase ──
 // 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
-const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','x-staff-key':'be36416a5b1d0c7020c4187b7d5cb3d3471fa71f5a95dd8b44eb82419ebbe11d'};
+const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','x-staff-key':'1decb948c26632d73fc42efcee23273d09e673711b1385cf361242816551cc4c'};
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
@@ -737,9 +737,13 @@ function dbRowToHd(row, idx){
   };
 }
 async function dbLoadHospitals(){
-  const r=await fetch(`${SUPA_URL}/rest/v1/hospitals?select=*&order=name.asc`,{headers});
+  // 보안 패치(2026-06-24): hospitals 테이블의 contact/contract_rate/contract_status/note는
+  // 더 이상 anon role로 직접 select 불가 — is_staff() 검증을 거치는 RPC로 전체 컬럼을 가져온다.
+  const r=await fetch(`${SUPA_URL}/rest/v1/rpc/get_hospitals_full`,{method:'POST',headers,body:JSON.stringify({})});
   const d=await r.json();
-  return Array.isArray(d)?d.map((row,i)=>dbRowToHd(row,i)):[];
+  const rows=Array.isArray(d)?d:[];
+  rows.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  return rows.map((row,i)=>dbRowToHd(row,i));
 }
 async function dbSaveHospitals(rows){
   // 전체를 지우고 다시 넣는 기존 dbSave 패턴과 동일하게 동작
