@@ -2720,15 +2720,16 @@ function fkqT(key){
 
 // 언어별 통화 설정 (KRW 기준 환율 및 기호)
 const FKQ_CURRENCY = {
-  zh: { exr: 192,   sym: '¥',  code: 'CNY' },  // 중국 위안화
+  // 2026년 6월 25일 기준 환율 (Bloomberg/Investing.com)
+  zh: { exr: 227,   sym: '¥',  code: 'CNY' },  // 중국 위안화 (1CNY=227원)
   ko: { exr: 1,     sym: '₩',  code: 'KRW' },  // 한국 원화
-  en: { exr: 1380,  sym: '$',  code: 'USD' },   // 미국 달러
-  vi: { exr: 18.2,  sym: '₫',  code: 'VND', mult: true }, // 베트남 동 (1원 × 18.2)
-  th: { exr: 38,    sym: '฿',  code: 'THB' },   // 태국 바트
-  ja: { exr: 9.3,   sym: '¥',  code: 'JPY' },   // 일본 엔
-  ru: { exr: 1380,  sym: '$',  code: 'USD' },   // 러시아 → USD
-  mn: { exr: 1380,  sym: '$',  code: 'USD' },   // 몽골 → USD
-  id: { exr: 1380,  sym: '$',  code: 'USD' },   // 인니 → USD
+  en: { exr: 1543,  sym: '$',  code: 'USD' },   // 미국 달러 (1USD=1,543원)
+  vi: { exr: 16.5,  sym: '₫',  code: 'VND', mult: true }, // 베트남 동 (1원≈16.5동)
+  th: { exr: 46,    sym: '฿',  code: 'THB' },   // 태국 바트 (1THB≈46원)
+  ja: { exr: 9.5,   sym: '¥',  code: 'JPY' },   // 일본 엔 (1JPY≈9.5원)
+  ru: { exr: 1543,  sym: '$',  code: 'USD' },   // 러시아 → USD
+  mn: { exr: 1543,  sym: '$',  code: 'USD' },   // 몽골 → USD
+  id: { exr: 1543,  sym: '$',  code: 'USD' },   // 인니 → USD
 };
 // fkqLang: 전역 lang 변수와 항상 동기화 (모달 열릴 때 갱신)
 let fkqLang = (typeof lang !== 'undefined' ? lang : 'zh');
@@ -3302,8 +3303,8 @@ async function fkqSubmit(){
       _totalMaxKrw += origItem._maxKrw;
     } else {
       // 기타서비스 등 USD 고정값: display값 × USD환율로 역산
-      _totalMinKrw += Math.round(sel.min * 1380);
-      _totalMaxKrw += Math.round(sel.max * 1380);
+      _totalMinKrw += Math.round(sel.min * 1543);
+      _totalMaxKrw += Math.round(sel.max * 1543);
     }
   });
   const totalMinWan = Math.round(_totalMinKrw / 10000);
