@@ -3291,8 +3291,9 @@ async function fkqSubmit(){
     return;
   }
   const procedures = fkqSelected.map(i => `${i.catLabel}-${i.name}`).join(', ');
-  const totalMin = fkqSelected.reduce((s,i) => s + i.min, 0);
-  const totalMax = fkqSelected.reduce((s,i) => s + i.max, 0);
+  // 백오피스 저장은 항상 KRW 원화 기준 (만원 단위)
+  const totalMinWan = Math.round(fkqSelected.reduce((s,i) => s + (i._minKrw ?? i.min), 0) / 10000);
+  const totalMaxWan = Math.round(fkqSelected.reduce((s,i) => s + (i._maxKrw ?? i.max), 0) / 10000);
 
   const submitBtn = document.getElementById('fkq-submit-btn');
   const originalBtnText = submitBtn.textContent;
@@ -3313,7 +3314,7 @@ async function fkqSubmit(){
       body: JSON.stringify({
         name, contact, nationality: nation, hospital: hospital || null,
         arrival_date: arrival || null, departure_date: departure || null,
-        procedures, quote_min: totalMin, quote_max: totalMax,
+        procedures, quote_min: totalMinWan, quote_max: totalMaxWan,
         status: '신규', source: 'patient_web_quote_widget',
         introducer_code: introducerRaw || null
       })

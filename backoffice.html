@@ -1635,7 +1635,7 @@ function renderQuoteRequests(){
   document.getElementById('qr-tbody').innerHTML=list.map(q=>{
     const created=q.created_at?new Date(q.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
     const stay=(q.arrival_date&&q.departure_date)?`${q.arrival_date.slice(5)}~${q.departure_date.slice(5)}`:'-';
-    const quote=(q.quote_min||q.quote_max)?`${q.quote_min}~${q.quote_max}만원`:'-';
+    const quote=(q.quote_min||q.quote_max)?`₩${Number(q.quote_min).toLocaleString()}~${Number(q.quote_max).toLocaleString()}만원`:'-';
     return`<tr style="${(q.status==='신규'||!q.status)?'background:#fffbf0;':''}">
       <td style="font-size:10px;color:#888;white-space:nowrap;">${created}</td>
       <td style="font-weight:500;">${escapeHtml(q.name)||'-'}</td>
@@ -1663,7 +1663,7 @@ function openQrModal(id){
     방한일정: ${q.arrival_date||'-'} ~ ${q.departure_date||'-'}<br>
     희망시술: ${escapeHtml(q.procedures)||'-'}<br>
     소개자 코드: <b style="color:#7c3aed;">${escapeHtml(q.introducer_code)||'-'}</b><br>
-    예상견적: <span style="color:#B8960C;font-weight:600;">${q.quote_min}~${q.quote_max}만원</span>
+    예상견적: <span style="color:#B8960C;font-weight:600;">₩${Number(q.quote_min).toLocaleString()}~${Number(q.quote_max).toLocaleString()}만원 (KRW 기준)</span>
   `;
   document.getElementById('qr-modal').classList.add('open');
 }
