@@ -600,7 +600,7 @@ a{text-decoration:none;color:inherit;}
 <!-- 서비스 신청 모달 -->
 <div class="modal-bg" id="svc-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeSvcModal() }">
 <div class="modal">
-  <h2><span id="svc-modal-title">서비스 신청</span><button onclick="closeSvcModal()">✕</button></h2>
+  <h2><span id="svc-modal-title" data-i18n="svc_modal_title">서비스 신청</span><button onclick="closeSvcModal()">✕</button></h2>
   <div id="svc-form">
     <div style="background:var(--lgray);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--gray);margin-bottom:2px;" data-i18n="svc_selected">선택 서비스</div>
@@ -612,11 +612,11 @@ a{text-decoration:none;color:inherit;}
       <div id="svc-time-row" class="fitem" style="display:none;">
         <label id="svc-time-label">시간 선택</label>
         <select id="svc-time">
-          <option>06:00 (새벽)</option><option>07:00</option><option>08:00</option>
-          <option>09:00</option><option>10:00</option><option>11:00</option>
-          <option>13:00</option><option>14:00</option><option>15:00</option>
-          <option>16:00</option><option>17:00</option><option>18:00</option>
-          <option>19:00</option><option>21:00 (야간)</option><option>23:00 (심야)</option>
+          <option value="06:00" data-i18n-time="06:00">06:00 (새벽)</option><option value="07:00">07:00</option><option value="08:00">08:00</option>
+          <option value="09:00">09:00</option><option value="10:00">10:00</option><option value="11:00">11:00</option>
+          <option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option>
+          <option value="16:00">16:00</option><option value="17:00">17:00</option><option value="18:00">18:00</option>
+          <option value="19:00">19:00</option><option value="21:00" data-i18n-time="21:00">21:00 (야간)</option><option value="23:00" data-i18n-time="23:00">23:00 (심야)</option>
         </select>
       </div>
       <div class="fitem"><label data-i18n="f_nation">국적</label>
@@ -1500,6 +1500,29 @@ function applyI18n(){
   const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх',id:'Daftar'};
   const confirmTxt=confirmLabels[lang]||'신청';
   document.querySelectorAll('.svc-confirm-btn').forEach(btn=>{btn.textContent=confirmTxt;});
+  // 서비스 신청 모달 타이틀 다국어
+  const svcModalTitles={zh:'服务预约',ko:'서비스 신청',en:'Service Booking',vi:'Đặt dịch vụ',th:'จองบริการ',ja:'サービス申し込み',ru:'Запись на услугу',mn:'Үйлчилгээ захиалах',id:'Pesan Layanan'};
+  const svcTitle=document.getElementById('svc-modal-title');
+  if(svcTitle) svcTitle.textContent=svcModalTitles[lang]||svcModalTitles.ko;
+  // 시간 드롭다운 특수 라벨 다국어
+  const timeLabels={
+    '06:00':{zh:'06:00 (早晨)',ko:'06:00 (새벽)',en:'06:00 (Early morning)',vi:'06:00 (Sáng sớm)',th:'06:00 (เช้าตรู่)',ja:'06:00 (早朝)',ru:'06:00 (Ранее утро)',mn:'06:00 (Өглөө эрт)',id:'06:00 (Dini hari)'},
+    '21:00':{zh:'21:00 (夜间)',ko:'21:00 (야간)',en:'21:00 (Evening)',vi:'21:00 (Buổi tối)',th:'21:00 (กลางคืน)',ja:'21:00 (夜間)',ru:'21:00 (Вечером)',mn:'21:00 (Орой)',id:'21:00 (Malam)'},
+    '23:00':{zh:'23:00 (深夜)',ko:'23:00 (심야)',en:'23:00 (Late night)',vi:'23:00 (Khuya)',th:'23:00 (ดึก)',ja:'23:00 (深夜)',ru:'23:00 (Глубокая ночь)',mn:'23:00 (Гүн шөнө)',id:'23:00 (Tengah malam)'},
+  };
+  document.querySelectorAll('#svc-time option[data-i18n-time]').forEach(opt=>{
+    const key=opt.dataset.i18nTime;
+    if(timeLabels[key]) opt.textContent=timeLabels[key][lang]||timeLabels[key].ko;
+  });
+  // svc-nation 선택지 다국어
+  const svcNation=document.getElementById('svc-nation');
+  if(svcNation){
+    const nations=t('nations');
+    if(Array.isArray(nations)){
+      const prev=svcNation.value;
+      svcNation.innerHTML=nations.map(([label])=>`<option>${label}</option>`).join('');
+    }
+  }
 }
 
 function renderCats(){
