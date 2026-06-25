@@ -75,7 +75,20 @@ tr:hover td{background:#fafaf8;}
 .bar{width:24px;border-radius:3px 3px 0 0;min-height:2px;}
 .blbl{font-size:9px;color:var(--gray);text-align:center;}
 .bval{font-size:9px;font-weight:600;color:#555;}
-@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:10px;}}
+/* ── 모바일 햄버거/드로어 ── */
+.mob-menu-btn{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;margin-right:4px;}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;}
+.drawer-overlay.open{display:block;}
+.sidebar-drawer{position:fixed;top:0;left:-240px;width:240px;height:100vh;background:var(--white);z-index:400;overflow-y:auto;transition:left .25s ease;box-shadow:4px 0 20px rgba(0,0,0,.15);padding-top:52px;}
+.sidebar-drawer.open{left:0;}
+.drawer-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;color:var(--gray);cursor:pointer;}
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{margin-left:0;padding:10px;}
+  .mob-menu-btn{display:flex;align-items:center;}
+  .stats-row{grid-template-columns:repeat(2,1fr)!important;}
+  table th,table td{padding:6px 7px;font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -94,6 +107,7 @@ tr:hover td{background:#fafaf8;}
 
 <div id="app" style="display:none;">
 <div class="header">
+  <button class="mob-menu-btn" onclick="toggleDrawer()" aria-label="메뉴">☰</button>
   <div class="logo">팔로우코리아</div>
   <div class="header-badge">백오피스 ADMIN</div>
   <div style="margin-left:auto;display:flex;gap:8px;">
@@ -130,6 +144,40 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-section">⚙️ 설정</div>
   <div class="sidebar-menu">
     <a onclick="showPage('settings')"><span class="ic">⚙️</span>시스템 설정</a>
+  </div>
+</div>
+
+<!-- 모바일 드로어 -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="toggleDrawer()"></div>
+<div class="sidebar-drawer" id="sidebar-drawer">
+  <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  <div class="sidebar-section">📊 현황</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('dashboard');toggleDrawer()"><span class="ic">🏠</span>대시보드</a>
+    <a onclick="showPage('bookings');toggleDrawer()"><span class="ic">📋</span>예약 명단</a>
+    <a onclick="showPage('calendar');toggleDrawer()"><span class="ic">📅</span>일정 캘린더</a>
+  </div>
+  <div class="sidebar-section">💰 수익</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('revenue');toggleDrawer()"><span class="ic">💵</span>매출 / 수수료</a>
+    <a onclick="showPage('hospital_rev');toggleDrawer()"><span class="ic">🏥</span>병원별 입금</a>
+    <a onclick="showPage('wanghong_rev');toggleDrawer()"><span class="ic">👑</span>왕홍별 실적</a>
+  </div>
+  <div class="sidebar-section">👥 관리</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('hospitals');toggleDrawer()"><span class="ic">🏥</span>병원 관리</a>
+    <a onclick="showPage('ad_settings');toggleDrawer()"><span class="ic">📢</span>병원 광고 설정</a>
+    <a onclick="showPage('wanghongs');toggleDrawer()"><span class="ic">👑</span>왕홍·소개자</a>
+    <a onclick="showPage('quote_requests');toggleDrawer()"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge-m" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;"></span></a>
+    <a onclick="showPage('foreign');toggleDrawer()"><span class="ic">🌏</span>외국인환자 보고</a>
+  </div>
+  <div class="sidebar-section">⭐ 리뷰</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('reviews');toggleDrawer()"><span class="ic">⭐</span>고객 리뷰 관리</a>
+  </div>
+  <div class="sidebar-section">⚙️ 설정</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('settings');toggleDrawer()"><span class="ic">⚙️</span>시스템 설정</a>
   </div>
 </div>
 
@@ -1585,6 +1633,12 @@ async function toggleRvStatus(id){
 }
 
 // ── 페이지 전환 ──
+function toggleDrawer(){
+  const d=document.getElementById('sidebar-drawer');
+  const o=document.getElementById('drawer-overlay');
+  d.classList.toggle('open');
+  o.classList.toggle('open');
+}
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
