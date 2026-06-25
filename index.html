@@ -2299,7 +2299,7 @@ let SHARED_WM=[];
 
   v2 변경사항:
   - 6대 분야 + 기타서비스로 카테고리 확장, 다중선택 가능
-  - 실제 병원 수가표 기반 평균가격 반영 (USD 환산)
+  - 실제 병원 수가표 기반 평균가격 반영 (CNY 위안화 환산)
   - 정확한 가격은 위챗 상담원 안내로 명확히 문구 추가
   ════════════════════════════════════════════════════════════ -->
 <style>
@@ -2437,7 +2437,7 @@ let SHARED_WM=[];
       <div id="fkq-step-3" class="fkq-step" style="display:none;">
         <div class="fkq-result-doc" id="fkq-result-doc"></div>
         <div class="fkq-disclaimer" id="fkq-disclaimer-text">
-          ⓘ 본 견적은 협력 병원들의 <b>평균 시세 범위(USD 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.
+          ⓘ 본 견적은 협력 병원들의 <b>평균 시세 범위(위안화 CNY 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.
         </div>
       </div>
 
@@ -2455,7 +2455,7 @@ let SHARED_WM=[];
 <script>
 // ════════════════════════════════════════════════════════════
 //  견적서 데이터 — 6대 분야 + 기타서비스
-//  ※ 39개 협력병원 가격표 기반 평균 시세 범위 (USD 환산, 1300원=1$ 적용시 참고)
+//  ※ 39개 협력병원 가격표 기반 평균 시세 범위 (CNY 위안화 환산, 1위안≈192원 기준 참고)
 //  ※ 정확한 가격은 상담원이 위챗으로 안내. 가격 수정은 fkqProcedureData만 편집.
 // ════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════
@@ -2474,13 +2474,13 @@ const FKQ_I18N = {
     step3_contact:'3. 联系方式', name_label:'姓名（护照英文名）*', nation_label:'国籍',
     contact_label:'微信 / 联系方式 *', hospital_label:'希望医院（可选）', hospital_ph:'未定可留空', introducer_label:'介绍人代码（可选）', introducer_ph:'4位数字',
     step3_title:'预估报价', step3_sub:'确认下方报价单后通过微信咨询',
-    disclaimer:'本报价为合作医院<b>平均市场价范围（USD换算）</b>，仅供参考，实际费用以医院诊断后确定为准。<b>精确报价及行程将由专属顾问通过微信直接为您说明</b>。',
+    disclaimer:'本报价为合作医院<b>平均市场价范围（人民币CNY）</b>，仅供参考，实际费用以医院诊断后确定为准。<b>精确报价及行程将由专属顾问通过微信直接为您说明</b>。',
     btn_prev:'上一步', btn_next:'下一步', btn_consult:'💬 微信咨询', btn_submit:'📤 发送报价申请', btn_save:'🖨️ 打印',
     select_min1:'请至少选择1个感兴趣的项目。',
     name_contact_required:'姓名和联系方式为必填项。',
     doc_title:'预估报价单（仅供参考）', doc_no:'报价编号', doc_issued:'发行',
     doc_name:'姓名', doc_contact:'联系方式', doc_hospital:'希望医院', doc_visit:'访韩日程',
-    doc_field:'领域', doc_treat:'希望项目', doc_range:'预估范围 (USD)', doc_total:'预估报价总额',
+    doc_field:'领域', doc_treat:'希望项目', doc_range:'预估范围 (CNY)', doc_total:'预估报价总额',
     doc_match:'咨询后匹配', doc_footer:'💬 精确报价由专属顾问通过微信直接为您说明',
     sent_title:'报价申请已发送！', sent_desc:'已发送完成，我们将通过微信联系您',
     sent_wechat:'打开微信咨询窗口', close_btn:'✓ 关闭',
@@ -2499,13 +2499,13 @@ const FKQ_I18N = {
     step3_contact:'3. 연락 정보', name_label:'성명 (여권 영문명) *', nation_label:'국적',
     contact_label:'위챗 / 연락처 *', hospital_label:'희망 병원 (선택)', hospital_ph:'미정이면 비워두세요', introducer_label:'소개자 코드 (선택)', introducer_ph:'4자리 숫자',
     step3_title:'예상 견적서', step3_sub:'아래 견적서를 확인하고 위챗으로 상담받으세요',
-    disclaimer:'본 견적은 협력 병원들의 <b>평균 시세 범위(USD 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.',
+    disclaimer:'본 견적은 협력 병원들의 <b>평균 시세 범위(위안화 CNY 환산)</b>를 안내드리는 참고용 견적이며, 실제 진료비는 병원 진단 후 확정됩니다. <b>정확한 견적·일정은 전담 상담원이 위챗으로 직접 안내</b>드립니다.',
     btn_prev:'이전', btn_next:'다음', btn_consult:'💬 위챗으로 상담받기', btn_submit:'📤 견적신청 전송', btn_save:'🖨️ 출력하기',
     select_min1:'관심 있는 시술을 1개 이상 선택해주세요.',
     name_contact_required:'성명과 연락처는 필수 입력입니다.',
     doc_title:'예상 견적서 (참고용)', doc_no:'견적번호', doc_issued:'발행',
     doc_name:'성명', doc_contact:'연락처', doc_hospital:'희망병원', doc_visit:'방한일정',
-    doc_field:'분야', doc_treat:'희망 시술', doc_range:'예상 범위 (USD)', doc_total:'총 예상 견적 범위',
+    doc_field:'분야', doc_treat:'희망 시술', doc_range:'예상 범위 (CNY)', doc_total:'총 예상 견적 범위',
     doc_match:'상담 후 매칭', doc_footer:'💬 정확한 견적은 위챗 상담원이 직접 안내드립니다',
     sent_title:'견적신청이 전송되었습니다!', sent_desc:'전송이 완료되었으니 위챗으로 연락드릴게요',
     sent_wechat:'위챗 상담 창 열기', close_btn:'✓ 닫기',
@@ -2524,13 +2524,13 @@ const FKQ_I18N = {
     step3_contact:'3. Contact Information', name_label:'Full Name (as on Passport) *', nation_label:'Nationality',
     contact_label:'WeChat / Contact *', hospital_label:'Preferred Hospital (optional)', hospital_ph:'Leave blank if undecided', introducer_label:'Referrer Code (optional)', introducer_ph:'4-digit number',
     step3_title:'Estimated Quote', step3_sub:'Review the quote below and consult via WeChat',
-    disclaimer:'This quote reflects the <b>average market price range (converted to USD)</b> of partner hospitals for reference only; the actual cost will be confirmed after hospital diagnosis. <b>Your dedicated consultant will provide the exact quote and schedule directly via WeChat.</b>',
+    disclaimer:'This quote reflects the <b>average market price range (CNY)</b> of partner hospitals for reference only; the actual cost will be confirmed after hospital diagnosis. <b>Your dedicated consultant will provide the exact quote and schedule directly via WeChat.</b>',
     btn_prev:'Back', btn_next:'Next', btn_consult:'💬 Consult via WeChat', btn_submit:'📤 Send Quote Request', btn_save:'🖨️ Print',
     select_min1:'Please select at least one treatment of interest.',
     name_contact_required:'Name and contact information are required.',
     doc_title:'Estimated Quote (Reference)', doc_no:'Quote No.', doc_issued:'Issued',
     doc_name:'Name', doc_contact:'Contact', doc_hospital:'Preferred Hospital', doc_visit:'Travel Schedule',
-    doc_field:'Field', doc_treat:'Desired Treatment', doc_range:'Estimated Range (USD)', doc_total:'Total Estimated Range',
+    doc_field:'Field', doc_treat:'Desired Treatment', doc_range:'Estimated Range (CNY)', doc_total:'Total Estimated Range',
     doc_match:'Matched after consultation', doc_footer:'💬 The exact quote will be provided directly by your consultant via WeChat',
     sent_title:'Quote Request Sent!', sent_desc:'Your request has been sent. We will contact you via WeChat.',
     sent_wechat:'Open WeChat Consultation', close_btn:'✓ Close',
@@ -2549,13 +2549,13 @@ const FKQ_I18N = {
     step3_contact:'3. Thông tin liên hệ', name_label:'Họ tên (theo hộ chiếu) *', nation_label:'Quốc tịch',
     contact_label:'WeChat / Liên hệ *', hospital_label:'Bệnh viện mong muốn (tùy chọn)', hospital_ph:'Để trống nếu chưa quyết định', introducer_label:'Mã người giới thiệu (tùy chọn)', introducer_ph:'Số 4 chữ số',
     step3_title:'Báo giá dự kiến', step3_sub:'Xem báo giá dưới đây và tư vấn qua WeChat',
-    disclaimer:'Báo giá này dựa trên <b>khoảng giá trung bình thị trường (quy đổi USD)</b> của các bệnh viện đối tác chỉ để tham khảo; chi phí thực tế sẽ được xác nhận sau khi bệnh viện chẩn đoán. <b>Tư vấn viên chuyên trách sẽ cung cấp báo giá và lịch trình chính xác trực tiếp qua WeChat.</b>',
+    disclaimer:'Báo giá này dựa trên <b>khoảng giá trung bình thị trường (CNY)</b> của các bệnh viện đối tác chỉ để tham khảo; chi phí thực tế sẽ được xác nhận sau khi bệnh viện chẩn đoán. <b>Tư vấn viên chuyên trách sẽ cung cấp báo giá và lịch trình chính xác trực tiếp qua WeChat.</b>',
     btn_prev:'Quay lại', btn_next:'Tiếp theo', btn_consult:'💬 Tư vấn qua WeChat', btn_submit:'📤 Gửi yêu cầu báo giá', btn_save:'🖨️ In',
     select_min1:'Vui lòng chọn ít nhất một liệu trình quan tâm.',
     name_contact_required:'Họ tên và thông tin liên hệ là bắt buộc.',
     doc_title:'Báo giá dự kiến (Tham khảo)', doc_no:'Số báo giá', doc_issued:'Ngày phát hành',
     doc_name:'Họ tên', doc_contact:'Liên hệ', doc_hospital:'Bệnh viện mong muốn', doc_visit:'Lịch trình sang Hàn',
-    doc_field:'Lĩnh vực', doc_treat:'Liệu trình mong muốn', doc_range:'Khoảng giá dự kiến (USD)', doc_total:'Tổng báo giá dự kiến',
+    doc_field:'Lĩnh vực', doc_treat:'Liệu trình mong muốn', doc_range:'Khoảng giá dự kiến (CNY)', doc_total:'Tổng báo giá dự kiến',
     doc_match:'Sẽ chỉ định sau tư vấn', doc_footer:'💬 Báo giá chính xác sẽ do tư vấn viên cung cấp trực tiếp qua WeChat',
     sent_title:'Đã gửi yêu cầu báo giá!', sent_desc:'Yêu cầu đã được gửi, chúng tôi sẽ liên hệ qua WeChat',
     sent_wechat:'Mở cửa sổ tư vấn WeChat', close_btn:'✓ Đóng',
@@ -2574,13 +2574,13 @@ const FKQ_I18N = {
     step3_contact:'3. ข้อมูลติดต่อ', name_label:'ชื่อ-นามสกุล (ตามพาสปอร์ต) *', nation_label:'สัญชาติ',
     contact_label:'WeChat / ติดต่อ *', hospital_label:'โรงพยาบาลที่ต้องการ (ไม่บังคับ)', hospital_ph:'เว้นว่างได้หากยังไม่ตัดสินใจ', introducer_label:'รหัสผู้แนะนำ (ไม่บังคับ)', introducer_ph:'ตัวเลข 4 หลัก',
     step3_title:'ใบเสนอราคาประเมิน', step3_sub:'ตรวจสอบใบเสนอราคาด้านล่างและปรึกษาทาง WeChat',
-    disclaimer:'ใบเสนอราคานี้อ้างอิงจาก <b>ช่วงราคาตลาดเฉลี่ย (แปลงเป็น USD)</b> ของโรงพยาบาลพันธมิตรเพื่อการอ้างอิงเท่านั้น ค่าใช้จ่ายจริงจะยืนยันหลังการวินิจฉัยจากโรงพยาบาล <b>ที่ปรึกษาส่วนตัวของคุณจะให้ใบเสนอราคาและกำหนดการที่แม่นยำโดยตรงทาง WeChat</b>',
+    disclaimer:'ใบเสนอราคานี้อ้างอิงจาก <b>ช่วงราคาตลาดเฉลี่ย (CNY)</b> ของโรงพยาบาลพันธมิตรเพื่อการอ้างอิงเท่านั้น ค่าใช้จ่ายจริงจะยืนยันหลังการวินิจฉัยจากโรงพยาบาล <b>ที่ปรึกษาส่วนตัวของคุณจะให้ใบเสนอราคาและกำหนดการที่แม่นยำโดยตรงทาง WeChat</b>',
     btn_prev:'ก่อนหน้า', btn_next:'ถัดไป', btn_consult:'💬 ปรึกษาทาง WeChat', btn_submit:'📤 ส่งคำขอใบเสนอราคา', btn_save:'🖨️ พิมพ์',
     select_min1:'กรุณาเลือกหัตถการที่สนใจอย่างน้อย 1 รายการ',
     name_contact_required:'กรุณากรอกชื่อและข้อมูลติดต่อ',
     doc_title:'ใบเสนอราคาประเมิน (อ้างอิง)', doc_no:'เลขที่ใบเสนอราคา', doc_issued:'วันที่ออก',
     doc_name:'ชื่อ', doc_contact:'ติดต่อ', doc_hospital:'โรงพยาบาลที่ต้องการ', doc_visit:'กำหนดการเดินทาง',
-    doc_field:'สาขา', doc_treat:'หัตถการที่ต้องการ', doc_range:'ช่วงราคาประเมิน (USD)', doc_total:'ราคาประเมินรวม',
+    doc_field:'สาขา', doc_treat:'หัตถการที่ต้องการ', doc_range:'ช่วงราคาประเมิน (CNY)', doc_total:'ราคาประเมินรวม',
     doc_match:'จะจับคู่หลังปรึกษา', doc_footer:'💬 ใบเสนอราคาที่แม่นยำจะให้โดยที่ปรึกษาโดยตรงทาง WeChat',
     sent_title:'ส่งคำขอใบเสนอราคาแล้ว!', sent_desc:'ส่งเรียบร้อยแล้ว เราจะติดต่อคุณทาง WeChat',
     sent_wechat:'เปิดหน้าต่างปรึกษา WeChat', close_btn:'✓ ปิด',
@@ -2599,13 +2599,13 @@ const FKQ_I18N = {
     step3_contact:'3. 連絡先情報', name_label:'氏名（パスポート英字）*', nation_label:'国籍',
     contact_label:'WeChat / 連絡先 *', hospital_label:'希望病院（任意）', hospital_ph:'未定の場合は空欄でOK', introducer_label:'紹介者コード（任意）', introducer_ph:'4桁の数字',
     step3_title:'予想見積書', step3_sub:'下記の見積書をご確認の上、WeChatでご相談ください',
-    disclaimer:'本見積りは提携病院の<b>平均相場範囲（USD換算）</b>をご案内する参考用であり、実際の診療費は病院診断後に確定します。<b>正確な見積り・日程は専属コーディネーターがWeChatで直接ご案内します。</b>',
+    disclaimer:'本見積りは提携病院の<b>平均相場範囲（人民币CNY）</b>をご案内する参考用であり、実際の診療費は病院診断後に確定します。<b>正確な見積り・日程は専属コーディネーターがWeChatで直接ご案内します。</b>',
     btn_prev:'戻る', btn_next:'次へ', btn_consult:'💬 WeChatで相談', btn_submit:'📤 見積り申請を送信', btn_save:'🖨️ 印刷',
     select_min1:'ご興味のある施術を1つ以上選択してください。',
     name_contact_required:'氏名と連絡先は必須項目です。',
     doc_title:'予想見積書（参考用）', doc_no:'見積番号', doc_issued:'発行日',
     doc_name:'氏名', doc_contact:'連絡先', doc_hospital:'希望病院', doc_visit:'訪韓日程',
-    doc_field:'分野', doc_treat:'希望施術', doc_range:'予想範囲 (USD)', doc_total:'予想見積総額',
+    doc_field:'分野', doc_treat:'希望施術', doc_range:'予想範囲 (CNY)', doc_total:'予想見積総額',
     doc_match:'相談後マッチング', doc_footer:'💬 正確な見積りは専属コーディネーターがWeChatで直接ご案内します',
     sent_title:'見積り申請が送信されました！', sent_desc:'送信が完了しました。WeChatでご連絡いたします',
     sent_wechat:'WeChat相談窓口を開く', close_btn:'✓ 閉じる',
@@ -2624,13 +2624,13 @@ const FKQ_I18N = {
     step3_contact:'3. Контактная информация', name_label:'Имя (как в паспорте) *', nation_label:'Гражданство',
     contact_label:'WeChat / Контакт *', hospital_label:'Предпочитаемая клиника (необязательно)', hospital_ph:'Оставьте пустым, если не определено', introducer_label:'Код реферала (необязательно)', introducer_ph:'4-значный номер',
     step3_title:'Предварительный расчёт', step3_sub:'Проверьте расчёт ниже и проконсультируйтесь через WeChat',
-    disclaimer:'Этот расчёт отражает <b>среднюю рыночную цену (в USD)</b> партнёрских клиник только для справки; фактическая стоимость будет подтверждена после диагностики в клинике. <b>Точный расчёт и график предоставит ваш персональный консультант напрямую через WeChat.</b>',
+    disclaimer:'Этот расчёт отражает <b>среднюю рыночную цену (в CNY)</b> партнёрских клиник только для справки; фактическая стоимость будет подтверждена после диагностики в клинике. <b>Точный расчёт и график предоставит ваш персональный консультант напрямую через WeChat.</b>',
     btn_prev:'Назад', btn_next:'Далее', btn_consult:'💬 Консультация через WeChat', btn_submit:'📤 Отправить запрос', btn_save:'🖨️ Печать',
     select_min1:'Пожалуйста, выберите хотя бы одну интересующую процедуру.',
     name_contact_required:'Имя и контактные данные обязательны.',
     doc_title:'Предварительный расчёт (справочно)', doc_no:'Номер расчёта', doc_issued:'Дата выдачи',
     doc_name:'Имя', doc_contact:'Контакт', doc_hospital:'Предпочитаемая клиника', doc_visit:'График поездки',
-    doc_field:'Направление', doc_treat:'Желаемая процедура', doc_range:'Расчётный диапазон (USD)', doc_total:'Общий расчётный диапазон',
+    doc_field:'Направление', doc_treat:'Желаемая процедура', doc_range:'Расчётный диапазон (CNY)', doc_total:'Общий расчётный диапазон',
     doc_match:'Будет назначено после консультации', doc_footer:'💬 Точный расчёт предоставит ваш консультант напрямую через WeChat',
     sent_title:'Запрос на расчёт отправлен!', sent_desc:'Запрос отправлен, мы свяжемся с вами через WeChat',
     sent_wechat:'Открыть консультацию WeChat', close_btn:'✓ Закрыть',
@@ -2649,13 +2649,13 @@ const FKQ_I18N = {
     step3_contact:'3. Холбоо барих мэдээлэл', name_label:'Нэр (паспортын дагуу) *', nation_label:'Иргэншил',
     contact_label:'WeChat / Холбоо барих *', hospital_label:'Хүссэн эмнэлэг (заавал биш)', hospital_ph:'Тодорхойгүй бол хоосон орхино уу', introducer_label:'Танилцуулагчийн код (заавал биш)', introducer_ph:'4 оронтой тоо',
     step3_title:'Тооцоолсон үнийн санал', step3_sub:'Доорх үнийн саналыг шалгаад WeChat-аар зөвлөгөө аваарай',
-    disclaimer:'Энэ үнийн санал нь түншлэгч эмнэлгүүдийн <b>дундаж зах зээлийн үнийн хязгаар (USD)</b>-ыг лавлагаа болгон харуулж байгаа бөгөөд бодит зардал нь эмнэлгийн оношилгооны дараа тодорхойлогдоно. <b>Тодорхой үнийн санал, хуанли таны хариуцсан зөвлөхөөс WeChat-аар шууд мэдээлэгдэнэ.</b>',
+    disclaimer:'Энэ үнийн санал нь түншлэгч эмнэлгүүдийн <b>дундаж зах зээлийн үнийн хязгаар (CNY)</b>-ыг лавлагаа болгон харуулж байгаа бөгөөд бодит зардал нь эмнэлгийн оношилгооны дараа тодорхойлогдоно. <b>Тодорхой үнийн санал, хуанли таны хариуцсан зөвлөхөөс WeChat-аар шууд мэдээлэгдэнэ.</b>',
     btn_prev:'Буцах', btn_next:'Дараах', btn_consult:'💬 WeChat-аар зөвлөгөө авах', btn_submit:'📤 Үнийн саналын хүсэлт илгээх', btn_save:'🖨️ Хэвлэх',
     select_min1:'Сонирхсон эмчилгээгээ доод тал нь 1-ийг сонгоно уу.',
     name_contact_required:'Нэр болон холбоо барих мэдээлэл заавал шаардлагатай.',
     doc_title:'Тооцоолсон үнийн санал (Лавлагаа)', doc_no:'Үнийн саналын дугаар', doc_issued:'Гарсан огноо',
     doc_name:'Нэр', doc_contact:'Холбоо барих', doc_hospital:'Хүссэн эмнэлэг', doc_visit:'Аяллын хуанли',
-    doc_field:'Чиглэл', doc_treat:'Хүссэн эмчилгээ', doc_range:'Тооцоолсон хязгаар (USD)', doc_total:'Нийт тооцоолсон хязгаар',
+    doc_field:'Чиглэл', doc_treat:'Хүссэн эмчилгээ', doc_range:'Тооцоолсон хязгаар (CNY)', doc_total:'Нийт тооцоолсон хязгаар',
     doc_match:'Зөвлөгөөний дараа тохируулна', doc_footer:'💬 Тодорхой үнийн саналыг таны зөвлөх WeChat-аар шууд мэдээлнэ',
     sent_title:'Үнийн саналын хүсэлт илгээгдлээ!', sent_desc:'Илгээлт амжилттай. Бид тантай WeChat-аар холбогдох болно',
     sent_wechat:'WeChat зөвлөгөөний цонх нээх', close_btn:'✓ Хаах',
@@ -2674,13 +2674,13 @@ const FKQ_I18N = {
     step3_contact:'3. Informasi Kontak', name_label:'Nama Lengkap (sesuai Paspor) *', nation_label:'Kewarganegaraan',
     contact_label:'WeChat / Kontak *', hospital_label:'Rumah Sakit Pilihan (opsional)', hospital_ph:'Biarkan kosong jika belum ditentukan', introducer_label:'Kode Referensi (opsional)', introducer_ph:'Angka 4 digit',
     step3_title:'Estimasi Penawaran', step3_sub:'Tinjau penawaran di bawah dan konsultasikan via WeChat',
-    disclaimer:'Penawaran ini mencerminkan <b>kisaran harga pasar rata-rata (dikonversi ke USD)</b> dari rumah sakit mitra hanya untuk referensi; biaya aktual akan dikonfirmasi setelah diagnosis rumah sakit. <b>Konsultan khusus Anda akan memberikan penawaran dan jadwal yang akurat langsung melalui WeChat.</b>',
+    disclaimer:'Penawaran ini mencerminkan <b>kisaran harga pasar rata-rata (CNY)</b> dari rumah sakit mitra hanya untuk referensi; biaya aktual akan dikonfirmasi setelah diagnosis rumah sakit. <b>Konsultan khusus Anda akan memberikan penawaran dan jadwal yang akurat langsung melalui WeChat.</b>',
     btn_prev:'Kembali', btn_next:'Selanjutnya', btn_consult:'💬 Konsultasi via WeChat', btn_submit:'📤 Kirim Permintaan Penawaran', btn_save:'🖨️ Cetak',
     select_min1:'Silakan pilih setidaknya satu perawatan yang diminati.',
     name_contact_required:'Nama dan informasi kontak wajib diisi.',
     doc_title:'Estimasi Penawaran (Referensi)', doc_no:'No. Penawaran', doc_issued:'Diterbitkan',
     doc_name:'Nama', doc_contact:'Kontak', doc_hospital:'Rumah Sakit Pilihan', doc_visit:'Jadwal Perjalanan',
-    doc_field:'Bidang', doc_treat:'Perawatan yang Diinginkan', doc_range:'Estimasi Kisaran (USD)', doc_total:'Total Estimasi Kisaran',
+    doc_field:'Bidang', doc_treat:'Perawatan yang Diinginkan', doc_range:'Estimasi Kisaran (CNY)', doc_total:'Total Estimasi Kisaran',
     doc_match:'Dicocokkan setelah konsultasi', doc_footer:'💬 Penawaran akurat akan diberikan langsung oleh konsultan Anda melalui WeChat',
     sent_title:'Permintaan Penawaran Terkirim!', sent_desc:'Permintaan telah terkirim, kami akan menghubungi Anda via WeChat',
     sent_wechat:'Buka Konsultasi WeChat', close_btn:'✓ Tutup',
@@ -2694,7 +2694,7 @@ function fkqT(key){
   return dict[key] !== undefined ? dict[key] : (FKQ_I18N.ko[key] || key);
 }
 
-const FKQ_EXR = 1500; // KRW per USD
+const FKQ_EXR = 192; // KRW per CNY (하나은행 기준, 1CNY≈192원)
 
 function won(min, max){ return { min: Math.round(min/FKQ_EXR), max: Math.round(max/FKQ_EXR) }; }
 
@@ -2858,7 +2858,7 @@ function fkqSelectCat(key){
     return `<div class="fkq-proc-item ${checked ? 'checked' : ''}" onclick="fkqToggleItem('${key}', ${idx})" data-cat="${key}" data-idx="${idx}">
       <div class="chk">${checked ? '✓' : ''}</div>
       <div class="pname">${item.name}${item.sub ? '<span class="sub">'+item.sub+'</span>' : ''}</div>
-      <div class="prange">$${item.min.toLocaleString()}~${item.max.toLocaleString()}</div>
+      <div class="prange">¥${item.min.toLocaleString()}~¥${item.max.toLocaleString()}</div>
     </div>`;
   }).join('');
 }
@@ -2964,7 +2964,7 @@ function fkqRenderResult(){
   const rows = fkqSelected.map(i => `<tr>
     <td>${i.catLabel}</td>
     <td>${i.name}${i.sub ? '<br><span style="font-size:10px;color:#94a3b8;">'+i.sub+'</span>' : ''}</td>
-    <td style="text-align:right;white-space:nowrap;">$${i.min.toLocaleString()}~${i.max.toLocaleString()}</td>
+    <td style="text-align:right;white-space:nowrap;">¥${i.min.toLocaleString()}~¥${i.max.toLocaleString()}</td>
   </tr>`).join('');
 
   document.getElementById('fkq-result-doc').innerHTML = `
@@ -2982,7 +2982,7 @@ function fkqRenderResult(){
     <table>
       <thead><tr><th>${fkqT('doc_field')}</th><th>${fkqT('doc_treat')}</th><th style="text-align:right;">${fkqT('doc_range')}</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr class="grand"><td colspan="2">${fkqT('doc_total')}</td><td style="text-align:right;white-space:nowrap;">$${totalMin.toLocaleString()}~${totalMax.toLocaleString()}</td></tr></tfoot>
+      <tfoot><tr class="grand"><td colspan="2">${fkqT('doc_total')}</td><td style="text-align:right;white-space:nowrap;">¥${totalMin.toLocaleString()}~¥${totalMax.toLocaleString()}</td></tr></tfoot>
     </table>
     <div style="text-align:center;"><span class="fkq-badge">💬 ${fkqT('doc_footer')}</span></div>
   `;
