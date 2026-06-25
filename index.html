@@ -1484,6 +1484,7 @@ function setLang(l){
   initSvcButtons();
   // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
   if(typeof fkqApplyI18n === 'function' && document.getElementById('fk-quote-overlay')?.classList.contains('open')){
+    fkqLang = lang;
     fkqApplyI18n();
     if(typeof fkqInitCategories === 'function') fkqInitCategories();
     if(fkqCurrentStep === 3 && typeof fkqRenderResult === 'function') fkqRenderResult();
@@ -2706,7 +2707,9 @@ const FKQ_CURRENCY = {
   mn: { exr: 1380,  sym: '$',  code: 'USD' },   // 몽골 → USD
   id: { exr: 1380,  sym: '$',  code: 'USD' },   // 인니 → USD
 };
-function getFkqCur(){ return FKQ_CURRENCY[fkqLang] || FKQ_CURRENCY.en; }
+// fkqLang: 전역 lang 변수와 항상 동기화 (모달 열릴 때 갱신)
+let fkqLang = (typeof lang !== 'undefined' ? lang : 'zh');
+function getFkqCur(){ return FKQ_CURRENCY[fkqLang] || FKQ_CURRENCY.zh; }
 function krwToFkq(krw){
   const c = getFkqCur();
   return c.mult ? Math.round(krw * c.exr) : Math.round(krw / c.exr);
@@ -2807,6 +2810,7 @@ const FKQ_CAT_TKEY = {
 };
 
 function openQuoteWidget(){
+  fkqLang = (typeof lang !== 'undefined' ? lang : 'zh');
   document.getElementById('fk-quote-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   fkqApplyI18n();
