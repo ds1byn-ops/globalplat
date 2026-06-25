@@ -3291,9 +3291,23 @@ async function fkqSubmit(){
     return;
   }
   const procedures = fkqSelected.map(i => `${i.catLabel}-${i.name}`).join(', ');
-  // 백오피스 저장은 항상 KRW 원화 기준 (만원 단위)
-  const totalMinWan = Math.round(fkqSelected.reduce((s,i) => s + (i._minKrw ?? i.min), 0) / 10000);
-  const totalMaxWan = Math.round(fkqSelected.reduce((s,i) => s + (i._maxKrw ?? i.max), 0) / 10000);
+  // 백오피스 저장: 항상 KRW 원화 기준 만원 단위
+  // fkqProcedureData 원본 _minKrw/_maxKrw를 직접 참조 (display 통화 무관)
+  let _totalMinKrw = 0, _totalMaxKrw = 0;
+  fkqSelected.forEach(sel => {
+    const origItem = (fkqProcedureData[sel.catKey]?.items || [])[sel.idx];
+    if(origItem && origItem._minKrw != null){
+      // won()으로 만들어진 항목: 원화값 직접 사용
+      _totalMinKrw += origItem._minKrw;
+      _totalMaxKrw += origItem._maxKrw;
+    } else {
+      // 기타서비스 등 USD 고정값: display값 × USD환율로 역산
+      _totalMinKrw += Math.round(sel.min * 1380);
+      _totalMaxKrw += Math.round(sel.max * 1380);
+    }
+  });
+  const totalMinWan = Math.round(_totalMinKrw / 10000);
+  const totalMaxWan = Math.round(_totalMaxKrw / 10000);
 
   const submitBtn = document.getElementById('fkq-submit-btn');
   const originalBtnText = submitBtn.textContent;
