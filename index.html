@@ -201,6 +201,32 @@ a{text-decoration:none;color:inherit;}
   .btn-consult{display:none;}
 }
 </style>
+<style>
+/* ===== 아랍어 RTL 지원 ===== */
+html[dir="rtl"] body{direction:rtl;text-align:right;}
+html[dir="rtl"] .nav-links{margin-left:0;margin-right:32px;}
+html[dir="rtl"] .nav-right{margin-left:0;margin-right:auto;}
+html[dir="rtl"] .hero-title,html[dir="rtl"] .hero-sub{text-align:right;}
+html[dir="rtl"] .sec-head{text-align:center;}
+html[dir="rtl"] .search-bar{padding:6px 20px 6px 6px;}
+html[dir="rtl"] .hosp-badge-tag{left:auto;right:10px;}
+html[dir="rtl"] .hosp-grid .hosp-badge-tag{left:auto;right:5px;}
+html[dir="rtl"] .hosp-recommend-card .badge-recommend{right:auto;left:12px;}
+html[dir="rtl"] #lang-menu{right:auto!important;left:0!important;}
+html[dir="rtl"] .fkq-cat-btn .cnt-badge{right:auto;left:-6px;}
+html[dir="rtl"] .fkq-proc-item .chk{margin-right:0;margin-left:10px;}
+html[dir="rtl"] .fkq-proc-item .prange{margin-left:0;margin-right:8px;}
+html[dir="rtl"] .fkq-clear-btn{margin-left:0;margin-right:auto;}
+html[dir="rtl"] .fkq-close{right:auto;left:18px;}
+html[dir="rtl"] .fkai-msg.user{flex-direction:row;}
+html[dir="rtl"] .float-btn,html[dir="rtl"] #fk-ai-trigger-fab{right:auto;left:22px;}
+html[dir="rtl"] #fk-scroll-top-btn{right:auto;left:22px;}
+html[dir="rtl"] #fk-quote-trigger-fab{right:auto;left:22px;}
+html[dir="rtl"] .modal h2{flex-direction:row-reverse;}
+html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align:right;}
+html[dir="rtl"] .testi-text,html[dir="rtl"] .step-desc,html[dir="rtl"] .hosp-name,html[dir="rtl"] .hosp-dept{text-align:right;}
+html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
+</style>
 </head>
 <body>
 
@@ -235,6 +261,7 @@ a{text-decoration:none;color:inherit;}
           <div onclick="setLang('ru')" class="lang-opt" data-lang="ru">🇷🇺 Русский</div>
         <div onclick="setLang('mn')" class="lang-opt" data-lang="mn">🇲🇳 Монгол</div>
         <div onclick="setLang('id')" class="lang-opt" data-lang="id">🇮🇩 Indonesia</div>
+          <div onclick="setLang('ar')" class="lang-opt" data-lang="ar">🇸🇦 العربية</div>
         </div>
       </div>
       <button class="btn-consult" onclick="openModal(null)" data-i18n="nav_consult">免费咨询</button>
@@ -1467,6 +1494,8 @@ function openSvcModalWithTime(type,sub,pickerId){
 }
 function setLang(l){
   lang=l;
+  document.documentElement.setAttribute('dir', l==='ar' ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', l);
   // 드롭다운 업데이트
   const meta=LANG_META[l]||{flag:'🌐',label:l};
   const fl=document.getElementById('lang-flag');const lb=document.getElementById('lang-label');
@@ -1497,11 +1526,11 @@ function applyI18n(){
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   // svc 확인 버튼 텍스트
-  const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх',id:'Daftar'};
+  const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх',id:'Daftar',ar:'إرسال'};
   const confirmTxt=confirmLabels[lang]||'신청';
   document.querySelectorAll('.svc-confirm-btn').forEach(btn=>{btn.textContent=confirmTxt;});
   // 서비스 신청 모달 타이틀 다국어
-  const svcModalTitles={zh:'服务预约',ko:'서비스 신청',en:'Service Booking',vi:'Đặt dịch vụ',th:'จองบริการ',ja:'サービス申し込み',ru:'Запись на услугу',mn:'Үйлчилгээ захиалах',id:'Pesan Layanan'};
+  const svcModalTitles={zh:'服务预约',ko:'서비스 신청',en:'Service Booking',vi:'Đặt dịch vụ',th:'จองบริการ',ja:'サービス申し込み',ru:'Запись на услугу',mn:'Үйлчилгээ захиалах',id:'Pesan Layanan',ar:'حجز خدمة'};
   const svcTitle=document.getElementById('svc-modal-title');
   if(svcTitle) svcTitle.textContent=svcModalTitles[lang]||svcModalTitles.ko;
   // 시간 드롭다운 특수 라벨 다국어
@@ -1621,9 +1650,10 @@ function filterHosps(){
     I.zh.cats.slice(1).forEach((c,j)=>{if(j===i)catMap[c]=k;});
     I.ko.cats.slice(1).forEach((c,j)=>{if(j===i)catMap[c]=k;});
     I.en.cats.slice(1).forEach((c,j)=>{if(j===i)catMap[c]=k;});
+    I.ar.cats.slice(1).forEach((c,j)=>{if(j===i)catMap[c]=k;});
   });
   // 한방(Korean Medicine) 카테고리 라벨 → 내부 키워드 매핑 (언어별)
-  ['한방','韩医','Korean Medicine','Đông y','แพทย์แผนเกาหลี','韓方','Корейская медицина','Pengobatan Tradisional','Зүүн анагаах'].forEach(c=>{catMap[c]='한방';});
+  ['한방','韩医','Korean Medicine','Đông y','แพทย์แผนเกาหลี','韓方','Корейская медицина','Pengobatan Tradisional','Зүүн анагаах','الطب الكوري'].forEach(c=>{catMap[c]='한방';});
   const filtered=HOSPS.filter(h=>{
     const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
@@ -2285,6 +2315,17 @@ async function loadDynamicHospitals(){
     });
   }catch(e){ console.error('동적 병원 로딩 실패', e); }
 }
+
+// ════════════ 아랍어(ar) 추가 — P1 ════════════
+I.ar = {"nav_home":"الرئيسية","nav_hosps":"المستشفيات","nav_concierge":"الكونسيرج","nav_proc":"خطوات الحجز","nav_review":"التقييمات","nav_faq":"الأسئلة الشائعة","nav_consult":"استشارة مجانية","review_more":"عرض كل التقييمات ←","hero_badge":"منصة السياحة الطبية رقم 1 في كوريا","hero_title":"<em>رحلة جمال كورية</em><br>مصممة خصيصًا لك","hero_sub":"نخبة من أفضل عيادات التجميل في غانغنام بسيول<br>دعم لغوي احترافي · مرافقة كاملة","search_ph":"ابحث عن مستشفى أو إجراء...","search_btn":"بحث","hero_cta1":"احجز الآن","hero_cta2":"تصفّح المستشفيات","hero_cta_quote":"💰 عرض سعر سريع","stat1":"مريض تمت خدمته","stat2":"مستشفى شريك","stat3":"رضا العملاء","cat_title":"اختر الإجراء المناسب لك","hosp_title":"المستشفيات الشريكة","hosp_sub":"مختارة بعناية صارمة — أفضل عيادات غانغنام فقط","hosp_recommend_label":"موصى به","proc_title":"الحجز في 4 خطوات سهلة","review_title":"تقييمات حقيقية من المرضى","footer_desc":"منصة موثوقة للسياحة الطبية في كوريا\nخدمة آمنة وشفافة واحترافية متكاملة","f_h1":"الخدمات","f_skin":"العناية بالبشرة","f_plastic":"جراحة التجميل","f_stem":"الخلايا الجذعية","f_h2":"الشركة","f_about":"من نحن","f_partner":"المستشفيات الشريكة","f_contact":"وي تشات / التواصل","f_h3":"التواصل","back":"رجوع","d_loc":"الموقع","d_lang":"اللغة","d_lang_val":"دعم لغوي ✓","d_hours":"ساعات العمل","d_web":"الموقع الرسمي","main_treats":"الإجراءات الرئيسية","book_btn":"احجز استشارة","t_overview":"نظرة عامة","t_treats":"الإجراءات","t_hours":"ساعات العمل","t_reviews":"التقييمات","modal_title":"حجز استشارة","f_hosp":"اختر المستشفى","f_treat":"الإجراء المطلوب","tr1":"ألثيرا / Ulthera","tr2":"ثيرماج / Thermage","tr3":"بوتوكس / Botox","tr4":"فيلر / Filler","tr5":"خلايا جذعية / Stem Cell","tr6":"جراحة العيون·الأنف","tr7":"شد الوجه / Lifting","tr8":"أخرى","f_name":"الاسم (كما في جواز السفر)","f_gender":"الجنس","f_f":"أنثى","f_m":"ذكر","f_nation":"الجنسية","n_cn":"الصين","n_vn":"فيتنام","n_th":"تايلاند","n_my":"ماليزيا","n_etc":"أخرى","f_date":"التاريخ المطلوب","f_note":"ملاحظات","f_submit":"إرسال طلب الحجز ✓","done_title":"تم إرسال الحجز!","done_desc":"سيتواصل معك المنسق عبر وي تشات خلال 24 ساعة","done_close":"إغلاق","cats":["الكل","جراحة التجميل","البشرة","الخلايا الجذعية","الجسم","صحة المرأة","العيون","مكافحة الشيخوخة","الأسنان","التجميل","الطب الكوري","خدمات أخرى"],"steps":[["01","اختر العيادة والإجراء","تصفّح العيادات المختارة"],["02","املأ نموذج الحجز","أدخل بياناتك"],["03","تأكيد المنسق","خلال 24 ساعة عبر وي تشات"],["04","الزيارة والاستمتاع","خدمة مرافقة كاملة"]],"reviews":[{"t":"\"نتائج ألثيرا كانت مذهلة! الطاقم تواصل معنا باحترافية. أنصح بشدة!\"","n":"Sara A.","f":"الإمارات · دبي"},{"t":"\"أول تجربة سياحة علاجية في كوريا — جعلت Follow Korea كل شيء سهلاً!\"","n":"Noura K.","f":"السعودية · الرياض"},{"t":"\"حجز سهل جدًا والمنسقة أجابت على كل أسئلتي!\"","n":"Layla M.","f":"الكويت"}],"loc_gangnam":"غانغنام، سيول","loc_sinsa":"سينسا، غانغنام","loc_apgujeong":"أبغوجيونغ، سيول","extra_title":"خدمات أخرى","extra_sub":"نرافقك طوال رحلتك الطبية","svc_concierge":"كونسيرج كبار الشخصيات VVIP","svc_concierge_desc":"منسق مخصص من الحجز حتى المغادرة","svc_interpret":"خدمة الترجمة","svc_interpret_desc":"ترجمة احترافية: صينية·فيتنامية·تايلاندية·إنجليزية","svc_car":"خدمة السيارة","svc_car_desc":"استقبال من المطار · التنقل للمستشفى · سيارة سياحية","c_1n2d":"باقة ليلة و يومين","c_2n3d":"باقة ليلتين و 3 أيام","c_3n4d":"باقة 3 ليالٍ و 4 أيام","c_4n5d":"باقة 4 ليالٍ و 5 أيام","c_5nmore":"باقة 5 ليالٍ فأكثر","i_half":"ترجمة نصف يوم (4 ساعات)","i_full":"ترجمة يوم كامل (8 ساعات)","i_hosp":"ترجمة مرافقة في المستشفى","car_1d":"سيارة ليوم واحد","car_2d":"سيارة ليومين","car_3d":"سيارة 3 أيام","car_4d":"سيارة 4 أيام","car_5dmore":"سيارة 5 أيام فأكثر","car_airport":"استقبال/توصيل المطار","svc_selected":"الخدمة المختارة","reserve_btn":"احجز","detail_btn":"التفاصيل","overview_default":"عيادة تجميل طبية احترافية تقدم خدمات عالية الجودة مع دعم لغوي.","review_sub":"تجارب حقيقية من مرضى حول العالم","faq_title":"الأسئلة الشائعة","faq_sub":"أمور قد ترغب بمعرفتها عن السياحة العلاجية","write_review":"✍️ اكتب تقييمًا","no_review":"لا توجد تقييمات بعد. كن أول من يشارك تجربته!","rv_hosp":"اختر المستشفى","rv_treat":"اسم الإجراء","rv_name":"الاسم المستعار","rv_nation":"الموقع","rv_star":"تقييم الرضا","rv_text":"محتوى التقييم","rv_submit":"إرسال التقييم","rv_done_title":"تم إرسال التقييم!","rv_done_desc":"شكرًا لمشاركتك تجربتك 😊","rv_done_close":"إغلاق","star_hints":["","سيئ جدًا","سيئ","مقبول","جيد","ممتاز!"],"f_introducer":"رمز المُحيل (اختياري)","f_introducer_ph":"رقم من 4 خانات","ai_placeholder":"اكتب سؤالك...","ai_send":"إرسال","rv_img":"إرفاق صور (اختياري، حد أقصى 2)","rv_all":"الكل"};
+
+LANG_META.ar = {flag:'🇸🇦',label:'العربية'};
+
+(function(){var _bAr={'BEST':'أفضل','VIP':'VIP','NEW':'جديد','줄기세포':'خلايا جذعية','추천':'موصى به','프리미엄':'بريميوم','인기':'شائع','여성의학':'صحة المرأة','피부전문':'أخصائي جلدية','안과전문':'أخصائي عيون','리프팅전문':'أخصائي شد','바디전문':'أخصائي الجسم','항노화':'مكافحة الشيخوخة','윤곽전문':'أخصائي نحت','전문':'أخصائي'};Object.keys(_bAr).forEach(function(k){if(BADGE_MAP[k])BADGE_MAP[k].ar=_bAr[k];});})();
+
+Object.assign(CAT_ICONS,{'جراحة التجميل':'💉','البشرة':'🌿','الخلايا الجذعية':'🧬','الجسم':'💪','صحة المرأة':'🌸','العيون':'👁','مكافحة الشيخوخة':'🏅','الأسنان':'🦷','التجميل':'✨','خدمات أخرى':'🎯','الطب الكوري':'🍵'});
+EXTRA_CATS_KR.push('خدمات أخرى');
+// ════════════ P1 끝 ════════════
 
 setLang('zh');
 loadReviews();
@@ -2955,6 +2996,61 @@ function fkqItem(nameKey, subKey){ // 언어별 시술명+설명 반환
   const d = FKQ_ITEM_I18N[fkqLang] || FKQ_ITEM_I18N.zh;
   return { name: d[nameKey]||nameKey, sub: subKey ? (d[subKey]||'') : '' };
 }
+
+// ════════════ 견적위젯 아랍어(ar) — P2 ════════════
+FKQ_CURRENCY.ar = { exr: 1543, sym: '$', code: 'USD' };
+
+FKQ_I18N.ar = {
+  title:'احصل على عرض سعر سريع', subtitle:'اختر إجراءاتك وتواريخ السفر للحصول على تقدير فوري',
+  step1_title:'1. اختر المجالات التي تهمّك (يمكن اختيار أكثر من مجال)',
+  step1_empty:'يرجى اختيار مجال بالأعلى أولاً (يمكن اختيار أكثر من واحد)',
+  clear_all:'مسح الكل',
+  step2_visit:'2. جدول السفر', arrival:'تاريخ الوصول', departure:'تاريخ المغادرة',
+  stay_label:'مدة الإقامة', reco_label:'الجدول الموصى به',
+  reco_day:'جدول علاج في نفس اليوم', reco_short:'جدول قصير مع فترة تعافٍ', reco_mid:'جدول علاج + سياحة', reco_long:'جدول شامل مع وقت تعافٍ كافٍ',
+  step3_contact:'3. معلومات التواصل', name_label:'الاسم الكامل (كما في الجواز) *', nation_label:'الجنسية',
+  contact_label:'وي تشات / التواصل *', hospital_label:'المستشفى المفضل (اختياري)', hospital_ph:'اتركه فارغًا إن لم تقرر', introducer_label:'رمز المُحيل (اختياري)', introducer_ph:'رقم من 4 خانات',
+  step3_title:'عرض السعر التقديري', step3_sub:'راجع العرض أدناه واستشر عبر وي تشات',
+  disclaimer:'يعكس هذا العرض <b>متوسط نطاق أسعار السوق (USD)</b> للمستشفيات الشريكة للأغراض المرجعية فقط؛ ويتم تأكيد التكلفة الفعلية بعد تشخيص المستشفى. <b>سيقدّم لك مستشارك المخصص العرض والجدول الدقيق مباشرةً عبر وي تشات.</b>',
+  btn_prev:'السابق', btn_next:'التالي', btn_consult:'💬 استشارة عبر وي تشات', btn_submit:'📤 إرسال طلب العرض', btn_save:'🖨️ طباعة',
+  select_min1:'يرجى اختيار إجراء واحد على الأقل.',
+  name_contact_required:'الاسم ومعلومات التواصل مطلوبة.',
+  doc_title:'عرض سعر تقديري (مرجعي)', doc_no:'رقم العرض', doc_issued:'صدر بتاريخ',
+  doc_name:'الاسم', doc_contact:'التواصل', doc_hospital:'المستشفى المفضل', doc_visit:'جدول السفر',
+  doc_field:'المجال', doc_treat:'الإجراء المطلوب', doc_range:'النطاق التقديري (USD)', doc_total:'إجمالي النطاق التقديري',
+  doc_match:'يُحدّد بعد الاستشارة', doc_footer:'💬 سيقدّم لك مستشارك العرض الدقيق مباشرةً عبر وي تشات',
+  sent_title:'تم إرسال طلب العرض!', sent_desc:'تم الإرسال، وسنتواصل معك عبر وي تشات',
+  sent_wechat:'افتح استشارة وي تشات', close_btn:'✓ إغلاق',
+  cat_skin:'الجلدية', cat_plastic:'جراحة التجميل', cat_stem:'الخلايا الجذعية', cat_women:'عيادة المرأة',
+  cat_checkup:'الفحص الصحي', cat_wellness:'الطب الكوري والعافية', cat_extra:'خدمات أخرى',
+  nations:[['China','中国'],['Vietnam','越南'],['Thailand','泰国'],['Japan','日本'],['USA','美国'],['Other','其他']],
+};
+
+FKQ_ITEM_I18N.ar = {
+  s_shots:'نبضة', s_1cc:'لكل 1سي‌سي', s_2cc:'2سي‌سي', s_1time:'جلسة واحدة', s_pkg:'باقة', s_basic:'أساسي',
+  s_embed:'غرز/شق', s_nose:'جسر/أرنبة الأنف', s_contour:'جراحة نحت', s_v:'نحت مركّب', s_implant:'حشوة/زرعة',
+  s_premium_lens:'عدسة بريميوم', s_coord:'مرافقة منسّق', s_stem_pkg:'باقة خلايا جذعية', s_lipolysis:'حقن إذابة الدهون',
+  s_tonic:'ثوم/تبييض/كوكتيل', s_20times:'20 جلسة', s_vvip:'فئة فاخرة', s_airport:'يشمل استقبال المطار',
+  n_ulthera:'ألثيرا (Ulthera)', n_thermage:'ثيرماج FLX', n_botox:'بوتوكس (Botox)',
+  n_filler:'فيلر (Filler)', n_rejuran:'ريجوران (Rejuran)', n_pico:'بيكو تونينغ',
+  n_inmode:'INMODE', n_onda:'ONDA',
+  n_eye:'الجفن المزدوج', n_nose:'تجميل الأنف', n_jaw:'تصغير زاوية الفك',
+  n_cheek:'تصغير عظمة الوجنة', n_vline:'نحت الوجه V-line', n_breast:'تكبير الصدر',
+  n_lipo_ab:'شفط دهون البطن', n_lipo_th:'شفط دهون الفخذين',
+  n_stem_blood:'خلايا جذعية من الدم', n_stem_blood3:'خلايا جذعية من الدم بريميوم (×3)',
+  n_stem_fat:'خلايا جذعية دهنية (SVF)', n_stem_fat_pkg:'باقة دهون + الجسم كامل',
+  n_stem_bone:'خلايا جذعية من النخاع', n_stem_vvip:"Rev'ita Cell Premium (VVIP)",
+  n_stem_local:'حقن موضعي',
+  n_labia:'تجميل الشفرين', n_vagina:'تضييق المهبل', n_incont:'جراحة سلس البول',
+  n_intimate:'تبييض المنطقة الحساسة', n_vlaser:'ليزر مهبلي',
+  n_checkup:'فحص صحي شامل', n_cataract:'جراحة المياه البيضاء (عدسة بريميوم)',
+  n_mri:'فحص رنين مغناطيسي دقيق', n_breast_cancer:'باقة فحص سرطان الثدي',
+  n_hair:'علاج الشعر بالخلايا الجذعية', n_hanbang_diet:'تنحيف بالطب الكوري (حقن إذابة الدهون)',
+  n_nutrition:'حقن مغذية (ثوم/تبييض)', n_scalp:'تقوية فروة الرأس (×20)', n_hanbang:'علاج كوري شامل للجسم',
+  n_vvip1:'كونسيرج VVIP (ليلة ويومين)', n_vvip3:'كونسيرج VVIP (3 ليالٍ و4 أيام)',
+  n_interp_half:'ترجمة (نصف يوم)', n_interp_full:'ترجمة (يوم كامل)', n_car:'خدمة سيارة (يوم واحد)',
+};
+// ════════════ P2 끝 ════════════
 
 const fkqProcedureData = {
   "피부": {
