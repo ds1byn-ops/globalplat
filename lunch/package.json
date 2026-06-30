@@ -1,0 +1,14 @@
+{
+  "name": "gangnam-lunch-roulette",
+  "version": "1.0.0",
+  "description": "강남역 3·4·5·6번출구 반경 500m · 점심 12,000원 이내 식당 룰렛",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "seed": "node scripts/seed.mjs",
+    "gen-seed-sql": "node scripts/gen-seed-sql.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>강남역 점심 룰렛 · 팀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --rice:#FBF6EF; --ink:#211B14; --card:#FFFFFF;
+    --gochu:#E8512B; --gochu-d:#C73C18; --broth:#F2A33C; --line:#EADFCE;
+    --mut:#9A8C79; --soft:#6B5D4A; --gold:#E8A317;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--rice);color:var(--ink);font-family:'Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;display:flex;justify-content:center;padding:22px 16px 60px}
+  .app{width:100%;max-width:540px}
+
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .brand{font-family:'Black Han Sans',sans-serif;font-size:31px;line-height:.95;letter-spacing:-.5px;color:var(--ink)}
+  .brand em{color:var(--gochu);font-style:normal}
+  .sub{font-size:11.5px;font-weight:700;color:var(--mut);letter-spacing:.2px;text-align:right;line-height:1.5}
+  .datebar{margin:14px 0 14px;display:flex;align-items:center;gap:9px;font-weight:700;font-size:13.5px;color:var(--soft);flex-wrap:wrap}
+  .datebar b{font-family:'Black Han Sans',sans-serif;color:var(--ink);font-weight:400;font-size:15px}
+  .datebar .q{color:var(--gochu)}
+  .src{font-size:10px;font-weight:700;border-radius:999px;padding:3px 9px;letter-spacing:.3px}
+  .src.live{background:#E6F4EA;color:#15803D}
+  .src.local{background:#FBEAE3;color:var(--gochu-d)}
+  .who{margin-left:auto;display:flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--line);
+    border-radius:999px;padding:5px 11px;cursor:pointer;font-weight:700;font-size:12px;color:var(--ink);transition:.14s}
+  .who:hover{border-color:var(--ink)}
+  .who .ic{font-size:13px}
+
+  /* tabs */
+  .tabs{display:none;gap:6px;margin-bottom:16px;background:#F1E9DC;padding:5px;border-radius:14px}
+  .tabs.show{display:flex}
+  .tab{flex:1;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;color:var(--soft);
+    padding:9px 6px;border-radius:10px;cursor:pointer;transition:.14s}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:0 4px 10px -6px rgba(60,40,20,.5)}
+
+  .view{display:none}
+  .view.on{display:block}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+  .chip{border:1.5px solid var(--line);background:#fff;color:var(--soft);font-family:inherit;font-size:12.5px;font-weight:700;
+    padding:7px 13px;border-radius:999px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+  .chip .dot{width:7px;height:7px;border-radius:50%}
+  .chip:hover{border-color:var(--mut)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip.on .cnt{color:#d8cbb6}
+  .chip .cnt{color:var(--mut);font-weight:500;font-size:11px}
+
+  .opts{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:12px;font-weight:700;color:var(--soft)}
+  .switch{position:relative;display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+  .switch input{display:none}
+  .track{width:38px;height:22px;border-radius:999px;background:#E3D8C6;transition:.15s;position:relative}
+  .track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked + .track{background:var(--gochu)}
+  .switch input:checked + .track::after{transform:translateX(16px)}
+
+  .reel-wrap{position:relative;height:128px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(180deg,#fff 0%,#FFF8EE 100%);
+    border:2px solid var(--line);box-shadow:0 10px 26px -16px rgba(60,40,20,.45)}
+  .reel-band{position:absolute;left:8px;right:8px;top:50%;height:50px;transform:translateY(-50%);
+    border-top:2px solid var(--gochu);border-bottom:2px solid var(--gochu);pointer-events:none;z-index:3;background:rgba(232,81,43,.05)}
+  .reel-band::before,.reel-band::after{content:"";position:absolute;top:50%;width:0;height:0;transform:translateY(-50%);border-top:7px solid transparent;border-bottom:7px solid transparent}
+  .reel-band::before{left:-2px;border-left:9px solid var(--gochu)}
+  .reel-band::after{right:-2px;border-right:9px solid var(--gochu)}
+  .reel-mask-t,.reel-mask-b{position:absolute;left:0;right:0;height:39px;z-index:2;pointer-events:none}
+  .reel-mask-t{top:0;background:linear-gradient(180deg,#fff,rgba(255,255,255,0))}
+  .reel-mask-b{bottom:0;background:linear-gradient(0deg,#FFF8EE,rgba(255,248,238,0))}
+  .reel-strip{position:absolute;left:0;right:0;top:0;will-change:transform}
+  .reel-item{height:50px;display:flex;align-items:center;justify-content:center;gap:9px;font-family:'Black Han Sans',sans-serif;font-size:22px;color:#c9bca8;letter-spacing:-.3px}
+  .reel-item .em{font-size:19px}
+  .reel-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;font-family:'Black Han Sans',sans-serif;font-size:23px;color:#cdbfa9;text-align:center;padding:0 18px}
+
+  .controls{display:flex;gap:10px;margin-top:14px}
+  .btn{font-family:'Black Han Sans',sans-serif;font-size:18px;letter-spacing:.3px;border:none;border-radius:14px;cursor:pointer;padding:15px 10px;transition:.14s;flex:1}
+  .btn-spin{background:var(--gochu);color:#fff;box-shadow:0 9px 20px -9px rgba(232,81,43,.8)}
+  .btn-spin:hover{background:var(--gochu-d)}
+  .btn-spin:active{transform:translateY(1px)}
+  .btn-spin:disabled{background:#e7c9bd;box-shadow:none;cursor:default}
+  .btn-pick{flex:0 0 132px;background:#fff;color:var(--ink);border:2px solid var(--ink)}
+  .btn-pick:hover{background:var(--ink);color:#fff}
+  .btn-pick.on{background:var(--ink);color:#fff}
+
+  .result{margin-top:18px;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;opacity:0;transform:translateY(8px);transition:.3s;box-shadow:0 14px 34px -22px rgba(60,40,20,.5)}
+  .result.show{opacity:1;transform:none}
+  .r-eyebrow{font-size:11.5px;font-weight:700;color:var(--gochu);letter-spacing:1.4px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+  .r-fav{background:none;border:none;cursor:pointer;font-size:20px;line-height:1;filter:grayscale(1) opacity(.4);transition:.14s}
+  .r-fav.on{filter:none}
+  .r-fav .c{font-size:12px;font-family:'Noto Sans KR';font-weight:700;color:var(--gold);margin-left:3px;vertical-align:middle}
+  .r-name{font-family:'Black Han Sans',sans-serif;font-size:33px;line-height:1.04;letter-spacing:-.6px;margin-bottom:11px}
+  .r-tags{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:15px}
+  .tag{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;color:#fff}
+  .tag.line{background:#fff;border:1.5px solid var(--line);color:var(--soft)}
+  .r-menu{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:13px 15px;background:#FFF8EE;border-radius:13px;border:1px solid var(--line);margin-bottom:8px}
+  .r-menu .lbl{font-size:12px;font-weight:700;color:var(--mut)}
+  .r-menu .mn{font-weight:700;font-size:15px;color:var(--ink);margin-top:3px}
+  .r-menu .price{font-family:'Black Han Sans',sans-serif;font-size:26px;color:var(--gochu);white-space:nowrap}
+  .r-menu .price small{font-size:13px;color:var(--soft);font-family:'Noto Sans KR';font-weight:700}
+  .r-note{font-size:12.5px;color:var(--soft);line-height:1.6;margin:10px 2px 14px}
+  .maps{display:flex;gap:9px;margin-bottom:10px}
+  .maps a{flex:1;text-align:center;text-decoration:none;font-weight:700;font-size:13px;padding:11px;border-radius:12px;transition:.14s}
+  .map-n{background:#03C75A;color:#fff}.map-n:hover{filter:brightness(.94)}
+  .map-k{background:#FEE500;color:#3A1D1D}.map-k:hover{filter:brightness(.96)}
+  .r-ate{width:100%;font-family:'Black Han Sans',sans-serif;font-size:15px;border:none;border-radius:12px;padding:12px;cursor:pointer;transition:.14s;margin-bottom:10px;background:#15803D;color:#fff}
+  .r-ate:hover{filter:brightness(.94)}
+  .r-ate.done{background:#E6F4EA;color:#15803D}
+  .r-actions{display:flex;gap:8px}
+  .r-actions button{flex:1;font-family:inherit;font-weight:700;font-size:12.5px;border-radius:11px;padding:11px 6px;cursor:pointer;transition:.14s;border:1.5px solid var(--line);background:#fff;color:var(--soft)}
+  .r-actions button:hover{border-color:var(--mut);color:var(--ink)}
+  .r-actions .redo{border-color:var(--ink);color:var(--ink)}
+  .r-actions .redo:hover{background:var(--ink);color:#fff}
+
+  .picker{margin-top:16px;display:none}
+  .picker.show{display:block}
+  .picker h3{font-size:12px;font-weight:700;color:var(--mut);margin:0 2px 9px;letter-spacing:.3px}
+  .plist{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;padding-right:3px}
+  .prow{display:flex;align-items:center;gap:11px;padding:11px 13px;background:#fff;border:1.5px solid var(--line);border-radius:13px;cursor:pointer;transition:.13s;text-align:left}
+  .prow:hover{border-color:var(--ink);transform:translateX(2px)}
+  .prow .pdot{width:9px;height:9px;border-radius:50%;flex:none}
+  .prow .pmain{flex:1;min-width:0}
+  .prow .pn{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+  .prow .badge{font-size:10.5px;font-weight:700;border-radius:6px;padding:1px 5px}
+  .badge.fav{background:#FDF3D8;color:#A9760A}
+  .badge.ate{background:#E6F4EA;color:#15803D}
+  .prow .pm{font-size:11.5px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .pp{font-family:'Black Han Sans',sans-serif;font-size:17px;color:var(--gochu);flex:none}
+  .prow.excluded{opacity:.4}
+  .prow.excluded .pn{text-decoration:line-through}
+
+  /* team views */
+  .rank{display:flex;flex-direction:column;gap:8px}
+  .rcard{display:flex;align-items:center;gap:12px;padding:13px 15px;background:#fff;border:1.5px solid var(--line);border-radius:14px}
+  .rcard .num{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--mut);width:22px;text-align:center}
+  .rcard .num.top{color:var(--gold)}
+  .rcard .rmain{flex:1;min-width:0}
+  .rcard .rn{font-weight:700;font-size:15px}
+  .rcard .rd{font-size:11.5px;color:var(--mut);margin-top:2px}
+  .rcard .rf{font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);white-space:nowrap}
+  .rcard .mine{color:var(--gochu);font-size:11px;font-weight:700}
+  .logday{margin-bottom:18px}
+  .logday h4{font-family:'Black Han Sans',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .logday h4 small{font-family:'Noto Sans KR';font-weight:700;font-size:11px;color:var(--mut)}
+  .logrow{display:flex;align-items:center;gap:10px;padding:9px 13px;background:#fff;border:1.5px solid var(--line);border-radius:12px;margin-bottom:6px;font-size:13px}
+  .logrow .lm{font-weight:700;color:var(--ink)}
+  .logrow .lr{color:var(--soft)}
+  .logrow .ls{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--mut);background:#F1E9DC;border-radius:6px;padding:2px 7px}
+  .empty{text-align:center;color:var(--mut);font-size:13px;padding:34px 10px;line-height:1.7}
+
+  .footnote{margin-top:20px;font-size:11px;color:var(--mut);line-height:1.7;text-align:center}
+  .footnote b{color:var(--soft)}
+  .excl-line{margin-top:11px;font-size:11.5px;color:var(--soft);text-align:center}
+  .excl-line button{background:none;border:none;color:var(--gochu);font-weight:700;font-size:11.5px;cursor:pointer;text-decoration:underline;font-family:inherit}
+
+  /* weekly best banner */
+  .weekbest{display:none;align-items:center;gap:11px;margin-bottom:14px;padding:12px 15px;border-radius:15px;cursor:pointer;
+    background:linear-gradient(100deg,#FFF3D6,#FFE6C9);border:1.5px solid #F0D8A8;transition:.14s}
+  .weekbest:hover{filter:brightness(.98)}
+  .weekbest.show{display:flex}
+  .weekbest .trophy{font-size:24px}
+  .weekbest .wb-main{flex:1;min-width:0}
+  .weekbest .wb-lbl{font-size:10.5px;font-weight:700;color:#A9760A;letter-spacing:.6px}
+  .weekbest .wb-name{font-family:'Black Han Sans',sans-serif;font-size:19px;color:#3A2A0A;line-height:1.1;margin-top:1px}
+  .weekbest .wb-cnt{font-family:'Black Han Sans',sans-serif;font-size:13px;color:#A9760A;white-space:nowrap;text-align:right;line-height:1.3}
+
+  .addbtn{margin-left:auto;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;
+    font-family:inherit;font-weight:700;font-size:11.5px;color:var(--soft);cursor:pointer;transition:.14s}
+  .addbtn:hover{border-color:var(--ink);color:var(--ink)}
+
+  /* modal */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(33,27,20,.45);z-index:60;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .modal-bg.show{display:flex}
+  .modal{width:100%;max-width:440px;background:#fff;border-radius:20px;padding:22px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
+  .modal h3{font-family:'Black Han Sans',sans-serif;font-size:21px;margin-bottom:4px}
+  .modal .mdesc{font-size:12px;color:var(--mut);margin-bottom:16px;line-height:1.6}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--soft);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+    border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;background:#FFFDFA;transition:.14s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gochu)}
+  .field textarea{resize:vertical;min-height:54px}
+  .field .row{display:flex;gap:9px}
+  .addr-row{display:flex;gap:8px}
+  .addr-row input{flex:1}
+  .nv{flex:none;background:#03C75A;color:#fff;border:none;border-radius:11px;padding:0 13px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+  .nv:hover{filter:brightness(.94)}
+  .mhint{font-size:11px;color:var(--mut);margin-top:5px;line-height:1.5}
+  .modal-act{display:flex;gap:9px;margin-top:18px}
+  .modal-act button{flex:1;font-family:'Black Han Sans',sans-serif;font-size:16px;border-radius:12px;padding:13px;cursor:pointer;border:none;transition:.14s}
+  .m-cancel{background:#F1E9DC;color:var(--soft)}.m-cancel:hover{filter:brightness(.96)}
+  .m-save{background:var(--gochu);color:#fff}.m-save:hover{background:var(--gochu-d)}
+  .m-save:disabled{background:#e7c9bd;cursor:default}
+
+  canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+  @media (max-width:430px){ .brand{font-size:27px}.btn-pick{flex-basis:112px;font-size:16px}.r-name{font-size:28px} }
+  @media (prefers-reduced-motion:reduce){ .reel-strip{transition:none!important}.result{transition:opacity .2s} }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">강남역<br><em>점심 룰렛</em></div>
+    <div class="sub">3·4·5·6번출구 반경 500m<br>점심 메뉴 12,000원 이내<br>· 후보 <span id="totalCount">—</span>곳 ·</div>
+  </div>
+
+  <div class="datebar">
+    <b id="today">—</b><span class="q">오늘 점심 뭐 먹지?</span>
+    <span id="srcBadge" class="src local">로컬 데이터</span>
+    <button class="who" id="whoBtn" style="display:none"><span class="ic">👤</span><span id="whoName">팀원</span></button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-tab="roulette">🎲 룰렛</button>
+    <button class="tab" data-tab="favs">⭐ 즐겨찾기</button>
+    <button class="tab" data-tab="log">📅 우리팀 기록</button>
+  </div>
+
+  <!-- ROULETTE VIEW -->
+  <div class="view on" id="view-roulette">
+    <div class="weekbest" id="weekBest"></div>
+    <div class="chips" id="chips"></div>
+    <div class="opts" id="opts" style="display:none">
+      <label class="switch"><input type="checkbox" id="exclRecent"><span class="track"></span></label>
+      <span>최근 7일 내 내가 먹은 곳 빼기</span>
+      <button class="addbtn" id="addBtn">➕ 식당 추가</button>
+    </div>
+    <div class="reel-wrap">
+      <div class="reel-mask-t"></div><div class="reel-mask-b"></div><div class="reel-band"></div>
+      <div class="reel-idle" id="idle">불러오는 중…</div>
+      <div class="reel-strip" id="strip"></div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-spin" id="spin" disabled>오늘의 점심 돌리기</button>
+      <button class="btn btn-pick" id="pickToggle">직접 고르기</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="picker" id="picker">
+      <h3>먹고 싶은 집을 직접 눌러 정하세요 · 다시 누르면 후보에서 제외</h3>
+      <div class="plist" id="plist"></div>
+    </div>
+    <div class="excl-line" id="exclLine"></div>
+  </div>
+
+  <!-- FAVORITES VIEW -->
+  <div class="view" id="view-favs">
+    <div class="rank" id="favRank"></div>
+  </div>
+
+  <!-- LOG VIEW -->
+  <div class="view" id="view-log">
+    <div id="logList"></div>
+  </div>
+
+  <div class="footnote">
+    네이버·구글지도 정보 기반으로 추린 리스트입니다. 가격·메뉴는 매장 사정에 따라 달라질 수 있어요.<br>
+    <b id="footTeam">팀 기능은 Supabase 연결 시 활성화됩니다.</b>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+
+<!-- 식당 추가 모달 -->
+<div class="modal-bg" id="addBg">
+  <div class="modal">
+    <h3>➕ 우리 팀 맛집 추가</h3>
+    <div class="mdesc">팀이 같이 보는 리스트에 식당을 추가합니다. 주소는 네이버 지도에서 확인해 넣어주세요.</div>
+    <div class="field"><label>상호명 *</label>
+      <div class="addr-row">
+        <input id="fName" maxlength="40" placeholder="예: 강남교자" />
+        <button class="nv" id="fNaver">네이버에서 찾기</button>
+      </div>
+      <div class="mhint">상호명을 적고 "네이버에서 찾기"를 누르면 새 탭에서 검색됩니다. 거기서 도로명 주소를 복사해 아래에 붙여넣으세요.</div>
+    </div>
+    <div class="field"><label>주소 (네이버 지도)</label>
+      <input id="fAddr" maxlength="120" placeholder="예: 서울 강남구 강남대로 396" />
+    </div>
+    <div class="field"><div class="row">
+      <div style="flex:1"><label>카테고리 *</label><select id="fCat"></select></div>
+      <div style="flex:0 0 120px"><label>가까운 출구</label>
+        <select id="fExit"><option value="6">6번</option><option value="5">5번</option><option value="4">4번</option><option value="3">3번</option><option value="">기타</option></select>
+      </div>
+    </div></div>
+    <div class="field"><div class="row">
+      <div style="flex:1"><label>대표 점심 메뉴 *</label><input id="fMenu" maxlength="40" placeholder="예: 김치만두" /></div>
+      <div style="flex:0 0 110px"><label>가격(원) *</label><input id="fPrice" type="number" inputmode="numeric" min="0" placeholder="9000" /></div>
+    </div></div>
+    <div class="field"><label>한줄 소개</label>
+      <textarea id="fNote" maxlength="160" placeholder="예: 점심 줄서는 만두 맛집, 손만두 강추"></textarea>
+    </div>
+    <div class="modal-act">
+      <button class="m-cancel" id="fCancel">취소</button>
+      <button class="m-save" id="fSave">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<script src="./config.js" onerror="window.LUNCH_CONFIG=window.LUNCH_CONFIG||{}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ---------- state ----------
+let CATS={}, SPOTS=[], SB=null, TEAM=false, MEMBER="";
+let FAVS=[], LOG=[], STATS={};               // STATS[id]={fav,favMine,ate14,ateTodayMine}
+let activeCat="all", excluded=new Set(), spinning=false, excludeRecent=false;
+const ITEM_H=50;
+const idOf = n => (SPOTS.find(s=>s.n===n)||{}).id;
+const today = ()=> new Date().toISOString().slice(0,10);
+const place = s => s.walk || s.address || "강남역 인근";
+function weekStart(){ const d=new Date(); const off=(d.getDay()+6)%7; const m=new Date(d); m.setHours(0,0,0,0); m.setDate(d.getDate()-off); return m.toISOString().slice(0,10); }
+
+// ---------- date ----------
+(function(){ const d=new Date(),days=["일","월","화","수","목","금","토"];
+  document.getElementById("today").textContent=`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} (${days[d.getDay()]})`; })();
+
+// ---------- member (nickname) ----------
+function lsGet(k){ try{return localStorage.getItem(k)}catch(e){return null} }
+function lsSet(k,v){ try{localStorage.setItem(k,v)}catch(e){} }
+function initMember(){
+  MEMBER = lsGet("lunch_member") || "";
+  if(!MEMBER){ MEMBER = "팀원"+Math.floor(100+Math.random()*900); lsSet("lunch_member",MEMBER); }
+  document.getElementById("whoName").textContent = MEMBER;
+}
+function changeMember(){
+  const v = prompt("이름(닉네임)을 입력하세요 · 최대 20자", MEMBER);
+  if(v===null) return;
+  const t = v.trim().slice(0,20);
+  if(!t) return;
+  MEMBER=t; lsSet("lunch_member",t);
+  document.getElementById("whoName").textContent=t;
+  computeStats(); refreshRouletteUI(); renderFavs(); renderLog();
+}
+
+// ---------- data loading ----------
+async function loadData(){
+  const cfg=window.LUNCH_CONFIG||{};
+  if(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase){
+    try{
+      SB=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+      const [{data:cats,error:e1},{data:rest,error:e2}]=await Promise.all([
+        SB.from("lunch_categories").select("*").order("sort"),
+        SB.from("lunch_restaurants").select("*").eq("active",true).order("category")
+      ]);
+      if(e1||e2) throw (e1||e2);
+      if(cats?.length && rest?.length){
+        CATS=Object.fromEntries(cats.map(c=>[c.key,{label:c.label,hex:c.hex,em:c.em}]));
+        SPOTS=rest.map(r=>({id:r.id,n:r.name,c:r.category,menu:r.menu,price:r.price,rate:Number(r.rating),walk:r.walk,address:r.address,note:r.note,exit:r.exit,addedBy:r.added_by}));
+        TEAM=true; setSrc("live");
+        await loadTeam();
+        return;
+      }
+    }catch(err){ console.warn("Supabase 로드 실패, JSON 폴백:",err.message); SB=null; TEAM=false; }
+  }
+  const res=await fetch("./data/restaurants.json"); const d=await res.json();
+  CATS=d.categories;
+  SPOTS=d.restaurants.map((r,i)=>({id:i+1,n:r.name,c:r.category,menu:r.menu,price:r.price,rate:r.rating,walk:r.walk,note:r.note,exit:r.exit}));
+  setSrc("local");
+}
+function setSrc(kind){ const b=document.getElementById("srcBadge");
+  if(kind==="live"){b.className="src live";b.textContent="Supabase 연결됨";}else{b.className="src local";b.textContent="로컬 데이터";} }
+
+async function loadTeam(){
+  if(!SB) return;
+  const since = new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  const [{data:f},{data:l}]=await Promise.all([
+    SB.from("lunch_favorites").select("restaurant_id,member"),
+    SB.from("lunch_log").select("restaurant_id,member,ate_on,source").gte("ate_on",since).order("ate_on",{ascending:false})
+  ]);
+  FAVS=f||[]; LOG=l||[];
+  computeStats();
+  renderWeekBest();
+}
+function computeStats(){
+  STATS={};
+  SPOTS.forEach(s=>STATS[s.id]={fav:0,favMine:false,ate14:0,ateTodayMine:false});
+  const cut14=new Date(Date.now()-14*864e5).toISOString().slice(0,10);
+  FAVS.forEach(f=>{ const st=STATS[f.restaurant_id]; if(!st)return; st.fav++; if(f.member===MEMBER)st.favMine=true; });
+  LOG.forEach(l=>{ const st=STATS[l.restaurant_id]; if(!st)return; if(l.ate_on>=cut14)st.ate14++; if(l.member===MEMBER&&l.ate_on===today())st.ateTodayMine=true; });
+}
+
+// ---------- team actions ----------
+async function toggleFav(spot){
+  if(!SB) return;
+  const st=STATS[spot.id]||{};
+  try{
+    if(st.favMine){ await SB.from("lunch_favorites").delete().eq("restaurant_id",spot.id).eq("member",MEMBER); }
+    else{ await SB.from("lunch_favorites").upsert({restaurant_id:spot.id,member:MEMBER},{onConflict:"restaurant_id,member"}); }
+    await loadTeam(); refreshRouletteUI(); renderFavs();
+    if(currentPick&&currentPick.id===spot.id) decorateResult();
+  }catch(e){ console.error(e); alert("즐겨찾기 처리 중 오류가 났어요."); }
+}
+async function logEat(spot,source){
+  if(!SB) return;
+  try{
+    await SB.from("lunch_log").upsert({restaurant_id:spot.id,member:MEMBER,ate_on:today(),source:source||'roulette'},{onConflict:"restaurant_id,member,ate_on"});
+    await loadTeam(); refreshRouletteUI(); renderLog();
+    if(currentPick&&currentPick.id===spot.id) decorateResult();
+  }catch(e){ console.error(e); alert("기록 중 오류가 났어요."); }
+}
+
+// ---------- chips ----------
+const chipsEl=document.getElementById("chips");
+function countCat(key){ return SPOTS.filter(s=>(key==="all"||s.c===key)).length; }
+function buildChips(){ chipsEl.innerHTML=""; chipsEl.appendChild(mkChip("all","전체",null));
+  Object.keys(CATS).forEach(k=>chipsEl.appendChild(mkChip(k,CATS[k].label,CATS[k].hex))); paintChips(); }
+function mkChip(key,label,hex){ const b=document.createElement("button"); b.className="chip"; b.dataset.k=key;
+  b.innerHTML=(hex?`<span class="dot" style="background:${hex}"></span>`:"")+`${label}<span class="cnt">${countCat(key)}</span>`;
+  b.onclick=()=>{activeCat=key;paintChips();renderPicker();updateExcl();}; return b; }
+function paintChips(){ [...chipsEl.children].forEach(c=>c.classList.toggle("on",c.dataset.k===activeCat)); }
+
+// ---------- candidate pool ----------
+function recentMineNames(){
+  if(!excludeRecent) return new Set();
+  const cut=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+  const ids=new Set(LOG.filter(l=>l.member===MEMBER&&l.ate_on>=cut).map(l=>l.restaurant_id));
+  return new Set(SPOTS.filter(s=>ids.has(s.id)).map(s=>s.n));
+}
+function pool(){ const rec=recentMineNames();
+  return SPOTS.filter(s=>(activeCat==="all"||s.c===activeCat)&&!excluded.has(s.n)&&!rec.has(s.n)); }
+
+// ---------- reel ----------
+const strip=document.getElementById("strip"), idle=document.getElementById("idle");
+function reelItem(s){ const d=document.createElement("div"); d.className="reel-item";
+  d.innerHTML=`<span class="em">${CATS[s.c]?.em||"🍽"}</span>${s.n}`; return d; }
+function spin(){
+  if(spinning) return;
+  const cands=pool();
+  if(cands.length===0){ flashIdle("후보가 없어요! 필터·제외를 확인하세요"); return; }
+  spinning=true; document.getElementById("spin").disabled=true; hideResult(); idle.style.display="none";
+  const winner=cands[Math.floor(Math.random()*cands.length)];
+  const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const loops=reduce?1:6, seq=[];
+  for(let i=0;i<loops;i++){ cands.forEach(c=>seq.push(c)); } seq.push(winner);
+  strip.innerHTML=""; seq.forEach(s=>strip.appendChild(reelItem(s)));
+  const bandCenter=(128/2)-(ITEM_H/2), endY=bandCenter-(seq.length-1)*ITEM_H;
+  strip.style.transition="none"; strip.style.transform="translateY("+bandCenter+"px)"; void strip.offsetHeight;
+  strip.style.transition=reduce?"transform .5s ease-out":"transform 2.7s cubic-bezier(.12,.66,.12,1)";
+  strip.style.transform="translateY("+endY+"px)";
+  const done=()=>{ strip.removeEventListener("transitionend",done); spinning=false;
+    document.getElementById("spin").disabled=false; showResult(winner,"roulette",true); };
+  strip.addEventListener("transitionend",done);
+  setTimeout(()=>{ if(spinning) done(); }, reduce?900:3200);
+}
+function flashIdle(msg){ idle.style.display="flex"; idle.textContent=msg; setTimeout(()=>{idle.textContent="레버를 당겨보세요 🍚";},1800); }
+
+// ---------- result card ----------
+const result=document.getElementById("result");
+let currentPick=null, currentSource="roulette";
+function won(p){ return p.toLocaleString("ko-KR"); }
+function showResult(s,source,celebrate){
+  currentPick=s; currentSource=source||"roulette";
+  const cat=CATS[s.c]||{label:"기타",hex:"#999",em:"🍽"};
+  result.innerHTML=`
+    <div class="r-eyebrow"><span>오늘의 점심</span>
+      <button class="r-fav" id="favBtn" title="팀 즐겨찾기">⭐<span class="c" id="favCnt"></span></button></div>
+    <div class="r-name">${s.n}</div>
+    <div class="r-tags">
+      <span class="tag" style="background:${cat.hex}">${cat.em} ${cat.label}</span>
+      <span class="tag line">⭐ ${(s.rate||0).toFixed(1)}</span>
+      <span class="tag line">📍 ${place(s)}</span>
+    </div>
+    <div class="r-menu"><div><div class="lbl">대표 점심 메뉴</div><div class="mn">${s.menu}</div></div>
+      <div class="price">${won(s.price)}<small>원~</small></div></div>
+    <div class="r-note">${s.note||""}</div>
+    <div class="maps">
+      <a class="map-n" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(s.n+" "+(s.address||"강남역"))}">네이버지도에서 보기</a>
+      <a class="map-k" target="_blank" rel="noopener" href="https://map.kakao.com/?q=${encodeURIComponent(s.n+" "+(s.address||"강남역"))}">카카오맵</a></div>
+    <button class="r-ate" id="ateBtn" style="display:none">🍽 여기서 먹었어요</button>
+    <div class="r-actions">
+      <button class="redo" id="aRedo">🎲 다시 돌리기</button>
+      <button id="aExcl">🙅 이 집 빼고</button>
+      <button id="aReset">↺ 제외 초기화</button></div>`;
+  result.classList.add("show");
+  document.getElementById("aRedo").onclick=spin;
+  document.getElementById("aExcl").onclick=()=>{ excluded.add(s.n); renderPicker(); updateExcl(); spin(); };
+  document.getElementById("aReset").onclick=()=>{ excluded.clear(); renderPicker(); updateExcl(); };
+  decorateResult();
+  if(celebrate) burst();
+  result.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function decorateResult(){
+  if(!currentPick) return;
+  const favBtn=document.getElementById("favBtn"), ateBtn=document.getElementById("ateBtn");
+  if(!favBtn) return;
+  if(!TEAM){ favBtn.style.display="none"; return; }
+  const st=STATS[currentPick.id]||{fav:0,favMine:false,ateTodayMine:false};
+  favBtn.style.display=""; favBtn.classList.toggle("on",st.favMine);
+  document.getElementById("favCnt").textContent = st.fav>0? st.fav : "";
+  favBtn.onclick=()=>toggleFav(currentPick);
+  ateBtn.style.display="";
+  if(st.ateTodayMine){ ateBtn.classList.add("done"); ateBtn.textContent="✅ 오늘 먹은 곳으로 기록됨 (취소하려면 탭)"; }
+  else{ ateBtn.classList.remove("done"); ateBtn.textContent="🍽 여기서 먹었어요"; }
+  ateBtn.onclick=async()=>{
+    if(st.ateTodayMine){ await SB.from("lunch_log").delete().eq("restaurant_id",currentPick.id).eq("member",MEMBER).eq("ate_on",today()); await loadTeam(); refreshRouletteUI(); renderLog(); decorateResult(); }
+    else{ await logEat(currentPick,currentSource); }
+  };
+}
+function hideResult(){ result.classList.remove("show"); currentPick=null; }
+
+// ---------- picker ----------
+const picker=document.getElementById("picker"), plist=document.getElementById("plist"), pickToggle=document.getElementById("pickToggle");
+let pickerOpen=false;
+pickToggle.onclick=()=>{ pickerOpen=!pickerOpen; picker.classList.toggle("show",pickerOpen);
+  pickToggle.classList.toggle("on",pickerOpen);
+  if(pickerOpen){ renderPicker(); picker.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
+function renderPicker(){
+  if(!pickerOpen) return;
+  const list=SPOTS.filter(s=>activeCat==="all"||s.c===activeCat); plist.innerHTML="";
+  list.forEach(s=>{ const cat=CATS[s.c]||{hex:"#999",em:"🍽"}; const st=STATS[s.id]||{};
+    const badges = TEAM ? `${st.fav?`<span class="badge fav">⭐${st.fav}</span>`:""}${st.ate14?`<span class="badge ate">🍽${st.ate14}</span>`:""}` : "";
+    const row=document.createElement("button"); row.className="prow"+(excluded.has(s.n)?" excluded":"");
+    row.innerHTML=`<span class="pdot" style="background:${cat.hex}"></span>
+      <span class="pmain"><span class="pn">${s.n} ${badges}</span><span class="pm">${cat.em} ${s.menu} · ${place(s)}</span></span>
+      <span class="pp">${won(s.price)}</span>`;
+    row.onclick=()=>{ if(excluded.has(s.n)){excluded.delete(s.n);row.classList.remove("excluded");updateExcl();return;} showResult(s,"pick",false); };
+    row.oncontextmenu=(e)=>{e.preventDefault();excluded.add(s.n);renderPicker();updateExcl();};
+    let t; row.onpointerdown=()=>{t=setTimeout(()=>{excluded.add(s.n);renderPicker();updateExcl();},550);};
+    row.onpointerup=()=>clearTimeout(t); row.onpointerleave=()=>clearTimeout(t);
+    plist.appendChild(row); });
+}
+
+// ---------- excluded line ----------
+const exclLine=document.getElementById("exclLine");
+function updateExcl(){
+  if(excluded.size===0){ exclLine.innerHTML=`후보 <b style="color:var(--ink)">${pool().length}</b>곳 · 제외 없음`; return; }
+  exclLine.innerHTML=`제외된 ${excluded.size}곳: ${[...excluded].join(", ")} · <button id="clr">전체 복구</button>`;
+  document.getElementById("clr").onclick=()=>{excluded.clear();renderPicker();updateExcl();};
+}
+function refreshRouletteUI(){ if(pickerOpen) renderPicker(); updateExcl(); if(currentPick) decorateResult(); }
+
+// ---------- weekly best ----------
+function renderWeekBest(){
+  const el=document.getElementById("weekBest");
+  if(!TEAM){ el.classList.remove("show"); return; }
+  const ws=weekStart();
+  const week=LOG.filter(l=>l.ate_on>=ws);
+  if(week.length===0){ el.classList.remove("show"); return; }
+  const tally={};
+  week.forEach(l=>{ const t=tally[l.restaurant_id]=tally[l.restaurant_id]||{n:0,members:new Set()}; t.n++; t.members.add(l.member); });
+  let bestId=null,best=null;
+  Object.entries(tally).forEach(([id,t])=>{ if(!best || t.n>best.n || (t.n===best.n && t.members.size>best.members.size)){ best=t; bestId=Number(id); } });
+  const sp=SPOTS.find(s=>s.id===bestId);
+  if(!sp){ el.classList.remove("show"); return; }
+  const cat=CATS[sp.c]||{em:"🍽"};
+  el.innerHTML=`<span class="trophy">🏆</span>
+    <div class="wb-main"><div class="wb-lbl">이번 주 우리팀 베스트</div>
+      <div class="wb-name">${cat.em} ${sp.n}</div></div>
+    <div class="wb-cnt">${best.n}회<br>👥 ${best.members.size}명</div>`;
+  el.classList.add("show");
+  el.onclick=()=>{ showTab("roulette"); showResult(sp,"pick",false); };
+}
+
+// ---------- add restaurant ----------
+const addBg=document.getElementById("addBg");
+function buildCatSelect(){
+  const sel=document.getElementById("fCat"); sel.innerHTML="";
+  Object.entries(CATS).forEach(([k,c])=>{ const o=document.createElement("option"); o.value=k; o.textContent=`${c.em} ${c.label}`; sel.appendChild(o); });
+}
+function openAdd(){ if(!TEAM){ alert("식당 추가는 Supabase 연결 시 가능합니다."); return; }
+  ["fName","fAddr","fMenu","fPrice","fNote"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("fExit").value="6"; addBg.classList.add("show"); }
+function closeAdd(){ addBg.classList.remove("show"); }
+async function submitAdd(){
+  const name=document.getElementById("fName").value.trim();
+  const menu=document.getElementById("fMenu").value.trim();
+  const price=parseInt(document.getElementById("fPrice").value,10);
+  if(!name||!menu||!Number.isFinite(price)){ alert("상호명·대표 메뉴·가격은 필수입니다."); return; }
+  if(SPOTS.some(s=>s.n===name)){ alert("이미 같은 이름의 식당이 있어요."); return; }
+  const row={ name, category:document.getElementById("fCat").value, menu, price,
+    rating:null, exit:document.getElementById("fExit").value||null,
+    address:document.getElementById("fAddr").value.trim()||null,
+    note:document.getElementById("fNote").value.trim()||null,
+    added_by:MEMBER, active:true };
+  const btn=document.getElementById("fSave"); btn.disabled=true; btn.textContent="추가 중…";
+  try{
+    const {error}=await SB.from("lunch_restaurants").insert(row);
+    if(error) throw error;
+    await reloadAll();
+    closeAdd();
+    const added=SPOTS.find(s=>s.n===name);
+    if(added){ activeCat="all"; paintChips(); showTab("roulette"); showResult(added,"pick",false); }
+  }catch(e){ console.error(e); alert("추가 중 오류가 났어요: "+(e.message||e)); }
+  finally{ btn.disabled=false; btn.textContent="추가하기"; }
+}
+async function reloadAll(){
+  const {data:rest}=await SB.from("lunch_restaurants").select("*").eq("active",true).order("category");
+  if(rest){ SPOTS=rest.map(r=>({id:r.id,n:r.name,c:r.category,menu:r.menu,price:r.price,rate:Number(r.rating),walk:r.walk,address:r.address,note:r.note,exit:r.exit,addedBy:r.added_by})); }
+  await loadTeam();
+  document.getElementById("totalCount").textContent=SPOTS.length;
+  buildChips(); refreshRouletteUI(); renderFavs(); renderLog();
+}
+
+// ---------- FAVORITES view ----------
+function renderFavs(){
+  const wrap=document.getElementById("favRank");
+  const ranked=SPOTS.map(s=>({s,st:STATS[s.id]||{fav:0,favMine:false}})).filter(x=>x.st.fav>0)
+    .sort((a,b)=>b.st.fav-a.st.fav || b.s.rate-a.s.rate);
+  if(ranked.length===0){ wrap.innerHTML=`<div class="empty">아직 즐겨찾기가 없어요.<br>룰렛에서 마음에 드는 집의 ⭐ 를 눌러보세요.</div>`; return; }
+  wrap.innerHTML=ranked.map((x,i)=>{ const cat=CATS[x.s.c]||{label:"",em:"🍽"};
+    return `<div class="rcard"><div class="num ${i<3?'top':''}">${i+1}</div>
+      <div class="rmain"><div class="rn">${cat.em} ${x.s.n} ${x.st.favMine?'<span class="mine">· 내 즐겨찾기</span>':''}</div>
+        <div class="rd">${x.s.menu} · ${won(x.s.price)}원 · ${x.s.walk||""}</div></div>
+      <div class="rf">⭐ ${x.st.fav}</div></div>`; }).join("");
+}
+
+// ---------- LOG view ----------
+function renderLog(){
+  const wrap=document.getElementById("logList");
+  const cut=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+  const recent=LOG.filter(l=>l.ate_on>=cut);
+  if(recent.length===0){ wrap.innerHTML=`<div class="empty">최근 7일 점심 기록이 없어요.<br>오늘 먹은 곳에서 <b>🍽 여기서 먹었어요</b> 를 눌러 기록을 시작하세요.</div>`; return; }
+  const byDay={}; recent.forEach(l=>{ (byDay[l.ate_on]=byDay[l.ate_on]||[]).push(l); });
+  const days=["일","월","화","수","목","금","토"];
+  const nameById={}; SPOTS.forEach(s=>nameById[s.id]=s);
+  wrap.innerHTML=Object.keys(byDay).sort().reverse().map(d=>{
+    const dt=new Date(d+"T00:00:00"); const isToday=d===today();
+    const rows=byDay[d].map(l=>{ const sp=nameById[l.restaurant_id]||{n:"(삭제된 식당)",c:null};
+      const cat=CATS[sp.c]||{em:"🍽"};
+      return `<div class="logrow"><span class="lm">${l.member}</span><span class="lr">${cat.em} ${sp.n}</span>
+        <span class="ls">${l.source==='pick'?'지정':'룰렛'}</span></div>`; }).join("");
+    return `<div class="logday"><h4>${dt.getMonth()+1}/${dt.getDate()} (${days[dt.getDay()]}) ${isToday?'<small>· 오늘</small>':''}</h4>${rows}</div>`;
+  }).join("");
+}
+
+// ---------- tabs ----------
+function showTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.tab===name));
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
+  document.getElementById("view-"+name).classList.add("on");
+  if(name==="favs") renderFavs(); if(name==="log") renderLog();
+}
+
+// ---------- confetti ----------
+const cv=document.getElementById("fx"), cx=cv.getContext("2d");
+function size(){ cv.width=innerWidth; cv.height=innerHeight; } size(); addEventListener("resize",size);
+let parts=[], running=false;
+function burst(){ if(window.matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const cols=["#E8512B","#F2A33C","#2E8B57","#C2410C","#FEE500"], cx0=innerWidth/2, cy0=innerHeight*0.42;
+  for(let i=0;i<70;i++){ const a=Math.random()*Math.PI*2,sp=4+Math.random()*7;
+    parts.push({x:cx0,y:cy0,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,g:.22+Math.random()*.12,s:5+Math.random()*5,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:60+Math.random()*30}); }
+  raf(); }
+function raf(){ if(running) return; running=true;
+  (function loop(){ cx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life--;});
+    parts=parts.filter(p=>p.life>0&&p.y<cv.height+30);
+    parts.forEach(p=>{cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.4);cx.restore();});
+    if(parts.length>0) requestAnimationFrame(loop); else {running=false;cx.clearRect(0,0,cv.width,cv.height);} })(); }
+
+// ---------- init ----------
+(async function init(){
+  initMember();
+  try{
+    await loadData();
+    document.getElementById("totalCount").textContent=SPOTS.length;
+    buildChips(); updateExcl();
+    idle.textContent="레버를 당겨보세요 🍚";
+    const spinBtn=document.getElementById("spin"); spinBtn.disabled=false; spinBtn.onclick=spin;
+    if(TEAM){
+      document.getElementById("tabs").classList.add("show");
+      document.getElementById("opts").style.display="";
+      document.getElementById("whoBtn").style.display="";
+      document.getElementById("footTeam").textContent=`팀 공유 모드 · 닉네임 "${MEMBER}" 로 즐겨찾기·기록이 공유됩니다.`;
+      document.getElementById("whoBtn").onclick=changeMember;
+      document.getElementById("exclRecent").onchange=(e)=>{ excludeRecent=e.target.checked; updateExcl(); };
+      document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+      buildCatSelect();
+      renderWeekBest();
+      document.getElementById("addBtn").onclick=openAdd;
+      document.getElementById("fCancel").onclick=closeAdd;
+      addBg.onclick=(e)=>{ if(e.target===addBg) closeAdd(); };
+      document.getElementById("fSave").onclick=submitAdd;
+      document.getElementById("fNaver").onclick=()=>{
+        const q=document.getElementById("fName").value.trim(); if(!q){ alert("먼저 상호명을 입력하세요."); return; }
+        window.open("https://map.naver.com/p/search/"+encodeURIComponent(q+" 강남역"),"_blank","noopener");
+      };
+    }
+  }catch(err){ idle.textContent="데이터를 불러오지 못했어요 😢"; console.error(err); }
+})();
+</script>
+</body>
+</html>
