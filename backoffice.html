@@ -881,9 +881,9 @@ function renderDashboard(){
   document.getElementById('db-recent').innerHTML=recent.map(b=>{
     const c=calcC(b);
     return`<tr>
-      <td style="font-weight:500;">${b.name}</td>
-      <td style="font-size:10px;">${b.hospital}</td>
-      <td style="color:#555;white-space:nowrap;">${b.datetime}</td>
+      <td style="font-weight:500;">${escapeHtml(b.name)}</td>
+      <td style="font-size:10px;">${escapeHtml(b.hospital)}</td>
+      <td style="color:#555;white-space:nowrap;">${escapeHtml(b.datetime)}</td>
       <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
       <td style="font-size:11px;">${b.introducer||'-'}</td>
       <td style="color:#B8960C;white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
@@ -925,13 +925,13 @@ function renderBk(){
     const c=calcC(b);
     return`<tr>
       <td style="color:#ccc;">${i+1}</td>
-      <td style="font-weight:500;">${b.name}</td>
-      <td style="font-size:10px;color:#888;">${b.dob||''}</td>
-      <td style="text-align:center;">${b.gender||'-'}</td>
-      <td>${b.nationality||'중국'}</td>
-      <td style="font-size:10px;background:${b.hospital==='신상성형외과'?'#fffbf0':'#f5f5f5'};color:${b.hospital==='신상성형외과'?'#B8960C':'inherit'};padding:2px 6px;border-radius:4px;">${b.hospital==='신상성형외과'?'★ ':''}<b>${b.hospital}</b></td>
-      <td style="white-space:nowrap;color:#555;">${b.datetime}</td>
-      <td style="font-size:10px;color:#888;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.treatment||'-'}</td>
+      <td style="font-weight:500;">${escapeHtml(b.name)}</td>
+      <td style="font-size:10px;color:#888;">${escapeHtml(b.dob)||''}</td>
+      <td style="text-align:center;">${escapeHtml(b.gender)||'-'}</td>
+      <td>${escapeHtml(b.nationality)||'중국'}</td>
+      <td style="font-size:10px;background:${b.hospital==='신상성형외과'?'#fffbf0':'#f5f5f5'};color:${b.hospital==='신상성형외과'?'#B8960C':'inherit'};padding:2px 6px;border-radius:4px;">${b.hospital==='신상성형외과'?'★ ':''}<b>${escapeHtml(b.hospital)}</b></td>
+      <td style="white-space:nowrap;color:#555;">${escapeHtml(b.datetime)}</td>
+      <td style="font-size:10px;color:#888;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.treatment)||'-'}</td>
       <td style="color:${c.won>0?'#B8960C':'#ccc'};white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
       <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
       <td style="font-size:11px;">${b.introducer||'-'}</td>
@@ -1072,13 +1072,13 @@ function renderCalendar(){
     const div=document.createElement('div');
     div.style.cssText=`padding:5px;min-height:64px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:${items.length?'#f0fff8':'var(--white)'};${ds===today?'border-color:var(--gn2);':''}`;
     div.innerHTML=`<div style="font-size:11px;font-weight:600;margin-bottom:3px;">${d}</div>`+
-    items.slice(0,2).map(b=>`<div style="font-size:9px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.name}</div>`).join('')+
+    items.slice(0,2).map(b=>`<div style="font-size:9px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.name)}</div>`).join('')+
     (items.length>2?`<div style="font-size:9px;color:var(--gray);">+${items.length-2}건</div>`:'');
     div.onclick=()=>{
       document.getElementById('cal-detail').style.display='block';
       document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
       (items.length?`<table><thead><tr><th>환자명</th><th>병원</th><th>시간</th><th>시술</th><th>유입</th><th>상태</th><th>관리</th></tr></thead><tbody>`+
-      items.map(b=>`<tr><td style="font-weight:500;">${b.name}</td><td style="font-size:10px;">${b.hospital}</td><td>${b.datetime.split(' ')[1]||''}</td><td style="font-size:10px;">${b.treatment||'-'}</td><td><span class="badge ${b.inflow_type}">${b.inflow_type}</span></td><td><span class="badge ${b.status}">${b.status}</span></td><td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td></tr>`).join('')+`</tbody></table>`
+      items.map(b=>`<tr><td style="font-weight:500;">${escapeHtml(b.name)}</td><td style="font-size:10px;">${escapeHtml(b.hospital)}</td><td>${escapeHtml(b.datetime.split(' ')[1]||'')}</td><td style="font-size:10px;">${escapeHtml(b.treatment)||'-'}</td><td><span class="badge ${b.inflow_type}">${escapeHtml(b.inflow_type)}</span></td><td><span class="badge ${b.status}">${escapeHtml(b.status)}</span></td><td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td></tr>`).join('')+`</tbody></table>`
       :`<div style="color:#aaa;font-size:12px;padding:8px;">예약 없음</div>`)+`</div>`;
     };
     grid.appendChild(div);
@@ -1442,10 +1442,10 @@ function renderWanghongs(){
     const totW=bks.reduce((s,b)=>s+r2w(b.amount),0);
     const totN=bks.reduce((s,b)=>s+calcC(b).net,0);
     return`<tr>
-      <td style="font-weight:500;">${w.name}</td>
-      <td><span class="badge ${w.type}">${w.type}</span></td>
-      <td style="font-size:11px;color:var(--gray);">${w.channel||'-'}</td>
-      <td style="font-size:11px;color:var(--gray);">${w.contact||'-'}</td>
+      <td style="font-weight:500;">${escapeHtml(w.name)}</td>
+      <td><span class="badge ${w.type}">${escapeHtml(w.type)}</span></td>
+      <td style="font-size:11px;color:var(--gray);">${escapeHtml(w.channel)||'-'}</td>
+      <td style="font-size:11px;color:var(--gray);">${escapeHtml(w.contact)||'-'}</td>
       <td style="text-align:center;color:#7c3aed;font-weight:600;">${w.rate}%</td>
       <td style="text-align:center;">${bks.length}명</td>
       <td style="color:#B8960C;">${fw(totW)}</td>
