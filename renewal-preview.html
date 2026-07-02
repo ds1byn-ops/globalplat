@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江南FOLLOW — 韩国江南医美严选平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Sans+Arabic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1A6B4A; --primary-d:#0F4D33; --mint:#E8F5EF;
+  --gold:#C9A84C; --gold-bg:#FDF6E4;
+  --pink:#F472A0; --pink-bg:#FDF0F5;
+  --blue-bg:#EAF3FD; --purple-bg:#F3EEFC; --orange-bg:#FEF3E8; --teal-bg:#E4F6F4; --rose-bg:#FCEAEF; --lime-bg:#F1F8E4;
+  --txt:#191F28; --txt2:#4E5968; --txt3:#8B95A1;
+  --line:#F2F4F6; --bg:#FFFFFF; --page:#F7F8FA;
+}
+html{scroll-behavior:smooth}
+body{font-family:"Noto Sans SC","Noto Sans KR","Noto Sans Arabic",sans-serif;background:var(--page);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased}
+body.rtl{direction:rtl}
+.app{max-width:520px;margin:0 auto;background:var(--bg);min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,0.06);position:relative;padding-bottom:76px;overflow-x:hidden}
+
+/* ─ TOP BAR ─ */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:baseline;gap:7px;text-decoration:none}
+.logo-kr{font-size:19px;font-weight:900;color:var(--primary);letter-spacing:-0.5px}
+.logo-en{font-size:9.5px;letter-spacing:2px;color:var(--gold);font-weight:700}
+.top-actions{display:flex;align-items:center;gap:12px;position:relative}
+.icon-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt);flex-shrink:0;background:none;border:none;padding:0}
+.my-btn{font-size:13px;font-weight:500;color:var(--txt);text-decoration:none;white-space:nowrap}
+
+/* ─ LANG SWITCHER ─ */
+.lang-btn{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--primary);background:var(--mint);border:none;padding:6px 9px 6px 11px;border-radius:100px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.lang-btn svg{width:11px;height:11px;transition:transform .2s}
+.lang-btn.open svg{transform:rotate(180deg)}
+.lang-menu{position:absolute;top:38px;inset-inline-end:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.12);width:180px;padding:6px;z-index:80;display:none;max-height:360px;overflow-y:auto}
+.lang-menu.open{display:block}
+.lang-opt{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:10px 12px;font-size:13px;color:var(--txt);cursor:pointer;font-family:inherit;border-radius:9px;text-align:start}
+.lang-opt:hover{background:var(--page)}
+.lang-opt.active{background:var(--mint);color:var(--primary);font-weight:700}
+.lang-opt-native{font-size:11px;color:var(--txt3)}
+.lang-opt.active .lang-opt-native{color:var(--primary);opacity:.7}
+
+/* ─ BANNER CAROUSEL ─ */
+.banners{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:16px 20px 6px;scrollbar-width:none}
+.banners::-webkit-scrollbar{display:none}
+.banner{flex:0 0 92%;scroll-snap-align:center;border-radius:16px;overflow:hidden;position:relative;height:170px;padding:24px;display:flex;flex-direction:column;justify-content:center;color:#fff;cursor:pointer}
+.banner-tag{font-size:10.5px;letter-spacing:1.5px;font-weight:700;opacity:.85;margin-bottom:8px}
+.banner-title{font-size:20px;font-weight:900;line-height:1.35;margin-bottom:6px}
+.banner-sub{font-size:12px;opacity:.82}
+.banner-num{position:absolute;inset-inline-end:16px;bottom:12px;font-size:10.5px;background:rgba(0,0,0,0.28);padding:2px 10px;border-radius:100px}
+.b1{background:linear-gradient(120deg,#0F4D33 0%,#1A6B4A 55%,#2D9A6E 100%)}
+.b2{background:linear-gradient(120deg,#8B2252 0%,#C93F74 60%,#F472A0 100%)}
+.b3{background:linear-gradient(120deg,#8A6A1A 0%,#C9A84C 65%,#D9C08A 100%)}
+
+/* ─ CATEGORY GRID (16, realistic icons) ─ */
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px 6px;padding:22px 18px 6px}
+.cat{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--txt)}
+.cat-ic{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:inset 0 -3px 8px rgba(0,0,0,0.04)}
+.cat:active .cat-ic{transform:scale(.92)}
+.cat-ic svg{width:28px;height:28px}
+.cat-label{font-size:10.5px;font-weight:500;color:var(--txt2);text-align:center;line-height:1.3}
+.cats-toggle{display:block;width:calc(100% - 40px);margin:6px 20px 4px;text-align:center;background:var(--page);border:1px solid var(--line);border-radius:100px;padding:9px;font-size:12px;color:var(--txt2);cursor:pointer;font-family:inherit}
+
+/* ─ QUICK ACTIONS ─ */
+.quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:18px 20px}
+.q-item{background:var(--mint);border-radius:14px;padding:15px 14px;text-decoration:none;position:relative;overflow:hidden;border:none;text-align:start;cursor:pointer;font-family:inherit;display:block}
+.q-item.gold{background:var(--gold-bg)}
+.q-item.pink{background:var(--pink-bg)}
+.q-title{font-size:12.5px;font-weight:700;color:var(--txt);margin-bottom:2px}
+.q-sub{font-size:9.5px;color:var(--txt3)}
+.q-arrow{position:absolute;inset-inline-end:12px;bottom:10px;font-size:14px;color:var(--txt3)}
+
+/* ─ OTHER SERVICES (기타서비스) ─ */
+.svc-grid{display:flex;flex-direction:column;gap:10px;padding:0 20px}
+.svc-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;text-decoration:none;color:var(--txt)}
+.svc-ic{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.svc-ic svg{width:24px;height:24px}
+.svc-body{flex:1;min-width:0}
+.svc-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.svc-desc{font-size:11.5px;color:var(--txt3);line-height:1.5}
+.svc-arrow{font-size:16px;color:var(--txt3);flex-shrink:0}
+
+/* ─ AD STRIP ─ */
+.ad-strip{margin:8px 20px 4px;border-radius:14px;background:linear-gradient(100deg,#082A20,#11453A);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:12px}
+.ad-l{min-width:0}
+.ad-l .ad-tag{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);font-weight:700;margin-bottom:3px}
+.ad-l .ad-title{font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-r{font-size:11px;background:rgba(255,255,255,0.14);padding:6px 14px;border-radius:100px;white-space:nowrap;flex-shrink:0}
+
+/* ─ SECTION ─ */
+.sec{padding:26px 20px 8px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:10px}
+.sec-title{font-size:16.5px;font-weight:900;letter-spacing:-0.3px}
+.sec-title em{font-style:normal;color:var(--primary)}
+.sec-more{font-size:12px;color:var(--txt3);text-decoration:none;white-space:nowrap;background:none;border:none;font-family:inherit;cursor:pointer}
+
+/* ─ CLINIC CARDS (실사풍) ─ */
+.clinics{display:flex;gap:14px;overflow-x:auto;padding:2px 20px 18px;scroll-snap-type:x proximity;scrollbar-width:none}
+.clinics::-webkit-scrollbar{display:none}
+.clinic{flex:0 0 236px;scroll-snap-align:start;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line);text-decoration:none;color:var(--txt);transition:box-shadow .2s}
+.clinic:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+.cl-img{height:132px;position:relative;display:flex;align-items:flex-end;padding:10px;overflow:hidden}
+.cl-img::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 15%, rgba(255,255,255,0.22), transparent 40%),
+  radial-gradient(circle at 85% 80%, rgba(0,0,0,0.18), transparent 55%)}
+.cl-img::after{content:'';position:absolute;inset:0;opacity:.5;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E")}
+.cl-badge{background:rgba(255,255,255,0.94);font-size:10px;font-weight:700;color:var(--primary);padding:3px 10px;border-radius:100px;position:relative;z-index:1}
+.cl-badge.gold{color:var(--gold)}
+.cl-body{padding:13px 14px 15px}
+.cl-name{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.cl-kr{font-size:10px;color:var(--txt3);margin-bottom:8px}
+.cl-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)}
+.cl-star{color:#F5A623;font-weight:700}
+.cl-tags{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
+.cl-tag{font-size:9.5px;background:var(--line);color:var(--txt2);padding:3px 9px;border-radius:100px}
+
+/* ─ PRICE LIST ─ */
+.deals{padding:0 20px}
+.deal{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--txt)}
+.deal:last-child{border-bottom:none}
+.deal-img{width:84px;height:84px;border-radius:14px;flex-shrink:0;position:relative;overflow:hidden}
+.deal-img::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 25% 20%, rgba(255,255,255,0.3), transparent 45%)}
+.deal-body{flex:1;min-width:0}
+.deal-cat{font-size:10px;color:var(--primary);font-weight:700;margin-bottom:2px}
+.deal-name{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.deal-meta{font-size:10.5px;color:var(--txt3);margin-bottom:5px}
+.deal-price{font-size:14px;font-weight:900;color:var(--txt)}
+.deal-price small{font-size:10px;color:var(--txt3);font-weight:400;margin-inline-start:5px}
+
+/* ─ REVIEWS ─ */
+.rvs{display:flex;gap:12px;overflow-x:auto;padding:2px 20px 18px;scrollbar-width:none}
+.rvs::-webkit-scrollbar{display:none}
+.rv{flex:0 0 256px;background:var(--page);border-radius:16px;padding:18px}
+.rv-stars{color:#F5A623;font-size:11px;letter-spacing:2px;margin-bottom:10px}
+.rv-txt{font-size:12px;line-height:1.8;color:var(--txt2);margin-bottom:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.rv-meta{display:flex;align-items:center;gap:9px}
+.rv-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--mint),var(--gold-bg));flex-shrink:0}
+.rv-name{font-size:11.5px;font-weight:700}
+.rv-info{font-size:10px;color:var(--txt3)}
+
+/* ─ 신뢰 스트립 ─ */
+.trust{margin:18px 20px;border-radius:16px;background:var(--mint);padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.tr-num{font-size:15.5px;font-weight:900;color:var(--primary)}
+.tr-label{font-size:8.5px;color:var(--txt2);margin-top:2px}
+
+/* ─ FAQ ─ */
+.faq-list{padding:0 20px;display:flex;flex-direction:column;gap:8px}
+.faq-item{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;cursor:pointer;font-size:13px;font-weight:700;background:none;border:none;width:100%;text-align:start;font-family:inherit;color:var(--txt)}
+.faq-q-mark{width:20px;height:20px;border-radius:50%;background:var(--mint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:transform .25s}
+.faq-item.open .faq-q-mark{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-item.open .faq-a{max-height:220px}
+.faq-a-in{padding:0 16px 16px;font-size:12.5px;color:var(--txt2);line-height:1.8}
+
+/* ─ FOOTER ─ */
+.foot{padding:26px 20px 20px;background:var(--page);font-size:10.5px;color:var(--txt3);line-height:1.9}
+.foot b{color:var(--txt2)}
+
+/* ─ BOTTOM TAB ─ */
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 max(8px, env(safe-area-inset-bottom));z-index:60}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--txt3);font-size:9px;font-weight:500}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--primary)}
+
+/* ─ FLOATING CONTACT WIDGET ─ */
+.contact-fab{position:fixed;right:max(16px, calc(50% - 260px + 16px));bottom:78px;z-index:70;display:flex;flex-direction:column;align-items:center;gap:10px}
+body.rtl .contact-fab{right:auto;left:max(16px, calc(50% - 260px + 16px))}
+.fab-stack{background:#fff;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,0.18);padding:8px;display:flex;flex-direction:column;gap:6px}
+.fab-btn{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;position:relative}
+.fab-btn svg{width:23px;height:23px}
+.fab-wechat{background:#07C160}
+.fab-line{background:#06C755}
+.fab-whatsapp{background:#25D366}
+.fab-chat{background:linear-gradient(135deg,#2D9A6E,#0F4D33);width:52px;height:52px;margin:2px 0 -4px;box-shadow:0 4px 14px rgba(15,77,51,0.4);animation:fabPulse 2.4s ease-in-out infinite}
+.fab-chat svg{width:26px;height:26px}
+.fab-chat-label{position:absolute;top:-6px;right:-6px;background:var(--gold);color:#fff;font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:100px;letter-spacing:.3px;box-shadow:0 2px 6px rgba(0,0,0,0.25)}
+@keyframes fabPulse{
+  0%,100%{box-shadow:0 4px 14px rgba(15,77,51,0.4), 0 0 0 0 rgba(45,154,110,0.5)}
+  50%{box-shadow:0 4px 14px rgba(15,77,51,0.4), 0 0 0 9px rgba(45,154,110,0)}
+}
+.fab-badge{background:linear-gradient(135deg,#7B5EA7,#4E3A73);color:#fff;font-size:10.5px;font-weight:800;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.2);cursor:pointer;border:none;line-height:1.15;text-align:center}
+.fab-tooltip{position:absolute;inset-inline-end:52px;top:50%;transform:translateY(-50%);background:var(--txt);color:#fff;font-size:11px;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.fab-btn:hover .fab-tooltip{opacity:1}
+
+/* ─ QUOTE MODAL ─ */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,20,15,0.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:88vh;overflow-y:auto;padding-bottom:24px}
+.modal-head{position:sticky;top:0;background:#fff;padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
+.modal-title{font-size:17px;font-weight:900}
+.modal-sub{font-size:11.5px;color:var(--txt3);margin-top:3px}
+.modal-close{width:30px;height:30px;border-radius:50%;background:var(--page);border:none;font-size:15px;color:var(--txt2);cursor:pointer;flex-shrink:0}
+.modal-body{padding:16px 20px}
+.qm-group-title{font-size:12.5px;font-weight:700;color:var(--txt2);margin:14px 0 8px}
+.qm-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qm-check{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;font-size:12px}
+.qm-check.on{border-color:var(--primary);background:var(--mint)}
+.qm-check input{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0}
+.qm-field{margin-bottom:12px}
+.qm-field label{display:block;font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:6px}
+.qm-field input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;outline:none}
+.qm-field input:focus{border-color:var(--primary)}
+.qm-total{background:var(--mint);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+.qm-total-label{font-size:12px;color:var(--primary)}
+.qm-total-amt{font-size:20px;font-weight:900;color:var(--primary-d)}
+.qm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qm-btn{padding:14px;border-radius:100px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+.qm-btn-send{background:var(--primary);color:#fff}
+.qm-btn-print{background:var(--page);color:var(--txt);border:1.5px solid var(--line)}
+.qm-disclaimer{font-size:10.5px;color:var(--txt3);margin-top:12px;line-height:1.7;text-align:center}
+
+@media print{
+  body *{visibility:hidden}
+  #printArea, #printArea *{visibility:visible}
+  #printArea{position:absolute;top:0;left:0;width:100%;padding:24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a class="logo" href="#">
+      <span class="logo-kr">江南FOLLOW</span>
+      <span class="logo-en">GANGNAM</span>
+    </a>
+    <div class="top-actions">
+      <div class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
+      <button class="lang-btn" id="langBtn">
+        <span id="langCurrent">中文</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="lang-menu" id="langMenu"></div>
+      <a class="my-btn" href="#" data-i18n="my">My</a>
+    </div>
+  </div>
+
+  <!-- BANNERS -->
+  <div class="banners">
+    <div class="banner b1">
+      <div class="banner-tag" data-i18n="b1tag">GRAND OPEN EVENT</div>
+      <div class="banner-title" data-i18n="b1title">江南FOLLOW 正式上线<br>分享得网红体验券</div>
+      <div class="banner-sub" data-i18n="b1sub">SNS分享抽奖 · 免费医美体验 · 咖啡券</div>
+      <div class="banner-num">1 / 3</div>
+    </div>
+    <div class="banner b2">
+      <div class="banner-tag" data-i18n="b2tag">AI CONSULTING</div>
+      <div class="banner-title" data-i18n="b2title">AI中文顾问 24小时在线<br>3秒获取项目报价</div>
+      <div class="banner-sub" data-i18n="b2sub">人民币实时报价 · 9种语言支持</div>
+      <div class="banner-num">2 / 3</div>
+    </div>
+    <div class="banner b3">
+      <div class="banner-tag" data-i18n="b3tag">CONCIERGE</div>
+      <div class="banner-title" data-i18n="b3title">专属礼宾服务<br>接机·翻译·陪诊一站式</div>
+      <div class="banner-sub" data-i18n="b3sub">从仁川机场到术后关怀 全程中文</div>
+      <div class="banner-num">3 / 3</div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES (16) -->
+  <div class="sec" style="padding-bottom:0">
+    <div class="sec-head"><div class="sec-title" data-i18n="catSecTitle">全部<em>分类</em></div></div>
+  </div>
+  <div class="cats" id="catsGrid"><!-- injected by JS --></div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="quick">
+    <button class="q-item" id="btnAiConsult"><div class="q-title" data-i18n="q1t">AI 咨询</div><div class="q-sub" data-i18n="q1s">24小时中文</div><div class="q-arrow">→</div></button>
+    <button class="q-item gold" id="btnQuickQuote"><div class="q-title" data-i18n="q2t">简易报价</div><div class="q-sub" data-i18n="q2s">3秒人民币报价</div><div class="q-arrow">→</div></button>
+    <button class="q-item pink" id="btnConcierge"><div class="q-title" data-i18n="q3t">专属礼宾</div><div class="q-sub" data-i18n="q3s">接机·翻译·陪诊</div><div class="q-arrow">→</div></button>
+  </div>
+
+  <!-- 기타서비스 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title" data-i18n="svcSecTitle">其他<em>服务</em></div>
+    </div>
+  </div>
+  <div class="svc-grid">
+    <a class="svc-card" href="#">
+      <div class="svc-ic" style="background:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="#1A6B4A" stroke-width="1.8"><path d="M4 20v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="svc-body"><div class="svc-title" data-i18n="svcConciergeT">专属礼宾服务</div><div class="svc-desc" data-i18n="svcConciergeD">接机 · 酒店预订 · 全程陪同翻译</div></div>
+      <div class="svc-arrow">→</div>
+    </a>
+    <a class="svc-card" href="#">
+      <div class="svc-ic" style="background:var(--blue-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#2E6FBB" stroke-width="1.8"><path d="M8 10h8M8 14h5"/><path d="M21 12c0 4.4-4 8-9 8-1.4 0-2.7-.3-3.9-.8L3 20l1-3.8C3.4 14.9 3 13.5 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg></div>
+      <div class="svc-body"><div class="svc-title" data-i18n="svcInterpretT">专业陪诊翻译</div><div class="svc-desc" data-i18n="svcInterpretD">面诊 · 手术说明 · 术后咨询同声传译</div></div>
+      <div class="svc-arrow">→</div>
+    </a>
+    <a class="svc-card" href="#">
+      <div class="svc-ic" style="background:var(--gold-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#8A6A1A" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M9 21V12h6v9"/><path d="M5 10v10h14V10"/></svg></div>
+      <div class="svc-body"><div class="svc-title" data-i18n="svcTourT">医疗观光套餐</div><div class="svc-desc" data-i18n="svcTourD">江南购物 · 韩流体验 · 治疗后疗养行程</div></div>
+      <div class="svc-arrow">→</div>
+    </a>
+  </div>
+
+  <!-- AD STRIP -->
+  <div class="ad-strip">
+    <div class="ad-l">
+      <div class="ad-tag" data-i18n="adtag">AD · 本月推荐</div>
+      <div class="ad-title">原辰整形外科皮肤科 — <span data-i18n="adtitle">江南综合医美</span></div>
+    </div>
+    <div class="ad-r" data-i18n="viewmore">查看 →</div>
+  </div>
+
+  <!-- 엄선 병원 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title" data-i18n="sec1title">本周<em>严选医院</em></div>
+      <a class="sec-more" href="#" data-i18n="all">全部 →</a>
+    </div>
+  </div>
+  <div class="clinics">
+    <a class="clinic" href="#">
+      <div class="cl-img" style="background:radial-gradient(circle at 30% 30%, #3E8F6B, #0F4D33 75%)"><span class="cl-badge" data-i18n="badgeCurated">严选</span></div>
+      <div class="cl-body">
+        <div class="cl-name">原辰整形外科皮肤科</div>
+        <div class="cl-kr">원진성형외과피부과의원 · <span data-i18n="areaGangnam">江南</span></div>
+        <div class="cl-meta"><span class="cl-star">★ 4.9</span><span>·</span><span data-i18n="fullChinese">中文全程</span></div>
+        <div class="cl-tags"><span class="cl-tag" data-i18n="tagEye">眼部</span><span class="cl-tag" data-i18n="tagContour">轮廓</span><span class="cl-tag" data-i18n="tagStem">干细胞</span></div>
+      </div>
+    </a>
+    <a class="clinic" href="#">
+      <div class="cl-img" style="background:radial-gradient(circle at 30% 30%, #E1638F, #8B2252 75%)"><span class="cl-badge gold" data-i18n="badgeHot">HOT</span></div>
+      <div class="cl-body">
+        <div class="cl-name">新常整形外科</div>
+        <div class="cl-kr">신상성형외과 · <span data-i18n="areaGangnam">江南</span></div>
+        <div class="cl-meta"><span class="cl-star">★ 4.9</span><span>·</span><span data-i18n="fullChinese">中文全程</span></div>
+        <div class="cl-tags"><span class="cl-tag" data-i18n="tagSkin">皮肤</span><span class="cl-tag" data-i18n="tagHifu">超声刀</span><span class="cl-tag" data-i18n="tagLift">提升</span></div>
+      </div>
+    </a>
+    <a class="clinic" href="#">
+      <div class="cl-img" style="background:radial-gradient(circle at 30% 30%, #4E86C9, #1C4A80 75%)"><span class="cl-badge" data-i18n="badgeCurated">严选</span></div>
+      <div class="cl-body">
+        <div class="cl-name">차움 CHAUM <span data-i18n="antiAgingCenter">抗衰中心</span></div>
+        <div class="cl-kr">차움의원 · <span data-i18n="areaCheongdam">清潭</span></div>
+        <div class="cl-meta"><span class="cl-star">★ 4.8</span><span>·</span><span data-i18n="fullChinese">中文全程</span></div>
+        <div class="cl-tags"><span class="cl-tag" data-i18n="tagCheckup">综合体检</span><span class="cl-tag" data-i18n="tagAging">抗衰</span></div>
+      </div>
+    </a>
+    <a class="clinic" href="#">
+      <div class="cl-img" style="background:radial-gradient(circle at 30% 30%, #9C7FC7, #4E3A73 75%)"><span class="cl-badge" data-i18n="badgeCurated">严选</span></div>
+      <div class="cl-body">
+        <div class="cl-name">One Cell <span data-i18n="hospitalWord">医院</span></div>
+        <div class="cl-kr">원셀의원 · <span data-i18n="areaGangnam">江南</span></div>
+        <div class="cl-meta"><span class="cl-star">★ 4.8</span><span>·</span><span data-i18n="fullChinese">中文全程</span></div>
+        <div class="cl-tags"><span class="cl-tag" data-i18n="tagStem">干细胞</span><span class="cl-tag" data-i18n="tagSkin">皮肤</span></div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 인기 시술 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title" data-i18n="sec2title">热门<em>项目</em></div>
+      <a class="sec-more" href="#" data-i18n="all">全部 →</a>
+    </div>
+  </div>
+  <div class="deals">
+    <a class="deal" href="#">
+      <div class="deal-img" style="background:radial-gradient(circle at 30% 25%, #8FC1F0, #4C86C4 80%)"></div>
+      <div class="deal-body">
+        <div class="deal-cat" data-i18n="cat3">眼部整形</div>
+        <div class="deal-name" data-i18n="deal1name">自然粘连双眼皮 + 开眼角</div>
+        <div class="deal-meta" data-i18n="deal1meta">江南严选 3 家医院对比报价</div>
+        <div class="deal-price" data-krw="1190400"><span class="dp-amount">¥6,200</span> <span data-i18n="from">起</span><small data-i18n="freeQuote">免费报价对比</small></div>
+      </div>
+    </a>
+    <a class="deal" href="#">
+      <div class="deal-img" style="background:radial-gradient(circle at 30% 25%, #F5A8C3, #D45C8C 80%)"></div>
+      <div class="deal-body">
+        <div class="deal-cat" data-i18n="cat7">提升紧致</div>
+        <div class="deal-name" data-i18n="deal2name">超声刀全脸提升 (7D 芙拉)</div>
+        <div class="deal-meta" data-i18n="deal2meta">江南严选 5 家医院对比报价</div>
+        <div class="deal-price" data-krw="921600"><span class="dp-amount">¥4,800</span> <span data-i18n="from">起</span><small data-i18n="freeQuote">免费报价对比</small></div>
+      </div>
+    </a>
+    <a class="deal" href="#">
+      <div class="deal-img" style="background:radial-gradient(circle at 30% 25%, #F0D48F, #C9A84C 80%)"></div>
+      <div class="deal-body">
+        <div class="deal-cat" data-i18n="cat6">干细胞抗衰</div>
+        <div class="deal-name" data-i18n="deal3name">干细胞综合抗衰管理套餐</div>
+        <div class="deal-meta" data-i18n="deal3meta">含综合体检 · 清潭 CHAUM 等</div>
+        <div class="deal-price" data-krw="3456000"><span class="dp-amount">¥18,000</span> <span data-i18n="from">起</span><small data-i18n="freeQuote">免费报价对比</small></div>
+      </div>
+    </a>
+    <a class="deal" href="#">
+      <div class="deal-img" style="background:radial-gradient(circle at 30% 25%, #90D3AE, #3E8F6B 80%)"></div>
+      <div class="deal-body">
+        <div class="deal-cat" data-i18n="cat5">面部轮廓</div>
+        <div class="deal-name" data-i18n="deal4name">下颌角 + 颧骨缩小 轮廓三件套</div>
+        <div class="deal-meta" data-i18n="deal4meta">江南严选 3 家医院对比报价</div>
+        <div class="deal-price" data-krw="7296000"><span class="dp-amount">¥38,000</span> <span data-i18n="from">起</span><small data-i18n="freeQuote">免费报价对比</small></div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 신뢰 지표 -->
+  <div class="trust">
+    <div><div class="tr-num">2,000+</div><div class="tr-label" data-i18n="trust1">服务患者</div></div>
+    <div><div class="tr-num">3,000+</div><div class="tr-label" data-i18n="trust2">合作医院</div></div>
+    <div><div class="tr-num">4.9</div><div class="tr-label" data-i18n="trust3">满意度</div></div>
+    <div><div class="tr-num">10</div><div class="tr-label" data-i18n="trust4">种语言</div></div>
+  </div>
+
+  <!-- 후기 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title" data-i18n="sec3title">真实<em>评价</em></div>
+      <a class="sec-more" href="#" data-i18n="all">全部 →</a>
+    </div>
+  </div>
+  <div class="rvs">
+    <div class="rv">
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-txt" data-i18n="rv1">"从机场接机到面诊翻译全程陪同，医生说的每句话都翻译得很清楚，完全没有语言不通的不安感。"</div>
+      <div class="rv-meta"><div class="rv-av"></div><div><div class="rv-name" data-i18n="rv1name">王女士</div><div class="rv-info" data-i18n="rv1info">上海 · 眼部整形</div></div></div>
+    </div>
+    <div class="rv">
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-txt" data-i18n="rv2">"对比了三家医院报价，透明没有隐藏费用。回国后恢复期有问题顾问也随时在线解答，很安心。"</div>
+      <div class="rv-meta"><div class="rv-av"></div><div><div class="rv-name" data-i18n="rv2name">陈女士</div><div class="rv-info" data-i18n="rv2info">杭州 · 面部轮廓</div></div></div>
+    </div>
+    <div class="rv">
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-txt" data-i18n="rv3">"帮妈妈安排的干细胞抗衰项目，从体检到疗程都很专业，还帮我们订了酒店和行程。"</div>
+      <div class="rv-meta"><div class="rv-av"></div><div><div class="rv-name" data-i18n="rv3name">李女士</div><div class="rv-info" data-i18n="rv3info">北京 · 干细胞抗衰</div></div></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title" data-i18n="faqTitle">常见<em>问题</em></div>
+    </div>
+  </div>
+  <div class="faq-list" id="faqList">
+    <div class="faq-item">
+      <button class="faq-q"><span data-i18n="faq1q">费用如何计算？会有隐藏费用吗？</span><span class="faq-q-mark">+</span></button>
+      <div class="faq-a"><div class="faq-a-in" data-i18n="faq1a">江南FOLLOW不收取任何中介差价，报价即医院实际收费。所有费用在预约确认前会以书面形式告知，无隐藏费用。</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span data-i18n="faq2q">不会说韩语，看病沟通怎么办？</span><span class="faq-q-mark">+</span></button>
+      <div class="faq-a"><div class="faq-a-in" data-i18n="faq2a">专属顾问将全程陪同面诊及手术说明，提供中文、英语等多语言同声传译，确保沟通零障碍。</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span data-i18n="faq3q">签证与入境手续需要协助吗？</span><span class="faq-q-mark">+</span></button>
+      <div class="faq-a"><div class="faq-a-in" data-i18n="faq3a">我们提供医疗签证邀请函及入境资料协助，并可安排仁川机场接机服务。</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span data-i18n="faq4q">回国后恢复期有问题怎么联系？</span><span class="faq-q-mark">+</span></button>
+      <div class="faq-a"><div class="faq-a-in" data-i18n="faq4a">回国后可通过微信、WhatsApp、LINE等随时联系专属顾问，我们提供术后线上复诊跟进服务。</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span data-i18n="faq5q">支持哪些支付方式？</span><span class="faq-q-mark">+</span></button>
+      <div class="faq-a"><div class="faq-a-in" data-i18n="faq5a">支持支付宝、微信支付、银联卡、Visa/Mastercard 及银行电汇等多种支付方式。</div></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <b>江南FOLLOW · FOLLOW KOREA Co., Ltd.</b><br>
+    <span data-i18n="footline">韩国首尔江南医美严选平台 · 10种语言 · 专属中文礼宾</span><br>
+    contact@followkorea.co.kr<br>
+    © 2026 Gangnam Follow. All rights reserved.
+  </div>
+
+  <!-- BOTTOM TAB -->
+  <div class="tabbar">
+    <a class="tab on" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+      <span data-i18n="tab1">首页</span>
+    </a>
+    <a class="tab" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span data-i18n="tab2">分类</span>
+    </a>
+    <a class="tab" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M9 3v4M15 3v4M4 11h16"/></svg>
+      <span data-i18n="tab3">预约</span>
+    </a>
+    <a class="tab" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.6 0-3-.4-4.3-1L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5z"/></svg>
+      <span data-i18n="tab4">评价</span>
+    </a>
+    <a class="tab" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5 21c1.2-3.8 3.8-6 7-6s5.8 2.2 7 6"/></svg>
+      <span data-i18n="tab5">My</span>
+    </a>
+  </div>
+
+  <!-- FLOATING CONTACT WIDGET -->
+  <div class="contact-fab">
+    <div class="fab-stack">
+      <button class="fab-btn fab-wechat" title="WeChat">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M9.5 4C5.4 4 2 6.9 2 10.5c0 2 1.1 3.8 2.8 5-.1.5-.5 1.6-.6 1.9 0 0 0 .2.1.3.1.1.2 0 .3 0 .2-.1 1.9-1.2 2.2-1.4.9.2 1.8.4 2.7.3-.1-.4-.2-.8-.2-1.2 0-3.6 3.5-6.5 7.9-6.5.3 0 .6 0 .9.1C17.6 5.9 13.9 4 9.5 4zm-2.7 3.6c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1zm5.4 0c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1z"/><path d="M22 14.8c0-2.9-2.9-5.3-6.5-5.3s-6.5 2.4-6.5 5.3 2.9 5.3 6.5 5.3c.7 0 1.4-.1 2.1-.3.3-.1 1.6.8 1.8.9.1 0 .2.1.3 0 .1-.1.1-.2.1-.2-.1-.3-.4-1.2-.5-1.6 1.6-1 2.7-2.5 2.7-4.1zm-8.9-.9c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9zm4.7 0c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9z"/></svg>
+        <span class="fab-tooltip" data-i18n="fabWechat">微信咨询</span>
+      </button>
+      <button class="fab-btn fab-line" title="LINE">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.6 1.1-.4 5.9-3.5 8.1-6C21.5 13.7 22 12.4 22 11c0-4.4-4.5-8-10-8z"/><path d="M17.5 13h-1.3v-3.2L14.8 13H14v-4h.9v3.1L16.3 9h.9v4h.3zm-4 0h-.9V9h.9v4zm-1.7 0H8.5V9h.9v3.2h2.4V13zm-4.9 0H5.5v-3.2H4.4V9h3.4v.8H6.9V13z" fill="#06C755"/></svg>
+        <span class="fab-tooltip" data-i18n="fabLine">LINE 咨询</span>
+      </button>
+      <button class="fab-btn fab-whatsapp" title="WhatsApp">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2z"/><path d="M16.7 14.2c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.3-.1-1.1-.4-2.1-1.3-.8-.7-1.3-1.6-1.5-1.8-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.7 2.6 4.1 3.6.6.2 1 .4 1.4.5.6.2 1.1.2 1.5.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.5-.3z"/></svg>
+        <span class="fab-tooltip" data-i18n="fabWhatsapp">WhatsApp 咨询</span>
+      </button>
+      <button class="fab-btn fab-chat" title="AI Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.6 0-3-.4-4.3-1L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5z"/></svg>
+        <span class="fab-chat-label">AI</span>
+        <span class="fab-tooltip" data-i18n="fabChat">AI 咨询</span>
+      </button>
+    </div>
+    <button class="fab-badge" id="btn24hr" data-i18n="fab24hr">24hr</button>
+  </div>
+
+  <!-- QUOTE MODAL -->
+  <div class="modal-overlay" id="quoteOverlay">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" data-i18n="quoteModalTitle">简易报价</div>
+          <div class="modal-sub" data-i18n="quoteModalSub">选择意向项目，3秒获取预估报价</div>
+        </div>
+        <button class="modal-close" id="quoteClose">✕</button>
+      </div>
+      <div class="modal-body" id="printArea">
+        <div class="qm-group-title" data-i18n="quoteSelectLabel">选择项目 (可多选)</div>
+        <div class="qm-check-grid" id="qmCheckGrid"><!-- injected --></div>
+
+        <div class="qm-group-title" data-i18n="quoteContactLabel">联系方式</div>
+        <div class="qm-field"><label data-i18n="quoteNameField">姓名</label><input type="text" id="qmName" data-i18n-ph="quoteNamePh"></div>
+        <div class="qm-field"><label data-i18n="quotePhoneField">电话 / WhatsApp</label><input type="text" id="qmPhone" data-i18n-ph="quotePhonePh"></div>
+
+        <div class="qm-total">
+          <div class="qm-total-label" data-i18n="quoteTotalLabel">预估报价区间</div>
+          <div class="qm-total-amt" id="qmTotalAmt">¥0</div>
+        </div>
+
+        <div class="qm-btns">
+          <button class="qm-btn qm-btn-send" id="qmSend" data-i18n="quoteSendBtn">发送报价</button>
+          <button class="qm-btn qm-btn-print" id="qmPrint" data-i18n="quotePrintBtn">打印 / PDF</button>
+        </div>
+        <div class="qm-disclaimer" data-i18n="quoteDisclaimer">此报价为预估价格，实际费用以医院面诊后确认为准。江南FOLLOW不收取任何中介差价。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============ 배너 자동 슬라이드 ============
+const bn = document.querySelector('.banners');
+let bi = 0;
+setInterval(() => {
+  bi = (bi + 1) % 3;
+  const w = bn.querySelector('.banner').offsetWidth + 12;
+  bn.scrollTo({ left: bi * w, behavior: 'smooth' });
+}, 4000);
+
+// ============ 데이터 ============
+const CATS = [{"key": "cat1", "bg": "var(--pink-bg)", "svg": "<defs><linearGradient id=\"gradPink\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#F492B0\"/><stop offset=\"1\" stop-color=\"#C93F74\"/></linearGradient></defs>\n    <path d=\"M12 21c-4.5-3.4-8-6.4-8-10a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 3.6-3.5 6.6-8 10z\" fill=\"url(#gradPink)\" stroke=\"#A82D5E\" stroke-width=\"1\"/>\n    <circle cx=\"9.5\" cy=\"10.5\" r=\"1\" fill=\"#fff\" opacity=\".7\"/>"}, {"key": "cat2", "bg": "var(--mint)", "svg": "<defs><linearGradient id=\"gradGreen\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#4FAE84\"/><stop offset=\"1\" stop-color=\"#0F4D33\"/></linearGradient></defs>\n    <circle cx=\"12\" cy=\"8\" r=\"4.5\" fill=\"url(#gradGreen)\"/>\n    <path d=\"M5 21c1.2-3.8 3.8-6 7-6s5.8 2.2 7 6\" fill=\"none\" stroke=\"#0F4D33\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>"}, {"key": "cat3", "bg": "var(--blue-bg)", "svg": "<defs><linearGradient id=\"gradBlue\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#6DA8EA\"/><stop offset=\"1\" stop-color=\"#1C4A80\"/></linearGradient></defs>\n    <path d=\"M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z\" fill=\"none\" stroke=\"#1C4A80\" stroke-width=\"1.6\"/>\n    <circle cx=\"12\" cy=\"12\" r=\"3.2\" fill=\"url(#gradBlue)\"/>\n    <circle cx=\"10.9\" cy=\"10.9\" r=\".8\" fill=\"#fff\" opacity=\".8\"/>"}, {"key": "cat4", "bg": "var(--purple-bg)", "svg": "<defs><linearGradient id=\"gradPurple\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#A98FD4\"/><stop offset=\"1\" stop-color=\"#4E3A73\"/></linearGradient></defs>\n    <path d=\"M12 3v9c0 2.5-1.5 4-3.5 4S5 14.7 5 13.5\" fill=\"none\" stroke=\"url(#gradPurple)\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <path d=\"M12 12c0 2.5 1.5 4 3.5 4s3.5-1.3 3.5-2.5\" fill=\"none\" stroke=\"url(#gradPurple)\" stroke-width=\"2\" stroke-linecap=\"round\"/>"}, {"key": "cat5", "bg": "var(--orange-bg)", "svg": "<defs><linearGradient id=\"gradOrange\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#F0B36E\"/><stop offset=\"1\" stop-color=\"#B5601C\"/></linearGradient></defs>\n    <path d=\"M7 4c-2 3-3 6-3 9a8 8 0 0 0 16 0c0-3-1-6-3-9\" fill=\"none\" stroke=\"url(#gradOrange)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>\n    <path d=\"M8 13h8\" stroke=\"#B5601C\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"1 2.5\"/>"}, {"key": "cat6", "bg": "var(--gold-bg)", "svg": "<defs><radialGradient id=\"gradGold\"><stop offset=\"0\" stop-color=\"#EAD08F\"/><stop offset=\"1\" stop-color=\"#8A6A1A\"/></radialGradient></defs>\n    <circle cx=\"12\" cy=\"12\" r=\"3\" fill=\"url(#gradGold)\"/>\n    <circle cx=\"12\" cy=\"12\" r=\"8\" fill=\"none\" stroke=\"#8A6A1A\" stroke-width=\"1.3\" stroke-dasharray=\"2.5 2.5\"/>\n    <circle cx=\"12\" cy=\"4\" r=\"1.1\" fill=\"#8A6A1A\"/><circle cx=\"19.9\" cy=\"16\" r=\"1.1\" fill=\"#8A6A1A\"/><circle cx=\"4.1\" cy=\"16\" r=\"1.1\" fill=\"#8A6A1A\"/>"}, {"key": "cat7", "bg": "var(--mint)", "svg": "<defs><linearGradient id=\"gradTeal\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#4FAE84\"/><stop offset=\"1\" stop-color=\"#0F4D33\"/></linearGradient></defs>\n    <path d=\"M4 17c4-2 6-5 6-9M20 17c-4-2-6-5-6-9\" fill=\"none\" stroke=\"url(#gradTeal)\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <path d=\"M4 21h16\" stroke=\"#0F4D33\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>"}, {"key": "cat8", "bg": "var(--blue-bg)", "svg": "<defs><linearGradient id=\"gradBlue2\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#8CC0F5\"/><stop offset=\"1\" stop-color=\"#2E6FBB\"/></linearGradient></defs>\n    <rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2.5\" fill=\"url(#gradBlue2)\" opacity=\".18\"/>\n    <rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2.5\" fill=\"none\" stroke=\"#2E6FBB\" stroke-width=\"1.6\"/>\n    <path d=\"M9 3v4M15 3v4M8 12h4l1-2 1.5 4L15.5 12H16\" stroke=\"#2E6FBB\" stroke-width=\"1.4\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"}, {"key": "pink-bg", "bg": "var(--pink-bg)", "svg": "<defs><linearGradient id=\"gradSpa\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#F5A0BE\"/><stop offset=\"1\" stop-color=\"#A82D5E\"/></linearGradient></defs>\n    <path d=\"M12 3c-1 3-4 5-4 9a4 4 0 0 0 8 0c0-4-3-6-4-9z\" fill=\"url(#gradSpa)\"/>\n    <path d=\"M12 21c-2.5 0-4-1.6-4-1.6\" stroke=\"#A82D5E\" stroke-width=\"1.3\" fill=\"none\" stroke-linecap=\"round\"/>"}, {"key": "purple-bg", "bg": "var(--purple-bg)", "svg": "<defs><linearGradient id=\"gradKorean\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#B79DDE\"/><stop offset=\"1\" stop-color=\"#4E3A73\"/></linearGradient></defs>\n    <path d=\"M8 3v6a4 4 0 0 0 8 0V3\" fill=\"none\" stroke=\"url(#gradKorean)\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <path d=\"M12 13v8M8 21h8\" stroke=\"#4E3A73\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>"}, {"key": "teal-bg", "bg": "var(--teal-bg)", "svg": "<defs><linearGradient id=\"gradDental\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\"1\" stop-color=\"#B9E4DC\"/></linearGradient></defs>\n    <path d=\"M12 4c-2.2 0-3.6 1-4.6 1-1.3 0-2.4 1.2-2.4 3.2 0 3 1 6.5 1.8 8.7.5 1.4 1 2.1 1.7 2.1.9 0 1-2.5 1.5-4 .3-1 .6-1.5 2-1.5s1.7.5 2 1.5c.5 1.5.6 4 1.5 4 .7 0 1.2-.7 1.7-2.1.8-2.2 1.8-5.7 1.8-8.7 0-2-1.1-3.2-2.4-3.2-1 0-2.4-1-4.6-1z\" fill=\"url(#gradDental)\" stroke=\"#3B9C86\" stroke-width=\"1\"/>"}, {"key": "rose-bg", "bg": "var(--rose-bg)", "svg": "<defs><linearGradient id=\"gradHair\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#E9A6B7\"/><stop offset=\"1\" stop-color=\"#A8536A\"/></linearGradient></defs>\n    <path d=\"M6 21c0-6 2-8 2-11a4 4 0 0 1 8 0c0 3 2 5 2 11\" fill=\"none\" stroke=\"url(#gradHair)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>\n    <path d=\"M9 21c0-4 .8-6 .8-8M15 21c0-4-.8-6-.8-8\" stroke=\"#A8536A\" stroke-width=\"1.2\" stroke-linecap=\"round\"/>"}, {"key": "lime-bg", "bg": "var(--lime-bg)", "svg": "<defs><linearGradient id=\"gradBody\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#AACB6E\"/><stop offset=\"1\" stop-color=\"#5E7A2E\"/></linearGradient></defs>\n    <circle cx=\"12\" cy=\"5\" r=\"2.3\" fill=\"url(#gradBody)\"/>\n    <path d=\"M8 21c0-3 .5-5 1.2-6.5C8.4 13.5 8 12 8 10.5 8 8.5 9.8 7 12 7s4 1.5 4 3.5c0 1.5-.4 3-1.2 4C15.5 16 16 18 16 21\" fill=\"none\" stroke=\"#5E7A2E\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"}, {"key": "rose-bg", "bg": "var(--rose-bg)", "svg": "<defs><linearGradient id=\"gradBreast\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#F0AFC4\"/><stop offset=\"1\" stop-color=\"#C93F74\"/></linearGradient></defs>\n    <path d=\"M12 20c-4-1-6-4.5-6-8.5C6 8 8 6 9.5 6.5 10.7 6.9 12 8 12 9c0-1 1.3-2.1 2.5-2.5C16 6 18 8 18 11.5c0 4-2 7.5-6 8.5z\" fill=\"url(#gradBreast)\" stroke=\"#A82D5E\" stroke-width=\".8\"/>"}, {"key": "blue-bg", "bg": "var(--blue-bg)", "svg": "<defs><linearGradient id=\"gradOphthal\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#8CC0F5\"/><stop offset=\"1\" stop-color=\"#1C4A80\"/></linearGradient></defs>\n    <circle cx=\"10\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"#1C4A80\" stroke-width=\"1.8\"/>\n    <circle cx=\"10\" cy=\"10\" r=\"2.6\" fill=\"url(#gradOphthal)\"/>\n    <path d=\"M14.5 14.5L21 21\" stroke=\"#1C4A80\" stroke-width=\"2\" stroke-linecap=\"round\"/>"}, {"key": "gold-bg", "bg": "var(--gold-bg)", "svg": "<defs><linearGradient id=\"gradWell\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#F0D48F\"/><stop offset=\"1\" stop-color=\"#8A6A1A\"/></linearGradient></defs>\n    <path d=\"M12 3l2 5.5L20 9l-4.2 3.6L17 19l-5-3.2L7 19l1.2-6.4L4 9l6-.5z\" fill=\"url(#gradWell)\" stroke=\"#8A6A1A\" stroke-width=\".6\"/>"}];
+const LANGS = [{"code": "zh", "native": "中文", "name": "简体中文", "htmlLang": "zh-CN", "currency": "CNY", "dir": "ltr"}, {"code": "ko", "native": "한국어", "name": "한국어", "htmlLang": "ko", "currency": "KRW", "dir": "ltr"}, {"code": "en", "native": "English", "name": "English", "htmlLang": "en", "currency": "USD", "dir": "ltr"}, {"code": "ja", "native": "日本語", "name": "日本語", "htmlLang": "ja", "currency": "JPY", "dir": "ltr"}, {"code": "vi", "native": "Tiếng Việt", "name": "Tiếng Việt", "htmlLang": "vi", "currency": "VND", "dir": "ltr"}, {"code": "th", "native": "ภาษาไทย", "name": "ภาษาไทย", "htmlLang": "th", "currency": "THB", "dir": "ltr"}, {"code": "ru", "native": "Русский", "name": "Русский", "htmlLang": "ru", "currency": "USD", "dir": "ltr"}, {"code": "mn", "native": "Монгол", "name": "Монгол", "htmlLang": "mn", "currency": "USD", "dir": "ltr"}, {"code": "id", "native": "Indonesia", "name": "Bahasa Indonesia", "htmlLang": "id", "currency": "USD", "dir": "ltr"}, {"code": "ar", "native": "العربية", "name": "العربية", "htmlLang": "ar", "currency": "USD", "dir": "rtl"}];
+const I18N = {"zh": {"my": "My", "b1tag": "GRAND OPEN EVENT", "b1title": "江南FOLLOW 正式上线<br>分享得网红体验券", "b1sub": "SNS分享抽奖 · 免费医美体验 · 咖啡券", "b2tag": "AI CONSULTING", "b2title": "AI中文顾问 24小时在线<br>3秒获取项目报价", "b2sub": "人民币实时报价 · 10种语言支持", "b3tag": "CONCIERGE", "b3title": "专属礼宾服务<br>接机·翻译·陪诊一站式", "b3sub": "从仁川机场到术后关怀 全程中文", "cat1": "皮肤诊所", "cat2": "整形外科", "cat3": "眼部整形", "cat4": "鼻部整形", "cat5": "面部轮廓", "cat6": "干细胞", "cat7": "提升紧致", "cat8": "健康体检", "cat9": "美容水疗", "cat10": "韩方诊所", "cat11": "牙科", "cat12": "毛发移植", "cat13": "身体塑形", "cat14": "胸部整形", "cat15": "眼科精密检查", "cat16": "减重管理", "catSecTitle": "全部<em>分类</em>", "q1t": "AI 咨询", "q1s": "24小时中文", "q2t": "简易报价", "q2s": "3秒人民币报价", "q3t": "专属礼宾", "q3s": "接机·翻译·陪诊", "svcSecTitle": "其他<em>服务</em>", "svcConciergeT": "专属礼宾服务", "svcConciergeD": "接机 · 酒店预订 · 全程陪同翻译", "svcInterpretT": "专业陪诊翻译", "svcInterpretD": "面诊 · 手术说明 · 术后咨询同声传译", "svcTourT": "医疗观光套餐", "svcTourD": "江南购物 · 韩流体验 · 治疗后疗养行程", "adtag": "AD · 本月推荐", "adtitle": "江南综合医美", "viewmore": "查看 →", "sec1title": "本周<em>严选医院</em>", "sec2title": "热门<em>项目</em>", "sec3title": "真实<em>评价</em>", "all": "全部 →", "badgeCurated": "严选", "badgeHot": "HOT", "areaGangnam": "江南", "areaCheongdam": "清潭", "fullChinese": "中文全程", "tagEye": "眼部", "tagContour": "轮廓", "tagStem": "干细胞", "tagSkin": "皮肤", "tagHifu": "超声刀", "tagLift": "提升", "tagCheckup": "综合体检", "tagAging": "抗衰", "antiAgingCenter": "抗衰中心", "hospitalWord": "医院", "deal1name": "自然粘连双眼皮 + 开眼角", "deal1meta": "江南严选 3 家医院对比报价", "deal2name": "超声刀全脸提升 (7D 芙拉)", "deal2meta": "江南严选 5 家医院对比报价", "deal3name": "干细胞综合抗衰管理套餐", "deal3meta": "含综合体检 · 清潭 CHAUM 等", "deal4name": "下颌角 + 颧骨缩小 轮廓三件套", "deal4meta": "江南严选 3 家医院对比报价", "freeQuote": "免费报价对比", "trust1": "服务患者", "trust2": "合作医院", "trust3": "满意度", "trust4": "种语言", "rv1": "\"从机场接机到面诊翻译全程陪同，医生说的每句话都翻译得很清楚，完全没有语言不通的不安感。\"", "rv1name": "王女士", "rv1info": "上海 · 眼部整形", "rv2": "\"对比了三家医院报价，透明没有隐藏费用。回国后恢复期有问题顾问也随时在线解答，很安心。\"", "rv2name": "陈女士", "rv2info": "杭州 · 面部轮廓", "rv3": "\"帮妈妈安排的干细胞抗衰项目，从体检到疗程都很专业，还帮我们订了酒店和行程。\"", "rv3name": "李女士", "rv3info": "北京 · 干细胞抗衰", "faqTitle": "常见<em>问题</em>", "faq1q": "费用如何计算？会有隐藏费用吗？", "faq1a": "江南FOLLOW不收取任何中介差价，报价即医院实际收费。所有费用在预约确认前会以书面形式告知，无隐藏费用。", "faq2q": "不会说韩语，看病沟通怎么办？", "faq2a": "专属顾问将全程陪同面诊及手术说明，提供中文、英语等多语言同声传译，确保沟通零障碍。", "faq3q": "签证与入境手续需要协助吗？", "faq3a": "我们提供医疗签证邀请函及入境资料协助，并可安排仁川机场接机服务。", "faq4q": "回国后恢复期有问题怎么联系？", "faq4a": "回国后可通过微信、WhatsApp、LINE等随时联系专属顾问，我们提供术后线上复诊跟进服务。", "faq5q": "支持哪些支付方式？", "faq5a": "支持支付宝、微信支付、银联卡、Visa/Mastercard 及银行电汇等多种支付方式。", "quoteModalTitle": "简易报价", "quoteModalSub": "选择意向项目，3秒获取预估报价", "quoteSelectLabel": "选择项目 (可多选)", "quoteContactLabel": "联系方式", "quoteNameField": "姓名", "quoteNamePh": "请输入姓名", "quotePhoneField": "电话 / WhatsApp", "quotePhonePh": "请输入联系方式", "quoteTotalLabel": "预估报价区间", "quoteSendBtn": "发送报价", "quotePrintBtn": "打印 / PDF", "quoteDisclaimer": "此报价为预估价格，实际费用以医院面诊后确认为准。江南FOLLOW不收取任何中介差价。", "fabWechat": "微信咨询", "fabLine": "LINE 咨询", "fabWhatsapp": "WhatsApp 咨询", "fabChat": "AI 咨询", "fab24hr": "24hr", "footline": "韩国首尔江南医美严选平台 · 10种语言 · 专属中文礼宾", "tab1": "首页", "tab2": "分类", "tab3": "预约", "tab4": "评价", "tab5": "My", "from": "起", "catsShowAll": "+ 显示全部分类", "catsShowLess": "－ 收起分类", "alertAiConsult": "正在打开AI咨询...", "alertConcierge": "正在打开专属礼宾预约...", "alertQuoteRequired": "请输入姓名和联系方式"}, "ko": {"my": "마이", "b1tag": "오픈 기념 이벤트", "b1title": "강남팔로우 정식 오픈<br>공유하면 왕홍 체험권 증정", "b1sub": "SNS 공유 추첨 · 무료 시술 체험 · 커피쿠폰", "b2tag": "AI 상담", "b2title": "AI 상담사 24시간 대기<br>3초만에 견적 확인", "b2sub": "실시간 환율 견적 · 10개 언어 지원", "b3tag": "컨시어지", "b3title": "전담 컨시어지 서비스<br>공항 픽업·통역·진료 동행", "b3sub": "인천공항부터 사후관리까지 전 과정 동행", "cat1": "피부과", "cat2": "성형외과", "cat3": "눈성형", "cat4": "코성형", "cat5": "안면윤곽", "cat6": "줄기세포", "cat7": "리프팅", "cat8": "건강검진", "cat9": "스파·에스테틱", "cat10": "한방진료", "cat11": "치과", "cat12": "모발이식", "cat13": "체형관리", "cat14": "가슴성형", "cat15": "안과정밀검사", "cat16": "체중관리", "catSecTitle": "전체 <em>카테고리</em>", "q1t": "AI 상담", "q1s": "24시간 대기", "q2t": "간편 견적", "q2s": "3초 견적 확인", "q3t": "전담 컨시어지", "q3s": "픽업·통역·동행", "svcSecTitle": "기타 <em>서비스</em>", "svcConciergeT": "전담 컨시어지 서비스", "svcConciergeD": "공항 픽업 · 호텔 예약 · 전 과정 동행 통역", "svcInterpretT": "전문 진료 동행 통역", "svcInterpretD": "면진 · 수술 설명 · 사후관리 상담 동시통역", "svcTourT": "메디컬 투어 패키지", "svcTourD": "강남 쇼핑 · 한류 체험 · 시술 후 회복 일정", "adtag": "AD · 이달의 추천", "adtitle": "강남 종합 의료미용", "viewmore": "보기 →", "sec1title": "이주의 <em>엄선 병원</em>", "sec2title": "인기 <em>시술</em>", "sec3title": "실제 <em>후기</em>", "all": "전체 →", "badgeCurated": "엄선", "badgeHot": "HOT", "areaGangnam": "강남", "areaCheongdam": "청담", "fullChinese": "중문 전담", "tagEye": "눈", "tagContour": "윤곽", "tagStem": "줄기세포", "tagSkin": "피부", "tagHifu": "초음파리프팅", "tagLift": "리프팅", "tagCheckup": "종합검진", "tagAging": "안티에이징", "antiAgingCenter": "안티에이징센터", "hospitalWord": "의원", "deal1name": "자연유착 쌍꺼풀 + 트임", "deal1meta": "강남 엄선 3개 병원 견적 비교", "deal2name": "초음파 리프팅 전체 (7D)", "deal2meta": "강남 엄선 5개 병원 견적 비교", "deal3name": "줄기세포 종합 안티에이징 패키지", "deal3meta": "종합검진 포함 · 차움 등", "deal4name": "사각턱 + 광대축소 윤곽 3종", "deal4meta": "강남 엄선 3개 병원 견적 비교", "freeQuote": "무료 견적 비교", "trust1": "누적 서비스 환자", "trust2": "제휴 병원", "trust3": "만족도", "trust4": "지원 언어", "rv1": "\"공항 픽업부터 진료 통역까지 전 과정 동행해주셨어요. 의사 선생님 말씀을 정확히 통역해주셔서 불안함이 전혀 없었습니다.\"", "rv1name": "왕 여사", "rv1info": "상하이 · 눈성형", "rv2": "\"세 병원 견적을 비교했는데 숨겨진 비용 없이 투명했어요. 귀국 후 회복기 문의도 언제든 답해주셔서 안심됐습니다.\"", "rv2name": "첸 여사", "rv2info": "항저우 · 안면윤곽", "rv3": "\"어머니 줄기세포 안티에이징 예약을 도와주셨어요. 검진부터 시술까지 전문적이었고 숙소와 일정까지 챙겨주셨습니다.\"", "rv3name": "리 여사", "rv3info": "베이징 · 줄기세포", "faqTitle": "자주 묻는 <em>질문</em>", "faq1q": "비용은 어떻게 계산되나요? 숨겨진 비용이 있나요?", "faq1a": "강남팔로우는 어떠한 중개 수수료도 받지 않으며, 안내된 견적이 병원 실제 청구 금액입니다. 예약 확정 전 모든 비용을 서면으로 안내드리며 숨겨진 비용은 없습니다.", "faq2q": "한국어를 못하는데 진료 소통은 어떻게 하나요?", "faq2a": "전담 컨시어지가 면진과 수술 설명 전 과정에 동행하며, 중국어·영어 등 다국어 동시통역을 제공해 소통에 어려움이 없도록 합니다.", "faq3q": "비자나 입국 절차도 도와주나요?", "faq3a": "의료 비자 초청장 및 입국 서류 준비를 도와드리며, 인천공항 픽업 서비스도 예약하실 수 있습니다.", "faq4q": "귀국 후 회복기에 문제가 생기면 어떻게 연락하나요?", "faq4a": "귀국 후에도 위챗, WhatsApp, LINE 등으로 언제든 전담 컨시어지에게 연락하실 수 있으며, 온라인 사후관리 상담을 제공합니다.", "faq5q": "어떤 결제 방식을 지원하나요?", "faq5a": "알리페이, 위챗페이, 은련카드, Visa/Mastercard, 은행 전신환 송금 등 다양한 결제 방식을 지원합니다.", "quoteModalTitle": "간편 견적", "quoteModalSub": "원하는 시술을 선택하면 3초 만에 예상 견적을 확인하세요", "quoteSelectLabel": "시술 선택 (복수 선택 가능)", "quoteContactLabel": "연락처", "quoteNameField": "이름", "quoteNamePh": "이름을 입력하세요", "quotePhoneField": "전화 / WhatsApp", "quotePhonePh": "연락처를 입력하세요", "quoteTotalLabel": "예상 견적 범위", "quoteSendBtn": "견적 전송", "quotePrintBtn": "인쇄 / PDF", "quoteDisclaimer": "본 견적은 예상 금액이며, 실제 비용은 병원 면진 후 확정됩니다. 강남팔로우는 어떠한 중개 수수료도 받지 않습니다.", "fabWechat": "위챗 상담", "fabLine": "라인 상담", "fabWhatsapp": "왓츠앱 상담", "fabChat": "AI 상담", "fab24hr": "24시간", "footline": "대한민국 서울 강남 의료미용 엄선 플랫폼 · 10개 언어 · 전담 컨시어지", "tab1": "홈", "tab2": "카테고리", "tab3": "예약", "tab4": "후기", "tab5": "마이", "from": "부터", "catsShowAll": "+ 전체 카테고리 보기", "catsShowLess": "－ 접기", "alertAiConsult": "AI 상담을 시작합니다...", "alertConcierge": "컨시어지 예약 페이지로 이동합니다...", "alertQuoteRequired": "이름과 연락처를 입력해주세요"}, "en": {"my": "My", "b1tag": "GRAND OPEN EVENT", "b1title": "Gangnam Follow is now live<br>Share &amp; win a free treatment", "b1sub": "Social share raffle · Free trial treatment · Coffee voucher", "b2tag": "AI CONSULTING", "b2title": "AI advisor online 24/7<br>Get a quote in 3 seconds", "b2sub": "Real-time exchange rate quotes · 10 languages supported", "b3tag": "CONCIERGE", "b3title": "Dedicated concierge service<br>Airport pickup · Interpreting · Escort", "b3sub": "From Incheon Airport to aftercare, all in one journey", "cat1": "Dermatology", "cat2": "Plastic Surgery", "cat3": "Eye Surgery", "cat4": "Rhinoplasty", "cat5": "Facial Contour", "cat6": "Stem Cell", "cat7": "Lifting", "cat8": "Health Check-up", "cat9": "Spa &amp; Aesthetics", "cat10": "Korean Medicine", "cat11": "Dental", "cat12": "Hair Transplant", "cat13": "Body Contouring", "cat14": "Breast Surgery", "cat15": "Ophthalmology", "cat16": "Weight Management", "catSecTitle": "All <em>Categories</em>", "q1t": "AI Consulting", "q1s": "Available 24/7", "q2t": "Quick Quote", "q2s": "Quote in 3 seconds", "q3t": "Concierge", "q3s": "Pickup · Interpreting · Escort", "svcSecTitle": "Other <em>Services</em>", "svcConciergeT": "Dedicated Concierge Service", "svcConciergeD": "Airport pickup · Hotel booking · Full interpreting escort", "svcInterpretT": "Professional Medical Interpreting", "svcInterpretD": "Consultation · Surgery briefing · Aftercare simultaneous interpreting", "svcTourT": "Medical Tourism Package", "svcTourD": "Gangnam shopping · K-culture experience · Post-treatment recovery itinerary", "adtag": "AD · Featured this month", "adtitle": "Gangnam Comprehensive Aesthetic Clinic", "viewmore": "View →", "sec1title": "This Week's <em>Curated Clinics</em>", "sec2title": "Popular <em>Procedures</em>", "sec3title": "Real <em>Reviews</em>", "all": "View all →", "badgeCurated": "Curated", "badgeHot": "HOT", "areaGangnam": "Gangnam", "areaCheongdam": "Cheongdam", "fullChinese": "Full interpreter support", "tagEye": "Eye", "tagContour": "Contour", "tagStem": "Stem Cell", "tagSkin": "Skin", "tagHifu": "HIFU", "tagLift": "Lifting", "tagCheckup": "Check-up", "tagAging": "Anti-aging", "antiAgingCenter": "Anti-aging Center", "hospitalWord": "Clinic", "deal1name": "Natural Non-incisional Double Eyelid + Canthoplasty", "deal1meta": "Compare quotes from 3 curated Gangnam clinics", "deal2name": "HIFU Full Face Lifting (7D)", "deal2meta": "Compare quotes from 5 curated Gangnam clinics", "deal3name": "Stem Cell Anti-aging Package", "deal3meta": "Includes health check-up · Chaum and more", "deal4name": "Jaw + Cheekbone Reduction Contour Set", "deal4meta": "Compare quotes from 3 curated Gangnam clinics", "freeQuote": "Free quote comparison", "trust1": "Patients served", "trust2": "Partner clinics", "trust3": "Satisfaction", "trust4": "Languages", "rv1": "\"They accompanied me from airport pickup to the consultation interpreting. Every word the doctor said was translated clearly — zero language anxiety.\"", "rv1name": "Ms. Wang", "rv1info": "Shanghai · Eye Surgery", "rv2": "\"I compared quotes from three clinics — fully transparent, no hidden fees. Even after I went home, my advisor answered my recovery questions anytime.\"", "rv2name": "Ms. Chen", "rv2info": "Hangzhou · Facial Contour", "rv3": "\"They arranged my mom's stem cell anti-aging package. Professional from check-up to treatment, and even booked our hotel and itinerary.\"", "rv3name": "Ms. Li", "rv3info": "Beijing · Stem Cell", "faqTitle": "Frequently Asked <em>Questions</em>", "faq1q": "How are costs calculated? Are there hidden fees?", "faq1a": "Gangnam Follow charges no brokerage margin — the quote you see is the clinic's actual price. All costs are confirmed in writing before booking, with no hidden fees.", "faq2q": "I don't speak Korean — how will I communicate during treatment?", "faq2a": "Your dedicated concierge accompanies you throughout consultations and surgical briefings, providing simultaneous interpreting in Chinese, English and more.", "faq3q": "Can you help with visa and entry procedures?", "faq3a": "We provide medical visa invitation letters and entry documentation support, and can arrange airport pickup at Incheon.", "faq4q": "What if I have issues during recovery after returning home?", "faq4a": "You can reach your dedicated concierge anytime via WeChat, WhatsApp, or LINE — we offer online follow-up consultations after you return home.", "faq5q": "What payment methods are supported?", "faq5a": "We support Alipay, WeChat Pay, UnionPay, Visa/Mastercard, and international bank transfer.", "quoteModalTitle": "Quick Quote", "quoteModalSub": "Select your procedures for an estimate in 3 seconds", "quoteSelectLabel": "Select Procedures (multiple)", "quoteContactLabel": "Contact Information", "quoteNameField": "Name", "quoteNamePh": "Enter your name", "quotePhoneField": "Phone / WhatsApp", "quotePhonePh": "Enter your contact", "quoteTotalLabel": "Estimated Quote Range", "quoteSendBtn": "Send Quote", "quotePrintBtn": "Print / PDF", "quoteDisclaimer": "This is an estimated price; the final cost is confirmed after an in-person consultation. Gangnam Follow charges no brokerage margin.", "fabWechat": "Chat on WeChat", "fabLine": "Chat on LINE", "fabWhatsapp": "Chat on WhatsApp", "fabChat": "AI Chat", "fab24hr": "24hr", "footline": "Seoul Gangnam Medical Aesthetics Curation Platform · 10 Languages · Dedicated Concierge", "tab1": "Home", "tab2": "Category", "tab3": "Booking", "tab4": "Reviews", "tab5": "My", "from": "from", "catsShowAll": "+ Show all categories", "catsShowLess": "－ Show less", "alertAiConsult": "Opening AI consultation...", "alertConcierge": "Opening concierge booking...", "alertQuoteRequired": "Please enter your name and contact"}, "ja": {"my": "マイ", "b1tag": "グランドオープン記念", "b1title": "カンナムフォロー正式オープン<br>シェアしてワンホン体験券をゲット", "b1sub": "SNSシェア抽選 · 無料施術体験 · コーヒー券", "b2tag": "AIコンサルティング", "b2title": "AIアドバイザー24時間対応<br>3秒で見積もり取得", "b2sub": "リアルタイム為替見積もり · 10言語対応", "b3tag": "コンシェルジュ", "b3title": "専属コンシェルジュサービス<br>空港送迎·通訳·付き添い", "b3sub": "仁川空港からアフターケアまで全行程同行", "cat1": "皮膚科", "cat2": "整形外科", "cat3": "目の整形", "cat4": "鼻の整形", "cat5": "輪郭形成", "cat6": "幹細胞", "cat7": "リフティング", "cat8": "健康診断", "cat9": "エステ·スパ", "cat10": "韓方診療", "cat11": "歯科", "cat12": "毛髪移植", "cat13": "ボディライン管理", "cat14": "胸の整形", "cat15": "眼科精密検査", "cat16": "体重管理", "catSecTitle": "全<em>カテゴリー</em>", "q1t": "AI相談", "q1s": "24時間対応", "q2t": "簡単見積もり", "q2s": "3秒で見積もり", "q3t": "専属コンシェルジュ", "q3s": "送迎·通訳·付き添い", "svcSecTitle": "その他の<em>サービス</em>", "svcConciergeT": "専属コンシェルジュサービス", "svcConciergeD": "空港送迎 · ホテル予約 · 全行程通訳同行", "svcInterpretT": "専門付き添い通訳", "svcInterpretD": "カウンセリング · 手術説明 · アフターケア相談の同時通訳", "svcTourT": "メディカルツアーパッケージ", "svcTourD": "江南ショッピング · 韓流体験 · 施術後の療養プラン", "adtag": "広告 · 今月のおすすめ", "adtitle": "カンナム総合美容クリニック", "viewmore": "見る →", "sec1title": "今週の<em>厳選クリニック</em>", "sec2title": "人気<em>施術</em>", "sec3title": "リアル<em>レビュー</em>", "all": "すべて見る →", "badgeCurated": "厳選", "badgeHot": "HOT", "areaGangnam": "江南", "areaCheongdam": "清潭", "fullChinese": "通訳フルサポート", "tagEye": "目元", "tagContour": "輪郭", "tagStem": "幹細胞", "tagSkin": "肌", "tagHifu": "ハイフ", "tagLift": "リフティング", "tagCheckup": "総合検診", "tagAging": "アンチエイジング", "antiAgingCenter": "アンチエイジングセンター", "hospitalWord": "クリニック", "deal1name": "自然癒着二重整形 + 目頭切開", "deal1meta": "江南厳選3クリニックの見積もり比較", "deal2name": "ハイフ全顔リフティング (7D)", "deal2meta": "江南厳選5クリニックの見積もり比較", "deal3name": "幹細胞総合アンチエイジングパッケージ", "deal3meta": "健康診断込み · チャウムなど", "deal4name": "エラ削り + 頬骨縮小 輪郭3点セット", "deal4meta": "江南厳選3クリニックの見積もり比較", "freeQuote": "無料見積もり比較", "trust1": "累計利用患者", "trust2": "提携クリニック", "trust3": "満足度", "trust4": "対応言語", "rv1": "「空港送迎からカウンセリング通訳まで付き添っていただきました。先生の説明が全て正確に訳されて不安が全くありませんでした。」", "rv1name": "王さん", "rv1info": "上海 · 目の整形", "rv2": "「3つのクリニックの見積もりを比較しましたが、隠れた費用もなく透明でした。帰国後も回復期の相談にいつでも答えてくれて安心でした。」", "rv2name": "陳さん", "rv2info": "杭州 · 輪郭形成", "rv3": "「母の幹細胞アンチエイジングパッケージを手配してもらいました。検診から施術まで専門的で、ホテルや日程まで手配してくれました。」", "rv3name": "李さん", "rv3info": "北京 · 幹細胞", "faqTitle": "よくある<em>ご質問</em>", "faq1q": "費用はどう計算されますか？隠れた費用はありますか？", "faq1a": "カンナムフォローは仲介マージンを一切いただきません。ご案内する見積もりはクリニックの実際の請求額です。予約確定前に全費用を書面でご案内し、隠れた費用はありません。", "faq2q": "韓国語が話せませんが、診察のコミュニケーションはどうなりますか？", "faq2a": "専属コンシェルジュがカウンセリングから手術説明まで全行程に同行し、中国語·英語など多言語同時通訳を提供しますので、コミュニケーションの心配はありません。", "faq3q": "ビザや入国手続きのサポートはありますか？", "faq3a": "医療ビザ招へい状や入国書類の準備をサポートし、仁川空港の送迎サービスも手配可能です。", "faq4q": "帰国後の回復期に問題があった場合、どう連絡すればよいですか？", "faq4a": "帰国後もWeChat、WhatsApp、LINEなどでいつでも専属コンシェルジュにご連絡いただけます。オンラインでのアフターケア相談もご提供しています。", "faq5q": "対応している支払い方法は？", "faq5a": "Alipay、WeChat Pay、銀聯カード、Visa/Mastercard、国際銀行送金など、様々な支払い方法に対応しています。", "quoteModalTitle": "簡単見積もり", "quoteModalSub": "ご希望の施術を選択すると3秒で概算見積もりが出ます", "quoteSelectLabel": "施術を選択（複数選択可）", "quoteContactLabel": "連絡先情報", "quoteNameField": "お名前", "quoteNamePh": "お名前を入力してください", "quotePhoneField": "電話番号 / WhatsApp", "quotePhonePh": "連絡先を入力してください", "quoteTotalLabel": "概算見積もり範囲", "quoteSendBtn": "見積もりを送信", "quotePrintBtn": "印刷 / PDF", "quoteDisclaimer": "こちらは概算価格です。実際の費用はクリニックでのカウンセリング後に確定します。カンナムフォローは仲介マージンを一切いただきません。", "fabWechat": "WeChatで相談", "fabLine": "LINEで相談", "fabWhatsapp": "WhatsAppで相談", "fabChat": "AI相談", "fab24hr": "24時間", "footline": "ソウル江南医療美容厳選プラットフォーム · 10言語対応 · 専属コンシェルジュ", "tab1": "ホーム", "tab2": "カテゴリ", "tab3": "予約", "tab4": "レビュー", "tab5": "マイ", "from": "〜", "catsShowAll": "+ すべてのカテゴリを表示", "catsShowLess": "－ 折りたたむ", "alertAiConsult": "AI相談を開始します...", "alertConcierge": "コンシェルジュ予約ページを開いています...", "alertQuoteRequired": "お名前とご連絡先を入力してください"}, "vi": {"my": "Của tôi", "b1tag": "SỰ KIỆN KHAI TRƯƠNG", "b1title": "Gangnam Follow chính thức ra mắt<br>Chia sẻ để nhận voucher trải nghiệm", "b1sub": "Bốc thăm chia sẻ MXH · Trải nghiệm miễn phí · Voucher cà phê", "b2tag": "TƯ VẤN AI", "b2title": "Tư vấn viên AI trực tuyến 24/7<br>Nhận báo giá trong 3 giây", "b2sub": "Báo giá theo tỷ giá thực · Hỗ trợ 10 ngôn ngữ", "b3tag": "DỊCH VỤ RIÊNG", "b3title": "Dịch vụ concierge riêng biệt<br>Đón sân bay · Phiên dịch · Đồng hành", "b3sub": "Từ sân bay Incheon đến chăm sóc sau điều trị", "cat1": "Da liễu", "cat2": "Phẫu thuật thẩm mỹ", "cat3": "Phẫu thuật mắt", "cat4": "Nâng mũi", "cat5": "Tạo hình khuôn mặt", "cat6": "Tế bào gốc", "cat7": "Nâng cơ", "cat8": "Khám sức khỏe", "cat9": "Spa & Thẩm mỹ", "cat10": "Y học cổ truyền Hàn Quốc", "cat11": "Nha khoa", "cat12": "Cấy tóc", "cat13": "Tạo hình cơ thể", "cat14": "Phẫu thuật ngực", "cat15": "Khám mắt chuyên sâu", "cat16": "Quản lý cân nặng", "catSecTitle": "Tất cả <em>danh mục</em>", "q1t": "Tư vấn AI", "q1s": "Hỗ trợ 24/7", "q2t": "Báo giá nhanh", "q2s": "Báo giá trong 3 giây", "q3t": "Concierge riêng", "q3s": "Đón · Phiên dịch · Đồng hành", "svcSecTitle": "Dịch vụ <em>khác</em>", "svcConciergeT": "Dịch vụ Concierge riêng biệt", "svcConciergeD": "Đón sân bay · Đặt khách sạn · Phiên dịch đồng hành toàn trình", "svcInterpretT": "Phiên dịch y tế chuyên nghiệp", "svcInterpretD": "Tư vấn · Giải thích phẫu thuật · Phiên dịch đồng thời chăm sóc sau điều trị", "svcTourT": "Gói du lịch y tế", "svcTourD": "Mua sắm Gangnam · Trải nghiệm Hallyu · Lịch trình phục hồi sau điều trị", "adtag": "QC · Nổi bật tháng này", "adtitle": "Phòng khám thẩm mỹ tổng hợp Gangnam", "viewmore": "Xem →", "sec1title": "<em>Phòng khám chọn lọc</em> tuần này", "sec2title": "<em>Dịch vụ</em> phổ biến", "sec3title": "Đánh giá <em>thực tế</em>", "all": "Xem tất cả →", "badgeCurated": "Chọn lọc", "badgeHot": "HOT", "areaGangnam": "Gangnam", "areaCheongdam": "Cheongdam", "fullChinese": "Hỗ trợ phiên dịch toàn trình", "tagEye": "Mắt", "tagContour": "Khuôn mặt", "tagStem": "Tế bào gốc", "tagSkin": "Da", "tagHifu": "HIFU", "tagLift": "Nâng cơ", "tagCheckup": "Khám tổng quát", "tagAging": "Chống lão hóa", "antiAgingCenter": "Trung tâm chống lão hóa", "hospitalWord": "Phòng khám", "deal1name": "Nhấn mí tự nhiên + Mở góc mắt", "deal1meta": "So sánh báo giá từ 3 phòng khám chọn lọc", "deal2name": "Nâng cơ toàn mặt HIFU (7D)", "deal2meta": "So sánh báo giá từ 5 phòng khám chọn lọc", "deal3name": "Gói chống lão hóa tế bào gốc toàn diện", "deal3meta": "Bao gồm khám tổng quát · Chaum và hơn thế", "deal4name": "Bộ 3 tạo hình hàm + gò má", "deal4meta": "So sánh báo giá từ 3 phòng khám chọn lọc", "freeQuote": "So sánh báo giá miễn phí", "trust1": "Bệnh nhân đã phục vụ", "trust2": "Phòng khám đối tác", "trust3": "Mức hài lòng", "trust4": "Ngôn ngữ hỗ trợ", "rv1": "\"Từ đón sân bay đến phiên dịch khi tư vấn, họ đồng hành suốt. Mọi lời bác sĩ nói đều được dịch rõ ràng, hoàn toàn không lo về ngôn ngữ.\"", "rv1name": "Chị Vương", "rv1info": "Thượng Hải · Phẫu thuật mắt", "rv2": "\"Tôi so sánh báo giá 3 phòng khám, hoàn toàn minh bạch không phí ẩn. Về nước rồi tư vấn viên vẫn trả lời mọi thắc mắc phục hồi.\"", "rv2name": "Chị Trần", "rv2info": "Hàng Châu · Tạo hình khuôn mặt", "rv3": "\"Họ sắp xếp gói tế bào gốc chống lão hóa cho mẹ tôi. Chuyên nghiệp từ khám đến điều trị, còn đặt khách sạn và lịch trình giúp.\"", "rv3name": "Chị Lý", "rv3info": "Bắc Kinh · Tế bào gốc", "faqTitle": "Câu hỏi <em>thường gặp</em>", "faq1q": "Chi phí được tính như thế nào? Có phí ẩn không?", "faq1a": "Gangnam Follow không thu bất kỳ khoản chênh lệch trung gian nào — báo giá bạn thấy chính là giá thực tế của phòng khám. Mọi chi phí được xác nhận bằng văn bản trước khi đặt lịch, không có phí ẩn.", "faq2q": "Tôi không biết tiếng Hàn, giao tiếp khi khám thế nào?", "faq2a": "Concierge riêng sẽ đồng hành suốt buổi tư vấn và giải thích phẫu thuật, cung cấp phiên dịch đồng thời tiếng Trung, tiếng Anh và nhiều ngôn ngữ khác.", "faq3q": "Có hỗ trợ visa và thủ tục nhập cảnh không?", "faq3a": "Chúng tôi hỗ trợ thư mời visa y tế và giấy tờ nhập cảnh, đồng thời có thể sắp xếp đón tại sân bay Incheon.", "faq4q": "Nếu gặp vấn đề trong giai đoạn phục hồi sau khi về nước thì liên hệ thế nào?", "faq4a": "Bạn có thể liên hệ concierge riêng bất cứ lúc nào qua WeChat, WhatsApp, LINE — chúng tôi cung cấp tư vấn theo dõi trực tuyến sau khi về nước.", "faq5q": "Hỗ trợ những phương thức thanh toán nào?", "faq5a": "Hỗ trợ Alipay, WeChat Pay, thẻ UnionPay, Visa/Mastercard và chuyển khoản ngân hàng quốc tế.", "quoteModalTitle": "Báo giá nhanh", "quoteModalSub": "Chọn dịch vụ để nhận báo giá ước tính trong 3 giây", "quoteSelectLabel": "Chọn dịch vụ (có thể chọn nhiều)", "quoteContactLabel": "Thông tin liên hệ", "quoteNameField": "Họ tên", "quoteNamePh": "Nhập họ tên của bạn", "quotePhoneField": "Điện thoại / WhatsApp", "quotePhonePh": "Nhập thông tin liên hệ", "quoteTotalLabel": "Khoảng báo giá ước tính", "quoteSendBtn": "Gửi báo giá", "quotePrintBtn": "In / PDF", "quoteDisclaimer": "Đây là giá ước tính; chi phí cuối cùng sẽ được xác nhận sau khi tư vấn trực tiếp tại phòng khám. Gangnam Follow không thu bất kỳ khoản chênh lệch trung gian nào.", "fabWechat": "Chat qua WeChat", "fabLine": "Chat qua LINE", "fabWhatsapp": "Chat qua WhatsApp", "fabChat": "Chat AI", "fab24hr": "24h", "footline": "Nền tảng thẩm mỹ y tế chọn lọc Gangnam Seoul · 10 ngôn ngữ · Concierge riêng biệt", "tab1": "Trang chủ", "tab2": "Danh mục", "tab3": "Đặt lịch", "tab4": "Đánh giá", "tab5": "Của tôi", "from": "từ", "catsShowAll": "+ Xem tất cả danh mục", "catsShowLess": "－ Thu gọn", "alertAiConsult": "Đang mở tư vấn AI...", "alertConcierge": "Đang mở đặt lịch concierge...", "alertQuoteRequired": "Vui lòng nhập tên và thông tin liên hệ"}, "th": {"my": "ของฉัน", "b1tag": "อีเวนต์เปิดตัว", "b1title": "Gangnam Follow เปิดตัวอย่างเป็นทางการ<br>แชร์รับบัตรทดลองสัมผัสประสบการณ์", "b1sub": "จับรางวัลแชร์โซเชียล · ทดลองฟรี · บัตรกาแฟ", "b2tag": "ปรึกษา AI", "b2title": "ที่ปรึกษา AI ออนไลน์ 24 ชม.<br>รับใบเสนอราคาใน 3 วินาที", "b2sub": "ราคาตามอัตราแลกเปลี่ยนจริง · รองรับ 10 ภาษา", "b3tag": "บริการคอนเซียร์จ", "b3title": "บริการคอนเซียร์จส่วนตัว<br>รับสนามบิน · ล่าม · ไปด้วยกัน", "b3sub": "จากสนามบินอินชอนจนถึงการดูแลหลังทำ", "cat1": "ผิวหนัง", "cat2": "ศัลยกรรมตกแต่ง", "cat3": "ศัลยกรรมตา", "cat4": "เสริมจมูก", "cat5": "ปรับรูปหน้า", "cat6": "สเต็มเซลล์", "cat7": "ยกกระชับ", "cat8": "ตรวจสุขภาพ", "cat9": "สปา & ความงาม", "cat10": "แพทย์แผนเกาหลี", "cat11": "ทันตกรรม", "cat12": "ปลูกผม", "cat13": "กระชับสัดส่วน", "cat14": "เสริมหน้าอก", "cat15": "ตรวจตาละเอียด", "cat16": "ควบคุมน้ำหนัก", "catSecTitle": "<em>หมวดหมู่</em>ทั้งหมด", "q1t": "ปรึกษา AI", "q1s": "ให้บริการ 24 ชม.", "q2t": "ใบเสนอราคาด่วน", "q2s": "ราคาใน 3 วินาที", "q3t": "คอนเซียร์จส่วนตัว", "q3s": "รับส่ง · ล่าม · ไปด้วยกัน", "svcSecTitle": "บริการ<em>อื่นๆ</em>", "svcConciergeT": "บริการคอนเซียร์จส่วนตัว", "svcConciergeD": "รับสนามบิน · จองโรงแรม · ล่ามไปด้วยตลอดการเดินทาง", "svcInterpretT": "ล่ามการแพทย์มืออาชีพ", "svcInterpretD": "ปรึกษาแพทย์ · อธิบายการผ่าตัด · แปลพร้อมกันสำหรับการดูแลหลังทำ", "svcTourT": "แพ็กเกจท่องเที่ยวเชิงการแพทย์", "svcTourD": "ช้อปปิ้งคังนัม · สัมผัสวัฒนธรรมเกาหลี · แผนพักฟื้นหลังทำหัตถการ", "adtag": "โฆษณา · แนะนำเดือนนี้", "adtitle": "คลินิกความงามครบวงจรคังนัม", "viewmore": "ดู →", "sec1title": "<em>คลินิกคัดสรร</em>สัปดาห์นี้", "sec2title": "<em>ทรีตเมนต์</em>ยอดนิยม", "sec3title": "รีวิว<em>จากผู้ใช้จริง</em>", "all": "ดูทั้งหมด →", "badgeCurated": "คัดสรร", "badgeHot": "HOT", "areaGangnam": "คังนัม", "areaCheongdam": "ชองดัม", "fullChinese": "ล่ามดูแลตลอด", "tagEye": "ดวงตา", "tagContour": "รูปหน้า", "tagStem": "สเต็มเซลล์", "tagSkin": "ผิว", "tagHifu": "ไฮฟู่", "tagLift": "ยกกระชับ", "tagCheckup": "ตรวจสุขภาพ", "tagAging": "แอนตี้เอจจิ้ง", "antiAgingCenter": "ศูนย์แอนตี้เอจจิ้ง", "hospitalWord": "คลินิก", "deal1name": "เสริมตาสองชั้นแบบธรรมชาติ + เปิดหัวตา", "deal1meta": "เทียบราคาจาก 3 คลินิกคัดสรรคังนัม", "deal2name": "ไฮฟู่ยกกระชับทั้งใบหน้า (7D)", "deal2meta": "เทียบราคาจาก 5 คลินิกคัดสรรคังนัม", "deal3name": "แพ็กเกจแอนตี้เอจจิ้งสเต็มเซลล์ครบวงจร", "deal3meta": "รวมตรวจสุขภาพ · Chaum และอื่นๆ", "deal4name": "เซ็ตปรับรูปหน้า กราม + โหนกแก้ม", "deal4meta": "เทียบราคาจาก 3 คลินิกคัดสรรคังนัม", "freeQuote": "เทียบราคาฟรี", "trust1": "ผู้ป่วยที่ให้บริการ", "trust2": "คลินิกพันธมิตร", "trust3": "ความพึงพอใจ", "trust4": "ภาษาที่รองรับ", "rv1": "\"ตั้งแต่รับที่สนามบินจนถึงล่ามตอนปรึกษาแพทย์ ดูแลตลอด คำพูดของหมอถูกแปลชัดเจนทุกคำ ไม่มีความกังวลเรื่องภาษาเลย\"", "rv1name": "คุณหวัง", "rv1info": "เซี่ยงไฮ้ · ศัลยกรรมตา", "rv2": "\"เทียบราคาจาก 3 คลินิก โปร่งใสไม่มีค่าใช้จ่ายแอบแฝง กลับประเทศแล้วที่ปรึกษายังตอบคำถามช่วงพักฟื้นได้ตลอดเวลา\"", "rv2name": "คุณเฉิน", "rv2info": "หางโจว · ปรับรูปหน้า", "rv3": "\"จัดแพ็กเกจสเต็มเซลล์แอนตี้เอจจิ้งให้คุณแม่ ตั้งแต่ตรวจสุขภาพจนถึงทำทรีตเมนต์เป็นมืออาชีพมาก แถมจองโรงแรมและตารางเที่ยวให้ด้วย\"", "rv3name": "คุณหลี่", "rv3info": "ปักกิ่ง · สเต็มเซลล์", "faqTitle": "คำถาม<em>ที่พบบ่อย</em>", "faq1q": "คิดค่าใช้จ่ายอย่างไร? มีค่าใช้จ่ายแอบแฝงหรือไม่?", "faq1a": "Gangnam Follow ไม่เก็บค่าคอมมิชชั่นตัวกลางใดๆ ราคาที่แสดงคือราคาจริงของคลินิก ค่าใช้จ่ายทั้งหมดจะยืนยันเป็นลายลักษณ์อักษรก่อนจองคิว ไม่มีค่าใช้จ่ายแอบแฝง", "faq2q": "พูดภาษาเกาหลีไม่ได้ จะสื่อสารตอนตรวจอย่างไร?", "faq2a": "คอนเซียร์จส่วนตัวจะดูแลตลอดการปรึกษาและอธิบายการผ่าตัด พร้อมล่ามพร้อมกันภาษาจีน อังกฤษ และอื่นๆ เพื่อการสื่อสารที่ราบรื่น", "faq3q": "ช่วยเรื่องวีซ่าและขั้นตอนเข้าประเทศหรือไม่?", "faq3a": "เราช่วยจัดเตรียมจดหมายเชิญวีซ่าทางการแพทย์และเอกสารเข้าประเทศ พร้อมจัดบริการรับที่สนามบินอินชอนได้", "faq4q": "หากมีปัญหาช่วงพักฟื้นหลังกลับประเทศจะติดต่ออย่างไร?", "faq4a": "ติดต่อคอนเซียร์จส่วนตัวได้ตลอดเวลาผ่าน WeChat, WhatsApp, LINE เรามีบริการปรึกษาติดตามผลออนไลน์หลังกลับประเทศ", "faq5q": "รองรับการชำระเงินแบบใดบ้าง?", "faq5a": "รองรับ Alipay, WeChat Pay, บัตร UnionPay, Visa/Mastercard และการโอนเงินระหว่างประเทศ", "quoteModalTitle": "ใบเสนอราคาด่วน", "quoteModalSub": "เลือกทรีตเมนต์ที่สนใจ รับราคาประเมินใน 3 วินาที", "quoteSelectLabel": "เลือกทรีตเมนต์ (เลือกได้หลายรายการ)", "quoteContactLabel": "ข้อมูลติดต่อ", "quoteNameField": "ชื่อ", "quoteNamePh": "กรอกชื่อของคุณ", "quotePhoneField": "โทรศัพท์ / WhatsApp", "quotePhonePh": "กรอกข้อมูลติดต่อ", "quoteTotalLabel": "ช่วงราคาประเมิน", "quoteSendBtn": "ส่งใบเสนอราคา", "quotePrintBtn": "พิมพ์ / PDF", "quoteDisclaimer": "นี่คือราคาประเมิน ค่าใช้จ่ายจริงจะยืนยันหลังปรึกษาที่คลินิก Gangnam Follow ไม่เก็บค่าคอมมิชชั่นตัวกลางใดๆ", "fabWechat": "แชทผ่าน WeChat", "fabLine": "แชทผ่าน LINE", "fabWhatsapp": "แชทผ่าน WhatsApp", "fabChat": "แชท AI", "fab24hr": "24ชม", "footline": "แพลตฟอร์มคัดสรรคลินิกความงามคังนัม โซล · รองรับ 10 ภาษา · คอนเซียร์จส่วนตัว", "tab1": "หน้าแรก", "tab2": "หมวดหมู่", "tab3": "จองคิว", "tab4": "รีวิว", "tab5": "ของฉัน", "from": "เริ่มต้น", "catsShowAll": "+ แสดงหมวดหมู่ทั้งหมด", "catsShowLess": "－ ย่อ", "alertAiConsult": "กำลังเปิดการปรึกษา AI...", "alertConcierge": "กำลังเปิดการจองคอนเซียร์จ...", "alertQuoteRequired": "กรุณากรอกชื่อและข้อมูลติดต่อ"}, "ru": {"my": "Мой", "b1tag": "ОТКРЫТИЕ", "b1title": "Gangnam Follow официально открыт<br>Поделись и получи ваучер на процедуру", "b1sub": "Розыгрыш за репост · Бесплатная процедура · Кофе-ваучер", "b2tag": "AI-КОНСУЛЬТАЦИЯ", "b2title": "AI-консультант онлайн 24/7<br>Расчёт стоимости за 3 секунды", "b2sub": "Расчёт по актуальному курсу · Поддержка 10 языков", "b3tag": "КОНСЬЕРЖ-СЕРВИС", "b3title": "Персональный консьерж<br>Встреча в аэропорту · Перевод · Сопровождение", "b3sub": "От аэропорта Инчхон до восстановления — всё включено", "cat1": "Дерматология", "cat2": "Пластическая хирургия", "cat3": "Операции на глазах", "cat4": "Ринопластика", "cat5": "Контурная пластика", "cat6": "Стволовые клетки", "cat7": "Лифтинг", "cat8": "Медосмотр", "cat9": "Спа и эстетика", "cat10": "Корейская медицина", "cat11": "Стоматология", "cat12": "Пересадка волос", "cat13": "Коррекция тела", "cat14": "Пластика груди", "cat15": "Офтальмология", "cat16": "Контроль веса", "catSecTitle": "Все <em>категории</em>", "q1t": "AI-консультация", "q1s": "Доступно 24/7", "q2t": "Быстрый расчёт", "q2s": "Расчёт за 3 секунды", "q3t": "Консьерж-сервис", "q3s": "Встреча · Перевод · Сопровождение", "svcSecTitle": "Другие <em>услуги</em>", "svcConciergeT": "Персональный консьерж-сервис", "svcConciergeD": "Встреча в аэропорту · Бронирование отеля · Сопровождение с переводчиком", "svcInterpretT": "Профессиональный медицинский перевод", "svcInterpretD": "Консультация · Разъяснение операции · Синхронный перевод при уходе после лечения", "svcTourT": "Медицинский туристический пакет", "svcTourD": "Шопинг в Каннаме · Знакомство с K-культурой · Программа восстановления после процедур", "adtag": "Реклама · Рекомендация месяца", "adtitle": "Комплексная эстетическая клиника Каннам", "viewmore": "Смотреть →", "sec1title": "<em>Отобранные клиники</em> недели", "sec2title": "Популярные <em>процедуры</em>", "sec3title": "Реальные <em>отзывы</em>", "all": "Смотреть все →", "badgeCurated": "Отобрано", "badgeHot": "HOT", "areaGangnam": "Каннам", "areaCheongdam": "Чхонгдам", "fullChinese": "Полное сопровождение переводчика", "tagEye": "Глаза", "tagContour": "Контур", "tagStem": "Стволовые клетки", "tagSkin": "Кожа", "tagHifu": "HIFU", "tagLift": "Лифтинг", "tagCheckup": "Медосмотр", "tagAging": "Антивозрастное", "antiAgingCenter": "Антивозрастной центр", "hospitalWord": "Клиника", "deal1name": "Естественная двойная складка века + кантопластика", "deal1meta": "Сравнение цен 3 отобранных клиник", "deal2name": "HIFU-лифтинг всего лица (7D)", "deal2meta": "Сравнение цен 5 отобранных клиник", "deal3name": "Комплексный антивозрастной пакет со стволовыми клетками", "deal3meta": "Включает медосмотр · Chaum и другие", "deal4name": "Набор контурной пластики: челюсть + скулы", "deal4meta": "Сравнение цен 3 отобранных клиник", "freeQuote": "Бесплатное сравнение цен", "trust1": "Пациентов обслужено", "trust2": "Клиник-партнёров", "trust3": "Удовлетворённость", "trust4": "Языков", "rv1": "\"Меня сопровождали от аэропорта до перевода на консультации. Каждое слово врача было переведено точно — никакого языкового барьера.\"", "rv1name": "Г-жа Ван", "rv1info": "Шанхай · Операция на глазах", "rv2": "\"Сравнила цены трёх клиник — всё прозрачно, без скрытых платежей. Даже после возвращения домой консультант отвечал на вопросы о восстановлении.\"", "rv2name": "Г-жа Чэнь", "rv2info": "Ханчжоу · Контурная пластика", "rv3": "\"Организовали для мамы антивозрастной пакет со стволовыми клетками. Профессионально от осмотра до процедуры, даже забронировали отель и маршрут.\"", "rv3name": "Г-жа Ли", "rv3info": "Пекин · Стволовые клетки", "faqTitle": "Часто задаваемые <em>вопросы</em>", "faq1q": "Как рассчитывается стоимость? Есть ли скрытые платежи?", "faq1a": "Gangnam Follow не берёт никакой посреднической наценки — указанная цена является фактической ценой клиники. Все расходы подтверждаются письменно до бронирования, скрытых платежей нет.", "faq2q": "Я не говорю по-корейски — как будет проходить общение на приёме?", "faq2a": "Персональный консьерж сопровождает вас на всех консультациях и разъяснениях операции, обеспечивая синхронный перевод на китайский, английский и другие языки.", "faq3q": "Поможете с визой и въездными процедурами?", "faq3a": "Мы предоставляем приглашение для медицинской визы и помощь с въездными документами, а также можем организовать встречу в аэропорту Инчхон.", "faq4q": "Что делать, если возникнут проблемы в период восстановления после возвращения домой?", "faq4a": "Вы можете связаться с персональным консьержем в любое время через WeChat, WhatsApp или LINE — мы предлагаем онлайн-консультации после возвращения домой.", "faq5q": "Какие способы оплаты поддерживаются?", "faq5a": "Поддерживаются Alipay, WeChat Pay, карты UnionPay, Visa/Mastercard и международный банковский перевод.", "quoteModalTitle": "Быстрый расчёт", "quoteModalSub": "Выберите процедуры для расчёта стоимости за 3 секунды", "quoteSelectLabel": "Выбор процедур (можно несколько)", "quoteContactLabel": "Контактная информация", "quoteNameField": "Имя", "quoteNamePh": "Введите ваше имя", "quotePhoneField": "Телефон / WhatsApp", "quotePhonePh": "Введите контактные данные", "quoteTotalLabel": "Ориентировочная стоимость", "quoteSendBtn": "Отправить расчёт", "quotePrintBtn": "Печать / PDF", "quoteDisclaimer": "Это ориентировочная цена; окончательная стоимость подтверждается после очной консультации в клинике. Gangnam Follow не берёт никакой посреднической наценки.", "fabWechat": "Написать в WeChat", "fabLine": "Написать в LINE", "fabWhatsapp": "Написать в WhatsApp", "fabChat": "AI-чат", "fab24hr": "24ч", "footline": "Платформа отобранных клиник эстетической медицины Каннам, Сеул · 10 языков · Персональный консьерж", "tab1": "Главная", "tab2": "Категории", "tab3": "Запись", "tab4": "Отзывы", "tab5": "Мой", "from": "от", "catsShowAll": "+ Показать все категории", "catsShowLess": "－ Свернуть", "alertAiConsult": "Открываем AI-консультацию...", "alertConcierge": "Открываем бронирование консьержа...", "alertQuoteRequired": "Пожалуйста, введите имя и контактные данные"}, "mn": {"my": "Миний", "b1tag": "НЭЭЛТИЙН АРГА ХЭМЖЭЭ", "b1title": "Gangnam Follow албан ёсоор нээгдлээ<br>Хуваалцаад үзлэгийн эрх аваарай", "b1sub": "Сошиал хуваалцах сугалаа · Үнэгүй туршилт · Кофе бэлэг", "b2tag": "AI ЗӨВЛӨГӨӨ", "b2title": "AI зөвлөх 24/7 онлайн<br>3 секундэд үнийн санал ав", "b2sub": "Бодит ханшаар тооцоолол · 10 хэл дэмждэг", "b3tag": "КОНСЬЕРЖ ҮЙЛЧИЛГЭЭ", "b3title": "Хувийн консьерж үйлчилгээ<br>Онгоцны буудлаас · Орчуулга · Дагалдан явах", "b3sub": "Инчоны онгоцны буудлаас эмчилгээний дараах халамж хүртэл", "cat1": "Арьс судлал", "cat2": "Гоо сайхны мэс засал", "cat3": "Нүдний мэс засал", "cat4": "Хамрын мэс засал", "cat5": "Нүүрний хэлбэржүүлэлт", "cat6": "Ишний эс", "cat7": "Уян хатан болгох", "cat8": "Эрүүл мэндийн үзлэг", "cat9": "Спа ба гоо сайхан", "cat10": "Солонгос анагаах ухаан", "cat11": "Шүдний эмчилгээ", "cat12": "Үс шилжүүлэн суулгах", "cat13": "Бие засал", "cat14": "Хөхний мэс засал", "cat15": "Нүдний нарийвчилсан үзлэг", "cat16": "Жин удирдлага", "catSecTitle": "Бүх <em>ангилал</em>", "q1t": "AI зөвлөгөө", "q1s": "24/7 боломжтой", "q2t": "Хурдан үнэ", "q2s": "3 секундэд үнэ", "q3t": "Консьерж үйлчилгээ", "q3s": "Тосох · Орчуулга · Дагалдах", "svcSecTitle": "Бусад <em>үйлчилгээ</em>", "svcConciergeT": "Хувийн консьерж үйлчилгээ", "svcConciergeD": "Онгоцны буудлаас тосох · Зочид буудал захиалах · Бүтэн орчуулгын дэмжлэг", "svcInterpretT": "Мэргэжлийн эмнэлгийн орчуулга", "svcInterpretD": "Зөвлөгөө · Мэс заслын тайлбар · Дараах халамжийн зэрэгцээ орчуулга", "svcTourT": "Эмнэлгийн аялалын багц", "svcTourD": "Каннам дэлгүүр хэсэх · K-соёл мэдрэх · Эмчилгээний дараах сэргэлтийн хөтөлбөр", "adtag": "Зар · Энэ сарын онцлох", "adtitle": "Каннамын иж бүрэн гоо сайхны эмнэлэг", "viewmore": "Харах →", "sec1title": "Энэ долоо хоногийн <em>шилдэг эмнэлгүүд</em>", "sec2title": "Алдартай <em>эмчилгээ</em>", "sec3title": "Бодит <em>сэтгэгдэл</em>", "all": "Бүгдийг харах →", "badgeCurated": "Шилдэг", "badgeHot": "HOT", "areaGangnam": "Каннам", "areaCheongdam": "Чонгдам", "fullChinese": "Бүрэн орчуулгын дэмжлэг", "tagEye": "Нүд", "tagContour": "Хэлбэржүүлэлт", "tagStem": "Ишний эс", "tagSkin": "Арьс", "tagHifu": "HIFU", "tagLift": "Уян хатан", "tagCheckup": "Ерөнхий үзлэг", "tagAging": "Нас барахаас сэргийлэх", "antiAgingCenter": "Нас ахих эсрэг төв", "hospitalWord": "Эмнэлэг", "deal1name": "Байгалийн давхар зovhис + Нүдний булан засал", "deal1meta": "Каннамын 3 шилдэг эмнэлгийн үнэ харьцуулах", "deal2name": "HIFU бүтэн нүүрний уян хатан болгох (7D)", "deal2meta": "Каннамын 5 шилдэг эмнэлгийн үнэ харьцуулах", "deal3name": "Ишний эсийн иж бүрэн нас ахих эсрэг багц", "deal3meta": "Ерөнхий үзлэг багтсан · Chaum гэх мэт", "deal4name": "Эрүү + Хацар багасгах хэлбэржүүлэлтийн багц", "deal4meta": "Каннамын 3 шилдэг эмнэлгийн үнэ харьцуулах", "freeQuote": "Үнэгүй үнэ харьцуулалт", "trust1": "Үйлчлүүлсэн өвчтөн", "trust2": "Хамтрагч эмнэлэг", "trust3": "Сэтгэл ханамж", "trust4": "Дэмждэг хэл", "rv1": "\"Онгоцны буудлаас эхлээд эмчийн зөвлөгөөний орчуулга хүртэл бүгдийг дагалдан явсан. Эмчийн үг бүрийг тодорхой орчуулсан тул хэлний бэрхшээл огт мэдрэгдсэнгүй.\"", "rv1name": "Ван хатагтай", "rv1info": "Шанхай · Нүдний мэс засал", "rv2": "\"Гурван эмнэлгийн үнийг харьцуулж үзсэн, нуугдмал төлбөр байхгүй ил тод байлаа. Буцаад ирсний дараа ч сэргэлтийн асуултад хариулж байлаа.\"", "rv2name": "Чен хатагтай", "rv2info": "Ханжоу · Нүүрний хэлбэржүүлэлт", "rv3": "\"Ээжийнхээ ишний эсийн багцыг зохион байгуулж өгсөн. Үзлэгээс эмчилгээ хүртэл мэргэжлийн бөгөөд буудал, хөтөлбөрийг ч захиалж өгсөн.\"", "rv3name": "Ли хатагтай", "rv3info": "Бээжин · Ишний эс", "faqTitle": "Түгээмэл <em>асуултууд</em>", "faq1q": "Үнэ хэрхэн тооцогддог вэ? Нуугдмал төлбөр байдаг уу?", "faq1a": "Gangnam Follow ямар ч зуучлалын хураамж авдаггүй — харуулж буй үнэ бол эмнэлгийн бодит үнэ юм. Бүх төлбөрийг захиалгаас өмнө бичгээр баталгаажуулна, нуугдмал төлбөр байхгүй.", "faq2q": "Би солонгос хэл мэддэггүй, үзлэгийн үед хэрхэн харилцах вэ?", "faq2a": "Хувийн консьерж таныг зөвлөгөө болон мэс заслын тайлбарын турш дагалдан явж, хятад, англи гэх мэт олон хэлээр зэрэгцээ орчуулга хийж өгнө.", "faq3q": "Виз болон нэвтрэх бичиг баримтад тусалдаг уу?", "faq3a": "Бид эмнэлгийн визийн урилгын захидал болон нэвтрэх бичиг баримтад туслах бөгөөд Инчоны онгоцны буудлаас тосох үйлчилгээг зохион байгуулж болно.", "faq4q": "Буцаж ирсний дараа сэргэлтийн үед асуудал гарвал хэрхэн холбоо барих вэ?", "faq4a": "Та WeChat, WhatsApp, LINE-ээр хувийн консьержтэйгээ хэдийд ч холбогдож болно. Бид буцаж ирсний дараах онлайн зөвлөгөө үйлчилгээг үзүүлдэг.", "faq5q": "Ямар төлбөрийн аргуудыг дэмждэг вэ?", "faq5a": "Alipay, WeChat Pay, UnionPay карт, Visa/Mastercard болон олон улсын банкны шилжүүлэг зэргийг дэмждэг.", "quoteModalTitle": "Хурдан үнэ", "quoteModalSub": "Хүссэн эмчилгээгээ сонгоод 3 секундэд тооцоолсон үнийг аваарай", "quoteSelectLabel": "Эмчилгээ сонгох (олон сонгож болно)", "quoteContactLabel": "Холбоо барих мэдээлэл", "quoteNameField": "Нэр", "quoteNamePh": "Нэрээ оруулна уу", "quotePhoneField": "Утас / WhatsApp", "quotePhonePh": "Холбоо барих мэдээллээ оруулна уу", "quoteTotalLabel": "Тооцоолсон үнийн хязгаар", "quoteSendBtn": "Үнийн санал илгээх", "quotePrintBtn": "Хэвлэх / PDF", "quoteDisclaimer": "Энэ бол тооцоолсон үнэ; эцсийн өртгийг эмнэлэгт биечлэн үзлэг хийсний дараа баталгаажуулна. Gangnam Follow ямар ч зуучлалын хураамж авдаггүй.", "fabWechat": "WeChat-ээр чатлах", "fabLine": "LINE-ээр чатлах", "fabWhatsapp": "WhatsApp-аар чатлах", "fabChat": "AI чат", "fab24hr": "24ц", "footline": "Сөүл Каннамын гоо сайхны эмнэлгийн шилдэг платформ · 10 хэл · Хувийн консьерж", "tab1": "Нүүр", "tab2": "Ангилал", "tab3": "Захиалга", "tab4": "Сэтгэгдэл", "tab5": "Миний", "from": "-с эхлэн", "catsShowAll": "+ Бүх ангиллыг харах", "catsShowLess": "－ Хураах", "alertAiConsult": "AI зөвлөгөөг нээж байна...", "alertConcierge": "Консьержийн захиалгыг нээж байна...", "alertQuoteRequired": "Нэр болон холбоо барих мэдээллээ оруулна уу"}, "id": {"my": "Saya", "b1tag": "ACARA PEMBUKAAN", "b1title": "Gangnam Follow resmi diluncurkan<br>Bagikan &amp; dapatkan voucher perawatan", "b1sub": "Undian berbagi medsos · Perawatan gratis · Voucher kopi", "b2tag": "KONSULTASI AI", "b2title": "Konsultan AI online 24/7<br>Dapatkan penawaran dalam 3 detik", "b2sub": "Penawaran kurs real-time · Mendukung 10 bahasa", "b3tag": "LAYANAN CONCIERGE", "b3title": "Layanan concierge pribadi<br>Jemput bandara · Penerjemah · Pendampingan", "b3sub": "Dari Bandara Incheon hingga perawatan pasca-tindakan", "cat1": "Dermatologi", "cat2": "Bedah Plastik", "cat3": "Operasi Mata", "cat4": "Rhinoplasti", "cat5": "Kontur Wajah", "cat6": "Sel Punca", "cat7": "Pengencangan", "cat8": "Cek Kesehatan", "cat9": "Spa & Estetika", "cat10": "Pengobatan Korea", "cat11": "Gigi", "cat12": "Transplantasi Rambut", "cat13": "Pembentukan Tubuh", "cat14": "Bedah Payudara", "cat15": "Pemeriksaan Mata Lengkap", "cat16": "Manajemen Berat Badan", "catSecTitle": "Semua <em>Kategori</em>", "q1t": "Konsultasi AI", "q1s": "Tersedia 24/7", "q2t": "Penawaran Cepat", "q2s": "Penawaran dalam 3 detik", "q3t": "Concierge Pribadi", "q3s": "Jemput · Penerjemah · Pendampingan", "svcSecTitle": "Layanan <em>Lainnya</em>", "svcConciergeT": "Layanan Concierge Pribadi", "svcConciergeD": "Jemput bandara · Pemesanan hotel · Pendampingan penerjemah penuh", "svcInterpretT": "Penerjemah Medis Profesional", "svcInterpretD": "Konsultasi · Penjelasan operasi · Penerjemahan simultan perawatan pasca-tindakan", "svcTourT": "Paket Wisata Medis", "svcTourD": "Belanja Gangnam · Pengalaman budaya Korea · Itinerary pemulihan pasca-perawatan", "adtag": "Iklan · Unggulan bulan ini", "adtitle": "Klinik Estetika Komprehensif Gangnam", "viewmore": "Lihat →", "sec1title": "<em>Klinik Pilihan</em> Minggu Ini", "sec2title": "<em>Prosedur</em> Populer", "sec3title": "Ulasan <em>Asli</em>", "all": "Lihat semua →", "badgeCurated": "Pilihan", "badgeHot": "HOT", "areaGangnam": "Gangnam", "areaCheongdam": "Cheongdam", "fullChinese": "Pendampingan penerjemah penuh", "tagEye": "Mata", "tagContour": "Kontur", "tagStem": "Sel Punca", "tagSkin": "Kulit", "tagHifu": "HIFU", "tagLift": "Pengencangan", "tagCheckup": "Cek Kesehatan", "tagAging": "Anti-penuaan", "antiAgingCenter": "Pusat Anti-penuaan", "hospitalWord": "Klinik", "deal1name": "Kelopak Mata Ganda Alami + Kantoplasti", "deal1meta": "Bandingkan penawaran dari 3 klinik pilihan Gangnam", "deal2name": "HIFU Pengencangan Wajah Penuh (7D)", "deal2meta": "Bandingkan penawaran dari 5 klinik pilihan Gangnam", "deal3name": "Paket Anti-penuaan Sel Punca Komprehensif", "deal3meta": "Termasuk cek kesehatan · Chaum dan lainnya", "deal4name": "Set Kontur Rahang + Pengurangan Tulang Pipi", "deal4meta": "Bandingkan penawaran dari 3 klinik pilihan Gangnam", "freeQuote": "Perbandingan penawaran gratis", "trust1": "Pasien terlayani", "trust2": "Klinik mitra", "trust3": "Kepuasan", "trust4": "Bahasa didukung", "rv1": "\"Mereka mendampingi saya dari penjemputan bandara hingga penerjemahan konsultasi. Setiap kata dokter diterjemahkan dengan jelas, tanpa kecemasan bahasa sama sekali.\"", "rv1name": "Ny. Wang", "rv1info": "Shanghai · Operasi Mata", "rv2": "\"Saya membandingkan penawaran dari tiga klinik — sepenuhnya transparan, tanpa biaya tersembunyi. Bahkan setelah pulang, konsultan menjawab pertanyaan pemulihan saya kapan saja.\"", "rv2name": "Ny. Chen", "rv2info": "Hangzhou · Kontur Wajah", "rv3": "\"Mereka mengatur paket anti-penuaan sel punca untuk ibu saya. Profesional dari pemeriksaan hingga perawatan, bahkan memesan hotel dan itinerary kami.\"", "rv3name": "Ny. Li", "rv3info": "Beijing · Sel Punca", "faqTitle": "Pertanyaan <em>Umum</em>", "faq1q": "Bagaimana biaya dihitung? Adakah biaya tersembunyi?", "faq1a": "Gangnam Follow tidak mengenakan margin perantara apa pun — penawaran yang Anda lihat adalah harga aktual klinik. Semua biaya dikonfirmasi secara tertulis sebelum pemesanan, tanpa biaya tersembunyi.", "faq2q": "Saya tidak bisa berbahasa Korea, bagaimana komunikasi saat konsultasi?", "faq2a": "Concierge pribadi Anda akan mendampingi selama konsultasi dan penjelasan operasi, menyediakan penerjemahan simultan dalam bahasa Mandarin, Inggris, dan lainnya.", "faq3q": "Apakah membantu visa dan prosedur masuk?", "faq3a": "Kami menyediakan surat undangan visa medis dan bantuan dokumen masuk, serta dapat mengatur penjemputan di Bandara Incheon.", "faq4q": "Bagaimana jika ada masalah selama pemulihan setelah pulang?", "faq4a": "Anda dapat menghubungi concierge pribadi kapan saja melalui WeChat, WhatsApp, atau LINE — kami menawarkan konsultasi lanjutan online setelah Anda pulang.", "faq5q": "Metode pembayaran apa yang didukung?", "faq5a": "Kami mendukung Alipay, WeChat Pay, UnionPay, Visa/Mastercard, dan transfer bank internasional.", "quoteModalTitle": "Penawaran Cepat", "quoteModalSub": "Pilih prosedur untuk mendapatkan estimasi dalam 3 detik", "quoteSelectLabel": "Pilih Prosedur (bisa lebih dari satu)", "quoteContactLabel": "Informasi Kontak", "quoteNameField": "Nama", "quoteNamePh": "Masukkan nama Anda", "quotePhoneField": "Telepon / WhatsApp", "quotePhonePh": "Masukkan kontak Anda", "quoteTotalLabel": "Kisaran Estimasi Harga", "quoteSendBtn": "Kirim Penawaran", "quotePrintBtn": "Cetak / PDF", "quoteDisclaimer": "Ini adalah harga estimasi; biaya akhir dikonfirmasi setelah konsultasi langsung di klinik. Gangnam Follow tidak mengenakan margin perantara apa pun.", "fabWechat": "Chat di WeChat", "fabLine": "Chat di LINE", "fabWhatsapp": "Chat di WhatsApp", "fabChat": "Chat AI", "fab24hr": "24jam", "footline": "Platform Kurasi Estetika Medis Gangnam Seoul · 10 Bahasa · Concierge Pribadi", "tab1": "Beranda", "tab2": "Kategori", "tab3": "Pemesanan", "tab4": "Ulasan", "tab5": "Saya", "from": "mulai", "catsShowAll": "+ Tampilkan semua kategori", "catsShowLess": "－ Tutup", "alertAiConsult": "Membuka konsultasi AI...", "alertConcierge": "Membuka pemesanan concierge...", "alertQuoteRequired": "Silakan masukkan nama dan kontak Anda"}, "ar": {"my": "حسابي", "b1tag": "حفل الافتتاح", "b1title": "تم إطلاق Gangnam Follow رسمياً<br>شارك واحصل على قسيمة تجربة مجانية", "b1sub": "سحب المشاركة عبر السوشيال ميديا · تجربة علاج مجانية · قسيمة قهوة", "b2tag": "استشارة الذكاء الاصطناعي", "b2title": "مستشار الذكاء الاصطناعي متاح ٢٤/٧<br>احصل على عرض سعر خلال ٣ ثوانٍ", "b2sub": "أسعار بسعر الصرف الفوري · دعم ١٠ لغات", "b3tag": "خدمة الكونسيرج", "b3title": "خدمة كونسيرج خاصة<br>استقبال من المطار · ترجمة · مرافقة", "b3sub": "من مطار إنتشون حتى الرعاية اللاحقة، رحلة متكاملة", "cat1": "الأمراض الجلدية", "cat2": "الجراحة التجميلية", "cat3": "جراحة العيون", "cat4": "تجميل الأنف", "cat5": "نحت الوجه", "cat6": "الخلايا الجذعية", "cat7": "الشد", "cat8": "الفحص الصحي", "cat9": "سبا وجماليات", "cat10": "الطب الكوري التقليدي", "cat11": "طب الأسنان", "cat12": "زراعة الشعر", "cat13": "نحت الجسم", "cat14": "جراحة الثدي", "cat15": "فحص العيون الدقيق", "cat16": "إدارة الوزن", "catSecTitle": "جميع <em>الفئات</em>", "q1t": "استشارة الذكاء الاصطناعي", "q1s": "متاح ٢٤/٧", "q2t": "عرض سعر سريع", "q2s": "عرض سعر خلال ٣ ثوانٍ", "q3t": "كونسيرج خاص", "q3s": "استقبال · ترجمة · مرافقة", "svcSecTitle": "خدمات <em>أخرى</em>", "svcConciergeT": "خدمة الكونسيرج الخاصة", "svcConciergeD": "استقبال من المطار · حجز الفنادق · مرافقة ترجمة كاملة", "svcInterpretT": "ترجمة طبية احترافية", "svcInterpretD": "الاستشارة · شرح العملية · ترجمة فورية لرعاية ما بعد العلاج", "svcTourT": "باقة السياحة العلاجية", "svcTourD": "تسوق في كانغنام · تجربة الثقافة الكورية · برنامج تعافي بعد العلاج", "adtag": "إعلان · الأبرز هذا الشهر", "adtitle": "عيادة كانغنام الشاملة للتجميل", "viewmore": "عرض ←", "sec1title": "<em>العيادات المختارة</em> هذا الأسبوع", "sec2title": "<em>الإجراءات</em> الأكثر طلباً", "sec3title": "تقييمات <em>حقيقية</em>", "all": "عرض الكل ←", "badgeCurated": "مختارة", "badgeHot": "رائج", "areaGangnam": "كانغنام", "areaCheongdam": "تشونغدام", "fullChinese": "دعم ترجمة كامل", "tagEye": "العيون", "tagContour": "النحت", "tagStem": "الخلايا الجذعية", "tagSkin": "البشرة", "tagHifu": "الموجات فوق الصوتية", "tagLift": "الشد", "tagCheckup": "فحص شامل", "tagAging": "مكافحة الشيخوخة", "antiAgingCenter": "مركز مكافحة الشيخوخة", "hospitalWord": "عيادة", "deal1name": "جفن مزدوج طبيعي + تجميل زاوية العين", "deal1meta": "قارن الأسعار من ٣ عيادات مختارة في كانغنام", "deal2name": "شد الوجه الكامل بالموجات فوق الصوتية (٧D)", "deal2meta": "قارن الأسعار من ٥ عيادات مختارة في كانغنام", "deal3name": "باقة شاملة لمكافحة الشيخوخة بالخلايا الجذعية", "deal3meta": "تشمل فحصاً شاملاً · Chaum والمزيد", "deal4name": "طقم نحت الفك وتصغير عظام الخد", "deal4meta": "قارن الأسعار من ٣ عيادات مختارة في كانغنام", "freeQuote": "مقارنة أسعار مجانية", "trust1": "المرضى الذين خدمناهم", "trust2": "العيادات الشريكة", "trust3": "نسبة الرضا", "trust4": "اللغات المدعومة", "rv1": "\"رافقوني من استقبال المطار وحتى الترجمة أثناء الاستشارة. تمت ترجمة كل كلمة قالها الطبيب بوضوح تام دون أي قلق بشأن اللغة.\"", "rv1name": "السيدة وانغ", "rv1info": "شنغهاي · جراحة العيون", "rv2": "\"قارنت الأسعار بين ثلاث عيادات، وكانت شفافة تماماً دون رسوم خفية. حتى بعد عودتي، أجاب المستشار على أسئلتي حول التعافي في أي وقت.\"", "rv2name": "السيدة تشين", "rv2info": "هانغتشو · نحت الوجه", "rv3": "\"رتبوا لأمي باقة مكافحة الشيخوخة بالخلايا الجذعية. احترافية من الفحص وحتى العلاج، وحتى حجزوا لنا الفندق وبرنامج الرحلة.\"", "rv3name": "السيدة لي", "rv3info": "بكين · الخلايا الجذعية", "faqTitle": "الأسئلة <em>الشائعة</em>", "faq1q": "كيف تُحسب التكلفة؟ هل توجد رسوم خفية؟", "faq1a": "لا تفرض Gangnam Follow أي هامش وساطة — السعر المعروض هو السعر الفعلي للعيادة. يتم تأكيد جميع التكاليف كتابياً قبل الحجز، دون رسوم خفية.", "faq2q": "لا أتحدث الكورية، كيف سيكون التواصل أثناء الاستشارة؟", "faq2a": "سيرافقك الكونسيرج الخاص بك طوال الاستشارة وشرح العملية، مع توفير ترجمة فورية بالصينية والإنجليزية ولغات أخرى.", "faq3q": "هل تساعدون في التأشيرة وإجراءات الدخول؟", "faq3a": "نوفر خطاب دعوة للتأشيرة الطبية والمساعدة في وثائق الدخول، ويمكننا ترتيب الاستقبال من مطار إنتشون.", "faq4q": "ماذا لو واجهت مشكلة أثناء فترة التعافي بعد عودتي؟", "faq4a": "يمكنك التواصل مع الكونسيرج الخاص بك في أي وقت عبر WeChat أو WhatsApp أو LINE — نقدم استشارات متابعة عبر الإنترنت بعد عودتك.", "faq5q": "ما هي طرق الدفع المدعومة؟", "faq5a": "ندعم Alipay وWeChat Pay وبطاقات UnionPay وVisa/Mastercard والتحويل المصرفي الدولي.", "quoteModalTitle": "عرض سعر سريع", "quoteModalSub": "اختر الإجراءات للحصول على تقدير خلال ٣ ثوانٍ", "quoteSelectLabel": "اختر الإجراءات (يمكن اختيار أكثر من واحد)", "quoteContactLabel": "معلومات الاتصال", "quoteNameField": "الاسم", "quoteNamePh": "أدخل اسمك", "quotePhoneField": "الهاتف / واتساب", "quotePhonePh": "أدخل معلومات الاتصال", "quoteTotalLabel": "نطاق السعر التقديري", "quoteSendBtn": "إرسال عرض السعر", "quotePrintBtn": "طباعة / PDF", "quoteDisclaimer": "هذا سعر تقديري؛ يتم تأكيد التكلفة النهائية بعد استشارة حضورية في العيادة. لا تفرض Gangnam Follow أي هامش وساطة.", "fabWechat": "محادثة عبر WeChat", "fabLine": "محادثة عبر LINE", "fabWhatsapp": "محادثة عبر واتساب", "fabChat": "محادثة الذكاء الاصطناعي", "fab24hr": "٢٤ساعة", "footline": "منصة كانغنام سيول المختارة للتجميل الطبي · ١٠ لغات · كونسيرج خاص", "tab1": "الرئيسية", "tab2": "الفئات", "tab3": "الحجز", "tab4": "التقييمات", "tab5": "حسابي", "from": "ابتداءً من", "catsShowAll": "+ عرض جميع الفئات", "catsShowLess": "－ عرض أقل", "alertAiConsult": "جارٍ فتح استشارة الذكاء الاصطناعي...", "alertConcierge": "جارٍ فتح حجز الكونسيرج...", "alertQuoteRequired": "يرجى إدخال الاسم ومعلومات الاتصال"}};
+
+const FX = { CNY:192, KRW:1, USD:1380, VND: 1/18.2, THB:38, JPY:9.3 };
+const CUR_SYMBOL = { CNY:'¥', KRW:'₩', USD:'$', VND:'₫', THB:'฿', JPY:'¥' };
+
+let currentLang = 'zh';
+let showAllCats = false;
+
+function formatPrice(krw, currency){
+  let amount = (currency === 'VND') ? krw * FX.VND : krw / FX[currency];
+  const display = Math.round(amount).toLocaleString('en-US');
+  return CUR_SYMBOL[currency] + display;
+}
+
+// ============ 카테고리 렌더 ============
+function renderCats(){
+  const grid = document.getElementById('catsGrid');
+  const dict = I18N[currentLang];
+  const visibleCount = showAllCats ? CATS.length : 8;
+  grid.innerHTML = CATS.slice(0, visibleCount).map(c => `
+    <a class="cat" href="#">
+      <div class="cat-ic" style="background:${c.bg}">
+        <svg viewBox="0 0 24 24">${c.svg}</svg>
+      </div>
+      <div class="cat-label">${dict[c.key] || ''}</div>
+    </a>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 카테고리 더보기 토글 삽입
+  const catsGrid = document.getElementById('catsGrid');
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'cats-toggle';
+  toggleBtn.id = 'catsToggleBtn';
+  catsGrid.insertAdjacentElement('afterend', toggleBtn);
+  toggleBtn.addEventListener('click', () => {
+    showAllCats = !showAllCats;
+    renderCats();
+    updateToggleLabel();
+  });
+});
+
+function updateToggleLabel(){
+  const btn = document.getElementById('catsToggleBtn');
+  if (!btn) return;
+  const dict = I18N[currentLang];
+  btn.textContent = showAllCats ? dict.catsShowLess : dict.catsShowAll;
+}
+
+// ============ FAQ 아코디언 ============
+document.addEventListener('click', (e) => {
+  const q = e.target.closest('.faq-q');
+  if (q) {
+    const item = q.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+});
+
+// ============ 언어 적용 ============
+function applyLang(code){
+  currentLang = code;
+  const lang = LANGS.find(l => l.code === code);
+  const dict = I18N[code];
+  document.documentElement.lang = lang.htmlLang;
+  document.documentElement.dir = lang.dir;
+  document.body.classList.toggle('rtl', lang.dir === 'rtl');
+  document.getElementById('langCurrent').textContent = lang.native;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+  });
+
+  document.querySelectorAll('.deal-price').forEach(el => {
+    const krw = parseFloat(el.getAttribute('data-krw'));
+    const amountEl = el.querySelector('.dp-amount');
+    if (amountEl) amountEl.textContent = formatPrice(krw, lang.currency);
+  });
+
+  document.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.code === code);
+  });
+
+  renderCats();
+  updateToggleLabel();
+  renderQuoteChecklist();
+}
+
+// ============ 언어 메뉴 ============
+const langMenu = document.getElementById('langMenu');
+LANGS.forEach(l => {
+  const btn = document.createElement('button');
+  btn.className = 'lang-opt';
+  btn.dataset.code = l.code;
+  btn.innerHTML = `<span>${l.name}</span><span class="lang-opt-native">${l.native}</span>`;
+  btn.addEventListener('click', () => {
+    applyLang(l.code);
+    langMenu.classList.remove('open');
+    document.getElementById('langBtn').classList.remove('open');
+  });
+  langMenu.appendChild(btn);
+});
+
+const langBtn = document.getElementById('langBtn');
+langBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  langMenu.classList.toggle('open');
+  langBtn.classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  langMenu.classList.remove('open');
+  langBtn.classList.remove('open');
+});
+
+// ============ 견적 계산기 모달 ============
+const QUOTE_ITEMS = [
+  { key:'cat3', krwMin: 1000000, krwMax: 2500000 },
+  { key:'cat4', krwMin: 2500000, krwMax: 6000000 },
+  { key:'cat5', krwMin: 6000000, krwMax: 15000000 },
+  { key:'cat6', krwMin: 3000000, krwMax: 8000000 },
+  { key:'cat7', krwMin: 800000, krwMax: 3000000 },
+  { key:'cat14', krwMin: 4000000, krwMax: 9000000 },
+  { key:'cat1', krwMin: 300000, krwMax: 1500000 },
+  { key:'cat8', krwMin: 500000, krwMax: 2000000 },
+];
+let selectedItems = new Set();
+
+function renderQuoteChecklist(){
+  const grid = document.getElementById('qmCheckGrid');
+  if (!grid) return;
+  const dict = I18N[currentLang];
+  grid.innerHTML = QUOTE_ITEMS.map((it, idx) => `
+    <label class="qm-check ${selectedItems.has(idx) ? 'on' : ''}" data-idx="${idx}">
+      <input type="checkbox" ${selectedItems.has(idx) ? 'checked' : ''}>
+      <span>${dict[it.key]}</span>
+    </label>
+  `).join('');
+  grid.querySelectorAll('.qm-check').forEach(label => {
+    label.addEventListener('click', (e) => {
+      e.preventDefault();
+      const idx = parseInt(label.dataset.idx);
+      if (selectedItems.has(idx)) selectedItems.delete(idx); else selectedItems.add(idx);
+      renderQuoteChecklist();
+      updateQuoteTotal();
+    });
+  });
+}
+
+function updateQuoteTotal(){
+  const lang = LANGS.find(l => l.code === currentLang);
+  let min = 0, max = 0;
+  selectedItems.forEach(idx => { min += QUOTE_ITEMS[idx].krwMin; max += QUOTE_ITEMS[idx].krwMax; });
+  const totalEl = document.getElementById('qmTotalAmt');
+  if (min === 0) { totalEl.textContent = formatPrice(0, lang.currency); return; }
+  totalEl.textContent = formatPrice(min, lang.currency) + ' - ' + formatPrice(max, lang.currency);
+}
+
+function openQuoteModal(){
+  document.getElementById('quoteOverlay').classList.add('open');
+  renderQuoteChecklist();
+  updateQuoteTotal();
+}
+function closeQuoteModal(){
+  document.getElementById('quoteOverlay').classList.remove('open');
+}
+
+document.getElementById('btnQuickQuote').addEventListener('click', openQuoteModal);
+document.getElementById('quoteClose').addEventListener('click', closeQuoteModal);
+document.getElementById('quoteOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'quoteOverlay') closeQuoteModal();
+});
+
+document.getElementById('qmSend').addEventListener('click', () => {
+  const name = document.getElementById('qmName').value.trim();
+  const phone = document.getElementById('qmPhone').value.trim();
+  const dict = I18N[currentLang];
+  if (!name || !phone) {
+    alert(dict.alertQuoteRequired);
+    return;
+  }
+  const items = [...selectedItems].map(idx => dict[QUOTE_ITEMS[idx].key]).join(', ');
+  const total = document.getElementById('qmTotalAmt').textContent;
+  const msg = encodeURIComponent(`${dict.quoteModalTitle}\n${dict.quoteSelectLabel}: ${items}\n${dict.quoteTotalLabel}: ${total}\n${dict.quoteNameField}: ${name}\n${dict.quotePhoneField}: ${phone}`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+});
+
+document.getElementById('qmPrint').addEventListener('click', () => {
+  window.print();
+});
+
+document.getElementById('btnAiConsult').addEventListener('click', () => {
+  alert(I18N[currentLang].alertAiConsult);
+});
+document.getElementById('btnConcierge').addEventListener('click', () => {
+  alert(I18N[currentLang].alertConcierge);
+});
+
+// ============ 24hr / FAB ============
+document.getElementById('btn24hr').addEventListener('click', () => {
+  document.getElementById('btnAiConsult').click();
+});
+
+// 초기 언어 적용
+applyLang('zh');
+</script>
+</body>
+</html>
