@@ -46,11 +46,15 @@ a{text-decoration:none;color:inherit;}
 .sec-title{font-size:30px;font-weight:800;letter-spacing:-0.5px;}
 .sec-sub{font-size:14px;color:var(--gray);margin-top:8px;}
 /* CATS */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
-.cat-card{background:var(--lgray);border-radius:var(--r);padding:18px 12px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all 0.2s;}
-.cat-card:hover,.cat-card.active{background:linear-gradient(135deg,#EAF6F0,#FDF6E4);border-color:var(--gn);}
-.cat-card .ci{font-size:28px;margin-bottom:6px;}
-.cat-card .cn{font-size:12px;font-weight:600;}
+.cat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px 8px;}
+.cat-card{background:none;border-radius:0;padding:0;text-align:center;cursor:pointer;border:none;display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .15s;}
+.cat-card:active{transform:scale(.94);}
+.cat-card:hover,.cat-card.active{background:none;border-color:transparent;}
+.cat-card .ci{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#EAF6F0,#F0F4F1);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto;box-shadow:0 2px 10px rgba(15,77,51,0.07);transition:all .2s;}
+.cat-card:hover .ci{box-shadow:0 6px 18px rgba(15,77,51,0.16);}
+.cat-card.active .ci{background:linear-gradient(135deg,var(--gn),var(--gn2));box-shadow:0 8px 20px rgba(15,77,51,0.3);transform:scale(1.06);}
+.cat-card .cn{font-size:11.5px;font-weight:600;color:var(--dark);}
+.cat-card.active .cn{color:var(--gn2);font-weight:800;}
 /* HOSPITALS */
 .hosp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
 .hosp-card{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.2s;border:2px solid transparent;}
@@ -184,11 +188,11 @@ a{text-decoration:none;color:inherit;}
   .hero-stats{gap:16px;}
   /* 병원 카드 2열 바둑판 (1/4 사이즈) */
   .hosp-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;}
-  /* 카테고리 카드 3열 */
-  .cat-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;}
-  .cat-card{padding:14px 8px!important;}
-  .cat-card .ci{font-size:24px!important;margin-bottom:4px!important;}
-  .cat-card .cn{font-size:11px!important;}
+  /* 카테고리 카드 4열 (원형 아이콘 그리드) */
+  .cat-grid{grid-template-columns:repeat(4,1fr)!important;gap:16px 6px!important;}
+  .cat-card{padding:0!important;}
+  .cat-card .ci{width:52px!important;height:52px!important;font-size:23px!important;margin-bottom:0!important;}
+  .cat-card .cn{font-size:10.5px!important;}
   /* 리뷰 카드 1열 */
   .testi-grid{grid-template-columns:1fr!important;}
   /* 섹션 패딩 */
@@ -226,9 +230,41 @@ html[dir="rtl"] .modal h2{flex-direction:row-reverse;}
 html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align:right;}
 html[dir="rtl"] .testi-text,html[dir="rtl"] .step-desc,html[dir="rtl"] .hosp-name,html[dir="rtl"] .hosp-dept{text-align:right;}
 html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
+/* ── 하단 고정 탭바 (모바일 전용, MTK 스타일) ── */
+#fk-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);z-index:850;padding:6px 0 max(6px, env(safe-area-inset-bottom));}
+#fk-tabbar-inner{display:grid;grid-template-columns:repeat(5,1fr);max-width:520px;margin:0 auto;}
+.fk-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;background:none;border:none;font-family:inherit;color:var(--gray);font-size:9.5px;font-weight:500;cursor:pointer;}
+.fk-tab .fk-tab-ic{font-size:19px;line-height:1;}
+.fk-tab.on{color:var(--gn2);}
+@media(max-width:768px){
+  #fk-tabbar{display:block;}
+  body{padding-bottom:58px;}
+  #fk-contact-fab{bottom:144px;}
+  #fk-ai-trigger-fab{bottom:78px;}
+}
 </style>
 </head>
 <body>
+
+<div id="fk-tabbar">
+  <div id="fk-tabbar-inner">
+    <button class="fk-tab on" onclick="showMain();fkhRestoreHospSection();fkSetTab(this)">
+      <span class="fk-tab-ic">🏠</span><span data-i18n="nav_home">首页</span>
+    </button>
+    <button class="fk-tab" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100);fkSetTab(this)">
+      <span class="fk-tab-ic">🏥</span><span data-i18n="nav_hosps">병원</span>
+    </button>
+    <button class="fk-tab" onclick="showMain();fkhShowExtraSection();fkSetTab(this)">
+      <span class="fk-tab-ic">🛎️</span><span data-i18n="nav_concierge">컨시어지</span>
+    </button>
+    <button class="fk-tab" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100);fkSetTab(this)">
+      <span class="fk-tab-ic">⭐</span><span data-i18n="nav_review">후기</span>
+    </button>
+    <button class="fk-tab" onclick="openAiChat();fkSetTab(this)">
+      <span class="fk-tab-ic">🤖</span><span data-i18n="nav_consult">무료상담</span>
+    </button>
+  </div>
+</div>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -1780,6 +1816,10 @@ function showDetail(kr){
   document.getElementById('detail-view').style.display='';
   window.scrollTo(0,0);
   renderDetail(kr);
+}
+function fkSetTab(el){
+  document.querySelectorAll('.fk-tab').forEach(t=>t.classList.remove('on'));
+  if(el) el.classList.add('on');
 }
 function showMain(){
   currentHosp=null;
