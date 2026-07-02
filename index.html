@@ -23,6 +23,37 @@ a{text-decoration:none;color:inherit;}
 .btn-consult{padding:8px 18px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:var(--white);border-radius:24px;font-size:13px;font-weight:600;border:none;cursor:pointer;}
 /* HERO */
 .hero{background:linear-gradient(135deg,#F0FFF8 0%,#EAF6F0 50%,#FDF6E4 100%);padding:72px 24px 80px;overflow:hidden;position:relative;}
+/* ── 컴팩트 히어로 (배지+슬림검색) ── */
+.hero-compact{background:linear-gradient(135deg,#F0FFF8 0%,#EAF6F0 55%,#FDF6E4 100%);padding:22px 24px 18px;}
+.hero-compact-inner{max-width:1200px;margin:0 auto;}
+.hero-search-slim{background:var(--white);border:1.5px solid var(--border);border-radius:100px;padding:5px 5px 5px 18px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(15,77,51,0.06);max-width:520px;transition:border-color .2s;}
+.hero-search-slim:focus-within{border-color:var(--gn);}
+.hero-search-slim input{flex:1;border:none;outline:none;font-size:13.5px;color:var(--dark);background:transparent;}
+.hero-search-slim button{padding:9px 18px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:100px;border:none;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+/* ── 배너 캐러셀 ── */
+.banner-sec{padding:6px 24px 20px;}
+.banner-scroll{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;max-width:1200px;margin:0 auto;padding-bottom:2px;}
+.banner-scroll::-webkit-scrollbar{display:none;}
+.banner-slide{flex:0 0 92%;max-width:640px;scroll-snap-align:center;border-radius:20px;overflow:hidden;position:relative;min-height:160px;padding:26px 28px;display:flex;flex-direction:column;justify-content:center;color:#fff;cursor:pointer;transition:transform .2s;}
+.banner-slide:hover{transform:translateY(-3px);}
+.banner-slide .b-tag{font-size:11px;letter-spacing:1.5px;font-weight:700;opacity:.85;margin-bottom:9px;text-transform:uppercase;}
+.banner-slide .b-title{font-size:21px;font-weight:900;line-height:1.35;margin-bottom:7px;}
+.banner-slide .b-sub{font-size:12.5px;opacity:.85;line-height:1.6;}
+.banner-slide .b-arrow{position:absolute;right:20px;bottom:18px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;}
+.banner-slide .b-arrow svg{width:14px;height:14px;}
+.banner1{background:linear-gradient(125deg,#0F4D33 0%,#1A6B4A 55%,#2D9A6E 100%);}
+.banner2{background:linear-gradient(125deg,#8A6A1A 0%,#C9A84C 60%,#D9C08A 100%);}
+.banner3{background:linear-gradient(125deg,#16202e 0%,#2E4258 55%,#4A6785 100%);}
+.banner-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
+.banner-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s;}
+.banner-dot.on{width:18px;border-radius:4px;background:var(--gn);}
+@media(max-width:768px){
+  .hero-compact{padding:16px 16px 12px;}
+  .banner-sec{padding:4px 16px 16px;}
+  .banner-slide{min-height:140px;padding:20px 22px;}
+  .banner-slide .b-title{font-size:18px;}
+}
+
 .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.22),transparent 70%);pointer-events:none;}
 .hero-inner{max-width:1200px;margin:0 auto;}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #EADFC0;border-radius:100px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:22px;box-shadow:0 2px 10px rgba(201,168,76,0.1);}
@@ -312,15 +343,44 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 
 <!-- 메인 -->
 <div id="main-view">
-<section class="hero">
-  <div class="hero-inner">
+<section class="hero-compact">
+  <div class="hero-compact-inner">
     <div class="hero-badge">✨ <span data-i18n="hero_badge">韩国NO.1医美预约平台</span></div>
-    <h1 class="hero-title" data-i18n="hero_title">打造<em>专属你的</em><br>K-Beauty之旅</h1>
-    <p class="hero-sub" data-i18n="hero_sub">精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同</p>
-    <div class="search-bar">
+    <div class="hero-search-slim">
       <input type="text" id="s-input" data-i18n-ph="search_ph" placeholder="搜索医院、项目..." oninput="filterHosps()">
       <button onclick="filterHosps()" data-i18n="search_btn">搜索</button>
     </div>
+  </div>
+</section>
+
+<section class="banner-sec">
+  <div class="banner-scroll" id="banner-scroll">
+    <div class="banner-slide banner1" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()">
+      <div class="b-tag" data-i18n="hero_badge">韩国NO.1医美预约平台</div>
+      <div class="b-title" data-i18n="hero_title">打造<em>专属你的</em><br>K-Beauty之旅</div>
+      <div class="b-sub" data-i18n="hero_sub">精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同</div>
+      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>
+    <div class="banner-slide banner2" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'})">
+      <div class="b-tag" data-i18n="hosp_recommend_label">推荐医院</div>
+      <div class="b-title" data-i18n="hosp_title">精选合作医院</div>
+      <div class="b-sub" data-i18n="hosp_sub">严格筛选，只为您推荐最优质的江南医院</div>
+      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>
+    <div class="banner-slide banner3" onclick="openAiChat()">
+      <div class="b-tag" data-i18n="nav_concierge">礼宾服务</div>
+      <div class="b-title" data-i18n="svc_concierge">VVIP 礼宾服务</div>
+      <div class="b-sub" data-i18n="svc_concierge_desc">专属顾问全程陪同，从预约到回国</div>
+      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>
+  </div>
+  <div class="banner-dots" id="banner-dots">
+    <div class="banner-dot on"></div><div class="banner-dot"></div><div class="banner-dot"></div>
+  </div>
+</section>
+
+<section class="hero">
+  <div class="hero-inner">
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
       <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn" data-i18n="hero_cta_quote">💰 简易报价</button>
@@ -4190,6 +4250,33 @@ document.addEventListener('DOMContentLoaded', function(){
   if(catGridEl){
     catGridEl.addEventListener('scroll', updateCatArrows, { passive:true });
     window.addEventListener('resize', updateCatArrows);
+  }
+  // ── 배너 캐러셀: 자동 슬라이드 + dot 동기화 + 스와이프 시 dot 갱신 ──
+  const bnScroll = document.getElementById('banner-scroll');
+  const bnDots = document.querySelectorAll('#banner-dots .banner-dot');
+  if(bnScroll && bnDots.length){
+    let bnIndex = 0;
+    const bnCount = bnDots.length;
+    function bnGoTo(i){
+      bnIndex = (i+bnCount)%bnCount;
+      const slide = bnScroll.children[bnIndex];
+      if(slide) bnScroll.scrollTo({ left: slide.offsetLeft - bnScroll.offsetLeft, behavior:'smooth' });
+      bnDots.forEach((d,idx)=>d.classList.toggle('on', idx===bnIndex));
+    }
+    let bnTimer = setInterval(()=>bnGoTo(bnIndex+1), 4500);
+    bnScroll.addEventListener('scroll', ()=>{
+      clearTimeout(bnScroll._bnSyncT);
+      bnScroll._bnSyncT = setTimeout(()=>{
+        let closest = 0, minDist = Infinity;
+        Array.from(bnScroll.children).forEach((el,idx)=>{
+          const dist = Math.abs(el.offsetLeft - bnScroll.offsetLeft - bnScroll.scrollLeft);
+          if(dist<minDist){minDist=dist;closest=idx;}
+        });
+        bnIndex = closest;
+        bnDots.forEach((d,idx)=>d.classList.toggle('on', idx===bnIndex));
+      }, 120);
+    }, { passive:true });
+    bnScroll.addEventListener('touchstart', ()=>clearInterval(bnTimer), { passive:true });
   }
 });
 
