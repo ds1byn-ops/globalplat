@@ -203,8 +203,20 @@ tr:hover td{background:#fafaf8;}
 
 <!-- 대시보드 -->
 <div class="page active" id="page-dashboard">
+  <div class="card" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;margin-bottom:14px;">
+    <span style="font-size:12px;font-weight:700;color:var(--gray);">📅 조회기간</span>
+    <input type="date" id="db-range-start" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    <span style="color:#aaa;">~</span>
+    <input type="date" id="db-range-end" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    <button class="btn gold-btn" onclick="dbApplyRange()">조회</button>
+    <div style="display:flex;gap:4px;margin-left:auto;">
+      <button class="btn sm" onclick="dbSetQuickRange('month')">이번달</button>
+      <button class="btn sm" onclick="dbSetQuickRange('lastmonth')">지난달</button>
+      <button class="btn sm" onclick="dbSetQuickRange('all')">전체기간</button>
+    </div>
+  </div>
   <div class="stats-row">
-    <div class="sc"><div class="sl">전체 예약</div><div class="sv" id="db-total">-</div><div class="ss">건</div></div>
+    <div class="sc"><div class="sl">예약</div><div class="sv" id="db-total">-</div><div class="ss">건</div></div>
     <div class="sc gold"><div class="sl">총 결제금액</div><div class="sv" id="db-rev">-</div><div class="ss">원</div></div>
     <div class="sc green"><div class="sl">FK 순매출</div><div class="sv" id="db-net">-</div><div class="ss">원</div></div>
     <div class="sc blue"><div class="sl">활성 왕홍</div><div class="sv" id="db-wang">-</div></div>
@@ -942,6 +954,10 @@ async function loadAndRender(){
   populateFilters();
   await loadReviews();
   await loadQuoteRequests();
+  // 대시보드 기본 조회기간: 이번달 (펄스와 동일)
+  const [defS,defE]=dbMonthRange(0);
+  document.getElementById('db-range-start').value=defS;
+  document.getElementById('db-range-end').value=defE;
   renderDashboard();
 }
 
@@ -966,23 +982,61 @@ function populateFilters(){
 }
 
 // ── 대시보드 ──
+// ── 대시보드 기간 필터 (펄스 방식: 기간 지정 후 조회) ──
+function dbMonthRange(offsetMonths){
+  const d=new Date();
+  d.setMonth(d.getMonth()+offsetMonths);
+  const y=d.getFullYear(), m=d.getMonth();
+  const first=new Date(y,m,1);
+  const last=new Date(y,m+1,0);
+  return [first.toISOString().slice(0,10), last.toISOString().slice(0,10)];
+}
+function dbSetQuickRange(type){
+  if(type==='all'){
+    document.getElementById('db-range-start').value='';
+    document.getElementById('db-range-end').value='';
+  }else if(type==='lastmonth'){
+    const [s,e]=dbMonthRange(-1);
+    document.getElementById('db-range-start').value=s;
+    document.getElementById('db-range-end').value=e;
+  }else{ // month(이번달)
+    const [s,e]=dbMonthRange(0);
+    document.getElementById('db-range-start').value=s;
+    document.getElementById('db-range-end').value=e;
+  }
+  dbApplyRange();
+}
+function dbApplyRange(){ renderDashboard(); }
+function dbFilteredBK(){
+  const start=document.getElementById('db-range-start')?.value;
+  const end=document.getElementById('db-range-end')?.value;
+  if(!start&&!end) return BK;
+  return BK.filter(b=>{
+    if(!b.datetime) return false;
+    const d=b.datetime.slice(0,10);
+    if(start&&d<start) return false;
+    if(end&&d>end) return false;
+    return true;
+  });
+}
 function renderDashboard(){
   const month=new Date().toISOString().slice(0,7);
-  const monthBk=BK.filter(b=>b.datetime&&b.datetime.startsWith(month));
-  const newBk=BK.filter(b=>b.status==='대기');
-  const totRev=BK.reduce((s,b)=>s+r2w(b.amount),0);
-  const totNet=BK.reduce((s,b)=>s+calcC(b).net,0);
-  document.getElementById('db-total').textContent=BK.length;
+  const scoped=dbFilteredBK();  // 선택 기간으로 필터된 데이터 (기본값: 이번달)
+  const monthBk=BK.filter(b=>b.datetime&&b.datetime.startsWith(month));  // 이번달 예약은 항상 고정 지표
+  const newBk=scoped.filter(b=>b.status==='대기');
+  const totRev=scoped.reduce((s,b)=>s+r2w(b.amount),0);
+  const totNet=scoped.reduce((s,b)=>s+calcC(b).net,0);
+  document.getElementById('db-total').textContent=scoped.length;
   document.getElementById('db-rev').textContent=totRev>0?totRev.toLocaleString():'-';
   document.getElementById('db-net').textContent=totNet>0?totNet.toLocaleString():'-';
-  document.getElementById('db-wang').textContent=new Set(BK.map(b=>b.introducer).filter(Boolean)).size;
+  document.getElementById('db-wang').textContent=new Set(scoped.map(b=>b.introducer).filter(Boolean)).size;
   document.getElementById('db-month').textContent=monthBk.length;
   document.getElementById('db-new').textContent=newBk.length;
   const hm={},mm={};
-  BK.forEach(b=>{hm[b.hospital]=(hm[b.hospital]||0)+1;const mo=b.datetime.slice(5,7)+'월';mm[mo]=(mm[mo]||0)+1;});
+  scoped.forEach(b=>{hm[b.hospital]=(hm[b.hospital]||0)+1;const mo=b.datetime.slice(5,7)+'월';mm[mo]=(mm[mo]||0)+1;});
   makeBar('ch-hosp',Object.entries(hm).sort((a,b)=>b[1]-a[1]).slice(0,7));
   makeBar('ch-month',Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])));
-  const recent=[...BK].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
+  const recent=[...scoped].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
   document.getElementById('db-recent').innerHTML=recent.map(b=>{
     const c=calcC(b);
     return`<tr>
@@ -995,7 +1049,7 @@ function renderDashboard(){
       <td><span class="badge ${b.status}">${b.status}</span></td>
       <td><button class="btn sm" onclick="openBkModal(${b.id})">편집</button></td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:#aaa;padding:20px;">선택한 기간에 예약이 없습니다</td></tr>';
 }
 function makeBar(id,entries){
   const el=document.getElementById(id);if(!el)return;
