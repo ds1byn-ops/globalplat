@@ -122,7 +122,7 @@ a{text-decoration:none;color:inherit;}
 .hosp-recommend-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:14px;letter-spacing:.2px;}
 .hosp-recommend-label .star{color:var(--gold);}
 .hosp-recommend-grid{display:flex;flex-direction:column;gap:14px;}
-.hosp-grid{display:flex;flex-direction:column;gap:14px;}
+.hosp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
 .hlc{background:var(--white);border-radius:18px;padding:14px;box-shadow:0 2px 14px rgba(15,77,51,0.07);cursor:pointer;transition:all .2s;border:1px solid var(--border);}
 .hlc:hover{box-shadow:0 10px 28px rgba(15,77,51,0.13);transform:translateY(-2px);}
 .hlc.hlc-rec{border-color:var(--gold);box-shadow:0 4px 18px rgba(201,168,76,0.16);}
@@ -145,9 +145,20 @@ a{text-decoration:none;color:inherit;}
   .hlc-name{font-size:14px;}
   .hlc-tags{display:none;}
 }
+/* 일반 병원 목록 - 2열 컴팩트 카드 */
+.hlcc{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(15,77,51,0.06);cursor:pointer;transition:all .2s;border:1px solid var(--border);}
+.hlcc:hover{box-shadow:0 8px 20px rgba(15,77,51,0.12);transform:translateY(-2px);}
+.hlcc-thumb{height:100px;position:relative;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;}
+.hlcc-body{padding:10px;}
+.hlcc-name{font-size:12.5px;font-weight:800;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
+.hlcc-dept{font-size:10px;color:var(--gn2);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hlcc-rating{color:var(--gray);font-weight:500;flex-shrink:0;}
+.hlcc-btns{display:flex;gap:5px;}
+.hlcc-btns .btn-detail,.hlcc-btns .btn-book{flex:1;padding:6px 4px;font-size:9.5px;border-radius:100px;}
 @media(max-width:768px){
   .hosp-recommend-grid{grid-template-columns:1fr;}
-  .hosp-grid{grid-template-columns:repeat(3,1fr);}
+  .hosp-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .hlcc-thumb{height:84px;}
 }
 /* PROCESS */
 .process{background:linear-gradient(135deg,#EAF6F0,#FDF6E4);}
@@ -2194,8 +2205,30 @@ function filterHosps(){
       </div>
     </div>`;
   }
+  // 일반 병원 목록용 컴팩트 카드 (2열 그리드, 세로형 - 이미지 상단/정보 하단)
+  function hlcCompactCardHTML(h){
+    const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
+    const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
+    const intro=HOSP_INTROS[h.kr];
+    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||'';
+    const cardImg=imgSrc?
+      `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
+    const rating=hospRatingInfo(h.kr);
+    const ratingHTML=rating?`<span class="hlcc-rating"><span class="hlc-star">★</span> ${rating.avg}</span>`:'';
+    return `<div class="hlcc" data-kr="${h.kr}">
+      <div class="hlcc-thumb">${cardImg||h.icon}<span class="hlc-badge${h.badgePk?' pk':''}">${badgeLabel(h.badge)}</span></div>
+      <div class="hlcc-body">
+        <div class="hlcc-name">${name}</div>
+        <div class="hlcc-dept">${dept}${ratingHTML}</div>
+        <div class="hlcc-btns">
+          <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
+          <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+        </div>
+      </div>
+    </div>`;
+  }
   function hlcBindClicks(container){
-    container.querySelectorAll('.hlc').forEach(card=>{
+    container.querySelectorAll('.hlc, .hlcc').forEach(card=>{
       card.onclick=function(e){
         const btn=e.target.closest('[data-action]');
         if(btn){
@@ -2209,15 +2242,15 @@ function filterHosps(){
     });
   }
 
-  // 추천병원 렌더링 (엄선 배지, 상단 고정)
+  // 추천병원 렌더링 (엄선 배지, 큰 카드로 강조)
   const recGrid = document.getElementById('hosp-recommend-grid');
   if(recGrid){
     recGrid.innerHTML = recommended.map(h=>hlcCardHTML(h,true)).join('');
     hlcBindClicks(recGrid);
   }
 
-  // 나머지 병원: 추천병원과 동일한 리스트카드로 연속 렌더링
-  document.getElementById('hosp-grid').innerHTML = others.map(h=>hlcCardHTML(h,false)).join('');
+  // 나머지 병원: 2열 컴팩트 그리드로 빠르게 훑어보기 좋게
+  document.getElementById('hosp-grid').innerHTML = others.map(h=>hlcCompactCardHTML(h)).join('');
   hlcBindClicks(document.getElementById('hosp-grid'));
 }
 
