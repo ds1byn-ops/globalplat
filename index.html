@@ -25,19 +25,22 @@ a{text-decoration:none;color:inherit;}
 .hero{background:linear-gradient(135deg,#F0FFF8 0%,#EAF6F0 50%,#FDF6E4 100%);padding:72px 24px 80px;overflow:hidden;position:relative;}
 .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.22),transparent 70%);pointer-events:none;}
 .hero-inner{max-width:1200px;margin:0 auto;}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--pk);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--pk2);font-weight:600;margin-bottom:20px;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #EADFC0;border-radius:100px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:22px;box-shadow:0 2px 10px rgba(201,168,76,0.1);}
 .hero-title{font-size:42px;font-weight:800;line-height:1.2;margin-bottom:16px;letter-spacing:-1px;max-width:600px;}
 .hero-title em{font-style:normal;background:linear-gradient(135deg,var(--pk2),var(--gn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero-sub{font-size:16px;color:var(--gray);margin-bottom:28px;line-height:1.8;}
-.search-bar{background:var(--white);border-radius:100px;padding:6px 6px 6px 20px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:500px;margin-bottom:28px;}
+.search-bar{background:var(--white);border:1.5px solid var(--border);border-radius:100px;padding:6px 6px 6px 22px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(15,77,51,0.07);max-width:500px;margin-bottom:30px;transition:border-color .2s;}
+.search-bar:focus-within{border-color:var(--gn);}
 .search-bar input{flex:1;border:none;outline:none;font-size:14px;color:var(--dark);background:transparent;}
-.search-bar button{padding:10px 20px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:100px;border:none;font-size:13px;font-weight:600;cursor:pointer;}
+.search-bar button{padding:11px 22px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:100px;border:none;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(15,77,51,0.25);}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px;}
-.btn-primary{padding:14px 28px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:32px;font-size:15px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(76,175,140,0.3);}
-.btn-secondary{padding:14px 28px;background:var(--white);color:var(--gn2);border-radius:32px;font-size:15px;font-weight:600;border:2px solid var(--gn);cursor:pointer;}
-.hero-stats{display:flex;gap:32px;}
-.hero-stat .num{font-size:26px;font-weight:800;color:var(--gn2);}
-.hero-stat .lbl{font-size:12px;color:var(--gray);}
+.btn-primary{padding:14px 30px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:100px;font-size:14.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(15,77,51,0.3);transition:transform .15s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-secondary{padding:14px 28px;background:var(--white);color:var(--dark);border-radius:100px;font-size:14.5px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--gn);color:var(--gn2);}
+.hero-stats{display:flex;gap:36px;padding-top:6px;}
+.hero-stat .num{font-size:25px;font-weight:900;color:var(--gn2);letter-spacing:-.3px;}
+.hero-stat .lbl{font-size:11.5px;color:var(--gray);margin-top:1px;}
 /* SECTION */
 .section{padding:60px 24px;}
 .section-inner{max-width:1200px;margin:0 auto;}
@@ -55,41 +58,42 @@ a{text-decoration:none;color:inherit;}
 .cat-card.active .ci{background:linear-gradient(135deg,var(--gn),var(--gn2));box-shadow:0 8px 20px rgba(15,77,51,0.3);transform:scale(1.06);}
 .cat-card .cn{font-size:11.5px;font-weight:600;color:var(--dark);}
 .cat-card.active .cn{color:var(--gn2);font-weight:800;}
-/* HOSPITALS */
+/* HOSPITALS — MTK 스타일: 실사풍 이미지 + 골드 배지 + 소프트 카드 */
 .hosp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
-.hosp-card{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.2s;border:2px solid transparent;}
-.hosp-card:hover{transform:translateY(-4px);border-color:var(--gn);}
-.hosp-img{height:160px;background:linear-gradient(135deg,var(--lgray),#E5E7EB);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
-.hosp-badge-tag{position:absolute;top:10px;left:10px;background:var(--gn2);color:var(--white);font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;}
-.hosp-badge-tag.pk{background:var(--pk2);}
-.hosp-body{padding:14px;}
-.hosp-name{font-size:14px;font-weight:700;margin-bottom:2px;}
-.hosp-dept{font-size:11px;color:var(--gn);font-weight:600;margin-bottom:8px;}
-.hosp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
-.hosp-tag{font-size:10px;background:var(--lgray);color:var(--gray);padding:2px 7px;border-radius:6px;}
-.hosp-bottom{display:flex;justify-content:space-between;align-items:center;}
-.btn-book{padding:7px 14px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:var(--white);border-radius:18px;font-size:11px;font-weight:600;border:none;cursor:pointer;}
-.btn-detail{padding:7px 14px;background:var(--white);color:var(--gn2);border-radius:18px;font-size:11px;font-weight:600;border:1px solid var(--gn);cursor:pointer;}
-/* 추천병원 2개 (큰 카드) */
+.hosp-card{background:var(--white);border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(15,77,51,0.06);cursor:pointer;transition:all .25s;border:1px solid var(--border);}
+.hosp-card:hover{transform:translateY(-5px);box-shadow:0 14px 32px rgba(15,77,51,0.14);border-color:transparent;}
+.hosp-img{height:160px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden;}
+.hosp-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(15,42,32,0.35) 100%);pointer-events:none;}
+.hosp-badge-tag{position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.94);color:var(--gn2);font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;letter-spacing:.2px;z-index:1;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.hosp-badge-tag.pk{color:var(--pk2);}
+.hosp-body{padding:15px 16px 16px;}
+.hosp-name{font-size:14.5px;font-weight:800;margin-bottom:2px;color:var(--dark);}
+.hosp-dept{font-size:11px;color:var(--gn2);font-weight:700;margin-bottom:9px;}
+.hosp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.hosp-tag{font-size:10px;background:var(--lgray);color:var(--gray);padding:3px 9px;border-radius:100px;font-weight:500;}
+.hosp-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.btn-book{flex:1;padding:9px 14px;background:linear-gradient(135deg,var(--gn),var(--gn2));color:var(--white);border-radius:100px;font-size:11.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(15,77,51,0.25);}
+.btn-detail{flex:1;padding:9px 14px;background:var(--white);color:var(--gn2);border-radius:100px;font-size:11.5px;font-weight:700;border:1.5px solid var(--border);cursor:pointer;}
+/* 추천병원 2개 (엄선/큐레이션 카드) */
 .hosp-recommend-wrap{margin-bottom:24px;}
-.hosp-recommend-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--dark);margin-bottom:12px;}
+.hosp-recommend-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:14px;letter-spacing:.2px;}
 .hosp-recommend-label .star{color:var(--gold);}
 .hosp-recommend-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px;}
-.hosp-recommend-card{position:relative;background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.2s;border:2px solid var(--gold);}
-.hosp-recommend-card:hover{transform:translateY(-4px);}
-.hosp-recommend-card .badge-recommend{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--gold),#b8941f);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:14px;z-index:2;}
+.hosp-recommend-card{position:relative;background:var(--white);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(201,168,76,0.14);cursor:pointer;transition:all .25s;border:1.5px solid var(--gold);}
+.hosp-recommend-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(201,168,76,0.24);}
+.hosp-recommend-card .badge-recommend{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--gold),#B8923A);color:#fff;font-size:10.5px;font-weight:800;padding:5px 13px;border-radius:100px;z-index:2;box-shadow:0 3px 10px rgba(0,0,0,0.15);letter-spacing:.2px;}
 .hosp-recommend-card .hosp-img{height:200px;}
-/* 일반 병원 1/4 사이즈 바둑판 */
+/* 일반 병원 소형 바둑판 */
 .hosp-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
-.hosp-grid .hosp-card{border-radius:10px;}
-.hosp-grid .hosp-img{height:80px;font-size:24px;}
-.hosp-grid .hosp-body{padding:8px;}
+.hosp-grid .hosp-card{border-radius:14px;}
+.hosp-grid .hosp-img{height:84px;font-size:24px;}
+.hosp-grid .hosp-body{padding:9px 10px 10px;}
 .hosp-grid .hosp-name{font-size:11px;margin-bottom:1px;}
-.hosp-grid .hosp-dept{font-size:9px;margin-bottom:4px;}
+.hosp-grid .hosp-dept{font-size:9px;margin-bottom:6px;}
 .hosp-grid .hosp-tags{display:none;}
-.hosp-grid .hosp-bottom{gap:4px;}
-.hosp-grid .btn-book,.hosp-grid .btn-detail{padding:4px 8px;font-size:9px;border-radius:10px;}
-.hosp-grid .hosp-badge-tag{font-size:8px;padding:2px 6px;top:5px;left:5px;}
+.hosp-grid .hosp-bottom{gap:5px;}
+.hosp-grid .btn-book,.hosp-grid .btn-detail{padding:5px 8px;font-size:9px;border-radius:100px;}
+.hosp-grid .hosp-badge-tag{font-size:8px;padding:3px 8px;top:6px;left:6px;}
 @media(max-width:768px){
   .hosp-recommend-grid{grid-template-columns:1fr;}
   .hosp-grid{grid-template-columns:repeat(3,1fr);}
@@ -225,7 +229,7 @@ html[dir="rtl"] .fkq-close{right:auto;left:18px;}
 html[dir="rtl"] .fkai-msg.user{flex-direction:row;}
 html[dir="rtl"] .float-btn,html[dir="rtl"] #fk-ai-trigger-fab{right:auto;left:22px;}
 html[dir="rtl"] #fk-scroll-top-btn{right:auto;left:22px;}
-html[dir="rtl"] #fk-quote-trigger-fab{right:auto;left:22px;}
+html[dir="rtl"] #fk-quote-trigger-fab{left:auto;right:16px;}
 html[dir="rtl"] .modal h2{flex-direction:row-reverse;}
 html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align:right;}
 html[dir="rtl"] .testi-text,html[dir="rtl"] .step-desc,html[dir="rtl"] .hosp-name,html[dir="rtl"] .hosp-dept{text-align:right;}
@@ -4123,7 +4127,8 @@ document.getElementById('fk-ai-overlay')?.addEventListener('click', function(e){
   #fk-scroll-top-btn:hover{background:#fdf8ef;border-color:#D4AF37;transform:translateY(-2px);}
 
   /* ① 견적위젯 트리거 플로팅 버튼 (페이지에 버튼이 없을 경우 자동 노출) */
-  #fk-quote-trigger-fab{position:fixed;bottom:148px;right:22px;background:linear-gradient(135deg,#FF8FAD,#FFB5C8);color:#fff;border:none;border-radius:28px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:898;display:none;align-items:center;gap:6px;}
+  #fk-quote-trigger-fab{position:fixed;bottom:20px;left:16px;right:auto;background:linear-gradient(135deg,var(--gold),#B8923A);color:#fff;border:none;border-radius:28px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(201,168,76,0.35);z-index:898;display:none;align-items:center;gap:6px;}
+  @media(max-width:768px){#fk-quote-trigger-fab{bottom:78px;}}
   #fk-quote-trigger-fab.show{display:flex;}
 </style>
 
