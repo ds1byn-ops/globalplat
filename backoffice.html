@@ -149,6 +149,7 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('ad_settings')"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('members')"><span class="ic">👤</span>회원가입 관리</a>
+    <a onclick="showPage('banners')"><span class="ic">🖼️</span>메인 배너 관리</a>
     <a onclick="showPage('quote_requests')"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></a>
     <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
   </div>
@@ -184,6 +185,7 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('ad_settings');toggleDrawer()"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('wanghongs');toggleDrawer()"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('members');toggleDrawer()"><span class="ic">👤</span>회원가입 관리</a>
+    <a onclick="showPage('banners');toggleDrawer()"><span class="ic">🖼️</span>메인 배너 관리</a>
     <a onclick="showPage('quote_requests');toggleDrawer()"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge-m" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;"></span></a>
     <a onclick="showPage('foreign');toggleDrawer()"><span class="ic">🌏</span>외국인환자 보고</a>
   </div>
@@ -401,6 +403,69 @@ tr:hover td{background:#fafaf8;}
       <th>전화번호</th>
       <th class="mb-sort-th" onclick="mbSortBy('nationality')">국적<span class="mb-sort-arrow" id="mb-arrow-nationality"></span></th>
     </tr></thead><tbody id="mb-tbody"></tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-banners">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <h2 style="font-size:14px;font-weight:700;">🖼️ 메인 배너 관리 (followkorea.kr 첫 화면 배너)</h2>
+    <button class="btn gold-btn" onclick="openBannerModal(null)">+ 배너 추가</button>
+  </div>
+  <div style="font-size:11px;color:#888;margin-bottom:12px;">순서를 바꾸려면 ▲▼ 버튼을 누르세요. 비활성화하면 고객 화면에서 즉시 사라집니다.</div>
+  <div id="bn-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
+<!-- 배너 편집 모달 -->
+<div class="modal-bg" id="bn-modal" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeBannerModal() }">
+  <div class="modal" style="width:520px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="font-size:14px;font-weight:700;" id="bn-modal-title">배너 추가</h3>
+      <button class="btn sm" onclick="closeBannerModal()">✕</button>
+    </div>
+    <input type="hidden" id="bn-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">배경 색상</label>
+        <select id="bn-bg" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+          <option value="banner1">그린</option>
+          <option value="banner2">골드</option>
+          <option value="banner3">다크네이비</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">클릭 시 이동</label>
+        <select id="bn-link-type" onchange="document.getElementById('bn-url-wrap').style.display=this.value==='url'?'block':'none'" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+          <option value="hospitals">병원 목록으로 스크롤</option>
+          <option value="concierge">컨시어지 섹션</option>
+          <option value="ai_chat">AI 상담창 오픈</option>
+          <option value="url">외부 링크(URL)</option>
+        </select>
+      </div>
+    </div>
+    <div id="bn-url-wrap" style="display:none;margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">이동 URL</label>
+      <input type="text" id="bn-url" placeholder="https://..." style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    </div>
+    <div style="margin-bottom:6px;font-size:11px;font-weight:700;color:var(--gn2);">🇨🇳 중국어 (기본값, 필수)</div>
+    <div style="display:grid;gap:6px;margin-bottom:12px;">
+      <input type="text" id="bn-tag-zh" placeholder="태그 (예: 韩国NO.1医美预约平台)" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-title-zh" placeholder="제목 (HTML 가능, 줄바꿈은 &lt;br&gt;)" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-sub-zh" placeholder="부제목" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    </div>
+    <div style="margin-bottom:6px;font-size:11px;font-weight:700;color:var(--gn2);">🇰🇷 한국어 (선택, 비워두면 중국어로 표시)</div>
+    <div style="display:grid;gap:6px;margin-bottom:12px;">
+      <input type="text" id="bn-tag-ko" placeholder="태그" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-title-ko" placeholder="제목" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-sub-ko" placeholder="부제목" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    </div>
+    <div style="margin-bottom:6px;font-size:11px;font-weight:700;color:var(--gn2);">🇺🇸 영어 (선택, 그 외 모든 언어의 기본값으로도 사용됨)</div>
+    <div style="display:grid;gap:6px;margin-bottom:16px;">
+      <input type="text" id="bn-tag-en" placeholder="Tag" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-title-en" placeholder="Title" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+      <input type="text" id="bn-sub-en" placeholder="Subtitle" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+    </div>
+    <div id="bn-err" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <button class="btn gold-btn" style="width:100%;padding:10px;" onclick="saveBanner()">저장</button>
   </div>
 </div>
 
@@ -1694,6 +1759,7 @@ function showPage(id){
   if(id==='wanghongs')renderWanghongs();
   if(id==='quote_requests')renderQuoteRequests();
   if(id==='members')loadMembers();
+  if(id==='banners')loadBanners();
   if(id==='foreign')renderForeign();
   if(id==='reviews'){loadReviews().then(renderAdminReviews);}
 }
@@ -1747,6 +1813,121 @@ function renderMembers(){
       <td style="font-size:12px;color:#888;">${escapeHtml(m.nationality)||'-'}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">가입한 회원이 없습니다</td></tr>';
+}
+
+// ── 메인 배너 관리 (site_banners 테이블, 환자웹 첫화면 배너캐러셀) ──
+let BN=[];
+async function loadBanners(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/site_banners?order=sort_order.asc`,{headers});
+    BN=r.ok?await r.json():[];
+  }catch(e){ BN=[]; }
+  renderBannerList();
+}
+function renderBannerList(){
+  const list=document.getElementById('bn-list');
+  if(!list) return;
+  if(!BN.length){ list.innerHTML='<div class="card" style="text-align:center;color:#aaa;padding:24px;">등록된 배너가 없습니다</div>'; return; }
+  const bgColors={banner1:'#1A6B4A',banner2:'#C9A84C',banner3:'#16202e'};
+  list.innerHTML=BN.map((b,i)=>`
+    <div class="card" style="display:flex;align-items:center;gap:12px;padding:12px;${b.active?'':'opacity:.5;'}">
+      <div style="width:64px;height:48px;border-radius:8px;background:${bgColors[b.bg_style]||'#1A6B4A'};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((b.title_zh||'').replace(/<br>/g,' '))}</div>
+        <div style="font-size:11px;color:#888;">${escapeHtml(b.tag_zh)} · ${b.active?'✅ 노출중':'⏸️ 숨김'} · 순서 ${b.sort_order}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <button class="btn sm" onclick="moveBanner(${b.id},-1)" ${i===0?'disabled':''}>▲</button>
+        <button class="btn sm" onclick="moveBanner(${b.id},1)" ${i===BN.length-1?'disabled':''}>▼</button>
+      </div>
+      <button class="btn sm" onclick="toggleBannerActive(${b.id},${b.active})">${b.active?'숨기기':'노출'}</button>
+      <button class="btn sm" onclick="openBannerModal(${b.id})">수정</button>
+      <button class="btn sm" style="color:#dc2626;" onclick="deleteBanner(${b.id})">삭제</button>
+    </div>
+  `).join('');
+}
+function openBannerModal(id){
+  document.getElementById('bn-err').style.display='none';
+  document.getElementById('bn-id').value=id===null?'':id;
+  document.getElementById('bn-modal-title').textContent=id===null?'배너 추가':'배너 수정';
+  const fields=['bn-bg','bn-link-type','bn-url','bn-tag-zh','bn-title-zh','bn-sub-zh','bn-tag-ko','bn-title-ko','bn-sub-ko','bn-tag-en','bn-title-en','bn-sub-en'];
+  if(id!==null){
+    const b=BN.find(x=>x.id===id); if(!b) return;
+    document.getElementById('bn-bg').value=b.bg_style||'banner1';
+    document.getElementById('bn-link-type').value=b.link_type||'hospitals';
+    document.getElementById('bn-url').value=b.link_value||'';
+    document.getElementById('bn-tag-zh').value=b.tag_zh||'';
+    document.getElementById('bn-title-zh').value=b.title_zh||'';
+    document.getElementById('bn-sub-zh').value=b.sub_zh||'';
+    document.getElementById('bn-tag-ko').value=b.tag_ko||'';
+    document.getElementById('bn-title-ko').value=b.title_ko||'';
+    document.getElementById('bn-sub-ko').value=b.sub_ko||'';
+    document.getElementById('bn-tag-en').value=b.tag_en||'';
+    document.getElementById('bn-title-en').value=b.title_en||'';
+    document.getElementById('bn-sub-en').value=b.sub_en||'';
+  }else{
+    fields.filter(f=>f!=='bn-bg'&&f!=='bn-link-type').forEach(f=>document.getElementById(f).value='');
+    document.getElementById('bn-bg').value='banner1';
+    document.getElementById('bn-link-type').value='hospitals';
+  }
+  document.getElementById('bn-url-wrap').style.display=document.getElementById('bn-link-type').value==='url'?'block':'none';
+  document.getElementById('bn-modal').classList.add('open');
+}
+function closeBannerModal(){ document.getElementById('bn-modal').classList.remove('open'); }
+async function saveBanner(){
+  const id=document.getElementById('bn-id').value;
+  const tagZh=document.getElementById('bn-tag-zh').value.trim();
+  const titleZh=document.getElementById('bn-title-zh').value.trim();
+  if(!tagZh||!titleZh){
+    const e=document.getElementById('bn-err'); e.textContent='중국어 태그와 제목은 필수입니다'; e.style.display='block';
+    return;
+  }
+  const body={
+    bg_style:document.getElementById('bn-bg').value,
+    link_type:document.getElementById('bn-link-type').value,
+    link_value:document.getElementById('bn-url').value.trim()||null,
+    tag_zh:tagZh, title_zh:titleZh, sub_zh:document.getElementById('bn-sub-zh').value.trim()||null,
+    tag_ko:document.getElementById('bn-tag-ko').value.trim()||null,
+    title_ko:document.getElementById('bn-title-ko').value.trim()||null,
+    sub_ko:document.getElementById('bn-sub-ko').value.trim()||null,
+    tag_en:document.getElementById('bn-tag-en').value.trim()||null,
+    title_en:document.getElementById('bn-title-en').value.trim()||null,
+    sub_en:document.getElementById('bn-sub-en').value.trim()||null,
+    updated_at:new Date().toISOString()
+  };
+  try{
+    let res;
+    if(id){
+      res=await fetch(`${SUPA_URL}/rest/v1/site_banners?id=eq.${id}`,{method:'PATCH',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify(body)});
+    }else{
+      body.sort_order=BN.length?Math.max(...BN.map(b=>b.sort_order))+1:1;
+      body.active=true;
+      res=await fetch(`${SUPA_URL}/rest/v1/site_banners`,{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify(body)});
+    }
+    if(!res.ok){alert('저장 실패: '+res.status);return;}
+    closeBannerModal();
+    await loadBanners();
+  }catch(e){alert('저장 오류: '+e.message);}
+}
+async function toggleBannerActive(id,current){
+  await fetch(`${SUPA_URL}/rest/v1/site_banners?id=eq.${id}`,{method:'PATCH',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({active:!current})});
+  await loadBanners();
+}
+async function moveBanner(id,dir){
+  const idx=BN.findIndex(b=>b.id===id);
+  const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=BN.length) return;
+  const a=BN[idx], b=BN[swapIdx];
+  await Promise.all([
+    fetch(`${SUPA_URL}/rest/v1/site_banners?id=eq.${a.id}`,{method:'PATCH',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({sort_order:b.sort_order})}),
+    fetch(`${SUPA_URL}/rest/v1/site_banners?id=eq.${b.id}`,{method:'PATCH',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({sort_order:a.sort_order})}),
+  ]);
+  await loadBanners();
+}
+async function deleteBanner(id){
+  if(!confirm('이 배너를 삭제하시겠습니까?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/site_banners?id=eq.${id}`,{method:'DELETE',headers});
+  await loadBanners();
 }
 
 async function loadQuoteRequests(){

@@ -441,29 +441,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 </section>
 
 <section class="banner-sec">
-  <div class="banner-scroll" id="banner-scroll">
-    <div class="banner-slide banner1" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()">
-      <div class="b-tag" data-i18n="hero_badge">韩国NO.1医美预约平台</div>
-      <div class="b-title" data-i18n="hero_title">打造<em>专属你的</em><br>K-Beauty之旅</div>
-      <div class="b-sub" data-i18n="hero_sub">精选首尔江南顶级医美医院<br>专业中文服务 · 全程陪同</div>
-      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div>
-    <div class="banner-slide banner2" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'})">
-      <div class="b-tag" data-i18n="hosp_recommend_label">推荐医院</div>
-      <div class="b-title" data-i18n="hosp_title">精选合作医院</div>
-      <div class="b-sub" data-i18n="hosp_sub">严格筛选，只为您推荐最优质的江南医院</div>
-      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div>
-    <div class="banner-slide banner3" onclick="openAiChat()">
-      <div class="b-tag" data-i18n="nav_concierge">礼宾服务</div>
-      <div class="b-title" data-i18n="svc_concierge">VVIP 礼宾服务</div>
-      <div class="b-sub" data-i18n="svc_concierge_desc">专属顾问全程陪同，从预约到回国</div>
-      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div>
-  </div>
-  <div class="banner-dots" id="banner-dots">
-    <div class="banner-dot on"></div><div class="banner-dot"></div><div class="banner-dot"></div>
-  </div>
+  <div class="banner-scroll" id="banner-scroll"></div>
+  <div class="banner-dots" id="banner-dots"></div>
 </section>
 
 <section class="quick-menu-sec">
@@ -1986,6 +1965,44 @@ function openSvcModalWithTime(type,sub,pickerId){
   const time=sel?sel.value.split(' ')[0]:'';
   openSvcModal(type,sub,time);
 }
+// ── 배너 캐러셀: 백오피스에서 관리하는 site_banners 테이블 연동 ──
+let SITE_BANNERS=[];
+const BANNER_LINK_HANDLERS={
+  hospitals:"fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()",
+  concierge:"fkhShowExtraSection()",
+  ai_chat:"openAiChat()",
+};
+async function loadBanners(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/site_banners?active=eq.true&order=sort_order.asc`,{headers:{'apikey':SUPA_KEY}});
+    const d=r.ok?await r.json():[];
+    if(Array.isArray(d)&&d.length>0) SITE_BANNERS=d;
+  }catch(e){ /* 실패 시 SITE_BANNERS 빈 배열 유지 → 배너 섹션 자동 숨김 */ }
+  renderBannerSlides();
+}
+function renderBannerSlides(){
+  const scroll=document.getElementById('banner-scroll');
+  const dots=document.getElementById('banner-dots');
+  if(!scroll||!dots) return;
+  if(!SITE_BANNERS.length){ scroll.parentElement.style.display='none'; return; }
+  scroll.parentElement.style.display='';
+  scroll.innerHTML=SITE_BANNERS.map((b,i)=>{
+    const tag=lang==='ko'?b.tag_ko:lang==='zh'?b.tag_zh:b.tag_en||b.tag_zh;
+    const title=(lang==='ko'?b.title_ko:lang==='zh'?b.title_zh:b.title_en)||b.title_zh;
+    const sub=(lang==='ko'?b.sub_ko:lang==='zh'?b.sub_zh:b.sub_en)||b.sub_zh;
+    const onclick = b.link_type==='url' && b.link_value
+      ? `window.open(${JSON.stringify(b.link_value)},'_blank')`
+      : (BANNER_LINK_HANDLERS[b.link_type]||BANNER_LINK_HANDLERS.hospitals);
+    return `<div class="banner-slide ${b.bg_style||'banner1'}" onclick="${onclick}">
+      <div class="b-tag">${tag||''}</div>
+      <div class="b-title">${title||''}</div>
+      <div class="b-sub">${sub||''}</div>
+      <div class="b-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>`;
+  }).join('');
+  dots.innerHTML=SITE_BANNERS.map((_,i)=>`<div class="banner-dot${i===0?' on':''}"></div>`).join('');
+}
+
 function setLang(l){
   lang=l;
   document.documentElement.setAttribute('dir', l==='ar' ? 'rtl' : 'ltr');
@@ -2002,7 +2019,7 @@ function setLang(l){
     vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
-  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq();
+  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides();
   if(currentHosp) renderDetail(currentHosp);
   initSvcButtons();
   // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
@@ -4657,9 +4674,11 @@ document.addEventListener('DOMContentLoaded', function(){
     window.addEventListener('resize', updateCatArrows);
   }
   // ── 배너 캐러셀: 자동 슬라이드 + dot 동기화 + 스와이프 시 dot 갱신 ──
-  const bnScroll = document.getElementById('banner-scroll');
-  const bnDots = document.querySelectorAll('#banner-dots .banner-dot');
-  if(bnScroll && bnDots.length){
+  // (site_banners 비동기 로드가 끝난 뒤 실행되어야 dot/slide가 이미 렌더된 상태)
+  function initBannerCarousel(){
+    const bnScroll = document.getElementById('banner-scroll');
+    const bnDots = document.querySelectorAll('#banner-dots .banner-dot');
+    if(!bnScroll || !bnDots.length) return;
     let bnIndex = 0;
     const bnCount = bnDots.length;
     function bnGoTo(i){
@@ -4683,6 +4702,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }, { passive:true });
     bnScroll.addEventListener('touchstart', ()=>clearInterval(bnTimer), { passive:true });
   }
+  loadBanners().then(initBannerCarousel);
   // 로그인 세션 복원 (자동 로그인 유지)
   authRestoreSession();
 });
