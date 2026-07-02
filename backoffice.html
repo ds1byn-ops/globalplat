@@ -7,7 +7,7 @@
 <style>
 :root{--gn:#4CAF8C;--gn2:#1A6B4A;--gold:#D4AF37;--pk:#FF8FAD;--bg:#F5F5F0;--white:#fff;--dark:#1a1a1a;--gray:#6B7280;--lgray:#F3F4F6;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,0.07);--r:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--dark);font-size:13px;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','PingFang SC','Microsoft YaHei','Noto Sans Thai','Noto Sans Arabic','Segoe UI',sans-serif;background:var(--bg);color:var(--dark);font-size:13px;}
 .header{background:var(--dark);color:#fff;padding:0 20px;display:flex;align-items:center;height:52px;gap:12px;position:sticky;top:0;z-index:200;}
 .logo{font-size:16px;font-weight:700;color:var(--gold);}
 .header-badge{background:#2d2d2d;border:1px solid #555;border-radius:12px;padding:3px 10px;font-size:10px;color:var(--gold);}
@@ -134,6 +134,7 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
     <a onclick="showPage('ad_settings')"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
+    <a onclick="showPage('members')"><span class="ic">👤</span>회원가입 관리</a>
     <a onclick="showPage('quote_requests')"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></a>
     <a onclick="showPage('foreign')"><span class="ic">🌏</span>외국인환자 보고</a>
   </div>
@@ -168,6 +169,7 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('hospitals');toggleDrawer()"><span class="ic">🏥</span>병원 관리</a>
     <a onclick="showPage('ad_settings');toggleDrawer()"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('wanghongs');toggleDrawer()"><span class="ic">👑</span>왕홍·소개자</a>
+    <a onclick="showPage('members');toggleDrawer()"><span class="ic">👤</span>회원가입 관리</a>
     <a onclick="showPage('quote_requests');toggleDrawer()"><span class="ic">🧾</span>견적신청 관리 <span id="qr-badge-m" style="display:none;background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;"></span></a>
     <a onclick="showPage('foreign');toggleDrawer()"><span class="ic">🌏</span>외국인환자 보고</a>
   </div>
@@ -364,6 +366,27 @@ tr:hover td{background:#fafaf8;}
 </div>
 
 <!-- 견적신청 관리 -->
+<div class="page" id="page-members">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <h2 style="font-size:14px;font-weight:700;">👤 환자웹 회원가입 관리</h2>
+    <div style="display:flex;gap:6px;">
+      <input type="text" id="mb-search" placeholder="이름/이메일/메신저ID 검색" oninput="renderMembers()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:180px;">
+      <button class="btn" onclick="loadMembers()">🔄 새로고침</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="sc"><div class="sl">총 가입 회원</div><div class="sv" id="mb-st-total">-</div></div>
+    <div class="sc green"><div class="sl">오늘 가입</div><div class="sv" id="mb-st-today">-</div></div>
+    <div class="sc gold"><div class="sl">이번 달 가입</div><div class="sv" id="mb-st-month">-</div></div>
+  </div>
+  <div class="card" style="overflow-x:auto;padding:0;">
+    <table><thead><tr>
+      <th>가입일시</th><th>이름</th><th>이메일</th><th>메신저ID</th>
+      <th>전화번호</th><th>국적</th>
+    </tr></thead><tbody id="mb-tbody"></tbody></table>
+  </div>
+</div>
+
 <div class="page" id="page-quote_requests">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <h2 style="font-size:14px;font-weight:700;">🧾 환자웹 견적신청 관리</h2>
@@ -1653,12 +1676,46 @@ function showPage(id){
   if(id==='ad_settings')loadAdSettingsPage();
   if(id==='wanghongs')renderWanghongs();
   if(id==='quote_requests')renderQuoteRequests();
+  if(id==='members')loadMembers();
   if(id==='foreign')renderForeign();
   if(id==='reviews'){loadReviews().then(renderAdminReviews);}
 }
 
 // ── 견적신청 관리 (환자웹 견적위젯 연동) ──
 let QR=[];
+// ── 회원가입 관리 (환자웹 Supabase Auth 연동) ──
+let MB=[];
+async function loadMembers(){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/rpc/get_all_user_profiles`,{method:'POST',headers});
+    MB=r.ok?await r.json():[];
+  }catch(e){ MB=[]; }
+  renderMembers();
+}
+function renderMembers(){
+  const q=(document.getElementById('mb-search')?.value||'').trim().toLowerCase();
+  const filtered=MB.filter(m=>{
+    if(!q) return true;
+    return (m.name||'').toLowerCase().includes(q)||(m.email||'').toLowerCase().includes(q)||(m.messenger_id||'').toLowerCase().includes(q);
+  });
+  const today=new Date().toISOString().slice(0,10);
+  const thisMonth=today.slice(0,7);
+  document.getElementById('mb-st-total').textContent=MB.length;
+  document.getElementById('mb-st-today').textContent=MB.filter(m=>(m.created_at||'').slice(0,10)===today).length;
+  document.getElementById('mb-st-month').textContent=MB.filter(m=>(m.created_at||'').slice(0,7)===thisMonth).length;
+  document.getElementById('mb-tbody').innerHTML=filtered.map(m=>{
+    const dt=m.created_at?new Date(m.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    return`<tr>
+      <td style="font-size:11px;color:#888;white-space:nowrap;">${escapeHtml(dt)}</td>
+      <td style="font-weight:500;">${escapeHtml(m.name)}</td>
+      <td style="font-size:12px;">${escapeHtml(m.email)}</td>
+      <td style="font-size:12px;">${escapeHtml(m.messenger_id)}</td>
+      <td style="font-size:12px;color:#888;">${escapeHtml(m.phone)||'-'}</td>
+      <td style="font-size:12px;color:#888;">${escapeHtml(m.nationality)||'-'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">가입한 회원이 없습니다</td></tr>';
+}
+
 async function loadQuoteRequests(){
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/quote_requests?select=*&order=created_at.desc`,{headers});
