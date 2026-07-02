@@ -53,6 +53,25 @@ a{text-decoration:none;color:inherit;}
   .banner-slide{min-height:140px;padding:20px 22px;}
   .banner-slide .b-title{font-size:18px;}
 }
+/* ── 상단 퀵메뉴 (견적/예약/FAQ/후기) ── */
+.quick-menu-sec{padding:4px 24px 22px;background:var(--bg);}
+.quick-menu-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.qm-item{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--white);border:1px solid var(--border);border-radius:16px;cursor:pointer;font-family:inherit;transition:all .2s;}
+.qm-item:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(15,77,51,0.1);border-color:transparent;}
+.qm-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.qm-ic svg{width:22px;height:22px;}
+.qm-ic-quote{background:var(--gold-bg,#FDF6E4);color:#8A6A1A;}
+.qm-ic-book{background:#E8F5EF;color:var(--gn2);}
+.qm-ic-faq{background:#EAF3FD;color:#2E6FBB;}
+.qm-ic-review{background:#FDF0F5;color:#C93F74;}
+.qm-label{font-size:11.5px;font-weight:700;color:var(--dark);text-align:center;}
+@media(max-width:768px){
+  .quick-menu-sec{padding:2px 16px 18px;}
+  .qm-item{padding:12px 6px;}
+  .qm-ic{width:36px;height:36px;}
+  .qm-ic svg{width:19px;height:19px;}
+  .qm-label{font-size:10.5px;}
+}
 
 .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.22),transparent 70%);pointer-events:none;}
 .hero-inner{max-width:1200px;margin:0 auto;}
@@ -69,9 +88,7 @@ a{text-decoration:none;color:inherit;}
 .btn-primary:hover{transform:translateY(-2px);}
 .btn-secondary{padding:14px 28px;background:var(--white);color:var(--dark);border-radius:100px;font-size:14.5px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;}
 .btn-secondary:hover{border-color:var(--gn);color:var(--gn2);}
-.hero-stats{display:flex;gap:36px;padding-top:6px;}
-.hero-stat .num{font-size:25px;font-weight:900;color:var(--gn2);letter-spacing:-.3px;}
-.hero-stat .lbl{font-size:11.5px;color:var(--gray);margin-top:1px;}
+/* hero-stats 제거됨 (견적/예약/FAQ/후기 퀵메뉴로 대체) */
 /* SECTION */
 .section{padding:60px 24px;}
 .section-inner{max-width:1200px;margin:0 auto;}
@@ -223,7 +240,6 @@ a{text-decoration:none;color:inherit;}
   .btn-consult{padding:7px 12px!important;font-size:12px!important;}
   /* 히어로 */
   .hero-inner{padding:40px 16px 32px;}
-  .hero-stats{gap:16px;}
   /* 병원 카드: 모바일에서도 리스트형 유지 (CSS는 위 .hlc 반응형 규칙 참조) */
   /* 카테고리: 모바일에서도 가로 스크롤 유지, 아이콘만 살짝 축소 */
   .cat-card{width:66px!important;}
@@ -379,18 +395,24 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
 </section>
 
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-actions">
-      <button class="btn-primary" onclick="openModal(null)" data-i18n="hero_cta1">立即预约</button>
-      <button class="btn-secondary" onclick="openQuoteWidget()" id="hero-quote-btn" data-i18n="hero_cta_quote">💰 简易报价</button>
-      <button class="btn-secondary" onclick="fkhRestoreHospSection();document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'});filterHosps()" data-i18n="hero_cta2">浏览医院</button>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="num">2,000+</div><div class="lbl" data-i18n="stat1">服务患者</div></div>
-      <div class="hero-stat"><div class="num">3,000+</div><div class="lbl" data-i18n="stat2">合作医院</div></div>
-      <div class="hero-stat"><div class="num">4.9★</div><div class="lbl" data-i18n="stat3">满意度</div></div>
-    </div>
+<section class="quick-menu-sec">
+  <div class="quick-menu-inner">
+    <button class="qm-item" onclick="openQuoteWidget()">
+      <div class="qm-ic qm-ic-quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div>
+      <div class="qm-label" data-i18n="hero_cta_quote">💰 简易报价</div>
+    </button>
+    <button class="qm-item" onclick="openModal(null)">
+      <div class="qm-ic qm-ic-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M9 3v4M15 3v4M4 11h16"/></svg></div>
+      <div class="qm-label" data-i18n="hero_cta1">立即预约</div>
+    </button>
+    <button class="qm-item" onclick="fkhRestoreHospSection();document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'})">
+      <div class="qm-ic qm-ic-faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 1.9-2.3 3.4M12 17.2h.01"/></svg></div>
+      <div class="qm-label" data-i18n="nav_faq">FAQ</div>
+    </button>
+    <button class="qm-item" onclick="fkhRestoreHospSection();document.getElementById('sec-review').scrollIntoView({behavior:'smooth'})">
+      <div class="qm-ic qm-ic-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3l-6.2 3.6 1.6-6.9L2 9.2l7-.6L12 2l3 6.6 7 .6-5.4 4.8 1.6 6.9z"/></svg></div>
+      <div class="qm-label" data-i18n="nav_review">用户评价</div>
+    </button>
   </div>
 </section>
 
