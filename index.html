@@ -7,7 +7,9 @@
 <style>
 :root{--pk:#C9A84C;--pk2:#B8923A;--gn:#1A6B4A;--gn2:#0F4D33;--gold:#C9A84C;--bg:#F7F8FA;--white:#FFFFFF;--dark:#191F28;--gray:#6B7280;--lgray:#F0F4F1;--border:#E2E8E3;--shadow:0 4px 24px rgba(15,77,51,0.08);--r:16px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Apple SD Gothic Neo','PingFang SC','Microsoft YaHei','Noto Sans Thai','Noto Sans Arabic','Segoe UI',sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;}
+body{font-family:'Apple SD Gothic Neo','PingFang SC','Microsoft YaHei','Noto Sans Thai','Noto Sans Arabic','Segoe UI',sans-serif;background:#E9EBEA;color:var(--dark);line-height:1.6;}
+/* ── PC에서도 모바일과 동일한 앱 폭(520px)으로 고정 + 가운데 정렬 ── */
+.fk-app-shell{max-width:520px;margin:0 auto;background:var(--white);min-height:100vh;box-shadow:0 0 44px rgba(0,0,0,0.08);position:relative;overflow-x:hidden;}
 a{text-decoration:none;color:inherit;}
 .nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 24px;}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;height:64px;gap:16px;}
@@ -50,7 +52,7 @@ a{text-decoration:none;color:inherit;}
 .banner-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
 .banner-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s;}
 .banner-dot.on{width:18px;border-radius:4px;background:var(--gn);}
-@media(max-width:768px){
+@media(min-width:0px){
   .hero-compact{padding:16px 16px 12px;}
   .banner-sec{padding:4px 16px 16px;}
   .banner-slide{min-height:140px;padding:20px 22px;}
@@ -68,7 +70,7 @@ a{text-decoration:none;color:inherit;}
 .qm-ic-faq{background:#EAF3FD;color:#2E6FBB;}
 .qm-ic-review{background:#FDF0F5;color:#C93F74;}
 .qm-label{font-size:11.5px;font-weight:700;color:var(--dark);text-align:center;}
-@media(max-width:768px){
+@media(min-width:0px){
   .quick-menu-sec{padding:2px 16px 18px;}
   .qm-item{padding:12px 6px;}
   .qm-ic{width:36px;height:36px;}
@@ -158,7 +160,7 @@ a{text-decoration:none;color:inherit;}
 .hlcc-rating{color:var(--gray);font-weight:500;flex-shrink:0;}
 .hlcc-btns{display:flex;gap:5px;}
 .hlcc-btns .btn-detail,.hlcc-btns .btn-book{flex:1;padding:6px 4px;font-size:9.5px;border-radius:100px;}
-@media(max-width:768px){
+@media(min-width:0px){
   .hosp-recommend-grid{grid-template-columns:1fr;}
   .hosp-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .hlcc-thumb{height:84px;}
@@ -262,7 +264,7 @@ a{text-decoration:none;color:inherit;}
 .lang-opt{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--dark);display:flex;align-items:center;gap:8px;min-height:44px;display:flex;align-items:center;}
 .lang-opt:hover{background:var(--lgray);}
 .lang-opt.active{background:#f0fff8;color:var(--gn2);font-weight:700;}
-@media(max-width:768px){
+@media(min-width:0px){
   .hero-title{font-size:26px;}
   .nav-links{display:none;}
   .footer-inner{grid-template-columns:1fr 1fr;}
@@ -345,7 +347,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 .fk-tab .fk-tab-ic svg{width:21px;height:21px;transition:all .15s;}
 .fk-tab.on{color:var(--gn2);}
 .fk-tab.on .fk-tab-ic svg{stroke-width:2.3;}
-@media(max-width:768px){
+@media(min-width:0px){
   #fk-tabbar{display:block;}
   body{padding-bottom:58px;}
   #fk-contact-fab{bottom:144px;}
@@ -354,6 +356,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 </style>
 </head>
 <body>
+<div class="fk-app-shell">
 
 <div id="fk-tabbar">
   <div id="fk-tabbar-inner">
@@ -4643,7 +4646,7 @@ document.getElementById('fk-ai-overlay')?.addEventListener('click', function(e){
 
   /* ① 견적위젯 트리거 플로팅 버튼 (페이지에 버튼이 없을 경우 자동 노출) */
   #fk-quote-trigger-fab{position:fixed;bottom:20px;left:16px;right:auto;background:linear-gradient(135deg,var(--gold),#B8923A);color:#fff;border:none;border-radius:28px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(201,168,76,0.35);z-index:898;display:none;align-items:center;gap:6px;}
-  @media(max-width:768px){#fk-quote-trigger-fab{bottom:78px;}}
+  @media(min-width:0px){#fk-quote-trigger-fab{bottom:78px;}}
   #fk-quote-trigger-fab.show{display:flex;}
 </style>
 
@@ -4822,5 +4825,6 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+</div><!-- /fk-app-shell -->
 </body>
 </html>
