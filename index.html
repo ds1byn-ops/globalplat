@@ -54,9 +54,18 @@ a{text-decoration:none;color:inherit;}
 .cat-card{flex:0 0 auto;width:74px;background:none;border-radius:0;padding:0;text-align:center;cursor:pointer;border:none;display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .15s;scroll-snap-align:start;}
 .cat-card:active{transform:scale(.94);}
 .cat-card:hover,.cat-card.active{background:none;}
-.cat-card .ci{width:62px;height:62px;border-radius:50%;background:var(--white);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto;transition:all .2s;}
-.cat-card:hover .ci{border-color:var(--gn);}
-.cat-card.active .ci{background:linear-gradient(135deg,var(--gn),var(--gn2));border-color:var(--gn2);box-shadow:0 8px 20px rgba(15,77,51,0.28);transform:scale(1.05);}
+.cat-card .ci{width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:all .2s;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.cat-card .ci svg{width:100%;height:100%;}
+.cat-card:hover .ci{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,77,51,0.14);}
+.cat-card.active .ci{box-shadow:0 0 0 2.5px var(--gn),0 8px 20px rgba(15,77,51,0.22);transform:scale(1.05);}
+/* ── 카테고리 좌우 스크롤 화살표 ── */
+.cats-scroll-wrap{position:relative;}
+.cat-arrow{position:absolute;top:31px;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:opacity .2s,box-shadow .2s;color:var(--gn2);}
+.cat-arrow:hover{box-shadow:0 6px 18px rgba(15,77,51,0.2);}
+.cat-arrow svg{width:16px;height:16px;}
+.cat-arrow.left{left:-6px;}
+.cat-arrow.right{right:-6px;}
+.cat-arrow.hidden{opacity:0;pointer-events:none;}
 .cat-card.active .cn{color:var(--gn2);}
 .cat-card .cn{font-size:11.5px;font-weight:600;color:var(--dark);}
 .cat-card.active .cn{color:var(--gn2);font-weight:800;}
@@ -331,7 +340,15 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <div class="sec-eyebrow">CATEGORIES</div>
       <h2 class="sec-title" data-i18n="cat_title">选择您的项目</h2>
     </div>
-    <div class="cat-grid" id="cat-grid"></div>
+    <div class="cats-scroll-wrap">
+      <button class="cat-arrow left hidden" id="cat-arrow-left" onclick="catScroll(-1)" aria-label="prev">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="cat-grid" id="cat-grid"></div>
+      <button class="cat-arrow right" id="cat-arrow-right" onclick="catScroll(1)" aria-label="next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -947,24 +964,41 @@ document.addEventListener('click',e=>{
 });
 
 // ── 카테고리 렌더 (기타서비스 포함) ──
+// ── 카테고리별 커스텀 SVG 아이콘 (둥근 사각 배경 + 라인 아이콘) ──
+const ICON_SVGS={
+  all:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#F0F4F1"/><path d="M9 18l9-7 9 7M11 17v8h5v-5h4v5h5v-8" fill="none" stroke="#1A6B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  plastic:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#E8F5EF"/><circle cx="18" cy="13" r="5.5" fill="none" stroke="#1A6B4A" stroke-width="1.8"/><path d="M9 27c1.5-5 4.8-8 9-8s7.5 3 9 8" fill="none" stroke="#1A6B4A" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  skin:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FDF0F5"/><path d="M18 28c-6-4.3-10-8.6-10-13.5A6 6 0 0 1 18 10a6 6 0 0 1 10 4.5c0 4.9-4 9.2-10 13.5z" fill="none" stroke="#C93F74" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  stemcell:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FDF6E4"/><circle cx="18" cy="18" r="3" fill="#8A6A1A"/><circle cx="18" cy="18" r="9" fill="none" stroke="#8A6A1A" stroke-width="1.4" stroke-dasharray="2.2 2.4"/><circle cx="18" cy="7" r="1.4" fill="#8A6A1A"/><circle cx="27" cy="23" r="1.4" fill="#8A6A1A"/><circle cx="9" cy="23" r="1.4" fill="#8A6A1A"/></svg>',
+  body:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#F1F8E4"/><circle cx="18" cy="9.5" r="3.2" fill="#6B8E23"/><path d="M12 28c0-4 1-6.5 2-8-1-1.4-1.5-3-1.5-4.5 0-2.6 2.5-4.5 5.5-4.5s5.5 1.9 5.5 4.5c0 1.5-.5 3.1-1.5 4.5 1 1.5 2 4 2 8" fill="none" stroke="#6B8E23" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  women:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FCEAEF"/><path d="M18 8c-1.4 4-6 6.6-6 12a6 6 0 0 0 12 0c0-5.4-4.6-8-6-12z" fill="none" stroke="#C93F74" stroke-width="1.8" stroke-linejoin="round"/><path d="M18 26v5M14.5 28.5h7" stroke="#C93F74" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  eye:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#EAF3FD"/><path d="M6 18s4.5-7 12-7 12 7 12 7-4.5 7-12 7-12-7-12-7z" fill="none" stroke="#2E6FBB" stroke-width="1.7"/><circle cx="18" cy="18" r="3.6" fill="#2E6FBB"/></svg>',
+  antiaging:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FDF6E4"/><path d="M18 8l2.6 6.9 7.4.5-5.7 4.8 1.9 7.2-6.2-4.1-6.2 4.1 1.9-7.2-5.7-4.8 7.4-.5z" fill="#C9A84C" stroke="#8A6A1A" stroke-width="1"/></svg>',
+  dental:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#E4F6F4"/><path d="M18 9c-2.6 0-4.3 1.2-5.5 1.2-1.6 0-2.9 1.4-2.9 3.8 0 3.6 1.2 7.8 2.2 10.4.6 1.7 1.2 2.5 2 2.5 1.1 0 1.2-3 1.8-4.8.4-1.2.7-1.8 2.4-1.8s2 .6 2.4 1.8c.6 1.8.7 4.8 1.8 4.8.8 0 1.4-.8 2-2.5 1-2.6 2.2-6.8 2.2-10.4 0-2.4-1.3-3.8-2.9-3.8-1.2 0-2.9-1.2-5.5-1.2z" fill="none" stroke="#3B9C86" stroke-width="1.6"/></svg>',
+  esthetic:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FDF0F5"/><path d="M18 9c-1.2 3.6-4.8 6-4.8 10.8a4.8 4.8 0 0 0 9.6 0C22.8 15 19.2 12.6 18 9z" fill="#F472A0" stroke="#C93F74" stroke-width="1"/><path d="M12 27c3-1.6 9-1.6 12 0" stroke="#C93F74" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>',
+  korean:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#F3EEFC"/><path d="M11 10v7a7 7 0 0 0 14 0v-7" fill="none" stroke="#7B5EA7" stroke-width="1.8" stroke-linecap="round"/><path d="M18 24v5M13.5 29h9" stroke="#7B5EA7" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  other:'<svg viewBox="0 0 36 36"><rect width="36" height="36" rx="12" fill="#FEF3E8"/><path d="M9 27v-2.5a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5V27" fill="none" stroke="#D97728" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="12" r="4" fill="none" stroke="#D97728" stroke-width="1.8"/></svg>',
+};
 const CAT_ICONS={
-  '전체':'🏥','성형외과':'💉','整形外科':'💉','Plastic Surgery':'💉',
-  '피부':'🌿','皮肤':'🌿','Skin':'🌿',
-  '줄기세포':'🧬','干细胞':'🧬','Stem Cell':'🧬',
-  '체형':'💪','体型':'💪','Body':'💪',
-  '여성의학':'🌸','女性医学':'🌸',"Women's Health":'🌸',
-  '안과':'👁','眼科':'👁','Eye':'👁',
-  '안티에이징':'🏅','抗衰老':'🏅','Anti-aging':'🏅',
-  '치과':'🦷','牙科':'🦷','Dental':'🦷',
-  '에스테틱':'✨','美容护理':'✨','Esthetic':'✨',
-  '기타서비스':'🎯','其他服务':'🎯','Other Services':'🎯',
-  '한방':'🍵','韩医':'🍵','Korean Medicine':'🍵',
+  '전체':ICON_SVGS.all,
+  '성형외과':ICON_SVGS.plastic,'整形外科':ICON_SVGS.plastic,'Plastic Surgery':ICON_SVGS.plastic,'Phẫu thuật thẩm mỹ':ICON_SVGS.plastic,'ศัลยกรรม':ICON_SVGS.plastic,'Пластическая хирургия':ICON_SVGS.plastic,'Пластик':ICON_SVGS.plastic,'Bedah Plastik':ICON_SVGS.plastic,'جراحة التجميل':ICON_SVGS.plastic,
+  '피부':ICON_SVGS.skin,'皮肤':ICON_SVGS.skin,'Skin':ICON_SVGS.skin,'Da liễu':ICON_SVGS.skin,'ผิวพรรณ':ICON_SVGS.skin,'Кожа':ICON_SVGS.skin,'Арьс':ICON_SVGS.skin,'Kulit':ICON_SVGS.skin,'البشرة':ICON_SVGS.skin,
+  '줄기세포':ICON_SVGS.stemcell,'干细胞':ICON_SVGS.stemcell,'Stem Cell':ICON_SVGS.stemcell,'Tế bào gốc':ICON_SVGS.stemcell,'เซลล์ต้นกำเนิด':ICON_SVGS.stemcell,'Стволовые клетки':ICON_SVGS.stemcell,'Ишмэсэн эс':ICON_SVGS.stemcell,'الخلايا الجذعية':ICON_SVGS.stemcell,
+  '체형':ICON_SVGS.body,'体型':ICON_SVGS.body,'Body':ICON_SVGS.body,'Cơ thể':ICON_SVGS.body,'รูปร่าง':ICON_SVGS.body,'Тело':ICON_SVGS.body,'Tubuh':ICON_SVGS.body,'الجسم':ICON_SVGS.body,
+  '여성의학':ICON_SVGS.women,'女性医学':ICON_SVGS.women,"Women's Health":ICON_SVGS.women,'Y tế phụ nữ':ICON_SVGS.women,'สุขภาพสตรี':ICON_SVGS.women,'Женское здоровье':ICON_SVGS.women,'Эх барих':ICON_SVGS.women,'Ginekologi':ICON_SVGS.women,'صحة المرأة':ICON_SVGS.women,
+  '안과':ICON_SVGS.eye,'眼科':ICON_SVGS.eye,'Eye':ICON_SVGS.eye,'Mắt':ICON_SVGS.eye,'จักษุ':ICON_SVGS.eye,'Офтальмология':ICON_SVGS.eye,'Нүд':ICON_SVGS.eye,'Mata':ICON_SVGS.eye,'العيون':ICON_SVGS.eye,
+  '안티에이징':ICON_SVGS.antiaging,'抗衰老':ICON_SVGS.antiaging,'Anti-aging':ICON_SVGS.antiaging,
+  '치과':ICON_SVGS.dental,'牙科':ICON_SVGS.dental,'Dental':ICON_SVGS.dental,
+  '에스테틱':ICON_SVGS.esthetic,'美容护理':ICON_SVGS.esthetic,'Esthetic':ICON_SVGS.esthetic,
+  '기타서비스':ICON_SVGS.other,'其他服务':ICON_SVGS.other,'Other Services':ICON_SVGS.other,
+  '한방':ICON_SVGS.korean,'韩医':ICON_SVGS.korean,'Korean Medicine':ICON_SVGS.korean,
   // 기타 언어
-  'Chống lão hóa':'🏅','Nha khoa':'🦷','Thẩm mỹ':'✨','Dịch vụ khác':'🎯','Đông y':'🍵',
-  'ต้านวัย':'🏅','ทันตกรรม':'🦷','เอสเทติก':'✨','บริการอื่นๆ':'🎯','แพทย์แผนเกาหลี':'🍵',
-  'アンチエイジング':'🏅','歯科':'🦷','エステ':'✨','その他サービス':'🎯','韓方':'🍵',
-  'Антивозрастное':'🏅','Стоматология':'🦷','Эстетика':'✨','Другие услуги':'🎯','Корейская медицина':'🍵',
-  'Pengobatan Tradisional':'🍵','Зүүн анагаах':'🍵',
+  'Chống lão hóa':ICON_SVGS.antiaging,'Nha khoa':ICON_SVGS.dental,'Thẩm mỹ':ICON_SVGS.esthetic,'Dịch vụ khác':ICON_SVGS.other,'Đông y':ICON_SVGS.korean,
+  'ต้านวัย':ICON_SVGS.antiaging,'ทันตกรรม':ICON_SVGS.dental,'เอสเทติก':ICON_SVGS.esthetic,'บริการอื่นๆ':ICON_SVGS.other,'แพทย์แผนเกาหลี':ICON_SVGS.korean,
+  'アンチエイジング':ICON_SVGS.antiaging,'歯科':ICON_SVGS.dental,'エステ':ICON_SVGS.esthetic,'その他サービス':ICON_SVGS.other,'韓方':ICON_SVGS.korean,
+  'Антивозрастное':ICON_SVGS.antiaging,'Стоматология':ICON_SVGS.dental,'Эстетика':ICON_SVGS.esthetic,'Другие услуги':ICON_SVGS.other,'Корейская медицина':ICON_SVGS.korean,
+  'Pengobatan Tradisional':ICON_SVGS.korean,'Зүүн анагаах':ICON_SVGS.korean,
+  'Все':ICON_SVGS.all,'Tất cả':ICON_SVGS.all,'ทั้งหมด':ICON_SVGS.all,'すべて':ICON_SVGS.all,'Бүгд':ICON_SVGS.all,'Semua':ICON_SVGS.all,'الكل':ICON_SVGS.all,'All':ICON_SVGS.all,'全部':ICON_SVGS.all,
 };
 const EXTRA_CATS_KR=['기타서비스','其他服务','Other Services','Dịch vụ khác','บริการอื่นๆ','その他サービス','Другие услуги'];
 
@@ -1592,13 +1626,29 @@ function renderCats(){
   const grid=document.getElementById('cat-grid');
   grid.innerHTML=cats.map((c,i)=>`
     <div class="cat-card${activeCat===c?' active':''}" data-cat="${i}">
-      <div class="ci">${CAT_ICONS[c]||(i===0?'🏥':'✨')}</div>
+      <div class="ci">${CAT_ICONS[c]||(i===0?ICON_SVGS.all:ICON_SVGS.esthetic)}</div>
       <div class="cn">${c}</div>
     </div>`).join('');
   // data-cat 인덱스로 클릭 이벤트 등록 (따옴표 문제 방지)
   grid.querySelectorAll('.cat-card').forEach(el=>{
     el.onclick=function(){setCat(cats[parseInt(this.dataset.cat)],this);};
   });
+  updateCatArrows();
+}
+// ── 카테고리 좌우 스크롤 화살표 ──
+function catScroll(dir){
+  const grid=document.getElementById('cat-grid');
+  if(!grid) return;
+  grid.scrollBy({left: dir*220, behavior:'smooth'});
+}
+function updateCatArrows(){
+  const grid=document.getElementById('cat-grid');
+  const left=document.getElementById('cat-arrow-left');
+  const right=document.getElementById('cat-arrow-right');
+  if(!grid||!left||!right) return;
+  const maxScroll=grid.scrollWidth-grid.clientWidth;
+  left.classList.toggle('hidden', grid.scrollLeft<=4);
+  right.classList.toggle('hidden', grid.scrollLeft>=maxScroll-4);
 }
 function setCat(cat,el){
   const all=t('cats')[0];
@@ -4134,6 +4184,12 @@ document.addEventListener('DOMContentLoaded', function(){
   const hasQuoteTrigger = !!document.querySelector('[onclick*="openQuoteWidget"]:not(#fk-quote-trigger-fab)');
   if(!hasQuoteTrigger && typeof openQuoteWidget === 'function'){
     document.getElementById('fk-quote-trigger-fab')?.classList.add('show');
+  }
+  // 카테고리 가로 스크롤 시 화살표 자동 갱신
+  const catGridEl = document.getElementById('cat-grid');
+  if(catGridEl){
+    catGridEl.addEventListener('scroll', updateCatArrows, { passive:true });
+    window.addEventListener('resize', updateCatArrows);
   }
 });
 
