@@ -254,15 +254,31 @@ a{text-decoration:none;color:inherit;}
   .footer-inner{grid-template-columns:1fr 1fr;}
   .detail-inner{grid-template-columns:1fr;}
   .info-grid{grid-template-columns:1fr;}
-  /* 모바일 nav */
-  .nav-inner{padding:0 14px;}
-  .nav-right{gap:6px;}
+  /* 모바일 nav: 고정높이 해제 + 줄바꿈 전면 방지 */
+  .nav{padding:0 14px;}
+  .nav-inner{padding:8px 0;height:auto;min-height:56px;gap:6px;}
+  .nav-inner > div:first-child{min-width:0;flex-shrink:1;overflow:hidden;}
+  .logo{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .logo-sub{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px;}
+  .nav-right{gap:5px;flex-shrink:0;}
   /* 모바일 언어 드롭다운 - 왼쪽으로 열리게 */
   #lang-menu{right:auto!important;left:0!important;min-width:150px!important;max-height:60vh;overflow-y:auto;}
-  /* 언어 버튼 작게 */
-  #lang-trigger{padding:5px 8px!important;font-size:12px!important;}
-  /* 상담버튼 작게 */
-  .btn-consult{padding:7px 12px!important;font-size:12px!important;}
+  /* 언어 버튼: 줄바꿈 방지 + 축소 */
+  #lang-trigger{padding:5px 7px!important;font-size:11px!important;white-space:nowrap;gap:3px!important;}
+  #lang-trigger span{white-space:nowrap;}
+  /* My 버튼: 줄바꿈 방지 + 축소, 아주 좁은 화면에선 라벨 숨김(아이콘만) */
+  .my-btn-nav{padding:5px 9px!important;font-size:11px!important;white-space:nowrap;gap:4px!important;}
+  .my-btn-nav .my-ic{width:14px;height:14px;flex-shrink:0;}
+  .my-dropdown{width:190px!important;right:-8px!important;}
+  /* 상담버튼: 줄바꿈 방지 + 축소 */
+  .btn-consult{padding:7px 10px!important;font-size:11px!important;white-space:nowrap;}
+  @media(max-width:380px){
+    .logo-sub{display:none;}
+    #my-btn-label{display:none;}
+    .my-btn-nav{padding:6px 8px!important;}
+    .btn-consult{padding:6px 8px!important;font-size:10px!important;}
+    #lang-trigger{padding:5px 6px!important;}
+  }
   /* 히어로 */
   .hero-inner{padding:40px 16px 32px;}
   /* 병원 카드: 모바일에서도 리스트형 유지 (CSS는 위 .hlc 반응형 규칙 참조) */
@@ -766,13 +782,13 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 
   <!-- 회원가입 폼 -->
   <div id="auth-form-signup" style="display:none;">
-    <div class="fitem"><label data-i18n="auth_name">姓名<span class="auth-req">*</span></label><input type="text" id="auth-signup-name" placeholder="ZHANG JING"></div>
-    <div class="fitem"><label data-i18n="auth_email">邮箱<span class="auth-req">*</span></label><input type="email" id="auth-signup-email" placeholder="you@example.com"></div>
-    <div class="fitem"><label data-i18n="auth_messenger">微信 / LINE / WhatsApp ID<span class="auth-req">*</span></label><input type="text" id="auth-signup-messenger" placeholder="WeChat ID"></div>
-    <div class="fitem"><label data-i18n="auth_password">密码<span class="auth-req">*</span></label><input type="password" id="auth-signup-pw" placeholder="至少6位"></div>
-    <div class="fitem"><label data-i18n="auth_phone"><span data-i18n="auth_optional_tag" class="auth-optional-tag">(选填)</span> 电话</label><input type="tel" id="auth-signup-phone" placeholder="+86 138 0000 0000"></div>
+    <div class="fitem"><label><span data-i18n="auth_name">姓名</span><span class="auth-req">*</span></label><input type="text" id="auth-signup-name" placeholder="ZHANG JING"></div>
+    <div class="fitem"><label><span data-i18n="auth_email">邮箱</span><span class="auth-req">*</span></label><input type="email" id="auth-signup-email" placeholder="you@example.com"></div>
+    <div class="fitem"><label><span data-i18n="auth_messenger">微信 / LINE / WhatsApp ID</span><span class="auth-req">*</span></label><input type="text" id="auth-signup-messenger" placeholder="WeChat ID"></div>
+    <div class="fitem"><label><span data-i18n="auth_password">密码</span><span class="auth-req">*</span></label><input type="password" id="auth-signup-pw" placeholder="至少6位"></div>
+    <div class="fitem"><label><span class="auth-optional-tag" data-i18n="auth_optional_tag">(选填)</span> <span data-i18n="auth_phone">电话</span></label><input type="tel" id="auth-signup-phone" placeholder="+86 138 0000 0000"></div>
     <div class="fitem">
-      <label data-i18n="f_nation">国籍<span class="auth-optional-tag" data-i18n="auth_optional_tag">(选填)</span></label>
+      <label><span data-i18n="f_nation">国籍</span><span class="auth-optional-tag" data-i18n="auth_optional_tag">(选填)</span></label>
       <select id="auth-signup-nation">
         <option value="">-</option>
         <option value="中国" data-i18n="n_cn">中国</option>
@@ -2237,6 +2253,21 @@ function showMain(){
   document.getElementById('detail-view').style.display='none';
   window.scrollTo(0,0);
 }
+const TREAT_ICON_MAP={
+  '가슴':'plastic','가슴필러':'plastic','거상':'antiaging','건강검진':'other','골반필러':'women',
+  '난소줄기세포':'stemcell','눈':'eye','다이어트':'body','라섹':'eye','라식':'eye','레이저':'skin',
+  '리프팅':'antiaging','바디리프팅':'antiaging','백내장':'eye','보톡스':'skin','성형':'plastic',
+  '세포노화검사':'other','소음순':'women','소음순 교정':'women','수액테라피':'other','슈링크':'antiaging',
+  '스킨부스터':'skin','실루엣소프트':'antiaging','실리프팅':'antiaging','안면교정':'plastic','안면윤곽':'plastic',
+  '양악':'plastic','엘란세':'skin','여성성형':'women','윤곽':'plastic','음핵리프팅':'women','이중턱':'antiaging',
+  '자궁근종':'women','자궁하이푸':'women','줄기세포':'stemcell','쥬브젠':'skin','지방흡입':'body',
+  '질타이트닝':'women','코':'plastic','통증':'korean','튼살':'skin','파워에이징':'antiaging','피부':'skin',
+  '필러':'skin','한방':'korean','항노화':'antiaging','흉터':'skin','흉터치료':'skin','힙필러':'body',
+};
+function treatIconSvg(krTag){
+  const key = TREAT_ICON_MAP[krTag] || 'esthetic';
+  return ICON_SVGS[key] || ICON_SVGS.esthetic;
+}
 function renderDetail(kr){
   const h=HOSPS.find(x=>x.kr===kr);if(!h)return;
   const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
@@ -2253,8 +2284,7 @@ function renderDetail(kr){
   loadHospIntro(h.kr);
   document.getElementById('d-badges').innerHTML=`<span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${h.badgePk?'#fce7f3':'#dcfce7'};color:${h.badgePk?'#9d174d':'#15803d'};">${badgeLabel(h.badge)}</span>`;
   document.getElementById('d-treats').innerHTML=treats.map(tr=>`<span style="font-size:11px;background:var(--lgray);color:var(--gray);padding:2px 8px;border-radius:6px;display:inline-block;margin:2px;">${tr}</span>`).join('');
-  const icons=['💉','✨','🔬','🌿','👁','💆'];
-  document.getElementById('d-treat-grid').innerHTML=treats.map((tr,i)=>`<div style="background:var(--white);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border);"><div style="font-size:24px;margin-bottom:6px;">${icons[i%icons.length]}</div><div style="font-size:12px;font-weight:600;">${tr}</div></div>`).join('');
+  document.getElementById('d-treat-grid').innerHTML=treats.map((tr,i)=>`<div style="background:var(--white);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border);"><div style="width:32px;height:32px;margin:0 auto 6px;">${treatIconSvg(h.treats_kr[i])}</div><div style="font-size:12px;font-weight:600;">${tr}</div></div>`).join('');
   document.getElementById('d-hours-grid').innerHTML=h.hours.split('/').map(s=>{const p=s.trim().split(' ');const day=p.slice(0,-1).join(' ');const time=p[p.length-1];return`<div style="background:var(--white);border-radius:10px;padding:10px;border:1px solid var(--border);text-align:center;"><div style="font-size:11px;font-weight:700;color:var(--gn2);margin-bottom:4px;">${day}</div><div style="font-size:11px;color:var(--gray);">${time}</div></div>`;}).join('');
   const revs=t('reviews');
   // 해당 병원 리뷰만 필터링
