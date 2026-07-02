@@ -654,7 +654,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     </div>
     <div class="footer-col">
       <h4 data-i18n="f_h3">联系方式</h4>
-      <a href="https://work.weixin.qq.com/kfid/kfc" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;">
+      <a href="javascript:void(0)" onclick="fkShowWechatId()" style="display:flex;align-items:center;gap:6px;">
         <img src="https://img.icons8.com/color/20/wechat.png" style="border-radius:4px;">
         WeChat: <b>Followkorea1</b>
       </a>
@@ -1058,6 +1058,18 @@ let authProfile = null;   // {id,name,email,messenger_id,phone,nationality}
 
 function authT(key){ return t(key); }
 
+// ── 위챗 ID 안내 (실제 고객센터 링크가 아직 없어 클립보드 복사 방식으로 안내) ──
+function fkShowWechatId(){
+  const wid = 'Followkorea1';
+  const msg = {
+    zh:`微信号：${wid}\n（已复制到剪贴板，请打开微信添加好友）`,
+    ko:`위챗 ID: ${wid}\n(클립보드에 복사됐어요. 위챗 앱에서 친구추가 해주세요)`,
+  }[typeof lang!=='undefined'?lang:'zh'] || `WeChat ID: ${wid}\n(Copied to clipboard — please add via WeChat app)`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(wid).catch(()=>{});
+  }
+  alert(msg);
+}
 function myToggleDropdown(){
   document.getElementById('my-dropdown').classList.toggle('open');
 }
@@ -4182,7 +4194,7 @@ function fkqResetWidget(){
 
 <!-- 플로팅 버튼 (기존 버튼이 없는 페이지를 위한 백업) -->
 <div id="fk-contact-fab">
-  <a class="fk-c-wechat" href="https://work.weixin.qq.com/kfid/kfc" target="_blank" rel="noopener noreferrer" title="WeChat">
+  <a class="fk-c-wechat" href="javascript:void(0)" onclick="fkShowWechatId()" title="WeChat">
     <svg viewBox="0 0 24 24" fill="#fff"><path d="M9.5 4C5.4 4 2 6.9 2 10.5c0 2 1.1 3.8 2.8 5-.1.5-.5 1.6-.6 1.9 0 0 0 .2.1.3.1.1.2 0 .3 0 .2-.1 1.9-1.2 2.2-1.4.9.2 1.8.4 2.7.3-.1-.4-.2-.8-.2-1.2 0-3.6 3.5-6.5 7.9-6.5.3 0 .6 0 .9.1C17.6 5.9 13.9 4 9.5 4zm-2.7 3.6c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1zm5.4 0c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1z"/><path d="M22 14.8c0-2.9-2.9-5.3-6.5-5.3s-6.5 2.4-6.5 5.3 2.9 5.3 6.5 5.3c.7 0 1.4-.1 2.1-.3.3-.1 1.6.8 1.8.9.1 0 .2.1.3 0 .1-.1.1-.2.1-.2-.1-.3-.4-1.2-.5-1.6 1.6-1 2.7-2.5 2.7-4.1zm-8.9-.9c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9zm4.7 0c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9z"/></svg>
   </a>
   <a class="fk-c-line" href="https://line.me/ti/p/Followkorea" target="_blank" rel="noopener noreferrer" title="LINE">
@@ -4492,9 +4504,9 @@ function fkaiShowHandoff(){
 function fkaiConnectHuman(){
   // 위챗 연결 안내 + 상담 로그 저장
   fkaiSaveHandoffLog();
-  window.open('https://work.weixin.qq.com/kfid/kfc', '_blank');
+  fkShowWechatId();
   document.getElementById('fkai-handoff-slot').innerHTML = '';
-  fkaiAddMsg('bot', fkaiLang === 'zh' ? '已为您打开微信客服窗口，请添加好友咨询～' : '위챗 상담 창을 열었습니다. 친구 추가 후 문의해주세요~');
+  fkaiAddMsg('bot', fkaiLang === 'zh' ? '请添加微信号 Followkorea1 咨询～' : '위챗 아이디 Followkorea1 로 친구 추가 후 문의해주세요~');
 }
 
 async function fkaiSaveHandoffLog(){
