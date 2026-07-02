@@ -449,6 +449,20 @@ tr:hover td{background:#fafaf8;}
       <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">이동 URL</label>
       <input type="text" id="bn-url" placeholder="https://..." style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
     </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">배경 실사 이미지 (선택 — 비워두면 배경 색상만 표시)</label>
+      <input type="text" id="bn-image-url" placeholder="https://... (이미지 주소)" oninput="bnUpdatePreview()" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;margin-bottom:6px;">
+      <div style="font-size:10.5px;color:#888;line-height:1.6;background:#f8f8f8;padding:8px 10px;border-radius:6px;margin-bottom:8px;">
+        📐 권장 사이즈: <b>가로 1200 × 세로 400px</b> (가로세로 비율 3:1)<br>
+        · 모바일 화면 가로폭에 꽉 차게 표시되고, 위에 텍스트가 얹혀지니 <b>좌측 상단은 너무 복잡하지 않은 이미지</b>가 좋아요<br>
+        · 파일 용량은 500KB 이하 권장 (로딩 속도)<br>
+        · jpg, png, webp 지원
+      </div>
+      <div id="bn-img-preview" style="display:none;width:100%;height:120px;border-radius:10px;background-size:cover;background-position:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.45));"></div>
+        <div style="position:absolute;bottom:8px;left:10px;color:#fff;font-size:10px;background:rgba(0,0,0,0.4);padding:2px 8px;border-radius:100px;">미리보기 (실제 텍스트 위치 예시)</div>
+      </div>
+    </div>
     <div style="margin-bottom:6px;font-size:11px;font-weight:700;color:var(--gn2);">🇨🇳 중국어 (기본값, 필수)</div>
     <div style="display:grid;gap:6px;margin-bottom:12px;">
       <input type="text" id="bn-tag-zh" placeholder="태그 (예: 韩国NO.1医美预约平台)" style="padding:7px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
@@ -1890,10 +1904,10 @@ function renderBannerList(){
   const bgColors={banner1:'#1A6B4A',banner2:'#C9A84C',banner3:'#16202e'};
   list.innerHTML=BN.map((b,i)=>`
     <div class="card" style="display:flex;align-items:center;gap:12px;padding:12px;${b.active?'':'opacity:.5;'}">
-      <div style="width:64px;height:48px;border-radius:8px;background:${bgColors[b.bg_style]||'#1A6B4A'};flex-shrink:0;"></div>
+      <div style="width:64px;height:48px;border-radius:8px;flex-shrink:0;background:${b.image_url?`url('${b.image_url.replace(/'/g,"%27")}') center/cover`:(bgColors[b.bg_style]||'#1A6B4A')};"></div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((b.title_zh||'').replace(/<br>/g,' '))}</div>
-        <div style="font-size:11px;color:#888;">${escapeHtml(b.tag_zh)} · ${b.active?'✅ 노출중':'⏸️ 숨김'} · 순서 ${b.sort_order}</div>
+        <div style="font-size:11px;color:#888;">${escapeHtml(b.tag_zh)} · ${b.active?'✅ 노출중':'⏸️ 숨김'} · 순서 ${b.sort_order}${b.image_url?' · 🖼️ 이미지있음':''}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:2px;">
         <button class="btn sm" onclick="moveBanner(${b.id},-1)" ${i===0?'disabled':''}>▲</button>
@@ -1905,16 +1919,28 @@ function renderBannerList(){
     </div>
   `).join('');
 }
+function bnUpdatePreview(){
+  const url=document.getElementById('bn-image-url').value.trim();
+  const prev=document.getElementById('bn-img-preview');
+  if(url){
+    prev.style.display='block';
+    prev.style.backgroundImage=`url('${url.replace(/'/g,"%27")}')`;
+  }else{
+    prev.style.display='none';
+    prev.style.backgroundImage='';
+  }
+}
 function openBannerModal(id){
   document.getElementById('bn-err').style.display='none';
   document.getElementById('bn-id').value=id===null?'':id;
   document.getElementById('bn-modal-title').textContent=id===null?'배너 추가':'배너 수정';
-  const fields=['bn-bg','bn-link-type','bn-url','bn-tag-zh','bn-title-zh','bn-sub-zh','bn-tag-ko','bn-title-ko','bn-sub-ko','bn-tag-en','bn-title-en','bn-sub-en'];
+  const fields=['bn-bg','bn-link-type','bn-url','bn-image-url','bn-tag-zh','bn-title-zh','bn-sub-zh','bn-tag-ko','bn-title-ko','bn-sub-ko','bn-tag-en','bn-title-en','bn-sub-en'];
   if(id!==null){
     const b=BN.find(x=>x.id===id); if(!b) return;
     document.getElementById('bn-bg').value=b.bg_style||'banner1';
     document.getElementById('bn-link-type').value=b.link_type||'hospitals';
     document.getElementById('bn-url').value=b.link_value||'';
+    document.getElementById('bn-image-url').value=b.image_url||'';
     document.getElementById('bn-tag-zh').value=b.tag_zh||'';
     document.getElementById('bn-title-zh').value=b.title_zh||'';
     document.getElementById('bn-sub-zh').value=b.sub_zh||'';
@@ -1930,6 +1956,7 @@ function openBannerModal(id){
     document.getElementById('bn-link-type').value='hospitals';
   }
   document.getElementById('bn-url-wrap').style.display=document.getElementById('bn-link-type').value==='url'?'block':'none';
+  bnUpdatePreview();
   document.getElementById('bn-modal').classList.add('open');
 }
 function closeBannerModal(){ document.getElementById('bn-modal').classList.remove('open'); }
@@ -1945,6 +1972,7 @@ async function saveBanner(){
     bg_style:document.getElementById('bn-bg').value,
     link_type:document.getElementById('bn-link-type').value,
     link_value:document.getElementById('bn-url').value.trim()||null,
+    image_url:document.getElementById('bn-image-url').value.trim()||null,
     tag_zh:tagZh, title_zh:titleZh, sub_zh:document.getElementById('bn-sub-zh').value.trim()||null,
     tag_ko:document.getElementById('bn-tag-ko').value.trim()||null,
     title_ko:document.getElementById('bn-title-ko').value.trim()||null,

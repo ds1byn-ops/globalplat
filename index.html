@@ -42,6 +42,9 @@ a{text-decoration:none;color:inherit;}
 .banner-slide .b-arrow{position:absolute;right:20px;bottom:18px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;}
 .banner-slide .b-arrow svg{width:14px;height:14px;}
 .banner1{background:linear-gradient(125deg,#0F4D33 0%,#1A6B4A 55%,#2D9A6E 100%);}
+.banner-slide.has-img{background-size:cover;background-position:center;}
+.banner-slide.has-img::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.55) 100%);pointer-events:none;}
+.banner-slide.has-img > *{position:relative;z-index:1;}
 .banner2{background:linear-gradient(125deg,#8A6A1A 0%,#C9A84C 60%,#D9C08A 100%);}
 .banner3{background:linear-gradient(125deg,#16202e 0%,#2E4258 55%,#4A6785 100%);}
 .banner-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
@@ -1993,7 +1996,10 @@ function renderBannerSlides(){
     const onclick = b.link_type==='url' && b.link_value
       ? `window.open(${JSON.stringify(b.link_value)},'_blank')`
       : (BANNER_LINK_HANDLERS[b.link_type]||BANNER_LINK_HANDLERS.hospitals);
-    return `<div class="banner-slide ${b.bg_style||'banner1'}" onclick="${onclick}">
+    const hasImg = !!b.image_url;
+    const cls = hasImg ? 'has-img' : (b.bg_style||'banner1');
+    const style = hasImg ? ` style="background-image:url('${b.image_url.replace(/'/g,"%27")}')"` : '';
+    return `<div class="banner-slide ${cls}"${style} onclick="${onclick}">
       <div class="b-tag">${tag||''}</div>
       <div class="b-title">${title||''}</div>
       <div class="b-sub">${sub||''}</div>
