@@ -33,6 +33,9 @@ td{padding:8px 10px;border-bottom:1px solid #f5f5f5;font-size:11px;vertical-alig
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:#fafaf8;}
 .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:500;white-space:nowrap;}
+.mb-sort-th{cursor:pointer;user-select:none;white-space:nowrap;}
+.mb-sort-th:hover{background:var(--lgray);}
+.mb-sort-arrow{font-size:9px;color:var(--gn2);margin-left:3px;}
 .badge.확정{background:#dcfce7;color:#15803d;}.badge.대기{background:#fef9c3;color:#854d0e;}
 .badge.완료{background:#dbeafe;color:#1e40af;}.badge.취소,.badge.노쇼{background:#fee2e2;color:#991b1b;}
 .badge.왕홍{background:#ede9fe;color:#5b21b6;}.badge.가이드{background:#dbeafe;color:#1e40af;}
@@ -392,8 +395,11 @@ tr:hover td{background:#fafaf8;}
   </div>
   <div class="card" style="overflow-x:auto;padding:0;">
     <table><thead><tr>
-      <th>가입일시</th><th>이름</th><th>이메일</th><th>메신저ID</th>
-      <th>전화번호</th><th>국적</th>
+      <th class="mb-sort-th" onclick="mbSortBy('created_at')">가입일시<span class="mb-sort-arrow" id="mb-arrow-created_at"></span></th>
+      <th class="mb-sort-th" onclick="mbSortBy('name')">이름<span class="mb-sort-arrow" id="mb-arrow-name"></span></th>
+      <th>이메일</th><th>메신저ID</th>
+      <th>전화번호</th>
+      <th class="mb-sort-th" onclick="mbSortBy('nationality')">국적<span class="mb-sort-arrow" id="mb-arrow-nationality"></span></th>
     </tr></thead><tbody id="mb-tbody"></tbody></table>
   </div>
 </div>
@@ -1696,6 +1702,11 @@ function showPage(id){
 let QR=[];
 // ── 회원가입 관리 (환자웹 Supabase Auth 연동) ──
 let MB=[];
+let mbSortKey=null, mbSortDir=1; // 1=오름차순, -1=내림차순
+function mbSortBy(key){
+  if(mbSortKey===key){ mbSortDir=-mbSortDir; } else { mbSortKey=key; mbSortDir=1; }
+  renderMembers();
+}
 async function loadMembers(){
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/rpc/get_all_user_profiles`,{method:'POST',headers});
@@ -1705,10 +1716,21 @@ async function loadMembers(){
 }
 function renderMembers(){
   const q=(document.getElementById('mb-search')?.value||'').trim().toLowerCase();
-  const filtered=MB.filter(m=>{
+  let filtered=MB.filter(m=>{
     if(!q) return true;
     return (m.name||'').toLowerCase().includes(q)||(m.email||'').toLowerCase().includes(q)||(m.messenger_id||'').toLowerCase().includes(q);
   });
+  // 정렬 적용
+  document.querySelectorAll('.mb-sort-arrow').forEach(el=>el.textContent='');
+  if(mbSortKey){
+    filtered=[...filtered].sort((a,b)=>{
+      const av=(a[mbSortKey]||''), bv=(b[mbSortKey]||'');
+      if(mbSortKey==='created_at') return (new Date(av)-new Date(bv))*mbSortDir;
+      return String(av).localeCompare(String(bv),'ko')*mbSortDir;
+    });
+    const arrowEl=document.getElementById('mb-arrow-'+mbSortKey);
+    if(arrowEl) arrowEl.textContent = mbSortDir===1?'▲':'▼';
+  }
   const today=new Date().toISOString().slice(0,10);
   const thisMonth=today.slice(0,7);
   document.getElementById('mb-st-total').textContent=MB.length;
