@@ -80,7 +80,8 @@ a{text-decoration:none;color:inherit;}
 
 .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.22),transparent 70%);pointer-events:none;}
 .hero-inner{max-width:1200px;margin:0 auto;}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #EADFC0;border-radius:100px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:22px;box-shadow:0 2px 10px rgba(201,168,76,0.1);}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #EADFC0;border-radius:100px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:22px;box-shadow:0 2px 10px rgba(201,168,76,0.1);max-width:100%;}
+#hero-badge-roll{transition:opacity .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hero-title{font-size:42px;font-weight:800;line-height:1.2;margin-bottom:16px;letter-spacing:-1px;max-width:600px;}
 .hero-title em{font-style:normal;background:linear-gradient(135deg,var(--pk2),var(--gn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero-sub{font-size:16px;color:var(--gray);margin-bottom:28px;line-height:1.8;}
@@ -102,25 +103,21 @@ a{text-decoration:none;color:inherit;}
 .sec-title{font-size:30px;font-weight:800;letter-spacing:-0.5px;}
 .sec-sub{font-size:14px;color:var(--gray);margin-top:8px;}
 /* CATS */
-.cat-grid{display:flex;gap:22px;overflow-x:auto;padding:2px 4px 10px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-.cat-grid::-webkit-scrollbar{display:none}
-.cat-card{flex:0 0 auto;width:74px;background:none;border-radius:0;padding:0;text-align:center;cursor:pointer;border:none;display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .15s;scroll-snap-align:start;}
+.cat-grid-fixed{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 4px;}
+.cat-card{background:none;border-radius:0;padding:0;text-align:center;cursor:pointer;border:none;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .15s;}
 .cat-card:active{transform:scale(.94);}
 .cat-card:hover,.cat-card.active{background:none;}
-.cat-card .ci{width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:all .2s;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.cat-card .ci{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:all .2s;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
 .cat-card .ci svg{width:100%;height:100%;}
 .cat-card:hover .ci{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,77,51,0.14);}
 .cat-card.active .ci{box-shadow:0 0 0 2.5px var(--gn),0 8px 20px rgba(15,77,51,0.22);transform:scale(1.05);}
-/* ── 카테고리 좌우 스크롤 화살표 ── */
-.cats-scroll-wrap{position:relative;}
-.cat-arrow{position:absolute;top:31px;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:opacity .2s,box-shadow .2s;color:var(--gn2);}
-.cat-arrow:hover{box-shadow:0 6px 18px rgba(15,77,51,0.2);}
-.cat-arrow svg{width:16px;height:16px;}
-.cat-arrow.left{left:-6px;}
-.cat-arrow.right{right:-6px;}
-.cat-arrow.hidden{opacity:0;pointer-events:none;}
 .cat-card.active .cn{color:var(--gn2);}
-.cat-card .cn{font-size:11.5px;font-weight:600;color:var(--dark);}
+.cat-card .cn{font-size:10px;font-weight:600;color:var(--dark);line-height:1.25;}
+@media(max-width:400px){
+  .cat-grid-fixed{gap:12px 2px;}
+  .cat-card .ci{width:42px;height:42px;border-radius:11px;}
+  .cat-card .cn{font-size:9px;}
+}
 .cat-card.active .cn{color:var(--gn2);font-weight:800;}
 /* HOSPITALS — MTK 리스트카드 스타일: 썸네일+정보 가로배치, 전체폭 예약버튼 */
 .hosp-recommend-wrap{margin-bottom:8px;}
@@ -155,7 +152,8 @@ a{text-decoration:none;color:inherit;}
 .hlcc:hover{box-shadow:0 8px 20px rgba(15,77,51,0.12);transform:translateY(-2px);}
 .hlcc-thumb{height:100px;position:relative;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;}
 .hlcc-body{padding:10px;}
-.hlcc-name{font-size:12.5px;font-weight:800;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
+.hlcc-name{font-size:12.5px;font-weight:800;color:var(--dark);margin-bottom:3px;display:flex;align-items:center;gap:5px;min-width:0;}
+.hlcc-name-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .hlcc-dept{font-size:10px;color:var(--gn2);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hlcc-rating{color:var(--gray);font-weight:500;flex-shrink:0;}
 .hlcc-btns{display:flex;gap:5px;}
@@ -298,10 +296,7 @@ a{text-decoration:none;color:inherit;}
   /* 히어로 */
   .hero-inner{padding:40px 16px 32px;}
   /* 병원 카드: 모바일에서도 리스트형 유지 (CSS는 위 .hlc 반응형 규칙 참조) */
-  /* 카테고리: 모바일에서도 가로 스크롤 유지, 아이콘만 살짝 축소 */
-  .cat-card{width:66px!important;}
-  .cat-card .ci{width:54px!important;height:54px!important;font-size:23px!important;}
-  .cat-card .cn{font-size:10.5px!important;}
+  /* 카테고리: 고정그리드는 위 .cat-grid-fixed 반응형 규칙 참조, 여기선 강제 오버라이드 불필요 */
   /* 리뷰 카드 1열 */
   .testi-grid{grid-template-columns:1fr!important;}
   /* 섹션 패딩 */
@@ -438,7 +433,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <div id="main-view">
 <section class="hero-compact">
   <div class="hero-compact-inner">
-    <div class="hero-badge">✨ <span data-i18n="hero_badge">韩国NO.1医美预约平台</span></div>
+    <div class="hero-badge">✨ <span id="hero-badge-roll">韩国NO.1医美预约平台</span></div>
     <div class="hero-search-slim">
       <input type="text" id="s-input" data-i18n-ph="search_ph" placeholder="搜索医院、项目..." oninput="filterHosps()">
       <button onclick="filterHosps()" data-i18n="search_btn">搜索</button>
@@ -449,6 +444,12 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <section class="banner-sec">
   <div class="banner-scroll" id="banner-scroll"></div>
   <div class="banner-dots" id="banner-dots"></div>
+</section>
+
+<section class="section" style="background:var(--white);padding-top:18px;padding-bottom:8px;">
+  <div class="section-inner">
+    <div class="cat-grid-fixed" id="cat-grid"></div>
+  </div>
 </section>
 
 <section class="quick-menu-sec">
@@ -472,31 +473,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
 </section>
 
-<section class="section" style="background:var(--white);">
-  <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">CATEGORIES</div>
-      <h2 class="sec-title" data-i18n="cat_title">选择您的项目</h2>
-    </div>
-    <div class="cats-scroll-wrap">
-      <button class="cat-arrow left hidden" id="cat-arrow-left" onclick="catScroll(-1)" aria-label="prev">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="cat-grid" id="cat-grid"></div>
-      <button class="cat-arrow right" id="cat-arrow-right" onclick="catScroll(1)" aria-label="next">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="sec-hosps" style="background:var(--lgray);">
   <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">HOSPITALS</div>
-      <h2 class="sec-title" data-i18n="hosp_title">精选合作医院</h2>
-      <p class="sec-sub" data-i18n="hosp_sub">严格筛选，只为您推荐最优质的江南医院</p>
-    </div>
     <div class="hosp-recommend-wrap">
       <div class="hosp-recommend-label"><span class="star">⭐</span><span data-i18n="hosp_recommend_label">추천 병원</span></div>
       <div class="hosp-recommend-grid" id="hosp-recommend-grid"></div>
@@ -2012,6 +1990,32 @@ function renderBannerSlides(){
   dots.innerHTML=SITE_BANNERS.map((_,i)=>`<div class="banner-dot${i===0?' on':''}"></div>`).join('');
 }
 
+// ── 상단 배지: 3개 문구 롤링 (한국NO.1의료 / 브랜드명 / 병원 큐레이션 문구) ──
+let heroBadgeIdx = 0;
+let heroBadgeTimer = null;
+function heroBadgeTexts(){
+  return [t('hero_badge'), t('brand_name'), t('hosp_sub')];
+}
+function renderHeroBadge(){
+  const el = document.getElementById('hero-badge-roll');
+  if(!el) return;
+  const texts = heroBadgeTexts();
+  heroBadgeIdx = heroBadgeIdx % texts.length;
+  el.style.opacity = '0';
+  setTimeout(()=>{
+    el.textContent = texts[heroBadgeIdx];
+    el.style.opacity = '1';
+  }, 200);
+}
+function startHeroBadgeRoll(){
+  if(heroBadgeTimer) clearInterval(heroBadgeTimer);
+  renderHeroBadge();
+  heroBadgeTimer = setInterval(()=>{
+    heroBadgeIdx = (heroBadgeIdx + 1) % heroBadgeTexts().length;
+    renderHeroBadge();
+  }, 3200);
+}
+
 function setLang(l){
   lang=l;
   document.documentElement.setAttribute('dir', l==='ar' ? 'rtl' : 'ltr');
@@ -2028,7 +2032,7 @@ function setLang(l){
     vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
-  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides();
+  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides(); renderHeroBadge();
   if(currentHosp) renderDetail(currentHosp);
   initSvcButtons();
   // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
@@ -2086,22 +2090,6 @@ function renderCats(){
   grid.querySelectorAll('.cat-card').forEach(el=>{
     el.onclick=function(){setCat(cats[parseInt(this.dataset.cat)],this);};
   });
-  updateCatArrows();
-}
-// ── 카테고리 좌우 스크롤 화살표 ──
-function catScroll(dir){
-  const grid=document.getElementById('cat-grid');
-  if(!grid) return;
-  grid.scrollBy({left: dir*220, behavior:'smooth'});
-}
-function updateCatArrows(){
-  const grid=document.getElementById('cat-grid');
-  const left=document.getElementById('cat-arrow-left');
-  const right=document.getElementById('cat-arrow-right');
-  if(!grid||!left||!right) return;
-  const maxScroll=grid.scrollWidth-grid.clientWidth;
-  left.classList.toggle('hidden', grid.scrollLeft<=4);
-  right.classList.toggle('hidden', grid.scrollLeft>=maxScroll-4);
 }
 function setCat(cat,el){
   const all=t('cats')[0];
@@ -2217,7 +2205,7 @@ function filterHosps(){
     const ratingHTML=rating?`<div class="hlc-rating"><span class="hlc-star">★</span> ${rating.avg} · 💬 ${rating.count}</div>`:'';
     return `<div class="hlc${isRec?' hlc-rec':''}" data-kr="${h.kr}">
       <div class="hlc-row">
-        <div class="hlc-thumb">${cardImg||h.icon}<span class="hlc-badge${h.badgePk?' pk':''}">${badgeLabel(h.badge)}</span></div>
+        <div class="hlc-thumb">${cardImg||h.icon}</div>
         <div class="hlc-info">
           <div class="hlc-name">${name}</div>
           <div class="hlc-dept">${dept}</div>
@@ -2240,12 +2228,12 @@ function filterHosps(){
     const cardImg=imgSrc?
       `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     const rating=hospRatingInfo(h.kr);
-    const ratingHTML=rating?`<span class="hlcc-rating"><span class="hlc-star">★</span> ${rating.avg}</span>`:'';
+    const ratingHTML=rating?`<span class="hlcc-rating"><span class="hlc-star">★</span>${rating.avg}</span>`:'';
     return `<div class="hlcc" data-kr="${h.kr}">
-      <div class="hlcc-thumb">${cardImg||h.icon}<span class="hlc-badge${h.badgePk?' pk':''}">${badgeLabel(h.badge)}</span></div>
+      <div class="hlcc-thumb">${cardImg||h.icon}</div>
       <div class="hlcc-body">
-        <div class="hlcc-name">${name}</div>
-        <div class="hlcc-dept">${dept}${ratingHTML}</div>
+        <div class="hlcc-name"><span class="hlcc-name-txt">${name}</span>${ratingHTML}</div>
+        <div class="hlcc-dept">${dept}</div>
         <div class="hlcc-btns">
           <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
           <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
@@ -4676,12 +4664,6 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!hasQuoteTrigger && typeof openQuoteWidget === 'function'){
     document.getElementById('fk-quote-trigger-fab')?.classList.add('show');
   }
-  // 카테고리 가로 스크롤 시 화살표 자동 갱신
-  const catGridEl = document.getElementById('cat-grid');
-  if(catGridEl){
-    catGridEl.addEventListener('scroll', updateCatArrows, { passive:true });
-    window.addEventListener('resize', updateCatArrows);
-  }
   // ── 배너 캐러셀: 자동 슬라이드 + dot 동기화 + 스와이프 시 dot 갱신 ──
   // (site_banners 비동기 로드가 끝난 뒤 실행되어야 dot/slide가 이미 렌더된 상태)
   function initBannerCarousel(){
@@ -4712,6 +4694,7 @@ document.addEventListener('DOMContentLoaded', function(){
     bnScroll.addEventListener('touchstart', ()=>clearInterval(bnTimer), { passive:true });
   }
   loadBanners().then(initBannerCarousel);
+  startHeroBadgeRoll();
   // 로그인 세션 복원 (자동 로그인 유지)
   authRestoreSession();
 });
