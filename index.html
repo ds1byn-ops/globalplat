@@ -133,9 +133,10 @@ a{text-decoration:none;color:inherit;}
 .hlc-badge{position:absolute;top:6px;left:6px;background:rgba(255,255,255,0.95);color:var(--gn2);font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;letter-spacing:.2px;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 .hlc-badge.pk{color:var(--pk2);}
 .hlc-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px;}
-.hlc-name{font-size:15px;font-weight:800;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hlc-name{font-size:15px;font-weight:800;color:var(--dark);display:flex;align-items:center;gap:6px;min-width:0;}
+.hlc-name-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .hlc-dept{font-size:11px;color:var(--gn2);font-weight:700;}
-.hlc-rating{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:3px;}
+.hlc-rating{font-size:11px;color:var(--gray);display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-weight:700;}
 .hlc-star{color:#F5A623;}
 .hlc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px;}
 .hlc-tag{font-size:10px;color:var(--gray);}
@@ -2204,14 +2205,14 @@ function filterHosps(){
     const cardImg=imgSrc?
       `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     const rating=hospRatingInfo(h.kr);
-    const ratingHTML=rating?`<div class="hlc-rating"><span class="hlc-star">★</span> ${rating.avg} · 💬 ${rating.count}</div>`:'';
+    const ratingCnt=(rating&&rating.count>0)?` · 💬 ${rating.count}`:'';
+    const ratingHTML=rating?`<span class="hlc-rating"><span class="hlc-star">★</span> ${rating.avg}${ratingCnt}</span>`:'';
     return `<div class="hlc${isRec?' hlc-rec':''}" data-kr="${h.kr}">
       <div class="hlc-row">
         <div class="hlc-thumb">${cardImg||h.icon}</div>
         <div class="hlc-info">
-          <div class="hlc-name">${name}</div>
+          <div class="hlc-name"><span class="hlc-name-txt">${name}</span>${ratingHTML}</div>
           <div class="hlc-dept">${dept}</div>
-          ${ratingHTML}
           <div class="hlc-tags">${treats.slice(0,4).map(tr=>`<span class="hlc-tag">#${tr}</span>`).join('')}</div>
         </div>
       </div>
@@ -2230,7 +2231,7 @@ function filterHosps(){
     const cardImg=imgSrc?
       `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     const rating=hospRatingInfo(h.kr);
-    const ratingHTML=rating?`<span class="hlcc-rating"><span class="hlc-star">★</span>${rating.avg}</span>`:'';
+    const ratingHTML=rating?`<span class="hlcc-rating"><span class="hlc-star">★</span> ${rating.avg}</span>`:'';
     return `<div class="hlcc" data-kr="${h.kr}">
       <div class="hlcc-thumb">${cardImg||h.icon}</div>
       <div class="hlcc-body">
@@ -2427,12 +2428,18 @@ const SAMPLE_REVIEWS = [
   {star:4,name:'Siti Rahma',from:'马来西亚',hospital:'Cellinique医院',treatment:'提升',text:'"Professional service with excellent results. The coordinator spoke English fluently."',date:'2026-05-15'},
 ];
 
+// 병원명 기반 결정론적 추정 별점 (리뷰 없는 병원용 — 4.5~4.7 안정 고정, 새로고침해도 안 바뀜)
+function estRatingFromName(kr){
+  let h=0; const s=kr||'';
+  for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; }
+  return ['4.5','4.6','4.7'][h%3];
+}
 function hospRatingInfo(kr){
   const src = allReviews.length>0 ? allReviews : [];
   const revs = src.filter(r=>r.hospital===kr);
-  if(!revs.length) return null;
+  if(!revs.length) return { avg: estRatingFromName(kr), count: 0, estimate: true };
   const avg = revs.reduce((s,r)=>s+(r.star||5),0)/revs.length;
-  return { avg: avg.toFixed(1), count: revs.length };
+  return { avg: avg.toFixed(1), count: revs.length, estimate: false };
 }
 async function loadReviews() {
   try {
