@@ -81,7 +81,8 @@ a{text-decoration:none;color:inherit;}
 .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.22),transparent 70%);pointer-events:none;}
 .hero-inner{max-width:1200px;margin:0 auto;}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #EADFC0;border-radius:100px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:22px;box-shadow:0 2px 10px rgba(201,168,76,0.1);max-width:100%;}
-#hero-badge-roll{transition:opacity .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#logo-roll{transition:opacity .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:100%;vertical-align:bottom;}
+.logo{max-width:220px;overflow:hidden;}
 .hero-title{font-size:42px;font-weight:800;line-height:1.2;margin-bottom:16px;letter-spacing:-1px;max-width:600px;}
 .hero-title em{font-style:normal;background:linear-gradient(135deg,var(--pk2),var(--gn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero-sub{font-size:16px;color:var(--gray);margin-bottom:28px;line-height:1.8;}
@@ -372,7 +373,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <nav class="nav">
   <div class="nav-inner">
     <div>
-      <div class="logo" onclick="showMain()" data-i18n="brand_name">江南FOLLOW</div>
+      <div class="logo" onclick="showMain()"><span id="logo-roll">江南FOLLOW</span></div>
       <div class="logo-sub">K-BEAUTY MEDICAL</div>
     </div>
         <div class="nav-links">
@@ -429,7 +430,6 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <div id="main-view">
 <section class="hero-compact">
   <div class="hero-compact-inner">
-    <div class="hero-badge">✨ <span id="hero-badge-roll">韩国NO.1医美预约平台</span></div>
     <div class="hero-search-slim">
       <input type="text" id="s-input" data-i18n-ph="search_ph" placeholder="搜索医院、项目..." oninput="filterHosps()">
       <button onclick="filterHosps()" data-i18n="search_btn">搜索</button>
@@ -1990,10 +1990,10 @@ function renderBannerSlides(){
 let heroBadgeIdx = 0;
 let heroBadgeTimer = null;
 function heroBadgeTexts(){
-  return [t('hero_badge'), t('brand_name'), t('hosp_sub')];
+  return [t('hero_badge'), t('brand_name'), t('hosp_title')];
 }
 function renderHeroBadge(){
-  const el = document.getElementById('hero-badge-roll');
+  const el = document.getElementById('logo-roll');
   if(!el) return;
   const texts = heroBadgeTexts();
   heroBadgeIdx = heroBadgeIdx % texts.length;
@@ -2122,6 +2122,9 @@ function fkhRestoreHospSection(){
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
   const firstCard=document.querySelector('.cat-card:first-child');
   if(firstCard) firstCard.classList.add('active');
+  // 버그수정: activeCat만 리셋하고 실제 그리드를 다시 안 그려서 병원목록이
+  // 컨시어지 방문 이후 영구적으로 비어보이던 문제 — filterHosps() 재호출로 해결
+  if(typeof filterHosps === 'function') filterHosps();
 }
 
 function fkhShowExtraSection(){
