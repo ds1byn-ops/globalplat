@@ -2201,7 +2201,7 @@ function renderHospSortBar(){
     +chips.map(([k,lab])=>`<button class="hsort-chip${hospSortMode===k?' on':''}" data-sort="${k}">${lab}</button>`).join('')
     +`</div>`;
   bar.querySelectorAll('.hsort-chip').forEach(c=>{
-    c.onclick=function(){ hospSortMode=this.dataset.sort; filterHosps(); };
+    c.onclick=function(){ hospSortMode=this.dataset.sort; setTimeout(filterHosps,0); };
   });
 }
 function sortHospList(list){
@@ -2315,11 +2315,15 @@ function filterHosps(){
     hlcBindClicks(recGrid);
   }
 
-  // 나머지 병원: 2열 컴팩트 그리드로 빠르게 훑어보기 좋게 (정렬 적용)
+  // 나머지 병원: 2열 컴팩트 그리드 (정렬 적용 — 정렬/카드 렌더 실패해도 목록은 항상 표시)
   renderHospSortBar();
-  const sortedOthers = sortHospList(others);
-  document.getElementById('hosp-grid').innerHTML = sortedOthers.map(h=>hlcCompactCardHTML(h)).join('');
-  hlcBindClicks(document.getElementById('hosp-grid'));
+  let sortedOthers;
+  try { sortedOthers = sortHospList(others); } catch(e){ sortedOthers = others; }
+  const _gridEl = document.getElementById('hosp-grid');
+  if(_gridEl){
+    _gridEl.innerHTML = sortedOthers.map(h=>{ try{ return hlcCompactCardHTML(h); }catch(e){ return ''; } }).join('');
+    hlcBindClicks(_gridEl);
+  }
 }
 
 function renderSteps(){
