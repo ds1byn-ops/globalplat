@@ -137,6 +137,12 @@ a{text-decoration:none;color:inherit;}
 .hlc-name-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .hlc-dept{font-size:11px;color:var(--gn2);font-weight:700;}
 .hlc-rating{font-size:11px;color:var(--gray);display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-weight:700;}
+.hosp-sort-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px;flex-wrap:wrap;}
+.hosp-list-title{font-size:13px;font-weight:800;color:var(--dark);letter-spacing:.2px;}
+.hosp-sort{display:flex;gap:6px;flex-wrap:wrap;}
+.hsort-chip{font-size:12px;font-weight:700;color:var(--gray);background:var(--white);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.hsort-chip:hover{border-color:var(--gn);color:var(--gn2);}
+.hsort-chip.on{background:linear-gradient(135deg,var(--gn),var(--gn2));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(15,77,51,.22);}
 .hlc-star{color:#F5A623;}
 .hlc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px;}
 .hlc-tag{font-size:10px;color:var(--gray);}
@@ -479,6 +485,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <div class="hosp-recommend-label"><span class="star">⭐</span><span data-i18n="hosp_recommend_label">추천 병원</span></div>
       <div class="hosp-recommend-grid" id="hosp-recommend-grid"></div>
     </div>
+    <div class="hosp-sort-bar" id="hosp-sort-bar"></div>
     <div class="hosp-grid" id="hosp-grid"></div>
   </div>
 </section>
@@ -2170,6 +2177,48 @@ async function fkhLoadRecommendedSetting(){
   }
 }
 
+// ── 병원 목록 정렬 (별점순 / 최신등록순 / 추천순) ──
+let hospSortMode='default';
+const SORT_LABELS={
+  ko:{title:'전체 병원',default:'추천순',rating:'별점순',newest:'최신등록순'},
+  zh:{title:'全部医院',default:'推荐顺序',rating:'评分最高',newest:'最新登记'},
+  en:{title:'All Hospitals',default:'Recommended',rating:'Top Rated',newest:'Newest'},
+  vi:{title:'Tất cả bệnh viện',default:'Đề xuất',rating:'Đánh giá cao',newest:'Mới nhất'},
+  th:{title:'โรงพยาบาลทั้งหมด',default:'แนะนำ',rating:'คะแนนสูงสุด',newest:'ล่าสุด'},
+  ja:{title:'すべての病院',default:'おすすめ順',rating:'評価順',newest:'新着順'},
+  ru:{title:'Все клиники',default:'Рекомендуемые',rating:'По рейтингу',newest:'Новые'},
+  mn:{title:'Бүх эмнэлэг',default:'Санал болгосон',rating:'Үнэлгээгээр',newest:'Шинэ'},
+  id:{title:'Semua Rumah Sakit',default:'Rekomendasi',rating:'Rating Tertinggi',newest:'Terbaru'},
+  ar:{title:'كل المستشفيات',default:'موصى به',rating:'الأعلى تقييمًا',newest:'الأحدث'},
+};
+function renderHospSortBar(){
+  const bar=document.getElementById('hosp-sort-bar');
+  if(!bar)return;
+  const L=SORT_LABELS[lang]||SORT_LABELS.zh;
+  const chips=[['default',L.default],['rating',L.rating],['newest',L.newest]];
+  bar.innerHTML=`<div class="hosp-list-title">${L.title}</div>`
+    +`<div class="hosp-sort">`
+    +chips.map(([k,lab])=>`<button class="hsort-chip${hospSortMode===k?' on':''}" data-sort="${k}">${lab}</button>`).join('')
+    +`</div>`;
+  bar.querySelectorAll('.hsort-chip').forEach(c=>{
+    c.onclick=function(){ hospSortMode=this.dataset.sort; filterHosps(); };
+  });
+}
+function sortHospList(list){
+  if(hospSortMode==='rating'){
+    return [...list].sort((a,b)=>{
+      const ra=hospRatingInfo(a.kr),rb=hospRatingInfo(b.kr);
+      const av=parseFloat(ra.avg),bv=parseFloat(rb.avg);
+      if(bv!==av)return bv-av;
+      if((rb.count||0)!==(ra.count||0))return (rb.count||0)-(ra.count||0);
+      return HOSPS.indexOf(a)-HOSPS.indexOf(b);
+    });
+  }
+  if(hospSortMode==='newest'){
+    return [...list].sort((a,b)=>HOSPS.indexOf(b)-HOSPS.indexOf(a));
+  }
+  return list;
+}
 function filterHosps(){
   const q=(document.getElementById('s-input').value||'').toLowerCase();
   const catMap={};
@@ -2266,8 +2315,10 @@ function filterHosps(){
     hlcBindClicks(recGrid);
   }
 
-  // 나머지 병원: 2열 컴팩트 그리드로 빠르게 훑어보기 좋게
-  document.getElementById('hosp-grid').innerHTML = others.map(h=>hlcCompactCardHTML(h)).join('');
+  // 나머지 병원: 2열 컴팩트 그리드로 빠르게 훑어보기 좋게 (정렬 적용)
+  renderHospSortBar();
+  const sortedOthers = sortHospList(others);
+  document.getElementById('hosp-grid').innerHTML = sortedOthers.map(h=>hlcCompactCardHTML(h)).join('');
   hlcBindClicks(document.getElementById('hosp-grid'));
 }
 
