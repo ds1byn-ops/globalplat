@@ -798,6 +798,11 @@ function makeBar(id,entries){
 }
 
 // ── 예약 명단 ──
+let bkSortKey='datetime', bkSortDir=1;
+function sortBk(key){
+  if(bkSortKey===key){ bkSortDir=-bkSortDir; } else { bkSortKey=key; bkSortDir=1; }
+  renderBk();
+}
 function renderBk(){
   const q=(document.getElementById('bk-q').value||'').toLowerCase();
   const hosp=document.getElementById('bk-hosp-f').value;
@@ -807,7 +812,20 @@ function renderBk(){
   const filtered=BK.filter(b=>{
     const mq=!q||b.name.toLowerCase().includes(q)||b.hospital.toLowerCase().includes(q)||(b.introducer||'').toLowerCase().includes(q);
     return mq&&(!hosp||b.hospital===hosp)&&(!inflow||b.inflow_type===inflow)&&(!month||b.datetime.startsWith(month))&&(!status||b.status===status);
-  }).sort((a,b)=>a.datetime.localeCompare(b.datetime));
+  }).sort((a,b)=>{
+    const av=bkSortKey==='amount'?r2w(a.amount):(a[bkSortKey]||'');
+    const bv=bkSortKey==='amount'?r2w(b.amount):(b[bkSortKey]||'');
+    if(typeof av==='number') return (av-bv)*bkSortDir;
+    return String(av).localeCompare(String(bv))*bkSortDir;
+  });
+  const thead=document.getElementById('bk-thead');
+  if(thead){
+    thead.querySelectorAll('th[onclick^="sortBk"]').forEach(th=>{
+      th.textContent = th.textContent.replace(/\s*[▲▼]$/,'');
+    });
+    const activeTh=[...thead.querySelectorAll('th[onclick^="sortBk"]')].find(th=>th.getAttribute('onclick')===`sortBk('${bkSortKey}')`);
+    if(activeTh) activeTh.textContent += bkSortDir===1?' ▲':' ▼';
+  }
   // 통계
   let tW=0,tH=0,tWC=0,tN=0,tNS=0;
   filtered.forEach(b=>{const c=calcC(b);tW+=c.won;tH+=c.hc;tWC+=c.wc;tN+=c.net;if(b.noshow==='Y'||b.status==='노쇼'||b.status==='취소')tNS++;});
@@ -1078,8 +1096,8 @@ function renderHospitals(){
     const bkCnt=BK.filter(b=>b.hospital===h.name).length;
     return`<tr>
       <td style="color:#ccc;">${i+1}</td>
-      <td style="font-weight:500;">${h.name}</td>
-      <td style="font-size:10px;">${h.dept||'-'}</td>
+      <td style="font-weight:500;">${escapeHtml(h.name)}</td>
+      <td style="font-size:10px;">${escapeHtml(h.dept)||'-'}</td>
       <td><span class="badge ${h.contract}">${h.contract}</span></td>
       <td style="font-size:11px;">${h.manager||'-'}</td>
       <td style="font-size:11px;">${h.tel||'-'}</td>
