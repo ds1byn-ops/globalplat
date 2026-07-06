@@ -1071,7 +1071,7 @@ function renderDashboard(){
       <td style="font-weight:500;">${escapeHtml(b.name)}</td>
       <td style="font-size:10px;">${escapeHtml(b.hospital)}</td>
       <td style="color:#555;white-space:nowrap;">${escapeHtml(b.datetime)}</td>
-      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
+      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span>${bkSiteTag(b)}</td>
       <td style="font-size:11px;">${b.introducer||'-'}</td>
       <td style="color:#B8960C;white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
       <td><span class="badge ${b.status}">${b.status}</span></td>
@@ -1140,7 +1140,7 @@ function renderBk(){
       <td style="white-space:nowrap;color:#555;">${escapeHtml(b.datetime)}</td>
       <td style="font-size:10px;color:#888;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.treatment)||'-'}</td>
       <td style="color:${c.won>0?'#B8960C':'#ccc'};white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
-      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span></td>
+      <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span>${bkSiteTag(b)}</td>
       <td style="font-size:11px;">${b.introducer||'-'}</td>
       <td style="text-align:center;">${b.hosp_comm_rate?b.hosp_comm_rate+'%':'-'}</td>
       <td style="color:var(--gn2);white-space:nowrap;">${c.hc>0?c.hc.toLocaleString()+'원':'-'}</td>
@@ -2115,6 +2115,12 @@ function qrSiteBadge(s){
   return (s==='gnfollow')
     ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:#fee2e2;color:#b91c1c;white-space:nowrap;">🇨🇳 gnfollow</span>'
     : '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:#dbeafe;color:#1e40af;white-space:nowrap;">강남팔로우</span>';
+}
+// 예약 명단: gnfollow.com 웹유입 예약만 작게 표시 (기존 펄스 예약은 표시 안 함)
+function bkSiteTag(b){
+  return (b && b.site==='gnfollow')
+    ? ' <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px;background:#fee2e2;color:#b91c1c;white-space:nowrap;">🇨🇳gn</span>'
+    : '';
 }
 function openQrModal(id){
   const q=QR.find(x=>x.id===id);if(!q)return;
