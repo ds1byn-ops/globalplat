@@ -115,6 +115,7 @@ tr:hover td{background:#fafaf8;}
     <input type="email" id="l-id" placeholder="이메일" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
     <input type="password" id="l-pw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">로그인</button>
+    <div id="l-captcha" style="margin-top:10px;display:flex;justify-content:center;"></div>
     <div class="err" id="l-err"></div>
   </div>
 </div>
@@ -949,16 +950,74 @@ async function dbDeleteAll(table){
   await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{method:'DELETE',headers:{...headers}});
 }
 
-// ── 로그인 ──
+// ── 로그인 (5회 실패 시 캡차/잠금 보호) ──
+// ↓ Cloudflare Turnstile Site Key로 교체하면 캡차 활성화. 유효 키가 없으면 자동으로 60초 잠금 폴백.
+const TURNSTILE_SITE_KEY='aaaabababab1112';
+const TS_VALID=/^0x[0-9A-Za-z_-]{20,}$/.test(TURNSTILE_SITE_KEY);
+const LOGIN_FAIL_LIMIT=5, LOGIN_LOCK_SEC=60;
+let tsWidgetId=null, tsToken='';
+
+function loginFailCount(){ return parseInt(localStorage.getItem('bo_fail')||'0',10); }
+function setLoginFail(n){ localStorage.setItem('bo_fail',String(n)); }
+function loginLockUntil(){ return parseInt(localStorage.getItem('bo_lock')||'0',10); }
+function setLoginLock(ts){ localStorage.setItem('bo_lock',String(ts)); }
+function resetLoginGuard(){
+  localStorage.removeItem('bo_fail'); localStorage.removeItem('bo_lock');
+  tsToken=''; tsWidgetId=null;
+  const c=document.getElementById('l-captcha'); if(c) c.innerHTML='';
+}
+function gateActive(){ return loginFailCount()>=LOGIN_FAIL_LIMIT; }
+function loadTurnstileScript(){
+  return new Promise(res=>{
+    if(window.turnstile) return res();
+    const s=document.createElement('script');
+    s.src='https://challenges.cloudflare.com/turnstile/v0/api.js';
+    s.async=true; s.defer=true; s.onload=()=>res(); s.onerror=()=>res();
+    document.head.appendChild(s);
+  });
+}
+async function showCaptcha(){
+  const box=document.getElementById('l-captcha'); if(!box) return;
+  await loadTurnstileScript();
+  if(!window.turnstile) return;
+  if(tsWidgetId!==null){ try{ window.turnstile.reset(tsWidgetId); }catch(e){} return; }
+  box.innerHTML='';
+  tsWidgetId=window.turnstile.render(box,{
+    sitekey:TURNSTILE_SITE_KEY,
+    callback:(t)=>{ tsToken=t; },
+    'error-callback':()=>{ tsToken=''; },
+    'expired-callback':()=>{ tsToken=''; }
+  });
+}
+
 async function doLogin(){
+  const errEl=document.getElementById('l-err');
   const email=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
-  document.getElementById('l-err').textContent='';
+  errEl.textContent='';
+
+  // 5회 이상 실패 시 게이트: 유효 키 있으면 캡차, 없으면 60초 잠금
+  if(gateActive()){
+    if(TS_VALID){
+      if(!tsToken){ await showCaptcha(); errEl.textContent='보안 확인(캡차)을 완료해 주세요.'; return; }
+    }else{
+      const rem=Math.ceil((loginLockUntil()-Date.now())/1000);
+      if(rem>0){ errEl.textContent=`시도 횟수 초과 — ${rem}초 후 다시 시도하세요.`; return; }
+    }
+  }
+
   const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
   if(error||!data.session){
-    document.getElementById('l-err').textContent='이메일 또는 비밀번호가 틀렸습니다.';
+    const n=loginFailCount()+1; setLoginFail(n);
+    if(n>=LOGIN_FAIL_LIMIT){
+      if(TS_VALID){ tsToken=''; await showCaptcha(); errEl.textContent=`로그인 ${LOGIN_FAIL_LIMIT}회 실패 — 아래 보안 확인 후 다시 시도하세요.`; }
+      else{ setLoginLock(Date.now()+LOGIN_LOCK_SEC*1000); errEl.textContent=`로그인 ${LOGIN_FAIL_LIMIT}회 실패 — ${LOGIN_LOCK_SEC}초간 잠깁니다.`; }
+    }else{
+      errEl.textContent=`이메일 또는 비밀번호가 틀렸습니다. (${n}/${LOGIN_FAIL_LIMIT})`;
+    }
     return;
   }
+  resetLoginGuard();
   setAuthHeader(data.session.access_token);
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='';
