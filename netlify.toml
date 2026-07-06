@@ -1,0 +1,5 @@
+# 정적 사이트 (빌드 없음). followkorea.kr은 GitHub Pages, gnfollow.com은 Netlify가 같은 repo를 서빙.
+# 접속 도메인 감지(index.html의 SITE)로 gnfollow.com은 중국어 전용 + 유입 gnfollow 태깅.
+[build]
+  publish = "."
+  command = ""
