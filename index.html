@@ -2285,8 +2285,12 @@ function filterHosps(){
 
   // 추천(광고) 병원 최대 10개 분리 (백오피스 설정값, 없으면 HOSPS 맨 앞 2개 기본값)
   const recommendNames = FKH_RECOMMENDED_NAMES.length > 0 ? FKH_RECOMMENDED_NAMES : [HOSPS[0].kr, HOSPS[1].kr];
-  const recommended = recommendNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean);
-  const others = filtered.filter(h => !recommendNames.includes(h.kr));
+  // 방어: 백오피스가 추천병원을 포털 저장명(PORTAL_TO_KR)으로 지정한 경우에도 B2C 목록(HOSPS.kr)과
+  // 매칭되도록 kr 이름으로 정규화. (포털명↔kr 표기가 다른 병원을 추천 지정하면 정확일치 실패로
+  //  추천에서 누락되던 문제 방지) — others 제외도 정규화된 kr 기준으로 수행해 중복 노출 방지
+  const recKrNames = recommendNames.map(n => (typeof PORTAL_TO_KR!=='undefined' && PORTAL_TO_KR[n]) ? PORTAL_TO_KR[n] : n);
+  const recommended = recKrNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean);
+  const others = filtered.filter(h => !recKrNames.includes(h.kr));
 
   // ── 병원 리스트카드 공통 템플릿 (MTK 스타일: 썸네일+정보 가로배치, 전체폭 버튼) ──
   function hlcCardHTML(h, isRec){
