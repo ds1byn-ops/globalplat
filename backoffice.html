@@ -1010,10 +1010,14 @@ async function doLogin(){
   if(error||!data.session){
     const n=loginFailCount()+1; setLoginFail(n);
     if(n>=LOGIN_FAIL_LIMIT){
-      if(TS_VALID){ tsToken=''; await showCaptcha(); errEl.textContent=`로그인 ${LOGIN_FAIL_LIMIT}회 실패 — 아래 보안 확인 후 다시 시도하세요.`; }
-      else{ setLoginLock(Date.now()+LOGIN_LOCK_SEC*1000); errEl.textContent=`로그인 ${LOGIN_FAIL_LIMIT}회 실패 — ${LOGIN_LOCK_SEC}초간 잠깁니다.`; }
+      if(TS_VALID){ tsToken=''; await showCaptcha(); errEl.innerHTML=`🔒 로그인 <b>${n}회</b> 실패 — 보안을 위해 접근이 제한되었습니다.<br>아래 보안 확인(캡차)을 완료한 뒤 다시 시도하세요.`; }
+      else{ setLoginLock(Date.now()+LOGIN_LOCK_SEC*1000); errEl.innerHTML=`🔒 로그인 <b>${n}회</b> 실패 — 보안을 위해 <b>${LOGIN_LOCK_SEC}초간</b> 로그인이 잠깁니다.`; }
     }else{
-      errEl.textContent=`이메일 또는 비밀번호가 틀렸습니다. (${n}/${LOGIN_FAIL_LIMIT})`;
+      const left=LOGIN_FAIL_LIMIT-n;
+      const warn = TS_VALID
+        ? `${LOGIN_FAIL_LIMIT}회 실패 시 보안 확인(캡차)이 표시됩니다.`
+        : `${LOGIN_FAIL_LIMIT}회 실패 시 ${LOGIN_LOCK_SEC}초간 로그인이 잠깁니다.`;
+      errEl.innerHTML = `⚠️ 이메일 또는 비밀번호가 틀렸습니다.<br>남은 시도 <b>${left}회</b> · ${warn}`;
     }
     return;
   }
