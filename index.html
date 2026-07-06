@@ -463,9 +463,9 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <div class="qm-ic qm-ic-quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div>
       <div class="qm-label" data-i18n="hero_cta_quote">💰 简易报价</div>
     </button>
-    <button class="qm-item" onclick="openModal(null)">
-      <div class="qm-ic qm-ic-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M9 3v4M15 3v4M4 11h16"/></svg></div>
-      <div class="qm-label" data-i18n="hero_cta1">立即预约</div>
+    <button class="qm-item" onclick="qmMyClick()" id="qm-my-item">
+      <div class="qm-ic qm-ic-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5 21c1.2-3.8 3.8-6 7-6s5.8 2.2 7 6"/></svg></div>
+      <div class="qm-label" id="qm-my-label" data-i18n="my_guest">My</div>
     </button>
     <button class="qm-item" onclick="fkhRestoreHospSection();document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'})">
       <div class="qm-ic qm-ic-faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 1.9-2.3 3.4M12 17.2h.01"/></svg></div>
@@ -1143,14 +1143,26 @@ function authUpdateUI(){
   const guestBox = document.getElementById('my-dd-guest');
   const userBox = document.getElementById('my-dd-user');
   const label = document.getElementById('my-btn-label');
+  const qmLabel = document.getElementById('qm-my-label');
   if(authSession && authProfile){
     guestBox.style.display='none'; userBox.style.display='';
     document.getElementById('my-dd-name').textContent = authProfile.name || '-';
     document.getElementById('my-dd-email').textContent = authProfile.email || authSession.user.email || '';
     label.textContent = authProfile.name || authT('my_guest');
+    if(qmLabel) qmLabel.textContent = authProfile.name || authT('my_guest');
   } else {
     guestBox.style.display=''; userBox.style.display='none';
     label.textContent = authT('my_guest');
+    if(qmLabel) qmLabel.textContent = authT('my_guest');
+  }
+}
+// 퀵메뉴의 My 버튼: 로그인 상태면 상단 My 드롭다운을 열어주고, 비로그인 상태면 로그인창을 바로 띄움
+function qmMyClick(){
+  if(authSession && authProfile){
+    window.scrollTo({top:0, behavior:'smooth'});
+    setTimeout(()=>myToggleDropdown(), 350);
+  } else {
+    authOpenModal('login');
   }
 }
 
