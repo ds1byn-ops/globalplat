@@ -112,7 +112,7 @@ tr:hover td{background:#fafaf8;}
   <div class="login-box">
     <div class="logo-lg">Follow Korea</div>
     <div class="sub">운영 백오피스</div>
-    <input type="text" id="l-id" placeholder="관리자 아이디" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+    <input type="email" id="l-id" placeholder="이메일" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
     <input type="password" id="l-pw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">로그인</button>
     <div class="err" id="l-err"></div>
@@ -814,17 +814,21 @@ tr:hover td{background:#fafaf8;}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
-const ADMIN_ACCOUNTS=[{id:'followkorea',pw:'fk2026!'},{id:'admin',pw:'admin1234'},{id:'jeff',pw:'jeff2026!'}];
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY); // 로그인 세션 기반 인증 (기존 평문 계정/정적 키 제거)
 
 let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
 let calY=2026, calM=5;
 
 // ── Supabase ──
 // 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
-const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','x-staff-key':'1decb948c26632d73fc42efcee23273d09e673711b1385cf361242816551cc4c'};
+const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+function setAuthHeader(tok){ headers.Authorization='Bearer '+tok; }
+// 로그인·토큰 자동갱신 시 세션 토큰으로 헤더 유지 (정적 스태프 키 제거됨)
+sb.auth.onAuthStateChange((_e,session)=>{ if(session) setAuthHeader(session.access_token); });
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
@@ -935,19 +939,21 @@ async function dbDeleteAll(table){
 }
 
 // ── 로그인 ──
-function doLogin(){
-  const id=document.getElementById('l-id').value.trim();
+async function doLogin(){
+  const email=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
-  if(ADMIN_ACCOUNTS.find(a=>a.id===id&&a.pw===pw)){
-    sessionStorage.setItem('admin_auth','1');
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='';
-    loadAndRender();
-  }else{
-    document.getElementById('l-err').textContent='아이디 또는 비밀번호가 틀렸습니다.';
+  document.getElementById('l-err').textContent='';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error||!data.session){
+    document.getElementById('l-err').textContent='이메일 또는 비밀번호가 틀렸습니다.';
+    return;
   }
+  setAuthHeader(data.session.access_token);
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='';
+  loadAndRender();
 }
-function doLogout(){sessionStorage.removeItem('admin_auth');location.reload();}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
 
 async function loadAndRender(){
   try{
@@ -2122,12 +2128,16 @@ async function saveQuoteRequest(){
 // 5분마다 신규 견적신청 자동 확인 (사이드바 뱃지 갱신용)
 setInterval(()=>{loadQuoteRequests();},5*60*1000);
 
-// ── 자동 로그인 ──
-if(sessionStorage.getItem('admin_auth')==='1'){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='';
-  loadAndRender();
-}
+// ── 세션 복원 (로그인 유지) ──
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){
+    setAuthHeader(session.access_token);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='';
+    loadAndRender();
+  }
+})();
 </script>
 </body>
 </html>
