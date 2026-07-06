@@ -1038,7 +1038,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 // ── 유입 도메인 구분: gnfollow.com = 중국어 전용, 그 외(followkorea.kr) = 강남팔로우 ──
 const SITE = location.hostname.includes('gnfollow') ? 'gnfollow' : 'followkorea';
-if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); }catch(e){} }
+if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); document.documentElement.lang='zh'; }catch(e){} }
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 
 // ══════════════════════════════════════════════════════════
