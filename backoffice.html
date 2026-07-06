@@ -489,8 +489,13 @@ tr:hover td{background:#fafaf8;}
 
 <div class="page" id="page-quote_requests">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-    <h2 style="font-size:14px;font-weight:700;">🧾 환자웹 견적신청 관리</h2>
+    <h2 style="font-size:14px;font-weight:700;">🧾 환자웹 견적·예약 통합 관리</h2>
     <div style="display:flex;gap:6px;">
+      <select id="qr-type-f" onchange="renderQuoteRequests()">
+        <option value="">전체 유형</option>
+        <option value="견적">💬 견적</option>
+        <option value="예약">📅 예약</option>
+      </select>
       <select id="qr-site-f" onchange="renderQuoteRequests()">
         <option value="">전체 유입</option>
         <option value="followkorea">강남팔로우 (followkorea.kr)</option>
@@ -514,7 +519,7 @@ tr:hover td{background:#fafaf8;}
   </div>
   <div style="overflow-x:auto;" class="card" style="padding:0;">
     <table><thead><tr>
-      <th>접수일시</th><th>유입</th><th>성명</th><th>국적</th><th>연락처</th>
+      <th>접수일시</th><th>유입</th><th>유형</th><th>성명</th><th>국적</th><th>연락처</th>
       <th>희망병원</th><th>방한일정</th><th>희망시술</th>
       <th>예상견적</th><th>담당자</th><th>상태</th><th>관리</th>
     </tr></thead><tbody id="qr-tbody"></tbody></table>
@@ -2063,7 +2068,27 @@ async function deleteBanner(id){
 async function loadQuoteRequests(){
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/quote_requests?select=*&order=created_at.desc`,{headers});
-    QR=r.ok?await r.json():[];
+    const quotes=r.ok?await r.json():[];
+    const q2=quotes.map(q=>({...q,_type:'견적',_ts:q.created_at?new Date(q.created_at).getTime():0}));
+    // 웹유입 예약(source=B2C_WEB)도 함께 표시 — 고객이 웹에서 직접 넣은 리드. 펄스 수동입력 예약은 제외.
+    let webBk=[];
+    try{
+      const br=await fetch(`${SUPA_URL}/rest/v1/bookings?select=*`,{headers});
+      const rows=br.ok?await br.json():[];
+      webBk=rows.map(x=>x.data||x)
+        .filter(b=>b&&b.source==='B2C_WEB')
+        .map(b=>({
+          id:'bk_'+b.id, _type:'예약', _ts:Number(b.id)||0,
+          created_at:new Date(Number(b.id)||0).toISOString(),
+          name:b.name, contact:b.contact, nationality:b.nationality,
+          hospital:b.hospital, procedures:b.treatment,
+          arrival_date:null, departure_date:null,
+          quote_min:0, quote_max:0,
+          assigned_to:b.introducer||'', status:b.status||'대기',
+          note:b.note||'', introducer_code:'', site:b.site
+        }));
+    }catch(e){console.warn('웹예약 로드 실패',e);}
+    QR=[...q2,...webBk].sort((a,b)=>(b._ts||0)-(a._ts||0));
   }catch(e){console.warn('견적신청 로드 실패',e);QR=[];}
   // 사이드바 뱃지 갱신 (페이지 어디에 있든 항상 보이도록)
   const badge=document.getElementById('qr-badge');
@@ -2073,7 +2098,7 @@ async function loadQuoteRequests(){
     badge.textContent=newCnt;
   }
 }
-function qrBadgeClass(s){const m={신규:'대기',상담중:'협의중',완료:'확정',취소:'취소'};return m[s]||'미정';}
+function qrBadgeClass(s){const m={신규:'대기',상담중:'협의중',완료:'확정',취소:'취소',대기:'대기',확정:'확정',방문완료:'확정',노쇼:'취소'};return m[s]||'미정';}
 // ── 보안: 사용자 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
 function escapeHtml(str){
   if(str===null||str===undefined)return '';
@@ -2083,20 +2108,32 @@ function escapeHtml(str){
 function renderQuoteRequests(){
   const sf=(document.getElementById('qr-status-f')||{value:''}).value;
   const stf=(document.getElementById('qr-site-f')||{value:''}).value;
+  const tf=(document.getElementById('qr-type-f')||{value:''}).value;
   let list=QR;
+  if(tf) list=list.filter(q=>(q._type||'견적')===tf);
   if(stf) list=list.filter(q=>(q.site||'followkorea')===stf);
   if(sf) list=list.filter(q=>q.status===sf);
-  document.getElementById('qr-st-new').textContent=QR.filter(q=>q.status==='신규'||!q.status).length;
+  const isNew=q=>q._type==='예약'?(q.status==='대기'||!q.status):(q.status==='신규'||!q.status);
+  document.getElementById('qr-st-new').textContent=QR.filter(isNew).length;
   document.getElementById('qr-st-progress').textContent=QR.filter(q=>q.status==='상담중').length;
-  document.getElementById('qr-st-done').textContent=QR.filter(q=>q.status==='완료').length;
+  document.getElementById('qr-st-done').textContent=QR.filter(q=>q.status==='완료'||q.status==='확정'||q.status==='방문완료').length;
   document.getElementById('qr-st-total').textContent=QR.length;
   document.getElementById('qr-tbody').innerHTML=list.map(q=>{
     const created=q.created_at?new Date(q.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
     const stay=(q.arrival_date&&q.departure_date)?`${q.arrival_date.slice(5)}~${q.departure_date.slice(5)}`:'-';
     const quote=(q.quote_min||q.quote_max)?`₩${Number(q.quote_min).toLocaleString()}~${Number(q.quote_max).toLocaleString()}만원`:'-';
-    return`<tr style="${(q.status==='신규'||!q.status)?'background:#fffbf0;':''}">
+    const isBk=q._type==='예약';
+    const typeBadge=isBk
+      ?'<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:#ffedd5;color:#c2410c;white-space:nowrap;">📅 예약</span>'
+      :'<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:#dbeafe;color:#1e40af;white-space:nowrap;">💬 견적</span>';
+    const manage=isBk
+      ?'<span style="font-size:10px;color:#999;white-space:nowrap;">펄스에서 처리</span>'
+      :`<button class="btn sm" onclick="openQrModal('${q.id}')">처리</button>`;
+    const isNewRow=isBk?(q.status==='대기'||!q.status):(q.status==='신규'||!q.status);
+    return`<tr style="${isNewRow?'background:#fffbf0;':''}">
       <td style="font-size:10px;color:#888;white-space:nowrap;">${created}</td>
       <td>${qrSiteBadge(q.site)}</td>
+      <td>${typeBadge}</td>
       <td style="font-weight:500;">${escapeHtml(q.name)||'-'}</td>
       <td>${escapeHtml(q.nationality)||'-'}</td>
       <td style="font-size:11px;">${escapeHtml(q.contact)||'-'}</td>
@@ -2105,10 +2142,10 @@ function renderQuoteRequests(){
       <td style="font-size:10px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(q.procedures)}">${escapeHtml(q.procedures)||'-'}</td>
       <td style="color:#B8960C;white-space:nowrap;">${quote}</td>
       <td style="font-size:11px;">${escapeHtml(q.assigned_to)||'-'}</td>
-      <td><span class="badge ${qrBadgeClass(q.status)}">${escapeHtml(q.status)||'신규'}</span></td>
-      <td><button class="btn sm" onclick="openQrModal('${q.id}')">처리</button></td>
+      <td><span class="badge ${qrBadgeClass(q.status)}">${escapeHtml(q.status)||(isBk?'대기':'신규')}</span></td>
+      <td>${manage}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:24px;color:#aaa;">견적신청이 없습니다</td></tr>';
+  }).join('')||'<tr><td colspan="13" style="text-align:center;padding:24px;color:#aaa;">견적·예약 요청이 없습니다</td></tr>';
 }
 // 유입 도메인 뱃지: gnfollow.com(중국전용) vs followkorea.kr(강남팔로우)
 function qrSiteBadge(s){
