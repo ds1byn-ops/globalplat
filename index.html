@@ -130,6 +130,13 @@ a{text-decoration:none;color:inherit;}
 .hlc.hlc-rec{border-color:var(--gold);box-shadow:0 4px 18px rgba(201,168,76,0.16);}
 .hlc-row{display:flex;gap:14px;margin-bottom:12px;}
 .hlc-thumb{width:92px;height:92px;flex-shrink:0;border-radius:14px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden;}
+/* 추천병원(큰 카드) 전용: 사진 확대 + 예약버튼만 풀와이드 */
+.hlc-row-big{align-items:stretch;}
+.hlc-thumb-big{width:132px;height:132px;border-radius:16px;font-size:44px;}
+.hlc-btn-full{width:100%;}
+@media(max-width:520px){
+  .hlc-thumb-big{width:104px;height:104px;}
+}
 .hlc-badge{position:absolute;top:6px;left:6px;background:rgba(255,255,255,0.95);color:var(--gn2);font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;letter-spacing:.2px;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 .hlc-badge.pk{color:var(--pk2);}
 .hlc-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px;}
@@ -2280,8 +2287,8 @@ function filterHosps(){
     const ratingCnt=(rating&&rating.count>0)?` · 💬 ${rating.count}`:'';
     const ratingHTML=rating?`<span class="hlc-rating"><span class="hlc-star">★</span> ${rating.avg}${ratingCnt}</span>`:'';
     return `<div class="hlc${isRec?' hlc-rec':''}" data-kr="${h.kr}">
-      <div class="hlc-row">
-        <div class="hlc-thumb">${cardImg||h.icon}</div>
+      <div class="hlc-row hlc-row-big">
+        <div class="hlc-thumb hlc-thumb-big">${cardImg||h.icon}</div>
         <div class="hlc-info">
           <div class="hlc-name"><span class="hlc-name-txt">${name}</span>${ratingHTML}</div>
           <div class="hlc-dept">${dept}</div>
@@ -2289,8 +2296,7 @@ function filterHosps(){
         </div>
       </div>
       <div class="hlc-btns">
-        <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
-        <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+        <button class="btn-book hlc-btn-full" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
       </div>
     </div>`;
   }
