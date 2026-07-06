@@ -4133,26 +4133,29 @@ async function fkqSubmit(){
   let sendOk = true;
   let sendErrorDetail = '';
   try{
-    const res = await fetch(`${SUPA_URL}/rest/v1/quote_requests`, {
+    const res = await fetch(`${SUPA_URL}/rest/v1/rpc/submit_quote_request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`,
-        'Prefer': 'return=minimal'
+        'Authorization': `Bearer ${SUPA_KEY}`
       },
       body: JSON.stringify({
-        name, contact, nationality: nation, hospital: hospital || null,
-        arrival_date: arrival || null, departure_date: departure || null,
-        procedures, quote_min: totalMinWan, quote_max: totalMaxWan,
-        status: '신규', source: 'patient_web_quote_widget', site: SITE,
-        introducer_code: introducerRaw || null
+        p: {
+          name, contact, nationality: nation, hospital: hospital || null,
+          arrival_date: arrival || null, departure_date: departure || null,
+          procedures, quote_min: totalMinWan, quote_max: totalMaxWan,
+          source: 'patient_web_quote_widget', site: SITE,
+          introducer_code: introducerRaw || null
+        }
       })
     });
-    if(!res.ok){
+    let _qr = null;
+    try{ _qr = await res.json(); }catch(_){}
+    if(!res.ok || !_qr || _qr.ok !== true){
       sendOk = false;
-      sendErrorDetail = `status ${res.status}`;
-      console.error('[FK] 견적 전송 실패:', res.status, await res.text());
+      sendErrorDetail = (_qr && _qr.error) ? _qr.error : `status ${res.status}`;
+      console.error('[FK] 견적 전송 실패:', res.status, _qr);
     }
   }catch(e){
     sendOk = false;
