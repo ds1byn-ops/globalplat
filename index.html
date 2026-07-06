@@ -132,8 +132,10 @@ a{text-decoration:none;color:inherit;}
 .hlc-thumb{width:92px;height:92px;flex-shrink:0;border-radius:14px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden;}
 /* 추천병원(큰 카드) 전용: 사진 확대 + 예약버튼만 풀와이드 */
 .hlc-row-big{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch;}
-.hlc-thumb-big{width:100%;height:140px;border-radius:16px;font-size:44px;}
-.hlc-btn-full{width:100%;}
+.hlc-row-big{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch;margin-bottom:0;}
+.hlc-thumb-big{width:100%;height:auto;min-height:100%;border-radius:16px;font-size:44px;}
+.hlc-info-big{display:flex;flex-direction:column;justify-content:space-between;gap:8px;}
+.hlc-btn-full{width:100%;flex-shrink:0;}
 @media(max-width:520px){
   .hlc-thumb-big{width:100%;height:110px;}
 }
@@ -2292,14 +2294,14 @@ function filterHosps(){
     return `<div class="hlc${isRec?' hlc-rec':''}" data-kr="${h.kr}">
       <div class="hlc-row hlc-row-big">
         <div class="hlc-thumb hlc-thumb-big">${cardImg||h.icon}</div>
-        <div class="hlc-info">
-          <div class="hlc-name"><span class="hlc-name-txt">${name}</span>${ratingHTML}</div>
-          <div class="hlc-dept">${dept}</div>
-          <div class="hlc-tags">${treats.slice(0,4).map(tr=>`<span class="hlc-tag">#${tr}</span>`).join('')}</div>
+        <div class="hlc-info hlc-info-big">
+          <div>
+            <div class="hlc-name"><span class="hlc-name-txt">${name}</span>${ratingHTML}</div>
+            <div class="hlc-dept">${dept}</div>
+            <div class="hlc-tags">${treats.slice(0,4).map(tr=>`<span class="hlc-tag">#${tr}</span>`).join('')}</div>
+          </div>
+          <button class="btn-book hlc-btn-full" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
         </div>
-      </div>
-      <div class="hlc-btns">
-        <button class="btn-book hlc-btn-full" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
       </div>
     </div>`;
   }
