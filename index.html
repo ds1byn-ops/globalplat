@@ -2275,7 +2275,11 @@ function filterHosps(){
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en).join(' ');
     const mq=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||treats.toLowerCase().includes(q);
-    const mc=!activeCat||h.cat.split('/').includes(catMap[activeCat]||activeCat);
+    // 방어: activeCat이 "기타서비스/컨시어지" 계열이면 카테고리 필터를 무시하고 전체 표시.
+    // (컨시어지 진입 시 activeCat이 이 값으로 남아, 이후 언어변경·검색·정렬로 filterHosps가
+    //  재호출되면 어떤 병원의 cat에도 없어 전체병원 목록이 통째로 비던 문제 근본 차단)
+    const isExtraActive=(typeof EXTRA_CATS_KR!=='undefined')&&EXTRA_CATS_KR.includes(activeCat);
+    const mc=!activeCat||isExtraActive||h.cat.split('/').includes(catMap[activeCat]||activeCat);
     return mq&&mc;
   });
 
