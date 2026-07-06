@@ -491,6 +491,11 @@ tr:hover td{background:#fafaf8;}
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <h2 style="font-size:14px;font-weight:700;">🧾 환자웹 견적신청 관리</h2>
     <div style="display:flex;gap:6px;">
+      <select id="qr-site-f" onchange="renderQuoteRequests()">
+        <option value="">전체 유입</option>
+        <option value="followkorea">강남팔로우 (followkorea.kr)</option>
+        <option value="gnfollow">중국전용 (gnfollow.com)</option>
+      </select>
       <select id="qr-status-f" onchange="renderQuoteRequests()">
         <option value="">전체 상태</option>
         <option value="신규">신규</option>
@@ -509,7 +514,7 @@ tr:hover td{background:#fafaf8;}
   </div>
   <div style="overflow-x:auto;" class="card" style="padding:0;">
     <table><thead><tr>
-      <th>접수일시</th><th>성명</th><th>국적</th><th>연락처</th>
+      <th>접수일시</th><th>유입</th><th>성명</th><th>국적</th><th>연락처</th>
       <th>희망병원</th><th>방한일정</th><th>희망시술</th>
       <th>예상견적</th><th>담당자</th><th>상태</th><th>관리</th>
     </tr></thead><tbody id="qr-tbody"></tbody></table>
@@ -2077,7 +2082,10 @@ function escapeHtml(str){
 
 function renderQuoteRequests(){
   const sf=(document.getElementById('qr-status-f')||{value:''}).value;
-  const list=sf?QR.filter(q=>q.status===sf):QR;
+  const stf=(document.getElementById('qr-site-f')||{value:''}).value;
+  let list=QR;
+  if(stf) list=list.filter(q=>(q.site||'followkorea')===stf);
+  if(sf) list=list.filter(q=>q.status===sf);
   document.getElementById('qr-st-new').textContent=QR.filter(q=>q.status==='신규'||!q.status).length;
   document.getElementById('qr-st-progress').textContent=QR.filter(q=>q.status==='상담중').length;
   document.getElementById('qr-st-done').textContent=QR.filter(q=>q.status==='완료').length;
@@ -2088,6 +2096,7 @@ function renderQuoteRequests(){
     const quote=(q.quote_min||q.quote_max)?`₩${Number(q.quote_min).toLocaleString()}~${Number(q.quote_max).toLocaleString()}만원`:'-';
     return`<tr style="${(q.status==='신규'||!q.status)?'background:#fffbf0;':''}">
       <td style="font-size:10px;color:#888;white-space:nowrap;">${created}</td>
+      <td>${qrSiteBadge(q.site)}</td>
       <td style="font-weight:500;">${escapeHtml(q.name)||'-'}</td>
       <td>${escapeHtml(q.nationality)||'-'}</td>
       <td style="font-size:11px;">${escapeHtml(q.contact)||'-'}</td>
@@ -2099,7 +2108,13 @@ function renderQuoteRequests(){
       <td><span class="badge ${qrBadgeClass(q.status)}">${escapeHtml(q.status)||'신규'}</span></td>
       <td><button class="btn sm" onclick="openQrModal('${q.id}')">처리</button></td>
     </tr>`;
-  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:24px;color:#aaa;">견적신청이 없습니다</td></tr>';
+  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:24px;color:#aaa;">견적신청이 없습니다</td></tr>';
+}
+// 유입 도메인 뱃지: gnfollow.com(중국전용) vs followkorea.kr(강남팔로우)
+function qrSiteBadge(s){
+  return (s==='gnfollow')
+    ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:#fee2e2;color:#b91c1c;white-space:nowrap;">🇨🇳 gnfollow</span>'
+    : '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:#dbeafe;color:#1e40af;white-space:nowrap;">강남팔로우</span>';
 }
 function openQrModal(id){
   const q=QR.find(x=>x.id===id);if(!q)return;

@@ -20,6 +20,7 @@ a{text-decoration:none;color:inherit;}
 .nav-links a:hover{color:var(--gn2);}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
 .lang-btns{display:flex;gap:4px;}
+html.gnfollow-cn #lang-trigger,html.gnfollow-cn .lang-select-wrap,html.gnfollow-cn .lang-btns{display:none!important;}
 .lang-btn{padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;background:var(--white);color:var(--gray);}
 .lang-btn.active{background:var(--gn2);color:var(--white);border-color:var(--gn2);}
 .btn-consult{padding:8px 18px;background:linear-gradient(135deg,var(--pk2),var(--pk));color:var(--white);border-radius:24px;font-size:13px;font-weight:600;border:none;cursor:pointer;}
@@ -1035,6 +1036,9 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 
 <script>
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
+// ── 유입 도메인 구분: gnfollow.com = 중국어 전용, 그 외(followkorea.kr) = 강남팔로우 ──
+const SITE = location.hostname.includes('gnfollow') ? 'gnfollow' : 'followkorea';
+if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); }catch(e){} }
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 
 // ══════════════════════════════════════════════════════════
@@ -2059,6 +2063,7 @@ function startHeroBadgeRoll(){
 }
 
 function setLang(l){
+  if(typeof SITE!=='undefined' && SITE==='gnfollow') l='zh'; // 중국어 전용 도메인 고정
   lang=l;
   document.documentElement.setAttribute('dir', l==='ar' ? 'rtl' : 'ltr');
   document.documentElement.setAttribute('lang', l);
@@ -2488,7 +2493,7 @@ async function submitBooking(){
     datetime:document.getElementById('f-date').value+' 00:00',
     contact:document.getElementById('f-contact').value,
     note:document.getElementById('f-note').value,
-    status:'대기',source:'B2C_WEB',inflow_type:'플랫폼',introducer:introducerRaw||'플랫폼',
+    status:'대기',source:'B2C_WEB',site:SITE,inflow_type:'플랫폼',introducer:introducerRaw||'플랫폼',
     hosp_comm_rate:20,dob:'',noshow:'N',hosp_paydate:'',hosp_paidamt:0,paid_comm:0,
     dept:'피부',amount:0,expected:0,vat:'별도',tax_invoice:'N',
     id:Date.now(),
@@ -4140,7 +4145,7 @@ async function fkqSubmit(){
         name, contact, nationality: nation, hospital: hospital || null,
         arrival_date: arrival || null, departure_date: departure || null,
         procedures, quote_min: totalMinWan, quote_max: totalMaxWan,
-        status: '신규', source: 'patient_web_quote_widget',
+        status: '신규', source: 'patient_web_quote_widget', site: SITE,
         introducer_code: introducerRaw || null
       })
     });
