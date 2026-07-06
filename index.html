@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1933,7 +1933,7 @@ async function loadHospIntros(){
 
 function badgeLabel(b){const m=BADGE_MAP[b];return m?(m[lang]||m.zh||b):b;}
 
-let lang='zh', currentHosp=null, activeCat='', HOSP_INTROS={};
+let lang='en', currentHosp=null, activeCat='', HOSP_INTROS={};
 const t=k=>I[lang][k]||I.zh[k]||k;
 
 
@@ -3045,7 +3045,7 @@ if(typeof AI_FLOW!=='undefined'){
 })();
 // ════════════ P3 끝 ════════════
 
-setLang('zh');
+setLang('en');
 loadReviews();
 // ⚠️ 추천병원 설정·병원소개·동적병원 데이터를 모두 기다린 후 딱 한 번만 최종 렌더링.
 //    (이전에는 각자 따로 filterHosps()를 호출해서, 네트워크 응답 순서가 매번 달라질 때마다
