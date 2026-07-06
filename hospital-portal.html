@@ -414,7 +414,9 @@ async function doLogin(){
     return;
   }
   if(!res||!res.ok){
-    errEl.textContent='아이디 또는 비밀번호가 틀렸습니다.';
+    errEl.textContent = (res&&res.error==='too_many_attempts')
+      ? '로그인 시도가 너무 많습니다. 약 15분 후 다시 시도해주세요.'
+      : '아이디 또는 비밀번호가 틀렸습니다.';
     return;
   }
   HTOKEN=res.token;
@@ -879,7 +881,7 @@ async function doChangePw(){
     });
     const res=await r.json();
     if(!res||!res.ok){
-      alert(res&&res.error==='wrong_password'?'현재 비밀번호가 틀립니다.':'비밀번호 변경에 실패했습니다.');
+      alert(res&&res.error==='too_many_attempts'?'시도가 너무 많습니다. 약 15분 후 다시 시도해주세요.':(res&&res.error==='wrong_password'?'현재 비밀번호가 틀립니다.':'비밀번호 변경에 실패했습니다.'));
       return;
     }
     alert('비밀번호가 변경되었습니다.');
