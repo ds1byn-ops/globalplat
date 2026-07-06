@@ -131,11 +131,11 @@ a{text-decoration:none;color:inherit;}
 .hlc-row{display:flex;gap:14px;margin-bottom:12px;}
 .hlc-thumb{width:92px;height:92px;flex-shrink:0;border-radius:14px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden;}
 /* 추천병원(큰 카드) 전용: 사진 확대 + 예약버튼만 풀와이드 */
-.hlc-row-big{align-items:stretch;}
-.hlc-thumb-big{width:132px;height:132px;border-radius:16px;font-size:44px;}
+.hlc-row-big{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch;}
+.hlc-thumb-big{width:100%;height:140px;border-radius:16px;font-size:44px;}
 .hlc-btn-full{width:100%;}
 @media(max-width:520px){
-  .hlc-thumb-big{width:104px;height:104px;}
+  .hlc-thumb-big{width:100%;height:110px;}
 }
 .hlc-badge{position:absolute;top:6px;left:6px;background:rgba(255,255,255,0.95);color:var(--gn2);font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;letter-spacing:.2px;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
 .hlc-badge.pk{color:var(--pk2);}
@@ -350,7 +350,7 @@ html[dir="rtl"] .testi-text,html[dir="rtl"] .step-desc,html[dir="rtl"] .hosp-nam
 html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 /* ── 하단 고정 탭바 (모바일 전용, MTK 스타일) ── */
 #fk-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);z-index:850;padding:6px 0 max(6px, env(safe-area-inset-bottom));}
-#fk-tabbar-inner{display:grid;grid-template-columns:repeat(6,1fr);max-width:520px;margin:0 auto;}
+#fk-tabbar-inner{display:grid;grid-template-columns:repeat(5,1fr);max-width:520px;margin:0 auto;}
 .fk-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;background:none;border:none;font-family:inherit;color:var(--gray);font-size:9.5px;font-weight:500;cursor:pointer;}
 .fk-tab .fk-tab-ic{display:flex;align-items:center;justify-content:center;line-height:1;}
 .fk-tab .fk-tab-ic svg{width:21px;height:21px;transition:all .15s;}
@@ -380,9 +380,6 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     </button>
     <button class="fk-tab" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100);fkSetTab(this)">
       <span class="fk-tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.3l-6.2 3.6 1.6-6.9L2 9.2l7-.6L12 2l3 6.6 7 .6-5.4 4.8 1.6 6.9z"/></svg></span><span data-i18n="nav_review">후기</span>
-    </button>
-    <button class="fk-tab" onclick="openAiChat();fkSetTab(this)">
-      <span class="fk-tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span data-i18n="nav_consult">무료상담</span>
     </button>
     <button class="fk-tab" onclick="qmMyClick();fkSetTab(this)">
       <span class="fk-tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21c1.2-3.8 3.8-6 7-6s5.8 2.2 7 6"/></svg></span><span id="tab-my-label" data-i18n="my_guest">My</span>
