@@ -1011,7 +1011,7 @@ function populateFilters(){
   const hosps=[...new Set(BK.map(b=>b.hospital))].sort((a,b)=>a.localeCompare(b,'ko'));
   hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o);});
   const fSel=document.getElementById('f-hosp');
-  fSel.innerHTML=HD.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')).map(h=>`<option value="${h.name}">${h.name}</option>`).join('');
+  fSel.innerHTML=HD.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')).map(h=>`<option value="${escapeHtml(h.name)}">${escapeHtml(h.name)}</option>`).join('');
 }
 
 // ── 대시보드 ──

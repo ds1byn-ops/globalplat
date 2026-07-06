@@ -1746,7 +1746,7 @@ function addAiMsg(role,text){
   const isAi=role==='ai';
   const div=document.createElement('div');
   div.style.cssText=`display:flex;justify-content:${isAi?'flex-start':'flex-end'};`;
-  div.innerHTML=`<div style="max-width:82%;padding:10px 13px;border-radius:${isAi?'4px 14px 14px 14px':'14px 4px 14px 14px'};background:${isAi?'var(--white)':'linear-gradient(135deg,var(--gn),var(--gn2))'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.65;white-space:pre-wrap;box-shadow:0 1px 4px rgba(0,0,0,0.06);">${text}</div>`;
+  div.innerHTML=`<div style="max-width:82%;padding:10px 13px;border-radius:${isAi?'4px 14px 14px 14px':'14px 4px 14px 14px'};background:${isAi?'var(--white)':'linear-gradient(135deg,var(--gn),var(--gn2))'};color:${isAi?'var(--dark)':'#fff'};font-size:13px;line-height:1.65;white-space:pre-wrap;box-shadow:0 1px 4px rgba(0,0,0,0.06);">${escapeHtml(text)}</div>`;
   el.appendChild(div);
   el.scrollTop=el.scrollHeight;
 }
@@ -2021,12 +2021,12 @@ function renderBannerSlides(){
     const title=(lang==='ko'?b.title_ko:lang==='zh'?b.title_zh:b.title_en)||b.title_zh;
     const sub=(lang==='ko'?b.sub_ko:lang==='zh'?b.sub_zh:b.sub_en)||b.sub_zh;
     const onclick = b.link_type==='url' && b.link_value
-      ? `window.open(${JSON.stringify(b.link_value)},'_blank')`
+      ? `safeOpen(${JSON.stringify(b.link_value)})`
       : (BANNER_LINK_HANDLERS[b.link_type]||BANNER_LINK_HANDLERS.hospitals);
     const hasImg = !!b.image_url;
     const cls = hasImg ? 'has-img' : (b.bg_style||'banner1');
     const style = hasImg ? ` style="background-image:url('${b.image_url.replace(/'/g,"%27")}')"` : '';
-    return `<div class="banner-slide ${cls}"${style} onclick="${onclick}">
+    return `<div class="banner-slide ${cls}"${style} onclick="${escapeHtml(onclick)}">
       <div class="b-tag">${tag||''}</div>
       <div class="b-title">${title||''}</div>
       <div class="b-sub">${sub||''}</div>
@@ -2561,6 +2561,14 @@ const RV_PER_PAGE=4;
 let rvAutoTimer=null;
 
 // ── 보안: 사용자/DB 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
+function safeOpen(url){
+  try{
+    const u=new URL(url, location.href);
+    if(u.protocol!=='http:'&&u.protocol!=='https:') return;
+    const w=window.open(u.href,'_blank','noopener,noreferrer');
+    if(w) w.opener=null;
+  }catch(e){}
+}
 function escapeHtml(str){
   if(str===null||str===undefined)return '';
   return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2618,7 +2626,7 @@ function openAllReviews(){
   const filterDiv=document.getElementById('all-rv-hosp-filters');
   filterDiv.innerHTML='<button onclick="filterAllRv(null)" class="all-rv-filter arfb" data-hosp="" style="padding:6px 14px;border-radius:20px;border:1px solid var(--gn);background:var(--gn);color:#fff;font-size:12px;cursor:pointer;font-weight:600;">'+t('rv_all')+'</button>'
     +hosps.map(function(h){
-      return '<button onclick="filterAllRv(this)" data-hosp="'+h.replace(/"/g,'&quot;')+'" class="all-rv-filter arfb" style="padding:6px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;cursor:pointer;">'+h+'</button>';
+      return '<button onclick="filterAllRv(this)" data-hosp="'+escapeHtml(h)+'" class="all-rv-filter arfb" style="padding:6px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;cursor:pointer;">'+escapeHtml(h)+'</button>';
     }).join('');
   filterAllRv(null);
   document.getElementById('all-reviews-modal').style.display='block';
