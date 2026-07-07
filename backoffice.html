@@ -1956,7 +1956,7 @@ function showPage(id){
   if(id==='hospitals')renderHospitals();
   if(id==='ad_settings')loadAdSettingsPage();
   if(id==='wanghongs')renderWanghongs();
-  if(id==='quote_requests')renderQuoteRequests();
+  if(id==='quote_requests')loadQuoteRequests().then(renderQuoteRequests);
   if(id==='members')loadMembers();
   if(id==='banners')loadBanners();
   if(id==='foreign')renderForeign();
@@ -2285,6 +2285,7 @@ setInterval(()=>{loadQuoteRequests();},5*60*1000);
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='';
     loadAndRender();
+    loadQuoteRequests();
   }
 })();
 </script>
