@@ -841,6 +841,20 @@ const headers={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Typ
 function setAuthHeader(tok){ headers.Authorization='Bearer '+tok; }
 // 로그인·토큰 자동갱신 시 세션 토큰으로 헤더 유지 (정적 스태프 키 제거됨)
 sb.auth.onAuthStateChange((_e,session)=>{ if(session) setAuthHeader(session.access_token); });
+// 읽기 직전 토큰 신선도 보장: 만료 임박 시 자동 갱신하여 헤더에 반영. 세션 없으면 로그인 화면 복귀.
+async function ensureFreshAuth(){
+  try{
+    let {data:{session}}=await sb.auth.getSession();
+    if(session && session.expires_at && (session.expires_at*1000 < Date.now()+60000)){
+      const r=await sb.auth.refreshSession(); if(r.data && r.data.session) session=r.data.session;
+    }
+    if(session){ setAuthHeader(session.access_token); return true; }
+  }catch(e){ console.warn('세션 갱신 실패',e); }
+  const ls=document.getElementById('login-screen'); if(ls) ls.style.display='';
+  const ap=document.getElementById('app'); if(ap) ap.style.display='none';
+  const er=document.getElementById('l-err'); if(er) er.textContent='세션이 만료되었습니다. 다시 로그인해주세요.';
+  return false;
+}
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
@@ -1042,6 +1056,7 @@ async function doChangePw(){
 
 async function loadAndRender(){
   try{
+    if(!await ensureFreshAuth()) return;
     const [bk,wm,hd]=await Promise.all([dbLoad('bookings'),dbLoad('wanghongs'),dbLoadHospitals()]);
     if(bk&&bk.length>0)BK=bk;
     if(wm&&wm.length>0)WM=wm;
@@ -2130,6 +2145,7 @@ async function deleteBanner(id){
 
 async function loadQuoteRequests(){
   try{
+    if(!await ensureFreshAuth()){ QR=[]; return; }
     const r=await fetch(`${SUPA_URL}/rest/v1/quote_requests?select=*&order=created_at.desc`,{headers});
     const quotes=r.ok?await r.json():[];
     const q2=quotes.map(q=>({...q,_type:'견적',_ts:q.created_at?new Date(q.created_at).getTime():0}));

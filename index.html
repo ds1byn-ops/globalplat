@@ -4317,6 +4317,11 @@ function fkqResetWidget(){
   }
   /* ── 우하단 빠른연락 위젯 (위챗/라인/왓츠앱) ── */
   #fk-contact-fab{position:fixed;bottom:86px;right:20px;z-index:899;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  /* 연락 위젯 도메인 분기: gnfollow.com=위챗·샤오홍슈, 글로벌(followkorea.kr)=왓츠앱·라인 */
+  html:not(.gnfollow-cn) #fk-contact-fab .fk-c-wechat,
+  html:not(.gnfollow-cn) #fk-contact-fab .fk-c-xhs{display:none!important;}
+  html.gnfollow-cn #fk-contact-fab .fk-c-line,
+  html.gnfollow-cn #fk-contact-fab .fk-c-whatsapp{display:none!important;}
   #fk-contact-fab a{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.18);text-decoration:none;transition:transform .15s;}
   #fk-contact-fab a:hover{transform:scale(1.08);}
   #fk-contact-fab a svg{width:24px;height:24px;}
