@@ -1038,7 +1038,14 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 // ── 유입 도메인 구분: gnfollow.com = 중국어 전용, 그 외(followkorea.kr) = 강남팔로우 ──
 const SITE = location.hostname.includes('gnfollow') ? 'gnfollow' : 'followkorea';
-if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); document.documentElement.lang='zh'; }catch(e){} }
+if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); document.documentElement.lang='zh'; }catch(e){}
+  // 중국 전용: 연락처 입력칸 placeholder를 위챗으로 (글로벌은 WhatsApp/LINE 유지)
+  document.addEventListener('DOMContentLoaded',function(){
+    ['f-contact','svc-contact','auth-signup-messenger','fkq-contact'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.placeholder='微信号 / WeChat ID';
+    });
+  });
+}
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
 
 // ══════════════════════════════════════════════════════════
