@@ -806,6 +806,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <div class="fitem"><label data-i18n="f_hosp">医院</label><select id="f-hosp"></select></div>
       <div class="fitem"><label data-i18n="f_treat">希望项目</label>
         <select id="f-treat">
+          <option value="" id="f-treat-any">未指定</option>
           <option data-i18n="tr1">超声刀 / Ulthera</option>
           <option data-i18n="tr2">热玛吉 / Thermage</option>
           <option data-i18n="tr3">肉毒素 / Botox</option>
@@ -2478,13 +2479,16 @@ function showDTab(id,el){
   if(el)el.classList.add('active');
 }
 
+function anyOptLabel(){ return lang==='ko'?'미정 (선택)':lang==='zh'?'未指定（可选）':'Not specified (optional)'; }
 function openModal(kr){
   const h=kr?HOSPS.find(x=>x.kr===kr):null;
   const sel=document.getElementById('f-hosp');
-  sel.innerHTML=HOSPS.map(ho=>{
+  sel.innerHTML='<option value="">'+anyOptLabel()+'</option>'+HOSPS.map(ho=>{
     const n=lang==='ko'?ho.kr:lang==='zh'?ho.zh:ho.en;
     return`<option value="${ho.kr}"${ho.kr===kr?' selected':''}>${n}</option>`;
   }).join('');
+  const _ta=document.getElementById('f-treat-any'); if(_ta) _ta.textContent=anyOptLabel();
+  const _t=document.getElementById('f-treat'); if(_t) _t.value='';
   document.getElementById('modal-step1').style.display='';
   document.getElementById('modal-done').style.display='none';
   document.getElementById('modal-bg').classList.add('open');
@@ -2494,7 +2498,8 @@ function closeModal(){document.getElementById('modal-bg').classList.remove('open
 
 async function submitBooking(){
   const name=document.getElementById('f-name').value.trim();
-  if(!name){alert(lang==='ko'?'성명을 입력하세요':lang==='zh'?'请输入姓名':'Please enter your name');return;}
+  const contact=document.getElementById('f-contact').value.trim();
+  if(!name || !contact){alert(lang==='ko'?'성명과 연락처를 입력해주세요':lang==='zh'?'请输入姓名和联系方式':'Please enter your name and contact');return;}
   const introducerRaw=document.getElementById('f-introducer').value.trim();
   if(introducerRaw && !/^\d{4}$/.test(introducerRaw)){
     alert(lang==='ko'?'소개자 코드는 숫자 4자리로 입력해주세요.':lang==='zh'?'介绍人代码请输入4位数字。':'Referrer code must be 4 digits.');
