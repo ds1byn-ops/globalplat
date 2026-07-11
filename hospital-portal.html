@@ -100,7 +100,7 @@ tr:hover td{background:#fafaf8;}
   <div class="logo">FK</div>
   <div class="header-sub">병원 파트너 포털</div>
   <div class="header-right">
-    <div class="hosp-badge" onclick="openChangePwModal()" style="cursor:pointer;" title="클릭하여 비밀번호 변경">🏥 <b id="hosp-name-badge">신상성형외과</b> <span style="font-size:10px;color:#aaa;">🔑</span></div>
+    <div class="hosp-badge" onclick="openChangePwModal()" style="cursor:pointer;" title="클릭하여 비밀번호 변경"><b id="hosp-name-badge">신상성형외과</b> <span style="font-size:10px;color:#aaa;"></span></div>
     <button class="btn" onclick="doLogout()" style="font-size:11px;color:#aaa;border-color:#444;">로그아웃</button>
   </div>
 </div>
@@ -108,21 +108,21 @@ tr:hover td{background:#fafaf8;}
 <div class="sidebar">
   <div class="sidebar-section">예약 관리</div>
   <div class="sidebar-menu">
-    <a class="active" onclick="showPage('dashboard')"><span class="ic">📊</span>대시보드</a>
-    <a onclick="showPage('bookings')"><span class="ic">📋</span>예약 목록</a>
-    <a onclick="showPage('calendar')"><span class="ic">📅</span>일정 캘린더</a>
-    <a onclick="showPage('new-booking')"><span class="ic">➕</span>예약 직접 등록</a>
+    <a class="active" onclick="showPage('dashboard')">대시보드</a>
+    <a onclick="showPage('bookings')">예약 목록</a>
+    <a onclick="showPage('calendar')">일정 캘린더</a>
+    <a onclick="showPage('new-booking')">예약 직접 등록</a>
   </div>
   <div class="sidebar-section">정산</div>
   <div class="sidebar-menu">
-    <a onclick="showPage('settlement')"><span class="ic">💰</span>수수료 정산</a>
-    <a onclick="showPage('history')"><span class="ic">📈</span>실적 내역</a>
+    <a onclick="showPage('settlement')">수수료 정산</a>
+    <a onclick="showPage('history')">실적 내역</a>
   </div>
   <div class="sidebar-section">병원 관리</div>
   <div class="sidebar-menu">
-    <a onclick="showPage('intro')"><span class="ic">📝</span>병원 소개 관리</a>
-    <a onclick="showPage('profile')"><span class="ic">🏥</span>병원 기본 정보</a>
-    <a onclick="showPage('notice')"><span class="ic">📢</span>공지사항</a>
+    <a onclick="showPage('intro')">병원 소개 관리</a>
+    <a onclick="showPage('profile')">병원 기본 정보</a>
+    <a onclick="showPage('notice')">공지사항</a>
   </div>
 </div>
 
@@ -139,14 +139,14 @@ tr:hover td{background:#fafaf8;}
     <div class="sc red"><div class="sl">미확인 예약</div><div class="sv" id="d-new">0</div><div class="ss">건</div></div>
   </div>
   <div class="card">
-    <div class="card-title">📋 최근 예약 (최신 10건)</div>
+    <div class="card-title">최근 예약 (최신 10건)</div>
     <div style="overflow-x:auto;"><table>
       <thead><tr><th>환자명</th><th>예약일시</th><th>시술</th><th>유입</th><th>상태</th><th>처리</th></tr></thead>
       <tbody id="dash-recent"></tbody>
     </table></div>
   </div>
   <div class="card">
-    <div class="card-title">📅 이번주 일정</div>
+    <div class="card-title">이번주 일정</div>
     <div id="dash-week"></div>
   </div>
 </div>
@@ -197,7 +197,7 @@ tr:hover td{background:#fafaf8;}
 <!-- 직접 예약 등록 -->
 <div class="page" id="page-new-booking">
   <div class="card" style="max-width:520px;">
-    <div class="card-title">➕ 예약 직접 등록</div>
+    <div class="card-title">예약 직접 등록</div>
     <div class="fg">
       <div class="fitem"><label>환자명 (영문)</label><input type="text" id="nb-name" placeholder="ZHANG JING"></div>
       <div class="fitem"><label>예약 일시</label><input type="datetime-local" id="nb-dt"></div>
@@ -229,12 +229,12 @@ tr:hover td{background:#fafaf8;}
     <div class="sc red"><div class="sl">미정산 잔액</div><div class="sv" id="st-unpaid">-</div></div>
   </div>
   <div class="card">
-    <div class="card-title">💰 월별 정산 현황</div>
+    <div class="card-title">월별 정산 현황</div>
     <table><thead><tr><th>월</th><th>예약건수</th><th>총 매출</th><th>수수료율</th><th>FK 수수료</th><th>병원 수령액</th><th>정산상태</th></tr></thead>
     <tbody id="st-tbody"></tbody></table>
   </div>
   <div class="card">
-    <div class="card-title">📋 건별 정산 내역</div>
+    <div class="card-title">건별 정산 내역</div>
     <div style="overflow-x:auto;"><table><thead><tr>
       <th>환자명</th><th>시술일</th><th>시술</th><th>결제금액</th><th>수수료율</th><th>FK수수료</th><th>병원수령</th><th>입금여부</th>
     </tr></thead><tbody id="st-detail-tbody"></tbody></table></div>
@@ -244,11 +244,11 @@ tr:hover td{background:#fafaf8;}
 <!-- 실적 내역 -->
 <div class="page" id="page-history">
   <div class="card">
-    <div class="card-title">📈 월별 실적 추이</div>
+    <div class="card-title">월별 실적 추이</div>
     <div id="history-chart" style="display:flex;gap:6px;align-items:flex-end;height:120px;overflow-x:auto;padding:8px 0;"></div>
   </div>
   <div class="card">
-    <div class="card-title">👥 환자 분석</div>
+    <div class="card-title">환자 분석</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="patient-analysis"></div>
   </div>
 </div>
@@ -257,9 +257,9 @@ tr:hover td{background:#fafaf8;}
 <!-- 병원 소개 관리 -->
 <div class="page" id="page-intro">
   <div class="card" style="max-width:700px;">
-    <div class="card-title">🏥 병원 소개 관리 (고객 B2C 플랫폼 표시용)</div>
+    <div class="card-title">병원 소개 관리 (고객 B2C 플랫폼 표시용)</div>
     <div class="notif" style="display:block;margin-bottom:14px;font-size:11px;">
-      💡 여기서 작성한 내용이 팔로우코리아 플랫폼 병원 상세 페이지에 표시됩니다.
+      여기서 작성한 내용이 팔로우코리아 플랫폼 병원 상세 페이지에 표시됩니다.
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div class="fitem"><label>병원 소개 (중국어 — 환자에게 표시)</label>
@@ -274,7 +274,7 @@ tr:hover td{background:#fafaf8;}
       <div class="fitem"><label>대표 이미지 (최대 3장, 각 2MB 이하)</label>
         <div id="img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
         <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--lgray);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gn2);">
-          📷 이미지 추가
+          이미지 추가
           <input type="file" id="intro-img-input" accept="image/*" multiple style="display:none;" onchange="handleImgUpload(event)">
         </label>
         <div style="font-size:10px;color:var(--gray);margin-top:4px;">JPG/PNG, 각 2MB 이하, 최대 3장</div>
@@ -294,7 +294,7 @@ tr:hover td{background:#fafaf8;}
 <!-- 병원 정보 -->
 <div class="page" id="page-profile">
   <div class="card" style="max-width:560px;">
-    <div class="card-title">🏥 병원 기본 정보</div>
+    <div class="card-title">병원 기본 정보</div>
     <div class="fg">
       <div class="fitem full"><label>병원명</label><input type="text" id="pr-name" readonly style="background:#f5f5f5;"></div>
       <div class="fitem"><label>진료과목</label><input type="text" id="pr-dept"></div>
@@ -316,7 +316,7 @@ tr:hover td{background:#fafaf8;}
 <!-- 공지사항 -->
 <div class="page" id="page-notice">
   <div class="card">
-    <div class="card-title">📢 팔로우코리아 공지사항</div>
+    <div class="card-title">팔로우코리아 공지사항</div>
     <div id="notice-list"></div>
   </div>
 </div>
@@ -376,7 +376,7 @@ function hpNoSession(res){
 // 비밀번호 원문은 더 이상 이 파일에 존재하지 않음.
 const MASTER_ID='fkmaster';
 
-let currentHosp=null, BK=[], calY=2026, calM=5, editBkId=null;
+let currentHosp=null, BK=[], calY=new Date().getFullYear(), calM=new Date().getMonth(), editBkId=null;
 
 // ── 보안: 사용자/DB 입력값을 innerHTML에 넣기 전 escape (XSS 방지) ──
 function escapeHtml(str){
@@ -462,7 +462,7 @@ function renderDashboard(){
   document.getElementById('d-new').textContent=newBk.length;
   if(newBk.length>0){
     document.getElementById('notif-new').style.display='';
-    document.getElementById('notif-new').textContent=`🔔 새 예약 ${newBk.length}건이 확인을 기다리고 있습니다.`;
+    document.getElementById('notif-new').textContent=`새 예약 ${newBk.length}건이 확인을 기다리고 있습니다.`;
   }
   const recent=[...hbk].sort((a,b)=>b.datetime.localeCompare(a.datetime)).slice(0,10);
   document.getElementById('dash-recent').innerHTML=recent.map(b=>`
@@ -641,7 +641,7 @@ function renderHistory(){
   const total=hbk.length||1;
   document.getElementById('patient-analysis').innerHTML=`
     <div>
-      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">🌍 국적별</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">국적별</div>
       ${Object.entries(natMap).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
           <span style="font-size:11px;">${n}</span>
@@ -654,7 +654,7 @@ function renderHistory(){
         </div>`).join('')}
     </div>
     <div>
-      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">💉 주요 시술</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;">주요 시술</div>
       ${Object.entries(treatMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
           <span style="font-size:11px;">${t}</span>
@@ -685,13 +685,13 @@ async function renderNotice(){
     const list=all.map(function(x){return x.data||x;}).filter(function(n){
       return n&&(n.target==='all'||n.target===hn);
     });
-    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280;">📭 공지사항이 없습니다.</div>';return;}
-    const TL={general:'📌',urgent:'🚨',settlement:'💰',schedule:'📅'};
+    if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7280;">공지사항이 없습니다.</div>';return;}
+    const TL={general:'',urgent:'',settlement:'',schedule:''};
     el.innerHTML=list.map(function(n){
       var u=n.type==='urgent';
       return '<div style="padding:14px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;margin-bottom:8px;background:'+(u?'#fef2f2':'#fff')+'">'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
-        +'<div style="display:flex;align-items:center;gap:6px;">'+(TL[n.type]||'📌')
+        +'<div style="display:flex;align-items:center;gap:6px;">'+(TL[n.type]||'')
         +' <b style="font-size:12px;">'+escapeHtml(n.title||'')+'</b>'
         +(n.target==='all'?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:8px;">전체</span>':'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;">개별</span>')
         +'</div><span style="font-size:10px;color:#9ca3af;">'+(n.created_at||n.date||'').slice(0,10)+'</span></div>'
@@ -814,7 +814,7 @@ if(saved){
 <div id="notice-popup-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center;padding:16px;" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeNoticePopup() }">
   <div style="background:#fff;border-radius:16px;width:460px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
     <div style="background:linear-gradient(135deg,#1A6B4A,#4CAF8C);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
-      <div><div style="font-size:14px;font-weight:800;color:#fff;">📢 팔로우코리아 공지사항</div><div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div></div>
+      <div><div style="font-size:14px;font-weight:800;color:#fff;">팔로우코리아 공지사항</div><div id="popup-badge" style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;"></div></div>
       <button onclick="closeNoticePopup()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:26px;height:26px;color:#fff;cursor:pointer;">✕</button>
     </div>
     <div id="popup-notice-list" style="padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
@@ -834,14 +834,14 @@ async function checkNoticePopup(){
     var hn=currentHosp?currentHosp.name:'';
     var list=all.map(function(x){return x.data||x;}).filter(function(n){return n&&(n.target==='all'||n.target===hn);});
     if(!list.length)return;
-    var TL={general:'📌 일반',urgent:'🚨 긴급',settlement:'💰 정산',schedule:'📅 일정'};
+    var TL={general:'일반',urgent:'긴급',settlement:'정산',schedule:'일정'};
     var urg=list.filter(function(n){return n.type==='urgent';}).length;
-    document.getElementById('popup-badge').textContent=urg?('🚨 긴급 '+urg+'건 포함'):('공지 '+list.length+'건');
+    document.getElementById('popup-badge').textContent=urg?('긴급 '+urg+'건 포함'):('공지 '+list.length+'건');
     document.getElementById('popup-notice-list').innerHTML=list.map(function(n){
       var u=n.type==='urgent';
       return '<div style="padding:12px;border:1px solid '+(u?'#fecaca':'#e5e7eb')+';border-radius:8px;background:'+(u?'#fef2f2':'#fafafa')+'">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
-        +'<span style="font-size:11px;background:'+(u?'#dc2626':'#f3f4f6')+';color:'+(u?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'📌 일반')+'</span>'
+        +'<span style="font-size:11px;background:'+(u?'#dc2626':'#f3f4f6')+';color:'+(u?'#fff':'#374151')+';padding:2px 7px;border-radius:8px;">'+(TL[n.type]||'일반')+'</span>'
         +'<b style="font-size:13px;">'+escapeHtml(n.title||'')+'</b></div>'
         +'<div style="font-size:12px;color:#6b7280;line-height:1.6;white-space:pre-line;">'+escapeHtml(n.content||'')+'</div>'
         +'<div style="font-size:10px;color:#d1d5db;margin-top:4px;">'+(n.created_at||n.date||'').slice(0,10)+' · '+escapeHtml(n.author||'Follow Korea 운영팀')+'</div>'
@@ -947,7 +947,7 @@ async function deleteCalBk(id){
 <!-- 비밀번호 변경 모달 -->
 <div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:900;align-items:center;justify-content:center;" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){ closeChangePwModal() }">
 <div style="background:#fff;border-radius:16px;width:340px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
-  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🔑 비밀번호 변경</h3>
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">비밀번호 변경</h3>
   <div style="margin-bottom:10px;">
     <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">현재 비밀번호</label>
     <input type="password" id="pw-current" placeholder="현재 비밀번호" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;outline:none;">
