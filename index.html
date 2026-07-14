@@ -716,6 +716,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   <div class="dtab-row">
     <div class="dtab active" onclick="showDTab('overview',this)" data-i18n="t_overview">概览</div>
     <div class="dtab" onclick="showDTab('treats',this)" data-i18n="t_treats">项目介绍</div>
+    <div class="dtab" id="dtab-doctors" style="display:none;" onclick="showDTab('doctors',this)">医生团队</div>
     <div class="dtab" onclick="showDTab('hours',this)" data-i18n="t_hours">营业时间</div>
     <div class="dtab" onclick="showDTab('reviews',this)" data-i18n="t_reviews">评价</div>
   </div>
@@ -726,6 +727,10 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
   <div class="dsec" id="ds-treats">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;" id="d-treat-grid"></div>
+  </div>
+  <div class="dsec" id="ds-doctors">
+    <div id="d-doctor-note" style="font-size:12px;color:var(--gray);margin-bottom:12px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;" id="d-doctor-grid"></div>
   </div>
   <div class="dsec" id="ds-hours">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;" id="d-hours-grid"></div>
@@ -2456,6 +2461,69 @@ function treatIconSvg(krTag){
   const key = TREAT_ICON_MAP[krTag] || 'esthetic';
   return ICON_SVGS[key] || ICON_SVGS.esthetic;
 }
+/* ── 진료진(의료진) 데이터 · 다국어 ─────────────────────────
+   각 병원 홈페이지 의료진 페이지에서 수집. name=한글(고유명사·언어공통), title/spec는 언어별 변환.
+   데이터가 있는 병원에만 '진료진' 탭이 노출됨(없으면 기존과 동일). 수집·검수 후 병원별로 추가. */
+const DOCTORS={
+  '원진성형외과피부과의원':[
+    {name:'강문석',title:'원장',spec:['코','리프팅','윤곽']},
+    {name:'강진석',title:'원장',spec:['눈','리프팅']},
+    {name:'김규희',title:'원장',spec:['눈','체형','가슴','리프팅']},
+    {name:'김승민',title:'원장',spec:['눈','코','리프팅']},
+    {name:'김영은',title:'원장',spec:['눈','가슴','체형','리프팅','여성성형']},
+    {name:'김용배',title:'원장',spec:['눈','재건']},
+    {name:'김지안',title:'원장',spec:['피부과']},
+    {name:'박성용',title:'원장',spec:['피부과']},
+    {name:'박장우',title:'원장',spec:['눈','윤곽']},
+    {name:'박종철',title:'원장',spec:['윤곽','양악']},
+    {name:'손유리',title:'원장',spec:['눈','가슴']},
+    {name:'송그라메',title:'원장',spec:['마취과']},
+    {name:'안창환',title:'원장',spec:['눈','코','리프팅']},
+    {name:'오세영',title:'원장',spec:['마취과']},
+    {name:'원기정',title:'원장',spec:['체형']},
+    {name:'이선구',title:'원장',spec:['가슴']},
+    {name:'이종석',title:'원장',spec:['눈','코','리프팅']},
+    {name:'이혁재',title:'원장',spec:['눈','코','리프팅']},
+    {name:'정대균',title:'원장',spec:['눈','코','리프팅']},
+    {name:'최수경',title:'원장',spec:['마취과']},
+    {name:'황윤주',title:'원장',spec:['피부과']},
+  ],
+};
+const DOC_LABELS={
+  zh:{tab:'医生团队',note:'各科室专业医生团队。'},ko:{tab:'진료진',note:'과별 전문 의료진입니다.'},
+  en:{tab:'Medical Team',note:'Specialist doctors by department.'},ja:{tab:'医師団',note:'診療科別の専門医師団です。'},
+  vi:{tab:'Đội ngũ bác sĩ',note:'Bác sĩ chuyên khoa theo từng khoa.'},th:{tab:'ทีมแพทย์',note:'ทีมแพทย์ผู้เชี่ยวชาญแต่ละแผนก'},
+  ru:{tab:'Врачи',note:'Специалисты по отделениям.'},mn:{tab:'Эмч нар',note:'Тасаг тус бүрийн мэргэжлийн эмч.'},
+  id:{tab:'Tim Dokter',note:'Dokter spesialis per departemen.'},ar:{tab:'الفريق الطبي',note:'أطباء متخصصون حسب القسم.'},
+};
+const DOC_TITLE={
+  '대표원장':{zh:'代表院长',ko:'대표원장',en:'Chief Director',ja:'代表院長',vi:'Giám đốc điều hành',th:'ผู้อำนวยการใหญ่',ru:'Главный врач',mn:'Ерөнхий захирал',id:'Direktur Utama',ar:'المدير الطبي'},
+  '원장':{zh:'院长',ko:'원장',en:'Director',ja:'院長',vi:'Giám đốc',th:'ผู้อำนวยการ',ru:'Врач',mn:'Захирал',id:'Direktur',ar:'مدير'},
+};
+const SPEC_MAP={
+  '눈':{zh:'眼部',en:'Eyes'},'코':{zh:'鼻部',en:'Nose'},'윤곽':{zh:'轮廓',en:'Contouring'},'리프팅':{zh:'提升',en:'Lifting'},
+  '가슴':{zh:'胸部',en:'Breast'},'체형':{zh:'体型',en:'Body'},'양악':{zh:'正颌',en:'Jaw'},'재건':{zh:'再造',en:'Reconstruction'},
+  '피부과':{zh:'皮肤科',en:'Dermatology'},'마취과':{zh:'麻醉科',en:'Anesthesiology'},'여성성형':{zh:'女性整形',en:'Women'},
+};
+function docTitle(tt){const m=DOC_TITLE[tt];if(!m)return tt;return m[lang]||m.zh||tt;}
+function docSpec(tag){if(lang==='ko')return tag;const m=SPEC_MAP[tag];return m?(m[lang]||m.en||m.zh||tag):tag;}
+function renderDoctors(kr){
+  const list=DOCTORS[kr]||[];
+  const tab=document.getElementById('dtab-doctors');
+  const L=DOC_LABELS[lang]||DOC_LABELS.zh;
+  if(!list.length){ if(tab)tab.style.display='none'; return; }
+  if(tab){ tab.style.display=''; tab.textContent=L.tab+' ('+list.length+')'; }
+  const note=document.getElementById('d-doctor-note'); if(note) note.textContent=L.note;
+  document.getElementById('d-doctor-grid').innerHTML=list.map(function(d){
+    const specTxt=(d.spec||[]).map(docSpec).join(' · ');
+    return '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 12px;text-align:center;">'
+      +'<div style="width:54px;height:54px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--gn2);">'+d.name.charAt(0)+'</div>'
+      +'<div style="font-size:14px;font-weight:700;">'+d.name+'</div>'
+      +'<div style="font-size:11px;color:var(--gn2);font-weight:600;margin-top:2px;">'+docTitle(d.title)+'</div>'
+      +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5;">'+specTxt+'</div>'
+      +'</div>';
+  }).join('');
+}
 function renderDetail(kr){
   const h=HOSPS.find(x=>x.kr===kr);if(!h)return;
   const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
@@ -2483,6 +2551,7 @@ function renderDetail(kr){
   }else{
     hospRvGrid.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray);font-size:13px;">'+t('no_review')+'</div>';
   }
+  renderDoctors(kr);
   applyI18n();
   showDTab('overview',document.querySelector('.dtab'));
 }
