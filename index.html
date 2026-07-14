@@ -3785,6 +3785,9 @@ function krwToFkq(krw){
 }
 function won(minKrw, maxKrw){ return { min: krwToFkq(minKrw), max: krwToFkq(maxKrw), _minKrw: minKrw, _maxKrw: maxKrw }; }
 function fkqSym(){ return getFkqCur().sym; }
+// 중국(gnfollow) 의료광고법: 가격 미표기 → 面诊后报价로 대체 (글로벌 followkorea만 실가격)
+function fkqIsGnf(){ return typeof SITE!=='undefined' && SITE==='gnfollow'; }
+function fkqPriceRange(mn,mx){ return fkqIsGnf() ? '面诊后报价' : (fkqSym()+Number(mn).toLocaleString()+'~'+Number(mx).toLocaleString()); }
 
 // ── 간편견적 시술 데이터 다국어 번역 ──
 const FKQ_ITEM_I18N = {
@@ -4187,7 +4190,7 @@ function fkqApplyI18n(){
   document.getElementById('fkq-hospital').placeholder = fkqT('hospital_ph');
   document.getElementById('fkq-introducer-label').textContent = fkqT('introducer_label');
   document.getElementById('fkq-introducer').placeholder = fkqT('introducer_ph');
-  document.getElementById('fkq-disclaimer-text').innerHTML = 'ⓘ ' + fkqT('disclaimer');
+  document.getElementById('fkq-disclaimer-text').innerHTML = 'ⓘ ' + (fkqIsGnf() ? '具体费用及行程需面诊后确定，将由专属顾问通过微信直接为您说明。' : fkqT('disclaimer'));
   document.getElementById('fkq-back-btn').textContent = fkqT('btn_prev');
   document.getElementById('fkq-next-btn').textContent = fkqT('btn_next');
   document.getElementById('fkq-submit-btn').textContent = fkqT('btn_submit');
@@ -4246,7 +4249,7 @@ function fkqSelectCat(key){
     return `<div class="fkq-proc-item ${checked ? 'checked' : ''}" onclick="fkqToggleItem('${key}', ${idx})" data-cat="${key}" data-idx="${idx}">
       <div class="chk">${checked ? '✓' : ''}</div>
       <div class="pname">${item.name}${item.sub ? '<span class="sub">'+item.sub+'</span>' : ''}</div>
-      <div class="prange">${fkqSym()}${item.min.toLocaleString()}~${item.max.toLocaleString()}</div>
+      <div class="prange">${fkqPriceRange(item.min,item.max)}</div>
     </div>`;
   }).join('');
 }
@@ -4352,7 +4355,7 @@ function fkqRenderResult(){
   const rows = fkqSelected.map(i => `<tr>
     <td>${i.catLabel}</td>
     <td>${i.name}${i.sub ? '<br><span style="font-size:10px;color:#94a3b8;">'+i.sub+'</span>' : ''}</td>
-    <td style="text-align:right;white-space:nowrap;">${fkqSym()}${i.min.toLocaleString()}~${i.max.toLocaleString()}</td>
+    <td style="text-align:right;white-space:nowrap;">${fkqPriceRange(i.min,i.max)}</td>
   </tr>`).join('');
 
   document.getElementById('fkq-result-doc').innerHTML = `
@@ -4370,7 +4373,7 @@ function fkqRenderResult(){
     <table>
       <thead><tr><th>${fkqT('doc_field')}</th><th>${fkqT('doc_treat')}</th><th style="text-align:right;">${fkqT('doc_range')}</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr class="grand"><td colspan="2">${fkqT('doc_total')}</td><td style="text-align:right;white-space:nowrap;">${fkqSym()}${totalMin.toLocaleString()}~${totalMax.toLocaleString()}</td></tr></tfoot>
+      <tfoot><tr class="grand"><td colspan="2">${fkqT('doc_total')}</td><td style="text-align:right;white-space:nowrap;">${fkqPriceRange(totalMin,totalMax)}</td></tr></tfoot>
     </table>
     <div style="text-align:center;"><span class="fkq-badge">💬 ${fkqT('doc_footer')}</span></div>
   `;
