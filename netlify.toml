@@ -3,3 +3,11 @@
 [build]
   publish = "."
   command = ""
+
+# 브라우저가 옛 버전 HTML을 캐시해 "최신이 안 뜨는" 문제 방지.
+# max-age=0, must-revalidate → 브라우저가 매번 서버에 최신 여부를 확인(변경 없으면 304로 빠름).
+# 단일 파일 HTML 사이트라 캐시할 별도 정적 에셋이 없어 성능 손해 없음.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
