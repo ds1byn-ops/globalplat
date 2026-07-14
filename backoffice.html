@@ -221,10 +221,8 @@ tr:hover td{background:#fafaf8;}
   <div id="cp-list"></div>
   <div id="cp-editor" class="card" style="display:none;padding:18px;margin-top:14px;">
     <input type="hidden" id="cp-id">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div><label class="cpl">분류</label><select id="cp-cat" class="cpi"><option value="info">정보</option><option value="guide">가이드</option><option value="procedure">시술정보</option><option value="news">뉴스</option><option value="event">이벤트</option></select></div>
-      <div><label class="cpl">상태</label><select id="cp-status" class="cpi"><option value="draft">초안 (비공개)</option><option value="active">공개</option></select></div>
-    </div>
+    <label class="cpl">분류</label><select id="cp-cat" class="cpi"><option value="info">정보</option><option value="guide">가이드</option><option value="procedure">시술정보</option><option value="news">뉴스</option><option value="event">이벤트</option></select>
+    <div style="font-size:11.5px;color:var(--gray);margin-top:6px;">저장하면 gnfollow.com 资讯 섹션에 <b>바로 공개</b>됩니다. 내리려면 「삭제」를 이용하세요.</div>
     <label class="cpl">제목 (中文)</label><input id="cp-title-zh" class="cpi" placeholder="标题">
     <label class="cpl">제목 (한글, 선택)</label><input id="cp-title-ko" class="cpi" placeholder="제목">
     <label class="cpl">본문 (中文)</label><textarea id="cp-body-zh" class="cpi" rows="6" placeholder="正文内容 (换行会保留)"></textarea>
@@ -2025,7 +2023,7 @@ function renderCpList(){
   }).join('')+'</div>';
 }
 function cpNew(){
-  document.getElementById('cp-id').value=''; document.getElementById('cp-cat').value='info'; document.getElementById('cp-status').value='draft';
+  document.getElementById('cp-id').value=''; document.getElementById('cp-cat').value='info';
   ['cp-title-zh','cp-title-ko','cp-body-zh','cp-body-ko','cp-video-url'].forEach(id=>document.getElementById(id).value='');
   ['cp-cover-status','cp-img-status','cp-video-status'].forEach(id=>document.getElementById(id).textContent='');
   cpCover=''; cpImages=[]; cpVideo=''; cpRenderMedia();
@@ -2034,7 +2032,7 @@ function cpNew(){
 }
 function cpEdit(id){
   const c=CP.find(x=>x.id===id); if(!c) return;
-  document.getElementById('cp-id').value=c.id; document.getElementById('cp-cat').value=c.category||'info'; document.getElementById('cp-status').value=c.status||'draft';
+  document.getElementById('cp-id').value=c.id; document.getElementById('cp-cat').value=c.category||'info';
   document.getElementById('cp-title-zh').value=c.title_zh||''; document.getElementById('cp-title-ko').value=c.title_ko||'';
   document.getElementById('cp-body-zh').value=c.body_zh||''; document.getElementById('cp-body-ko').value=c.body_ko||'';
   ['cp-cover-status','cp-img-status','cp-video-status'].forEach(id=>document.getElementById(id).textContent='');
@@ -2054,7 +2052,7 @@ async function cpUploadVideo(ev){ const f=ev.target.files[0]; if(!f) return; con
 async function cpSave(){
   const btn=document.getElementById('cp-save-btn'); btn.disabled=true; btn.textContent='저장 중...';
   const id=document.getElementById('cp-id').value;
-  const row={ category:document.getElementById('cp-cat').value, status:document.getElementById('cp-status').value,
+  const row={ category:document.getElementById('cp-cat').value, status:'active',
     title_zh:document.getElementById('cp-title-zh').value.trim()||null, title_ko:document.getElementById('cp-title-ko').value.trim()||null,
     body_zh:document.getElementById('cp-body-zh').value.trim()||null, body_ko:document.getElementById('cp-body-ko').value.trim()||null,
     cover_url:cpCover||null, images:cpImages, video_url:(document.getElementById('cp-video-url').value.trim()||cpVideo||null),
