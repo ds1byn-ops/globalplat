@@ -399,7 +399,6 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <a onclick="showMain();fkhRestoreHospSection();" data-i18n="nav_home">首页</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_hosps">병원</a>
       <a onclick="showMain();fkhShowExtraSection();" data-i18n="nav_concierge">컨시어지</a>
-      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-content').scrollIntoView({behavior:'smooth'}),100)">资讯</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
@@ -556,16 +555,6 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
 </section>
 </div>
-<section class="section process" id="sec-proc">
-  <div class="section-inner">
-    <div class="sec-head">
-      <div class="sec-eyebrow">HOW IT WORKS</div>
-      <h2 class="sec-title" data-i18n="proc_title">预约只需4步</h2>
-    </div>
-    <div class="step-grid" id="step-grid"></div>
-  </div>
-</section>
-
 <section class="section" id="sec-review" style="background:var(--white);">
   <div class="section-inner">
     <div class="sec-head">
@@ -2427,8 +2416,9 @@ function filterHosps(){
 }
 
 function renderSteps(){
+  const g=document.getElementById('step-grid'); if(!g) return;
   const steps=t('steps');
-  document.getElementById('step-grid').innerHTML=steps.map(s=>`
+  g.innerHTML=steps.map(s=>`
     <div class="step"><div class="step-num">${s[0]}</div><div class="step-title">${s[1]}</div><div class="step-desc">${s[2]}</div></div>`).join('');
 }
 // ── FAQ 섹션 렌더링 (FK_FAQ_PAGE 사용, AI챗봇용 FK_FAQ와는 별개) ──
