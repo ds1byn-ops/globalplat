@@ -3217,10 +3217,14 @@ loadReviews();
 // ⚠️ 추천병원 설정·병원소개·동적병원 데이터를 모두 기다린 후 딱 한 번만 최종 렌더링.
 //    (이전에는 각자 따로 filterHosps()를 호출해서, 네트워크 응답 순서가 매번 달라질 때마다
 //    화면에 보이는 병원 순서가 들쭉날쭉했던 문제 — 이제 항상 동일한 순서로 고정됩니다)
-Promise.all([loadHospIntros(), fkhLoadRecommendedSetting(), loadDynamicHospitals()]).then(()=>{
+// 병원 목록은 가벼운 데이터(추천설정 + 동적병원, 수십 KB)만 준비되면 즉시 렌더 → 목록이 바로 뜸.
+// 무거운 병원소개 이미지(loadHospIntros, 약 3.8MB)는 목록 렌더를 막지 않도록 백그라운드로 로드하고,
+// 로드 완료되면 카드 썸네일만 업그레이드하는 재렌더 수행.
+Promise.all([fkhLoadRecommendedSetting(), loadDynamicHospitals()]).then(()=>{
   renderCats();
   filterHosps();
 });
+loadHospIntros().then(()=>{ filterHosps(); }).catch(()=>{});
 
 // 외부 터치/클릭 시 언어 메뉴 닫기
 document.addEventListener('click',function(e){
