@@ -401,6 +401,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <a onclick="showMain();fkhShowExtraSection();" data-i18n="nav_concierge">컨시어지</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-proc').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_proc">예약과정</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
+      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-content').scrollIntoView({behavior:'smooth'}),100)">资讯</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
     </div>
     <div class="nav-right">
@@ -594,6 +595,25 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     </div>
   </div>
 </section>
+
+<!-- 资讯·攻略 (정보 콘텐츠) -->
+<section class="section" id="sec-content" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">INFO</div>
+      <h2 class="sec-title">资讯 · 攻略</h2>
+      <p class="sec-sub">江南FOLLOW 官方信息与就医攻略</p>
+    </div>
+    <div id="content-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:8px;"></div>
+    <div id="content-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);"><div style="font-size:36px;margin-bottom:10px;">📄</div><p>内容即将上线</p></div>
+  </div>
+</section>
+<div class="modal-bg" id="content-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){closeContentModal()}">
+  <div style="background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;position:relative;">
+    <button onclick="closeContentModal()" style="position:absolute;top:10px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;font-size:18px;cursor:pointer;color:#555;z-index:3;">✕</button>
+    <div id="content-modal-body"></div>
+  </div>
+</div>
 
 <!-- FAQ -->
 <section class="section" id="sec-faq" style="background:var(--lgray);">
@@ -2464,6 +2484,46 @@ function treatIconSvg(krTag){
   const key = TREAT_ICON_MAP[krTag] || 'esthetic';
   return ICON_SVGS[key] || ICON_SVGS.esthetic;
 }
+/* ── 资讯·攻略 정보 콘텐츠 (content_posts, 공개 로드) ── */
+let CONTENT=[];
+function cEsc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function cLang(c,f){ return ((typeof lang!=='undefined'&&lang==='ko')?(c[f+'_ko']||c[f+'_zh']):(c[f+'_zh']||c[f+'_ko']||c[f+'_en']))||''; }
+async function loadContentPosts(){
+  try{ const r=await fetch(`${SUPA_URL}/rest/v1/content_posts?select=*&status=eq.active&order=sort_order.desc,id.desc&limit=30`,{headers:{'apikey':SUPA_KEY}}); CONTENT=r.ok?await r.json():[]; }catch(e){ CONTENT=[]; }
+  renderContentPosts();
+}
+function renderContentPosts(){
+  const grid=document.getElementById('content-grid'), empty=document.getElementById('content-empty'); if(!grid) return;
+  if(!CONTENT.length){ grid.innerHTML=''; if(empty)empty.style.display=''; return; }
+  if(empty)empty.style.display='none';
+  grid.innerHTML=CONTENT.map(function(c){
+    const t=cLang(c,'title');
+    const cover=c.cover_url?`background:url('${(c.cover_url||'').replace(/'/g,'%27')}') center/cover;`:'background:linear-gradient(135deg,#EAF6F0,#DCEEE3);';
+    const vtag=c.video_url?'<span style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">🎬 视频</span>':'';
+    return `<div onclick="openContentPost(${c.id})" style="cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,.09)'" onmouseout="this.style.boxShadow='none'">
+      <div style="height:140px;position:relative;${cover}">${vtag}</div>
+      <div style="padding:12px 14px;"><div style="font-size:14px;font-weight:700;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${cEsc(t)}</div><div style="font-size:11px;color:var(--gray);margin-top:6px;">${cEsc(c.category||'')}</div></div>
+    </div>`;
+  }).join('');
+}
+function openContentPost(id){
+  const c=CONTENT.find(x=>x.id===id); if(!c) return;
+  const t=cLang(c,'title'), body=cLang(c,'body');
+  let html='';
+  if(c.cover_url) html+=`<img src="${cEsc(c.cover_url)}" style="width:100%;display:block;border-radius:14px 14px 0 0;">`;
+  html+='<div style="padding:20px 22px 26px;">';
+  if(c.category) html+=`<div style="font-size:11px;color:var(--gn2);font-weight:700;letter-spacing:.05em;">${cEsc(c.category)}</div>`;
+  html+=`<h2 style="font-size:20px;font-weight:800;margin:6px 0 14px;line-height:1.35;">${cEsc(t)}</h2>`;
+  if(c.video_url) html+=`<video src="${cEsc(c.video_url)}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-bottom:14px;background:#000;"></video>`;
+  if(body) html+=`<div style="font-size:14px;line-height:1.85;color:#333;white-space:pre-wrap;word-break:break-word;">${cEsc(body)}</div>`;
+  if(Array.isArray(c.images)&&c.images.length) html+='<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">'+c.images.map(u=>`<img src="${cEsc(u)}" loading="lazy" style="width:100%;border-radius:10px;display:block;">`).join('')+'</div>';
+  html+='</div>';
+  document.getElementById('content-modal-body').innerHTML=html;
+  document.getElementById('content-modal-bg').classList.add('open');
+}
+function closeContentModal(){ const m=document.getElementById('content-modal-bg'); if(m){m.classList.remove('open'); const v=m.querySelector('video'); if(v)v.pause();} }
+if(document.readyState!=='loading') loadContentPosts(); else document.addEventListener('DOMContentLoaded',loadContentPosts);
+
 /* ── 진료진(의료진) 데이터 · 다국어 ─────────────────────────
    각 병원 홈페이지 의료진 페이지에서 수집. name=한글(고유명사·언어공통), title/spec는 언어별 변환.
    데이터가 있는 병원에만 '진료진' 탭이 노출됨(없으면 기존과 동일). 수집·검수 후 병원별로 추가. */

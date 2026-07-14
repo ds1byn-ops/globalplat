@@ -159,6 +159,10 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-menu">
     <a onclick="showPage('reviews')"><span class="ic">⭐</span>고객 리뷰 관리</a>
   </div>
+  <div class="sidebar-section">📝 콘텐츠</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('content')"><span class="ic">📝</span>정보 콘텐츠</a>
+  </div>
   <div class="sidebar-section">⚙️ 설정</div>
   <div class="sidebar-menu">
     <a onclick="showPage('settings')"><span class="ic">⚙️</span>시스템 설정</a>
@@ -195,6 +199,10 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-menu">
     <a onclick="showPage('reviews');toggleDrawer()"><span class="ic">⭐</span>고객 리뷰 관리</a>
   </div>
+  <div class="sidebar-section">📝 콘텐츠</div>
+  <div class="sidebar-menu">
+    <a onclick="showPage('content');toggleDrawer()"><span class="ic">📝</span>정보 콘텐츠</a>
+  </div>
   <div class="sidebar-section">⚙️ 설정</div>
   <div class="sidebar-menu">
     <a onclick="showPage('settings');toggleDrawer()"><span class="ic">⚙️</span>시스템 설정</a>
@@ -202,6 +210,41 @@ tr:hover td{background:#fafaf8;}
 </div>
 
 <div class="main">
+
+<!-- 정보 콘텐츠 관리 -->
+<style>.cpl{display:block;font-size:12px;font-weight:600;color:#555;margin:10px 0 4px;}.cpi{width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;font-family:inherit;}</style>
+<div class="page" id="page-content">
+  <div class="card" style="padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div><b style="font-size:15px;">📝 정보 콘텐츠</b> <span style="font-size:12px;color:var(--gray);">가이드·정보성 글을 이미지·영상과 함께 게시 — gnfollow.com 資訊 섹션에 노출됩니다</span></div>
+    <button onclick="cpNew()" style="padding:8px 16px;background:var(--gn2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">＋ 새 글</button>
+  </div>
+  <div id="cp-list"></div>
+  <div id="cp-editor" class="card" style="display:none;padding:18px;margin-top:14px;">
+    <input type="hidden" id="cp-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label class="cpl">분류</label><select id="cp-cat" class="cpi"><option value="info">정보</option><option value="guide">가이드</option><option value="procedure">시술정보</option><option value="news">뉴스</option><option value="event">이벤트</option></select></div>
+      <div><label class="cpl">상태</label><select id="cp-status" class="cpi"><option value="draft">초안 (비공개)</option><option value="active">공개</option></select></div>
+    </div>
+    <label class="cpl">제목 (中文)</label><input id="cp-title-zh" class="cpi" placeholder="标题">
+    <label class="cpl">제목 (한글, 선택)</label><input id="cp-title-ko" class="cpi" placeholder="제목">
+    <label class="cpl">본문 (中文)</label><textarea id="cp-body-zh" class="cpi" rows="6" placeholder="正文内容 (换行会保留)"></textarea>
+    <label class="cpl">본문 (한글, 선택)</label><textarea id="cp-body-ko" class="cpi" rows="4" placeholder="본문"></textarea>
+    <label class="cpl">커버 이미지</label>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="cp-cover-file" accept="image/*" onchange="cpUploadCover(event)"><span id="cp-cover-status" style="font-size:11px;color:var(--gray);"></span></div>
+    <div id="cp-cover-preview" style="margin:8px 0;"></div>
+    <label class="cpl">추가 이미지 (여러 장 선택 가능)</label>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="cp-img-file" accept="image/*" multiple onchange="cpUploadImages(event)"><span id="cp-img-status" style="font-size:11px;color:var(--gray);"></span></div>
+    <div id="cp-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;"></div>
+    <label class="cpl">영상 (파일 업로드, 100MB 이하 · 또는 URL 직접 입력)</label>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="cp-video-file" accept="video/*" onchange="cpUploadVideo(event)"><span id="cp-video-status" style="font-size:11px;color:var(--gray);"></span></div>
+    <input id="cp-video-url" class="cpi" placeholder="https://... (직접 입력 시)" style="margin-top:6px;">
+    <div style="display:flex;gap:8px;margin-top:16px;align-items:center;">
+      <button onclick="cpSave()" id="cp-save-btn" style="padding:9px 22px;background:var(--gn2);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">저장</button>
+      <button onclick="cpCancel()" style="padding:9px 18px;background:#eee;border:none;border-radius:8px;cursor:pointer;">취소</button>
+      <button onclick="cpDelete()" id="cp-del-btn" style="padding:9px 18px;background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;cursor:pointer;display:none;margin-left:auto;">삭제</button>
+    </div>
+  </div>
+</div>
 
 <!-- 대시보드 -->
 <div class="page active" id="page-dashboard">
@@ -1961,6 +2004,73 @@ function showPage(id){
   if(id==='banners')loadBanners();
   if(id==='foreign')renderForeign();
   if(id==='reviews'){loadReviews().then(renderAdminReviews);}
+  if(id==='content')cpLoad();
+}
+
+// ── 정보 콘텐츠 관리 (content_posts + content-media 스토리지) ──
+let CP=[], cpCover='', cpImages=[], cpVideo='';
+async function cpLoad(){
+  try{ const r=await fetch(`${SUPA_URL}/rest/v1/content_posts?select=*&order=sort_order.desc,id.desc`,{headers}); CP=r.ok?await r.json():[]; }catch(e){ CP=[]; }
+  renderCpList();
+}
+function cpBadge(s){ return s==='active'?'<span style="background:#dcfce7;color:#15803d;font-size:10px;padding:2px 8px;border-radius:8px;">공개</span>':'<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 8px;border-radius:8px;">초안</span>'; }
+function renderCpList(){
+  const el=document.getElementById('cp-list'); if(!el) return;
+  if(!CP.length){ el.innerHTML='<div class="card" style="padding:26px;text-align:center;color:#94a3b8;font-size:13px;">아직 등록된 콘텐츠가 없습니다. 「＋ 새 글」로 첫 글을 올려보세요.</div>'; return; }
+  el.innerHTML='<div class="card" style="padding:0;overflow:hidden;">'+CP.map(function(c){
+    const title=c.title_zh||c.title_ko||'(제목 없음)';
+    const cover=c.cover_url?`<div style="width:56px;height:42px;border-radius:6px;background:url('${(c.cover_url||'').replace(/'/g,'%27')}') center/cover;flex-shrink:0;"></div>`:'<div style="width:56px;height:42px;border-radius:6px;background:#f1f5f9;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;">📄</div>';
+    const meta=(c.category||'')+' · '+(c.created_at||'').slice(0,10)+(c.video_url?' · 🎬':'')+((c.images&&c.images.length)?' · 🖼️'+c.images.length:'');
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;" onclick="cpEdit(${c.id})">${cover}<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div><div style="font-size:11px;color:#94a3b8;margin-top:2px;">${escapeHtml(meta)}</div></div>${cpBadge(c.status)}</div>`;
+  }).join('')+'</div>';
+}
+function cpNew(){
+  document.getElementById('cp-id').value=''; document.getElementById('cp-cat').value='info'; document.getElementById('cp-status').value='draft';
+  ['cp-title-zh','cp-title-ko','cp-body-zh','cp-body-ko','cp-video-url'].forEach(id=>document.getElementById(id).value='');
+  ['cp-cover-status','cp-img-status','cp-video-status'].forEach(id=>document.getElementById(id).textContent='');
+  cpCover=''; cpImages=[]; cpVideo=''; cpRenderMedia();
+  document.getElementById('cp-del-btn').style.display='none';
+  document.getElementById('cp-editor').style.display=''; document.getElementById('cp-editor').scrollIntoView({behavior:'smooth'});
+}
+function cpEdit(id){
+  const c=CP.find(x=>x.id===id); if(!c) return;
+  document.getElementById('cp-id').value=c.id; document.getElementById('cp-cat').value=c.category||'info'; document.getElementById('cp-status').value=c.status||'draft';
+  document.getElementById('cp-title-zh').value=c.title_zh||''; document.getElementById('cp-title-ko').value=c.title_ko||'';
+  document.getElementById('cp-body-zh').value=c.body_zh||''; document.getElementById('cp-body-ko').value=c.body_ko||'';
+  ['cp-cover-status','cp-img-status','cp-video-status'].forEach(id=>document.getElementById(id).textContent='');
+  cpCover=c.cover_url||''; cpImages=Array.isArray(c.images)?c.images.slice():[]; cpVideo=c.video_url||''; document.getElementById('cp-video-url').value=cpVideo; cpRenderMedia();
+  document.getElementById('cp-del-btn').style.display=''; document.getElementById('cp-editor').style.display=''; document.getElementById('cp-editor').scrollIntoView({behavior:'smooth'});
+}
+function cpCancel(){ document.getElementById('cp-editor').style.display='none'; }
+function cpRenderMedia(){
+  document.getElementById('cp-cover-preview').innerHTML=cpCover?`<img src="${cpCover}" style="max-width:220px;border-radius:8px;display:block;">`:'';
+  document.getElementById('cp-img-preview').innerHTML=cpImages.map((u,i)=>`<div style="position:relative;"><img src="${u}" style="width:70px;height:70px;object-fit:cover;border-radius:6px;display:block;"><button type="button" onclick="cpImages.splice(${i},1);cpRenderMedia()" style="position:absolute;top:-6px;right:-6px;background:#b91c1c;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;line-height:1;cursor:pointer;">×</button></div>`).join('');
+}
+function cpCompress(file,max){ return new Promise(res=>{ const rd=new FileReader(); rd.onload=e=>{ const img=new Image(); img.onload=()=>{ let w=img.width,h=img.height; if(w>max){ h=Math.round(h*max/w); w=max; } const cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); cv.toBlob(b=>res(b),'image/jpeg',0.82); }; img.src=e.target.result; }; rd.readAsDataURL(file); }); }
+async function cpUp(blob,ext){ const name=Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext; const {error}=await sb.storage.from('content-media').upload(name,blob,{upsert:true,contentType:blob.type||undefined}); if(error) throw error; return sb.storage.from('content-media').getPublicUrl(name).data.publicUrl; }
+async function cpUploadCover(ev){ const f=ev.target.files[0]; if(!f) return; const st=document.getElementById('cp-cover-status'); st.textContent='업로드 중...'; try{ const b=await cpCompress(f,1600); cpCover=await cpUp(b,'jpg'); cpRenderMedia(); st.textContent='✅ 완료'; }catch(e){ st.textContent='실패: '+(e.message||e); } }
+async function cpUploadImages(ev){ const st=document.getElementById('cp-img-status'); const files=[...ev.target.files]; for(let i=0;i<files.length;i++){ st.textContent='업로드 중 ('+(i+1)+'/'+files.length+')'; try{ const b=await cpCompress(files[i],1600); cpImages.push(await cpUp(b,'jpg')); cpRenderMedia(); }catch(e){ st.textContent='일부 실패: '+(e.message||e); } } st.textContent='✅ 완료 ('+cpImages.length+'장)'; }
+async function cpUploadVideo(ev){ const f=ev.target.files[0]; if(!f) return; const st=document.getElementById('cp-video-status'); if(f.size>100*1024*1024){ st.textContent='⚠️ 100MB 초과 — 더 작은 파일이나 URL을 사용하세요.'; return; } st.textContent='업로드 중... (영상은 시간이 걸릴 수 있어요)'; try{ const ext=(f.name.split('.').pop()||'mp4').toLowerCase(); cpVideo=await cpUp(f,ext); document.getElementById('cp-video-url').value=cpVideo; st.textContent='✅ 완료'; }catch(e){ st.textContent='실패: '+(e.message||e); } }
+async function cpSave(){
+  const btn=document.getElementById('cp-save-btn'); btn.disabled=true; btn.textContent='저장 중...';
+  const id=document.getElementById('cp-id').value;
+  const row={ category:document.getElementById('cp-cat').value, status:document.getElementById('cp-status').value,
+    title_zh:document.getElementById('cp-title-zh').value.trim()||null, title_ko:document.getElementById('cp-title-ko').value.trim()||null,
+    body_zh:document.getElementById('cp-body-zh').value.trim()||null, body_ko:document.getElementById('cp-body-ko').value.trim()||null,
+    cover_url:cpCover||null, images:cpImages, video_url:(document.getElementById('cp-video-url').value.trim()||cpVideo||null),
+    updated_at:new Date().toISOString() };
+  if(!row.title_zh && !row.title_ko){ alert('제목(中文 또는 한글)을 입력하세요.'); btn.disabled=false; btn.textContent='저장'; return; }
+  try{
+    if(id){ const {error}=await sb.from('content_posts').update(row).eq('id',id); if(error) throw error; }
+    else{ const {error}=await sb.from('content_posts').insert(row); if(error) throw error; }
+    btn.disabled=false; btn.textContent='저장'; document.getElementById('cp-editor').style.display='none'; await cpLoad();
+  }catch(e){ btn.disabled=false; btn.textContent='저장'; alert('저장 실패: '+(e.message||e)); }
+}
+async function cpDelete(){
+  const id=document.getElementById('cp-id').value; if(!id) return; if(!confirm('이 콘텐츠를 삭제할까요? 되돌릴 수 없습니다.')) return;
+  const {error}=await sb.from('content_posts').delete().eq('id',id);
+  if(error){ alert('삭제 실패: '+error.message); return; }
+  document.getElementById('cp-editor').style.display='none'; await cpLoad();
 }
 
 // ── 견적신청 관리 (환자웹 견적위젯 연동) ──
