@@ -399,6 +399,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <a onclick="showMain();fkhRestoreHospSection();" data-i18n="nav_home">首页</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-hosps').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_hosps">병원</a>
       <a onclick="showMain();fkhShowExtraSection();" data-i18n="nav_concierge">컨시어지</a>
+      <a id="nav-price" style="display:none" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-price').scrollIntoView({behavior:'smooth'}),100)">가격비교</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-content').scrollIntoView({behavior:'smooth'}),100)">资讯</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
@@ -555,6 +556,36 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
 </section>
 </div>
+<!-- 가격비교 (글로벌 followkorea 전용 · gnfollow(중국)에선 로드조차 안 됨) -->
+<style>
+#sec-price .pr-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+#sec-price .pr-main{flex:1;min-width:0;}
+#sec-price .pr-name{font-size:14px;font-weight:600;color:#222;}
+#sec-price .pr-zh{font-size:11.5px;color:var(--gray);margin-top:2px;}
+#sec-price .pr-hosp{font-size:11px;color:var(--gn2);font-weight:600;margin-top:3px;}
+#sec-price .pr-price{text-align:right;flex-shrink:0;}
+#sec-price .pr-krw{font-size:14px;font-weight:800;color:var(--gn2);white-space:nowrap;}
+#sec-price .pr-cny{font-size:11px;color:var(--gray);margin-top:2px;white-space:nowrap;}
+#sec-price .pr-chip{padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--gray);cursor:pointer;}
+#sec-price .pr-chip.on{background:var(--gn2);color:#fff;border-color:var(--gn2);}
+</style>
+<section class="section" id="sec-price" style="background:var(--lgray);display:none;">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div class="sec-eyebrow">PRICE</div>
+      <h2 class="sec-title" id="price-title">시술 가격 비교</h2>
+      <p class="sec-sub" id="price-sub">협력 병원의 시술별 가격 · 실제 견적은 병원 상담 후 확정</p>
+    </div>
+    <div style="max-width:760px;margin:0 auto;">
+      <input id="price-search" placeholder="시술명 검색 (예: 쌍꺼풀, 울쎄라, 필러)" oninput="priceLimit=40;renderPrice()" style="width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:24px;font-size:14px;outline:none;box-sizing:border-box;">
+      <div id="price-cats" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;justify-content:center;"></div>
+      <div id="price-list" style="margin-top:16px;"></div>
+      <div id="price-more" style="text-align:center;margin-top:16px;display:none;"><button onclick="priceLimit+=60;renderPrice()" style="padding:10px 32px;background:transparent;border:2px solid var(--gn);color:var(--gn);border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;">더보기 →</button></div>
+      <div id="price-count" style="text-align:center;margin-top:10px;font-size:12px;color:var(--gray);"></div>
+    </div>
+  </div>
+</section>
+
 <section class="section" id="sec-review" style="background:var(--white);">
   <div class="section-inner">
     <div class="sec-head">
@@ -2117,6 +2148,7 @@ function setLang(l){
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides(); renderHeroBadge();
   if(currentHosp) renderDetail(currentHosp);
+  if(typeof applyPriceI18n==='function'){ var _sp=document.getElementById('sec-price'); if(_sp&&_sp.style.display!=='none'){ applyPriceI18n(); renderPriceCats(); renderPrice(); } }
   initSvcButtons();
   // 견적위젯이 열려있는 상태에서 언어가 바뀌면 위젯 텍스트도 즉시 갱신
   if(typeof fkqApplyI18n === 'function' && document.getElementById('fk-quote-overlay')?.classList.contains('open')){
@@ -2516,6 +2548,61 @@ function openContentPost(id){
 }
 function closeContentModal(){ const m=document.getElementById('content-modal-bg'); if(m){m.classList.remove('open'); const v=m.querySelector('video'); if(v)v.pause();} }
 if(document.readyState!=='loading') loadContentPosts(); else document.addEventListener('DOMContentLoaded',loadContentPosts);
+
+/* ── 가격비교 (글로벌 followkorea 전용) ── */
+var priceCat='', priceLimit=40;
+var PRICE_I18N={
+  ko:{nav:'가격비교',title:'시술 가격 비교',sub:'협력 병원의 시술별 가격 · 실제 견적은 병원 상담 후 확정',ph:'시술명 검색 (예: 쌍꺼풀, 울쎄라, 필러)',all:'전체',more:'더보기 →',cnt:function(t,s){return '총 '+t+'개 중 '+s+'개 표시';},none:'검색 결과가 없습니다',ask:'상담'},
+  zh:{nav:'价格对比',title:'项目价格对比',sub:'合作医院项目价格一览 · 实际报价以医院面诊为准',ph:'搜索项目 (如 双眼皮, 超声刀, 填充)',all:'全部',more:'查看更多 →',cnt:function(t,s){return '共 '+t+' 项, 显示 '+s+' 项';},none:'没有搜索结果',ask:'咨询'},
+  en:{nav:'Prices',title:'Treatment Price Comparison',sub:'Procedure prices across partner clinics · final quote after consultation',ph:'Search treatment (e.g. eye, ulthera, filler)',all:'All',more:'Show more →',cnt:function(t,s){return 'Showing '+s+' of '+t;},none:'No results',ask:'Inquire'}
+};
+function priceL(){ return PRICE_I18N[lang]||PRICE_I18N.en; }
+function priceWon(n){ if(!n) return ''; if(lang==='ko'&&n>=10000){ return '₩'+(n/10000).toLocaleString('ko-KR',{maximumFractionDigits:1})+'만'; } return '₩'+n.toLocaleString('en'); }
+function applyPriceI18n(){
+  var L=priceL();
+  var e;
+  if((e=document.getElementById('nav-price'))) e.textContent=L.nav;
+  if((e=document.getElementById('price-title'))) e.textContent=L.title;
+  if((e=document.getElementById('price-sub'))) e.textContent=L.sub;
+  if((e=document.getElementById('price-search'))) e.placeholder=L.ph;
+  if((e=document.querySelector('#price-more button'))) e.textContent=L.more;
+}
+function priceName(it){ return (lang==='zh'&&it.zh)?it.zh:it.ko; }
+function renderPriceCats(){
+  var el=document.getElementById('price-cats'); if(!el||typeof PRICE_DATA==='undefined') return;
+  var L=priceL();
+  var cats=[{k:'',n:L.all}].concat(PRICE_DATA.map(function(c){return {k:c.cat,n:c.cat+' '+c.items.length};}));
+  el.innerHTML=cats.map(function(c){return '<span class="pr-chip'+(priceCat===c.k?' on':'')+'" onclick="priceCat=\''+c.k+'\';priceLimit=40;renderPriceCats();renderPrice()">'+cEsc(c.n)+'</span>';}).join('');
+}
+function renderPrice(){
+  if(typeof PRICE_DATA==='undefined') return;
+  var L=priceL();
+  var q=(document.getElementById('price-search').value||'').trim().toLowerCase();
+  var pool=[];
+  PRICE_DATA.forEach(function(c){ if(priceCat&&c.cat!==priceCat)return; c.items.forEach(function(it){ pool.push(it); }); });
+  var filtered=pool.filter(function(it){ return !q || (it.ko&&it.ko.toLowerCase().includes(q)) || (it.zh&&it.zh.includes(q)) || (it.h&&it.h.toLowerCase().includes(q)); });
+  var total=filtered.length, shown=filtered.slice(0,priceLimit);
+  document.getElementById('price-list').innerHTML=shown.map(function(it){
+    var krw=it.kn?(priceWon(it.kn)+(it.kx?('~'+priceWon(it.kx)):'')):L.ask;
+    var cny=it.cy?('¥'+Math.round(it.cy).toLocaleString()):'';
+    var nm=priceName(it), sub=(lang==='zh')?(it.ko):(it.zh||'');
+    return '<div class="pr-row"><div class="pr-main"><div class="pr-name">'+cEsc(nm)+'</div>'+(sub?'<div class="pr-zh">'+cEsc(sub)+'</div>':'')+'<div class="pr-hosp">'+cEsc(it.h)+'</div></div><div class="pr-price"><div class="pr-krw">'+krw+'</div>'+(cny?'<div class="pr-cny">'+cny+'</div>':'')+'</div></div>';
+  }).join('');
+  document.getElementById('price-more').style.display=total>priceLimit?'':'none';
+  document.getElementById('price-count').textContent=total?L.cnt(total,shown.length):L.none;
+}
+function initPrice(){
+  if(typeof SITE!=='undefined' && SITE==='gnfollow') return; // 중국(gnfollow) 제외 — 의료광고법: 가격 미표기
+  var s=document.createElement('script'); s.src='price-data.js';
+  s.onload=function(){
+    var sec=document.getElementById('sec-price'); if(sec) sec.style.display='';
+    var nav=document.getElementById('nav-price'); if(nav) nav.style.display='';
+    applyPriceI18n(); renderPriceCats(); renderPrice();
+  };
+  s.onerror=function(){};
+  document.head.appendChild(s);
+}
+if(document.readyState!=='loading') initPrice(); else document.addEventListener('DOMContentLoaded',initPrice);
 
 /* ── 진료진(의료진) 데이터 · 다국어 ─────────────────────────
    각 병원 홈페이지 의료진 페이지에서 수집. name=한글(고유명사·언어공통), title/spec는 언어별 변환.
