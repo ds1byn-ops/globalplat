@@ -2340,7 +2340,10 @@ function filterHosps(){
             <div class="hlc-dept">${dept}</div>
             <div class="hlc-tags">${treats.slice(0,4).map(tr=>`<span class="hlc-tag">#${tr}</span>`).join('')}</div>
           </div>
-          <button class="btn-book hlc-btn-full" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+          <div class="hlc-btns">
+            <button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button>
+            <button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button>
+          </div>
         </div>
       </div>
     </div>`;
