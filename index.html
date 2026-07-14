@@ -489,6 +489,20 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
 </section>
 
+<style>
+#hosp-grid .hcl-group{border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:10px;overflow:hidden;}
+#hosp-grid .hcl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;}
+#hosp-grid .hcl-cat{font-size:14.5px;font-weight:800;color:var(--dark);} #hosp-grid .hcl-cat b{color:var(--gn2);margin-left:5px;}
+#hosp-grid .hcl-arrow{transition:transform .2s;color:var(--gray);font-size:12px;}
+#hosp-grid .hcl-group.open .hcl-arrow{transform:rotate(180deg);}
+#hosp-grid .hcl-body{display:none;border-top:1px solid var(--border);}
+#hosp-grid .hcl-group.open .hcl-body{display:block;}
+#hosp-grid .hcl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid #f1f3f5;cursor:pointer;}
+#hosp-grid .hcl-row:last-child{border-bottom:0;}
+#hosp-grid .hcl-info{min-width:0;} #hosp-grid .hcl-name{font-size:14px;font-weight:700;color:#222;} #hosp-grid .hcl-rate{font-size:11.5px;color:#f59e0b;font-weight:700;margin-left:6px;}
+#hosp-grid .hcl-dept{font-size:11.5px;color:var(--gray);margin-top:2px;}
+#hosp-grid .hcl-btns{display:flex;gap:6px;flex-shrink:0;}
+</style>
 <section class="section" id="sec-hosps" style="background:var(--lgray);">
   <div class="section-inner">
     <div class="hosp-recommend-wrap">
@@ -2424,7 +2438,7 @@ function filterHosps(){
         if(act.dataset.action==='detail'){ showDetail(act.dataset.kr); return; }
         if(act.dataset.action==='modal'){ openModal(act.dataset.kr); return; }
       }
-      const card=e.target.closest('.hlc, .hlcc');
+      const card=e.target.closest('.hlc, .hlcc, .hcl-row');
       if(card && card.dataset.kr && !e.target.closest('button')){ showDetail(card.dataset.kr); }
     },true);
   }
@@ -2436,13 +2450,27 @@ function filterHosps(){
     hlcBindClicks(recGrid);
   }
 
-  // 나머지 병원: 2열 컴팩트 그리드 (정렬 적용 — 정렬/카드 렌더 실패해도 목록은 항상 표시)
-  renderHospSortBar();
-  let sortedOthers;
-  try { sortedOthers = sortHospList(others); } catch(e){ sortedOthers = others; }
+  // 나머지 병원: 분야(카테고리)별 아코디언 — 썸네일 없이 텍스트 목록(3.8MB 이미지 미사용)
+  const CATORD=['성형외과','피부','줄기세포','항노화','체형','여성의학','안과','한방'];
+  const CATI18N={'성형외과':{zh:'整形外科',en:'Plastic Surgery'},'피부':{zh:'皮肤科',en:'Dermatology'},'줄기세포':{zh:'干细胞',en:'Stem Cell'},'항노화':{zh:'抗衰老',en:'Anti-aging'},'체형':{zh:'体型管理',en:'Body'},'여성의학':{zh:'女性医学',en:"Women's Health"},'안과':{zh:'眼科',en:'Eye'},'한방':{zh:'韩医',en:'Korean Medicine'},'기타':{zh:'其他',en:'Others'}};
+  const catLbl=c=>{ if(lang==='ko')return c; const m=CATI18N[c]; return m?(m[lang]||m.en||c):c; };
+  const groups={};
+  others.forEach(h=>{ const c=(h.cat||'').split('/')[0]||'기타'; (groups[c]=groups[c]||[]).push(h); });
+  const gcats=Object.keys(groups).sort((a,b)=>{const ia=CATORD.indexOf(a),ib=CATORD.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
+  const sortBar=document.getElementById('hosp-sort-bar');
+  if(sortBar){ const allL={ko:'전체 병원 · 분야별로 보기',zh:'全部医院 · 按科室查看',en:'All Hospitals · by Field'}; sortBar.innerHTML=`<div class="hosp-list-title">${allL[lang]||allL.en}</div><div class="hosp-list-title" style="color:var(--gn2)">${others.length}</div>`; }
   const _gridEl = document.getElementById('hosp-grid');
   if(_gridEl){
-    _gridEl.innerHTML = sortedOthers.map(h=>{ try{ return hlcCompactCardHTML(h); }catch(e){ return ''; } }).join('');
+    _gridEl.innerHTML = gcats.map((c,ci)=>{
+      const rows=groups[c].map(h=>{
+        const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
+        const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
+        const rt=hospRatingInfo(h.kr);
+        const rHTML=rt?`<span class="hcl-rate">★ ${rt.avg}</span>`:'';
+        return `<div class="hcl-row" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
+      }).join('');
+      return `<div class="hcl-group${ci===0?' open':''}"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
+    }).join('');
     hlcBindClicks(_gridEl);
   }
 }
