@@ -644,17 +644,25 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     </div>
     <div class="footer-col">
       <h4 data-i18n="f_h3">联系方式</h4>
-      <a href="javascript:void(0)" onclick="fkShowWechatId()" style="display:flex;align-items:center;gap:6px;">
+      <a href="https://line.me/ti/p/followkorea_kr" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;">
+        <img src="https://img.icons8.com/color/20/line-me.png" style="border-radius:4px;">
+        LINE: <b>followkorea_kr</b>
+      </a>
+      <a href="javascript:void(0)" onclick="fkCopyId('Followkorea','WhatsApp')" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <img src="https://img.icons8.com/color/20/whatsapp.png" style="border-radius:4px;">
+        WhatsApp: <b>Followkorea</b>
+      </a>
+      <a href="javascript:void(0)" onclick="fkShowWechatId()" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
         <img src="https://img.icons8.com/color/20/wechat.png" style="border-radius:4px;">
-        WeChat: <b>Followkorea1</b>
+        WeChat: <b>Followkorea2</b>
       </a>
       <a href="https://www.xiaohongshu.com/user/profile/Followkorea_kr" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:14px;">📕</span>
-        小红书: <b>Followkorea_kr</b>
+        小红书(샤오홍슈): <b>Followkorea_kr</b>
       </a>
-      <a href="https://line.me/ti/p/Followkorea" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;">
-        <img src="https://img.icons8.com/color/20/line-me.png" style="border-radius:4px;">
-        Line: <b>Followkorea</b>
+      <a href="javascript:void(0)" onclick="fkCopyId('Followkorea1','抖音 Douyin')" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <img src="https://img.icons8.com/color/20/tiktok.png" style="border-radius:4px;">
+        抖音(더우인): <b>Followkorea1</b>
       </a>
       <a href="mailto:contact@followkorea.co.kr" style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:14px;">📧</span>
@@ -839,7 +847,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     <h3 style="font-size:18px;font-weight:800;margin-bottom:8px;" data-i18n="done_title">预约申请完成！</h3>
     <p style="color:var(--gray);font-size:13px;line-height:1.8;" data-i18n="done_desc">顾问将在24小时内通过微信联系您</p>
     <div style="margin-top:14px;padding:12px;background:var(--lgray);border-radius:10px;font-size:12px;">
-      LINE: <b style="color:var(--gn2);">Followkorea</b>
+      LINE: <b style="color:var(--gn2);">followkorea_kr</b>
     </div>
     <button class="btn-full" onclick="closeModal()" style="margin-top:12px;" data-i18n="done_close">关闭</button>
   </div>
@@ -1059,9 +1067,15 @@ let authProfile = null;   // {id,name,email,messenger_id,phone,nationality}
 
 function authT(key){ return t(key); }
 
+// ── 소셜 아이디 클립보드 복사 (WhatsApp·더우인 등 공용) ──
+function fkCopyId(id,label){
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(id).catch(()=>{}); }
+  const isZh = (typeof lang!=='undefined' && lang==='zh');
+  alert(label+': '+id+'\n'+(isZh?'（已复制到剪贴板）':'(클립보드에 복사됐어요)'));
+}
 // ── 위챗 ID 안내 (실제 고객센터 링크가 아직 없어 클립보드 복사 방식으로 안내) ──
 function fkShowWechatId(){
-  const wid = 'Followkorea1';
+  const wid = 'Followkorea2';
   const msg = {
     zh:`微信号：${wid}\n（已复制到剪贴板，请打开微信添加好友）`,
     ko:`위챗 ID: ${wid}\n(클립보드에 복사됐어요. 위챗 앱에서 친구추가 해주세요)`,
@@ -1073,7 +1087,7 @@ function fkShowWechatId(){
 }
 // ── 샤오홍슈(小红书) 계정 안내 (실제 프로필 링크가 아직 없어 ID 안내 방식으로 처리) ──
 function fkShowXhsId(){
-  const xid = 'Followkorea';
+  const xid = 'Followkorea_kr';
   const msg = {
     zh:`小红书号：${xid}\n（已复制到剪贴板，请打开小红书搜索关注）`,
     ko:`샤오홍슈 ID: ${xid}\n(클립보드에 복사됐어요. 샤오홍슈 앱에서 검색해서 팔로우해주세요)`,
@@ -1610,7 +1624,7 @@ COMPANY INFO:
 - Address: 13F, 116, Hongwoo Bldg, 373 Gangnam-daero, Seocho-gu, Seoul
 - License: Ministry of Health & Welfare registered foreign patient attraction agency (A-2026-01-01-06622)
 - Tourism License: 2026-000022
-- Contact: WeChat Followkorea1 | Line: Followkorea | Email: contact@followkorea.co.kr
+- Contact: WeChat Followkorea2 | Line: followkorea_kr | Email: contact@followkorea.co.kr
 - Official Website: https://www.followkorea.co.kr (you may mention/share this link when introducing the company or when the user wants more details)
 
 PARTNER HOSPITALS (26 clinics in Gangnam):
@@ -1844,7 +1858,7 @@ async function sendAiMsgText(msg, showUser=true){
         // ⚠️ 서버(Supabase Edge Function)에 Claude API 키가 아직 설정되지 않은 상태
         //    → FAQ 키워드 매칭으로 폴백 (Anthropic 콘솔에서 키 발급 후 Supabase 시크릿에 등록하면 자동으로 실제 AI 응답으로 전환됩니다)
         const matched = typeof fkaiMatchFaq==='function' ? fkaiMatchFaq(msg, aiLang) : null;
-        const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea1 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea1 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea1 😊'};
+        const fallbacks={zh:'抱歉，这个问题暂时无法直接回答。请微信联系我们：Followkorea2 😊',ko:'죄송해요, 이 질문은 지금 바로 답변드리기 어려워요. 위챗으로 문의해주세요: Followkorea2 😊',en:'Sorry, I can\'t answer that directly right now. Please contact us on WeChat: Followkorea2 😊'};
         const reply = matched || fallbacks[aiLang] || fallbacks.en;
         aiHistory.push({role:'assistant',content:reply});
         addAiMsg('ai',reply);
@@ -1872,7 +1886,7 @@ async function sendAiMsgText(msg, showUser=true){
     showAiBookingPrompt();
   }catch(e){
     document.getElementById('ai-typing')?.remove();
-    const fallbacks={zh:'抱歉，AI暂时无法连接。请微信联系我们：Followkorea1 😊',ko:'잠시 연결이 불안정합니다. 위챗으로 문의해주세요: Followkorea1 😊',en:'Connection issue. Contact WeChat: Followkorea1 😊'};
+    const fallbacks={zh:'抱歉，AI暂时无法连接。请微信联系我们：Followkorea2 😊',ko:'잠시 연결이 불안정합니다. 위챗으로 문의해주세요: Followkorea2 😊',en:'Connection issue. Contact WeChat: Followkorea2 😊'};
     addAiMsg('ai',fallbacks[aiLang]||fallbacks.en);
   }
   if(btn)btn.disabled=false;
@@ -4207,7 +4221,7 @@ async function fkqSubmit(){
       <div style="font-size:44px;margin-bottom:10px;">✅</div>
       <div style="font-size:16px;font-weight:700;color:#16202e;margin-bottom:6px;">${fkqT('sent_title')}</div>
       <div style="font-size:13px;color:#64748b;line-height:1.6;">${fkqT('sent_desc')}</div>
-      <div style="margin-top:14px;font-size:12px;color:#94a3b8;">LINE: <b style="color:#16202e;">Followkorea</b></div>
+      <div style="margin-top:14px;font-size:12px;color:#94a3b8;">LINE: <b style="color:#16202e;">followkorea_kr</b></div>
     </div>`;
   document.getElementById('fkq-submit-btn').style.display = 'none';
   document.getElementById('fkq-back-btn').style.display = 'none';
@@ -4387,7 +4401,7 @@ function fkqResetWidget(){
   <a class="fk-c-wechat" href="javascript:void(0)" onclick="fkShowWechatId()" title="WeChat">
     <svg viewBox="0 0 24 24" fill="#fff"><path d="M9.5 4C5.4 4 2 6.9 2 10.5c0 2 1.1 3.8 2.8 5-.1.5-.5 1.6-.6 1.9 0 0 0 .2.1.3.1.1.2 0 .3 0 .2-.1 1.9-1.2 2.2-1.4.9.2 1.8.4 2.7.3-.1-.4-.2-.8-.2-1.2 0-3.6 3.5-6.5 7.9-6.5.3 0 .6 0 .9.1C17.6 5.9 13.9 4 9.5 4zm-2.7 3.6c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1zm5.4 0c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1z"/><path d="M22 14.8c0-2.9-2.9-5.3-6.5-5.3s-6.5 2.4-6.5 5.3 2.9 5.3 6.5 5.3c.7 0 1.4-.1 2.1-.3.3-.1 1.6.8 1.8.9.1 0 .2.1.3 0 .1-.1.1-.2.1-.2-.1-.3-.4-1.2-.5-1.6 1.6-1 2.7-2.5 2.7-4.1zm-8.9-.9c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9zm4.7 0c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9z"/></svg>
   </a>
-  <a class="fk-c-line" href="https://line.me/ti/p/Followkorea" target="_blank" rel="noopener noreferrer" title="LINE">
+  <a class="fk-c-line" href="https://line.me/ti/p/followkorea_kr" target="_blank" rel="noopener noreferrer" title="LINE">
     <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.6 1.1-.4 5.9-3.5 8.1-6C21.5 13.7 22 12.4 22 11c0-4.4-4.5-8-10-8z"/></svg>
   </a>
   <a class="fk-c-whatsapp" href="https://wa.me/821000000000" target="_blank" rel="noopener noreferrer" title="WhatsApp">
@@ -4696,7 +4710,7 @@ function fkaiConnectHuman(){
   fkaiSaveHandoffLog();
   fkShowWechatId();
   document.getElementById('fkai-handoff-slot').innerHTML = '';
-  fkaiAddMsg('bot', fkaiLang === 'zh' ? '请添加微信号 Followkorea1 咨询～' : '위챗 아이디 Followkorea1 로 친구 추가 후 문의해주세요~');
+  fkaiAddMsg('bot', fkaiLang === 'zh' ? '请添加微信号 Followkorea2 咨询～' : '위챗 아이디 Followkorea2 로 친구 추가 후 문의해주세요~');
 }
 
 async function fkaiSaveHandoffLog(){
