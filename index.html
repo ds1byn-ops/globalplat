@@ -2391,18 +2391,21 @@ function filterHosps(){
     </div>`;
   }
   function hlcBindClicks(container){
-    container.querySelectorAll('.hlc, .hlcc').forEach(card=>{
-      card.onclick=function(e){
-        const btn=e.target.closest('[data-action]');
-        if(btn){
-          e.stopPropagation();
-          if(btn.dataset.action==='detail')showDetail(btn.dataset.kr);
-          else if(btn.dataset.action==='modal')openModal(btn.dataset.kr);
-        }else{
-          showDetail(this.dataset.kr);
-        }
-      };
-    });
+    // 개별 카드 onclick(버블 단계) 대신 document 캡처 단계 위임으로 처리.
+    // (일부 환경에서 카드 내부 요소의 클릭이 중간에서 전파 중단되어 card.onclick 이
+    //  실제 클릭에 안 걸리던 문제 해결 — 캡처는 전파중단 전에 먼저 잡음. 재렌더에도 안전.)
+    // 렌더 때마다 호출되지만 리스너는 한 번만 설치.
+    if(window.__hlcDelegated) return;
+    window.__hlcDelegated=true;
+    document.addEventListener('click',function(e){
+      const act=e.target.closest('[data-action][data-kr]');
+      if(act){
+        if(act.dataset.action==='detail'){ showDetail(act.dataset.kr); return; }
+        if(act.dataset.action==='modal'){ openModal(act.dataset.kr); return; }
+      }
+      const card=e.target.closest('.hlc, .hlcc');
+      if(card && card.dataset.kr && !e.target.closest('button')){ showDetail(card.dataset.kr); }
+    },true);
   }
 
   // 추천병원 렌더링 (엄선 배지, 큰 카드로 강조)
