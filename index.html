@@ -2487,7 +2487,7 @@ function filterHosps(){
         const rHTML=rt?`<span class="hcl-rate">★ ${rt.avg}</span>`:'';
         return `<div class="hcl-row" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
       }).join('');
-      return `<div class="hcl-group${ci===0?' open':''}"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
+      return `<div class="hcl-group"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
     }).join('') || ('<div style="text-align:center;padding:30px;color:var(--gray);font-size:13px;">'+(lang==='zh'?'该科室合作医院准备中':lang==='ko'?'해당 분야 병원 준비 중':'No hospitals in this field yet')+'</div>');
     hlcBindClicks(_gridEl);
   }
@@ -2679,7 +2679,7 @@ function renderPrice(){
         return '<div class="pr-sub"><div class="pr-subhead" onclick="event.stopPropagation();this.parentNode.classList.toggle(\'open\')"><span>'+cEsc(subLbl(k))+' <b>'+subs[k].length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-subbody">'+sortItems(subs[k]).map(priceRowHTML).join('')+'</div></div>';
       }).join('');
     } else { body=sortItems(c.items).map(priceRowHTML).join(''); }
-    return '<div class="pr-group'+(ci===0?' open':'')+'"><div class="pr-head" onclick="this.parentNode.classList.toggle(\'open\')"><span class="pr-catname">'+cEsc(priceCatLbl(c.cat))+' <b>'+c.items.length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-gbody">'+body+'</div></div>';
+    return '<div class="pr-group"><div class="pr-head" onclick="this.parentNode.classList.toggle(\'open\')"><span class="pr-catname">'+cEsc(priceCatLbl(c.cat))+' <b>'+c.items.length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-gbody">'+body+'</div></div>';
   }).join('');
   document.getElementById('price-more').style.display='none';
   document.getElementById('price-count').textContent='';
@@ -2806,12 +2806,13 @@ function openDoc(kr,di){
     +'</div>';
   document.getElementById('doc-modal-bg').classList.add('open');
 }
+var HOSP_THUMB={"원진성형외과피부과의원":"hthumb/wonjin.jpg","지유의원 (사적인아름다움)":"hthumb/gu.jpg","신상성형외과":"hthumb/shinsang.jpg","드림성형외과":"hthumb/dream.jpg","셀리닉의원":"hthumb/cellinique.jpg","차움":"hthumb/chaum.jpg","원셀의원":"hthumb/onecell.jpg","글로비성형외과":"hthumb/glovi.jpg","라미체의원":"hthumb/lamiche.jpg","뷰성형외과":"hthumb/view.jpg","바른길산부인과":"hthumb/barunhifu.jpg","강남다움의원":"hthumb/gangnamdaum.jpg","더뷰티성형외과":"hthumb/thebeauty.jpg","신소애여성의원":"hthumb/sinsoa.jpg","히어피부과":"hthumb/heerskin.jpg","히어산부인과":"hthumb/heerwomen.jpg","셀로라의원 (with 지유)":"hthumb/cellora.jpg","리프톤의원":"hthumb/lifton.jpg","청담서클의원":"hthumb/cheongdamcircle.jpg","루비성형외과(신사점)":"hthumb/ruby.jpg","벤자민의원":"hthumb/benjamin.jpg","고운몸의원":"hthumb/gowoonmom.jpg","티알 트리니티라파엘로 청담의원":"hthumb/tr.jpg","GV 성형외과":"hthumb/gv.jpg","페이스라인성형외과의원":"hthumb/faceline.jpg","강남서울안과의원":"hthumb/kseye.jpg"};
 function renderDetail(kr){
   const h=HOSPS.find(x=>x.kr===kr);if(!h)return;
   const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
   const overview=lang==='ko'?h.overview_ko:lang==='zh'?h.overview_zh:h.overview_en;
   const treats=lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en;
-  (function(){ var di=document.getElementById('d-icon'); if(!di)return; var im=(typeof HOSP_INTROS!=='undefined'&&HOSP_INTROS[kr]&&HOSP_INTROS[kr].images&&HOSP_INTROS[kr].images[0])||h.dynamicImage||''; if(im){ di.textContent=''; di.style.backgroundImage="url('"+String(im).replace(/'/g,'%27')+"')"; di.style.backgroundSize='cover'; di.style.backgroundPosition='center'; di.style.borderRadius='16px'; } else { di.textContent=h.icon; di.style.backgroundImage=''; } })();
+  (function(){ var di=document.getElementById('d-icon'); if(!di)return; var im=(typeof HOSP_INTROS!=='undefined'&&HOSP_INTROS[kr]&&HOSP_INTROS[kr].images&&HOSP_INTROS[kr].images[0])||h.dynamicImage||(typeof HOSP_THUMB!=='undefined'&&HOSP_THUMB[kr])||''; if(im){ di.textContent=''; di.style.width='88px'; di.style.height='88px'; di.style.borderRadius='18px'; di.style.backgroundImage="url('"+String(im).replace(/'/g,'%27')+"')"; di.style.backgroundSize='cover'; di.style.backgroundPosition='center center'; di.style.boxShadow='0 4px 14px rgba(0,0,0,.1)'; } else { di.textContent=h.icon; di.style.backgroundImage=''; di.style.width=''; di.style.height=''; di.style.boxShadow=''; } })();
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-en').textContent=h.en;
   document.getElementById('d-loc').textContent=h.locMap?(h.locMap[lang]||h.locMap.zh||h.locMap.en):t(h.loc);
