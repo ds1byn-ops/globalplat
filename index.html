@@ -582,6 +582,14 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 #sec-price .pr-cny{font-size:11px;color:var(--gray);margin-top:2px;white-space:nowrap;}
 #sec-price .pr-chip{padding:6px 14px;border-radius:18px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--gray);cursor:pointer;}
 #sec-price .pr-chip.on{background:var(--gn2);color:#fff;border-color:var(--gn2);}
+#sec-price .pr-group{border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:10px;overflow:hidden;}
+#sec-price .pr-head{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;cursor:pointer;user-select:none;}
+#sec-price .pr-catname{font-size:15px;font-weight:800;color:var(--dark);} #sec-price .pr-catname b{color:var(--gn2);margin-left:5px;}
+#sec-price .pr-arrow{color:var(--gray);font-size:12px;transition:transform .2s;}
+#sec-price .pr-group.open .pr-arrow{transform:rotate(180deg);}
+#sec-price .pr-gbody{display:none;border-top:1px solid var(--border);padding:6px 10px 10px;}
+#sec-price .pr-group.open .pr-gbody{display:block;}
+#sec-price .pr-group .pr-row{margin-bottom:6px;}
 </style>
 <section class="section" id="sec-price" style="background:var(--lgray);display:none;">
   <div class="section-inner">
@@ -2235,7 +2243,7 @@ function setCat(cat,el){
       initSvcButtons();
     },100);
   }
-  if(!isExtra)filterHosps();
+  if(!isExtra){ filterHosps(); const hs=document.getElementById('sec-hosps'); if(hs) setTimeout(()=>hs.scrollIntoView({behavior:'smooth',block:'start'}),90); }
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
@@ -2470,7 +2478,7 @@ function filterHosps(){
         return `<div class="hcl-row" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
       }).join('');
       return `<div class="hcl-group${ci===0?' open':''}"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
-    }).join('');
+    }).join('') || ('<div style="text-align:center;padding:30px;color:var(--gray);font-size:13px;">'+(lang==='zh'?'该科室合作医院准备中':lang==='ko'?'해당 분야 병원 준비 중':'No hospitals in this field yet')+'</div>');
     hlcBindClicks(_gridEl);
   }
 }
@@ -2603,28 +2611,39 @@ function applyPriceI18n(){
   if((e=document.querySelector('#price-more button'))) e.textContent=L.more;
 }
 function priceName(it){ return (lang==='zh'&&it.zh)?it.zh:it.ko; }
-function renderPriceCats(){
-  var el=document.getElementById('price-cats'); if(!el||typeof PRICE_DATA==='undefined') return;
-  var L=priceL();
-  var cats=[{k:'',n:L.all}].concat(PRICE_DATA.map(function(c){return {k:c.cat,n:c.cat+' '+c.items.length};}));
-  el.innerHTML=cats.map(function(c){return '<span class="pr-chip'+(priceCat===c.k?' on':'')+'" onclick="priceCat=\''+c.k+'\';priceLimit=40;renderPriceCats();renderPrice()">'+cEsc(c.n)+'</span>';}).join('');
+var PRICE_CAT_I18N={'성형외과':{zh:'整形外科',en:'Plastic Surgery'},'피부과':{zh:'皮肤科',en:'Dermatology'},'줄기세포':{zh:'干细胞',en:'Stem Cell'},'여성의원':{zh:'女性医学',en:"Women's Health"},'건강검진':{zh:'体检',en:'Health Check'},'기타서비스':{zh:'其他',en:'Others'}};
+function priceCatLbl(c){ if(lang==='ko')return c; var m=PRICE_CAT_I18N[c]; return m?(m[lang]||m.en||c):c; }
+// 언어별 통화로 환산 (KRW→현지통화). ko₩ zh¥ en$ vi₫ th฿ ja¥ …
+function priceCur(krw){ if(!krw) return null; var c=(typeof FKQ_CURRENCY!=='undefined'&&FKQ_CURRENCY[lang])||{exr:1,sym:'₩'}; var v=c.mult?Math.round(krw*c.exr):Math.round(krw/c.exr); return c.sym+v.toLocaleString(); }
+// 수가표 병원명 → HOSPS.kr 매핑(상세 이동용). 없으면 null(클릭 불가)
+function priceHospKr(h){ if(typeof HOSPS==='undefined'||!h) return null; var n=function(s){return (s||'').replace(/[\s()（）]/g,'');}; var t=n(h); var f=HOSPS.find(function(x){var xk=n(x.kr); return xk===t||xk.indexOf(t)>=0||t.indexOf(xk)>=0;}); return f?f.kr:null; }
+function priceRowHTML(it){
+  var L=priceL(), nm=priceName(it), sub=(lang==='zh')?it.ko:(it.zh||'');
+  var main=priceCur(it.kn), range=main?(main+(it.kx&&it.kx!==it.kn?'~'+priceCur(it.kx):'')):L.ask;
+  var krwSub=(lang!=='ko'&&it.kn)?('₩'+it.kn.toLocaleString()):'';
+  var hk=priceHospKr(it.h), click=hk?(' onclick="showMain();showDetail(\''+String(hk).replace(/'/g,"\\'")+'\')" style="cursor:pointer"'):'';
+  var arr=hk?'<span style="color:var(--gn2);font-weight:700;margin-left:5px">›</span>':'';
+  return '<div class="pr-row"'+click+'><div class="pr-main"><div class="pr-name">'+cEsc(nm)+'</div>'+(sub?'<div class="pr-zh">'+cEsc(sub)+'</div>':'')+'<div class="pr-hosp">'+cEsc(it.h)+arr+'</div></div><div class="pr-price"><div class="pr-krw">'+range+'</div>'+(krwSub?'<div class="pr-cny">'+krwSub+'</div>':'')+'</div></div>';
 }
+function renderPriceCats(){ var el=document.getElementById('price-cats'); if(el) el.style.display='none'; } // 칩 대신 분야 아코디언 사용
 function renderPrice(){
   if(typeof PRICE_DATA==='undefined') return;
-  var L=priceL();
+  var L=priceL(), listEl=document.getElementById('price-list');
   var q=(document.getElementById('price-search').value||'').trim().toLowerCase();
-  var pool=[];
-  PRICE_DATA.forEach(function(c){ if(priceCat&&c.cat!==priceCat)return; c.items.forEach(function(it){ pool.push(it); }); });
-  var filtered=pool.filter(function(it){ return !q || (it.ko&&it.ko.toLowerCase().includes(q)) || (it.zh&&it.zh.includes(q)) || (it.h&&it.h.toLowerCase().includes(q)); });
-  var total=filtered.length, shown=filtered.slice(0,priceLimit);
-  document.getElementById('price-list').innerHTML=shown.map(function(it){
-    var krw=it.kn?(priceWon(it.kn)+(it.kx?('~'+priceWon(it.kx)):'')):L.ask;
-    var cny=it.cy?('¥'+Math.round(it.cy).toLocaleString()):'';
-    var nm=priceName(it), sub=(lang==='zh')?(it.ko):(it.zh||'');
-    return '<div class="pr-row"><div class="pr-main"><div class="pr-name">'+cEsc(nm)+'</div>'+(sub?'<div class="pr-zh">'+cEsc(sub)+'</div>':'')+'<div class="pr-hosp">'+cEsc(it.h)+'</div></div><div class="pr-price"><div class="pr-krw">'+krw+'</div>'+(cny?'<div class="pr-cny">'+cny+'</div>':'')+'</div></div>';
-  }).join('');
-  document.getElementById('price-more').style.display=total>priceLimit?'':'none';
-  document.getElementById('price-count').textContent=total?L.cnt(total,shown.length):L.none;
+  if(q){ // 검색: 전 분야 flat
+    var pool=[]; PRICE_DATA.forEach(function(c){ c.items.forEach(function(it){ pool.push(it); }); });
+    var filtered=pool.filter(function(it){ return (it.ko&&it.ko.toLowerCase().includes(q))||(it.zh&&it.zh.includes(q))||(it.h&&it.h.toLowerCase().includes(q)); });
+    var shown=filtered.slice(0,priceLimit);
+    listEl.innerHTML=shown.length?shown.map(priceRowHTML).join(''):'<div style="text-align:center;color:var(--gray);padding:24px;">'+L.none+'</div>';
+    document.getElementById('price-more').style.display=filtered.length>priceLimit?'':'none';
+    document.getElementById('price-count').textContent=filtered.length?L.cnt(filtered.length,shown.length):L.none;
+  } else { // 분야 아코디언 (모두닥식): 접힘 → 누르면 펼침
+    listEl.innerHTML=PRICE_DATA.map(function(c,ci){
+      return '<div class="pr-group'+(ci===0?' open':'')+'"><div class="pr-head" onclick="this.parentNode.classList.toggle(\'open\')"><span class="pr-catname">'+cEsc(priceCatLbl(c.cat))+' <b>'+c.items.length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-gbody">'+c.items.map(priceRowHTML).join('')+'</div></div>';
+    }).join('');
+    document.getElementById('price-more').style.display='none';
+    document.getElementById('price-count').textContent='';
+  }
 }
 function initPrice(){
   if(typeof SITE!=='undefined' && SITE==='gnfollow') return; // 중국(gnfollow) 제외 — 의료광고법: 가격 미표기
@@ -2695,13 +2714,58 @@ function renderDoctors(kr){
   const note=document.getElementById('d-doctor-note'); if(note) note.textContent=L.note;
   var dg=document.getElementById('d-doctor-grid');
   dg.style.cssText='display:flex;flex-direction:column;gap:0;';
-  dg.innerHTML=list.map(function(d){
+  dg.innerHTML=list.map(function(d,di){
     const chips=(d.spec||[]).map(function(s){return '<span style="display:inline-block;font-size:11px;color:var(--gray);background:var(--lgray);padding:3px 10px;border-radius:14px;margin:2px 4px 2px 0;">'+cEsc(docSpec(s))+'</span>';}).join('');
-    return '<div style="display:flex;gap:14px;padding:15px 4px;border-bottom:1px solid var(--border);align-items:flex-start;">'
+    return '<div onclick="openDoc(\''+String(kr).replace(/\x27/g,"\\x27")+'\','+di+')" style="display:flex;gap:14px;padding:15px 4px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;">'
       +'<div style="width:52px;height:52px;border-radius:50%;flex-shrink:0;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--gn2);">'+cEsc(d.name.charAt(0))+'</div>'
       +'<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#222;">'+cEsc(d.name)+' <span style="font-size:12px;font-weight:600;color:var(--gn2);">'+cEsc(docTitle(d.title))+'</span></div><div style="margin-top:7px;">'+chips+'</div></div>'
+      +'<div style="color:var(--gray);font-size:16px;flex-shrink:0;">›</div>'
       +'</div>';
   }).join('');
+}
+// 시술분야 중립 설명(효과·경력 날조 없음 — 분야가 무엇인지만). gnfollow(중국) 의료광고법 고려: 효과·질병 표현 배제.
+var SPEC_DESC={
+  '눈':{ko:'눈성형 (쌍꺼풀·눈매교정 등)',zh:'眼部整形（双眼皮·眼型矫正等）',en:'Eye surgery (double eyelid, canthoplasty)'},
+  '코':{ko:'코성형',zh:'鼻部整形',en:'Rhinoplasty'},
+  '윤곽':{ko:'안면윤곽',zh:'面部轮廓',en:'Facial contouring'},
+  '양악':{ko:'양악·교정',zh:'正颌·矫正',en:'Jaw / orthognathic'},
+  '리프팅':{ko:'리프팅 (탄력·윤곽 관리)',zh:'提升（紧致·轮廓管理）',en:'Lifting'},
+  '가슴':{ko:'가슴성형',zh:'胸部整形',en:'Breast surgery'},
+  '체형':{ko:'체형·바디 관리',zh:'体型·身体管理',en:'Body contouring'},
+  '재건':{ko:'재건 성형',zh:'再造整形',en:'Reconstruction'},
+  '필러':{ko:'필러 시술',zh:'填充',en:'Filler'},
+  '보톡스':{ko:'보톡스 시술',zh:'肉毒素',en:'Botox'},
+  '줄기세포':{ko:'줄기세포·재생',zh:'干细胞·再生',en:'Stem cell / regenerative'},
+  '피부':{ko:'피부 시술·관리',zh:'皮肤治疗·管理',en:'Skin treatment'},
+  '피부과':{ko:'피부과 진료',zh:'皮肤科诊疗',en:'Dermatology'},
+  '마취과':{ko:'마취 (무통·안전 관리)',zh:'麻醉（无痛·安全管理）',en:'Anesthesiology'},
+  '여성성형':{ko:'여성 성형',zh:'女性整形',en:"Women's aesthetics"},
+  '산부인과':{ko:'여성 의학',zh:'女性医学',en:"Women's health"},
+  '성형외과':{ko:'성형외과 진료',zh:'整形外科诊疗',en:'Plastic surgery'},
+  '항노화':{ko:'항노화 관리',zh:'抗衰老管理',en:'Anti-aging'},
+  '미용성형':{ko:'미용 성형',zh:'美容整形',en:'Cosmetic surgery'}
+};
+function docSpecDesc(s){ var m=SPEC_DESC[s]; return m?(m[lang]||m.ko):null; }
+function ensureDocModal(){ if(document.getElementById('doc-modal-bg'))return; var d=document.createElement('div'); d.className='modal-bg'; d.id='doc-modal-bg'; d.onmousedown=function(e){window._mdTgt=e.target;}; d.onclick=function(e){if(e.target===d&&window._mdTgt===d)closeDocModal();}; d.innerHTML='<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;position:relative;"><button onclick="closeDocModal()" style="position:absolute;top:10px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;font-size:18px;cursor:pointer;color:#555;z-index:3;">✕</button><div id="doc-modal-body"></div></div>'; document.body.appendChild(d); }
+function closeDocModal(){ var m=document.getElementById('doc-modal-bg'); if(m) m.classList.remove('open'); }
+function openDoc(kr,di){
+  var d=(DOCTORS[kr]||[])[di]; if(!d) return; ensureDocModal();
+  var hosp=(typeof HOSPS!=='undefined')?HOSPS.find(function(x){return x.kr===kr;}):null;
+  var hname=hosp?(lang==='ko'?hosp.kr:lang==='zh'?hosp.zh:hosp.en):'';
+  var LL={ko:{field:'주요 진료 분야',note:'정확한 상담·시술 계획 및 세부 정보는 병원 면담(1:1 상담) 후 안내됩니다.',book:'이 원장에게 예약 상담'},
+          zh:{field:'主要诊疗领域',note:'详细咨询·治疗方案及具体信息将于医院面诊（1对1咨询）后为您说明。',book:'向该院长预约咨询'},
+          en:{field:'Main fields',note:'Detailed consultation and plan are provided after an in-person hospital consultation.',book:'Book consultation'}};
+  var L=LL[lang]||LL.en;
+  var chips=(d.spec||[]).map(function(s){return '<span style="display:inline-block;font-size:12.5px;color:var(--gn2);background:var(--lgray);padding:5px 13px;border-radius:16px;margin:3px 6px 3px 0;">'+cEsc(docSpecDesc(s)||docSpec(s))+'</span>';}).join('');
+  document.getElementById('doc-modal-body').innerHTML='<div style="padding:28px 22px 24px;text-align:center;">'
+    +'<div style="width:78px;height:78px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(145deg,#EAF6F0,#DCEEE3);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--gn2);">'+cEsc(d.name.charAt(0))+'</div>'
+    +'<div style="font-size:21px;font-weight:800;color:#222;">'+cEsc(d.name)+'</div>'
+    +'<div style="font-size:13px;color:var(--gn2);font-weight:600;margin-top:4px;">'+cEsc(docTitle(d.title))+(hname?' · '+cEsc(hname):'')+'</div>'
+    +'<div style="text-align:left;margin-top:22px;"><div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:9px;">'+L.field+'</div><div>'+chips+'</div></div>'
+    +'<div style="text-align:left;font-size:12px;color:var(--gray);line-height:1.7;margin-top:18px;background:var(--lgray);border-radius:10px;padding:12px 14px;">'+L.note+'</div>'
+    +'<button onclick="closeDocModal();showMain();openModal(\''+String(kr).replace(/\x27/g,"\\x27")+'\')" style="margin-top:18px;width:100%;padding:13px;background:var(--gn2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">'+L.book+'</button>'
+    +'</div>';
+  document.getElementById('doc-modal-bg').classList.add('open');
 }
 function renderDetail(kr){
   const h=HOSPS.find(x=>x.kr===kr);if(!h)return;
