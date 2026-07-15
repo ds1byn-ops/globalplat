@@ -490,18 +490,22 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 </section>
 
 <style>
-#hosp-grid .hcl-group{border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:10px;overflow:hidden;}
-#hosp-grid .hcl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;}
-#hosp-grid .hcl-cat{font-size:14.5px;font-weight:800;color:var(--dark);} #hosp-grid .hcl-cat b{color:var(--gn2);margin-left:5px;}
+#hosp-grid{display:block!important;}
+#hosp-grid .hcl-group{border:1px solid var(--border);border-radius:14px;background:#fff;margin-bottom:12px;overflow:hidden;}
+#hosp-grid .hcl-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;cursor:pointer;user-select:none;}
+#hosp-grid .hcl-cat{font-size:15px;font-weight:800;color:var(--dark);} #hosp-grid .hcl-cat b{color:var(--gn2);margin-left:6px;}
 #hosp-grid .hcl-arrow{transition:transform .2s;color:var(--gray);font-size:12px;}
 #hosp-grid .hcl-group.open .hcl-arrow{transform:rotate(180deg);}
 #hosp-grid .hcl-body{display:none;border-top:1px solid var(--border);}
 #hosp-grid .hcl-group.open .hcl-body{display:block;}
-#hosp-grid .hcl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid #f1f3f5;cursor:pointer;}
+#hosp-grid .hcl-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #f1f3f5;cursor:pointer;}
 #hosp-grid .hcl-row:last-child{border-bottom:0;}
-#hosp-grid .hcl-info{min-width:0;} #hosp-grid .hcl-name{font-size:14px;font-weight:700;color:#222;} #hosp-grid .hcl-rate{font-size:11.5px;color:#f59e0b;font-weight:700;margin-left:6px;}
-#hosp-grid .hcl-dept{font-size:11.5px;color:var(--gray);margin-top:2px;}
-#hosp-grid .hcl-btns{display:flex;gap:6px;flex-shrink:0;}
+#hosp-grid .hcl-info{min-width:0;flex:1;}
+#hosp-grid .hcl-name{font-size:15px;font-weight:700;color:#222;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+#hosp-grid .hcl-rate{font-size:12px;color:#f59e0b;font-weight:700;white-space:nowrap;}
+#hosp-grid .hcl-dept{font-size:12px;color:var(--gray);margin-top:4px;}
+#hosp-grid .hcl-btns{display:flex;gap:7px;flex-shrink:0;}
+#hosp-grid .hcl-btns .btn-detail,#hosp-grid .hcl-btns .btn-book{white-space:nowrap;padding:8px 15px;font-size:12.5px;border-radius:20px;}
 </style>
 <section class="section" id="sec-hosps" style="background:var(--lgray);">
   <div class="section-inner">
