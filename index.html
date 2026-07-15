@@ -889,6 +889,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <div class="modal">
   <h2><span data-i18n="modal_title">预约咨询</span><button onclick="closeModal()">✕</button></h2>
   <div id="modal-step1">
+    <div id="f-doctor-banner" style="display:none;margin:0 0 14px;padding:11px 14px;background:#EAF6F0;border-radius:10px;font-size:13px;color:var(--gn2);font-weight:700;line-height:1.5;"></div>
     <div class="fg">
       <div class="fitem"><label data-i18n="f_hosp">医院</label><select id="f-hosp"></select></div>
       <div class="fitem"><label data-i18n="f_treat">希望项目</label>
@@ -2839,7 +2840,7 @@ function openDoc(kr,di){
     +'<div style="font-size:13px;color:var(--gn2);font-weight:600;margin-top:4px;">'+cEsc(docTitle(d.title))+(hname?' · '+cEsc(hname):'')+'</div>'
     +'<div style="text-align:left;margin-top:22px;"><div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:9px;">'+L.field+'</div><div>'+chips+'</div></div>'
     +'<div style="text-align:left;font-size:12px;color:var(--gray);line-height:1.7;margin-top:18px;background:var(--lgray);border-radius:10px;padding:12px 14px;">'+L.note+'</div>'
-    +'<button onclick="closeDocModal();showMain();openModal(\''+String(kr).replace(/\x27/g,"\\x27")+'\')" style="margin-top:18px;width:100%;padding:13px;background:var(--gn2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">'+L.book+'</button>'
+    +'<button onclick="closeDocModal();showMain();openModal(\''+String(kr).replace(/\x27/g,"\\x27")+'\',{name:'+JSON.stringify(d.name)+',title:'+JSON.stringify(d.title||'')+'})" style="margin-top:18px;width:100%;padding:13px;background:var(--gn2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">'+L.book+'</button>'
     +'</div>';
   document.getElementById('doc-modal-bg').classList.add('open');
 }
@@ -2883,7 +2884,9 @@ function showDTab(id,el){
 }
 
 function anyOptLabel(){ return lang==='ko'?'미정 (선택)':lang==='zh'?'未指定（可选）':'Not specified (optional)'; }
-function openModal(kr){
+// 의료진 지정 예약 시 선택된 의료진(이름·직함) 보관 → 폼 배너 + 예약데이터에 반영
+var bookDoctor=null;
+function openModal(kr, doc){
   const h=kr?HOSPS.find(x=>x.kr===kr):null;
   const sel=document.getElementById('f-hosp');
   sel.innerHTML='<option value="">'+anyOptLabel()+'</option>'+HOSPS.map(ho=>{
@@ -2892,6 +2895,16 @@ function openModal(kr){
   }).join('');
   const _ta=document.getElementById('f-treat-any'); if(_ta) _ta.textContent=anyOptLabel();
   const _t=document.getElementById('f-treat'); if(_t) _t.value='';
+  // 의료진 지정 여부 반영(의료진 카드에서 열면 doc 전달, 병원카드에서 열면 null로 초기화)
+  bookDoctor = (doc && doc.name) ? {name:doc.name, title:doc.title||'', hosp:kr||''} : null;
+  const dbn=document.getElementById('f-doctor-banner');
+  if(dbn){
+    if(bookDoctor){
+      const L={ko:'지정 의료진',zh:'指定医生',en:'Selected doctor'};
+      const tt=bookDoctor.title?(' · '+(typeof docTitle==='function'?docTitle(bookDoctor.title):bookDoctor.title)):'';
+      dbn.style.display=''; dbn.textContent='👩‍⚕️ '+(L[lang]||L.en)+': '+bookDoctor.name+tt;
+    } else { dbn.style.display='none'; dbn.textContent=''; }
+  }
   document.getElementById('modal-step1').style.display='';
   document.getElementById('modal-done').style.display='none';
   document.getElementById('modal-bg').classList.add('open');
@@ -2919,6 +2932,8 @@ async function submitBooking(){
     status:'대기',source:'B2C_WEB',site:SITE,inflow_type:'플랫폼',introducer:introducerRaw||'플랫폼',
     hosp_comm_rate:20,dob:'',noshow:'N',hosp_paydate:'',hosp_paidamt:0,paid_comm:0,
     dept:'피부',amount:0,expected:0,vat:'별도',tax_invoice:'N',
+    doctor:(bookDoctor&&bookDoctor.name)?bookDoctor.name:'',
+    doctor_title:(bookDoctor&&bookDoctor.title)?bookDoctor.title:'',
     id:Date.now(),
   };
   const ok=await dbInsert('bookings',booking);

@@ -1278,7 +1278,7 @@ function renderBk(){
       <td>${escapeHtml(b.nationality)||'중국'}</td>
       <td style="font-size:10px;background:${b.hospital==='신상성형외과'?'#fffbf0':'#f5f5f5'};color:${b.hospital==='신상성형외과'?'#B8960C':'inherit'};padding:2px 6px;border-radius:4px;">${b.hospital==='신상성형외과'?'★ ':''}<b>${escapeHtml(b.hospital)}</b></td>
       <td style="white-space:nowrap;color:#555;">${escapeHtml(b.datetime)}</td>
-      <td style="font-size:10px;color:#888;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.treatment)||'-'}</td>
+      <td style="font-size:10px;color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.treatment)||'-'}${b.doctor?`<div style="color:#0a7d55;font-weight:700;" title="지정 의료진">👩‍⚕️ ${escapeHtml(b.doctor)}</div>`:''}</td>
       <td style="color:${c.won>0?'#B8960C':'#ccc'};white-space:nowrap;">${c.won>0?c.won.toLocaleString()+'원':'-'}</td>
       <td><span class="badge ${b.inflow_type}">${b.inflow_type||'-'}</span>${bkSiteTag(b)}</td>
       <td style="font-size:11px;">${b.introducer||'-'}</td>
@@ -1934,10 +1934,10 @@ function renderForeign(){
 // ── 엑셀 ──
 function exportExcel(){
   const wb=XLSX.utils.book_new();
-  const hdr=['No','환자명','생년월일','성별','국적','병원','예약일시','진료과목','시술','결제금액','유입','소개자','수수료율','FK수수료','FK→소개자','FK순매출','부가세','세금계산서','상태','비고'];
+  const hdr=['No','환자명','생년월일','성별','국적','병원','지정의료진','예약일시','진료과목','시술','결제금액','유입','소개자','수수료율','FK수수료','FK→소개자','FK순매출','부가세','세금계산서','상태','비고'];
   const rows=[hdr,...BK.sort((a,b)=>a.datetime.localeCompare(b.datetime)).map((b,i)=>{
     const c=calcC(b);
-    return[i+1,b.name,b.dob||'',b.gender,b.nationality,b.hospital,b.datetime,b.dept,b.treatment,c.won,b.inflow_type,b.introducer,b.hosp_comm_rate,c.hc,c.wc,c.net,b.vat||'포함',b.tax_invoice||'N',b.status,b.note];
+    return[i+1,b.name,b.dob||'',b.gender,b.nationality,b.hospital,b.doctor||'',b.datetime,b.dept,b.treatment,c.won,b.inflow_type,b.introducer,b.hosp_comm_rate,c.hc,c.wc,c.net,b.vat||'포함',b.tax_invoice||'N',b.status,b.note];
   })];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'예약명단');
   const wr=[['이름','구분','채널','연락처','수수료율','비고'],...WM.map(w=>[w.name,w.type,w.channel,w.contact,w.rate,w.note])];
@@ -2350,6 +2350,7 @@ async function loadQuoteRequests(){
           created_at:new Date(Number(b.id)||0).toISOString(),
           name:b.name, contact:b.contact, nationality:b.nationality,
           hospital:b.hospital, procedures:b.treatment,
+          doctor:b.doctor||'', doctor_title:b.doctor_title||'',
           arrival_date:null, departure_date:null,
           quote_min:0, quote_max:0,
           assigned_to:b.introducer||'', status:b.status||'대기',
@@ -2405,7 +2406,7 @@ function renderQuoteRequests(){
       <td style="font-weight:500;">${escapeHtml(q.name)||'-'}</td>
       <td>${escapeHtml(q.nationality)||'-'}</td>
       <td style="font-size:11px;">${escapeHtml(q.contact)||'-'}</td>
-      <td style="font-size:11px;">${escapeHtml(q.hospital)||'상담 후 매칭'}</td>
+      <td style="font-size:11px;">${escapeHtml(q.hospital)||'상담 후 매칭'}${q.doctor?`<div style="font-size:10px;color:#0a7d55;font-weight:700;margin-top:2px;">👩‍⚕️ 지정: ${escapeHtml(q.doctor)}${q.doctor_title?' '+escapeHtml(q.doctor_title):''}</div>`:''}</td>
       <td style="font-size:10px;color:#888;white-space:nowrap;">${stay}</td>
       <td style="font-size:10px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(q.procedures)}">${escapeHtml(q.procedures)||'-'}</td>
       <td style="color:#B8960C;white-space:nowrap;">${quote}</td>
@@ -2436,6 +2437,7 @@ function openQrModal(id){
   document.getElementById('qr-detail-view').innerHTML=`
     <b>${escapeHtml(q.name)}</b> (${escapeHtml(q.nationality)}) · ${escapeHtml(q.contact)}<br>
     희망병원: ${escapeHtml(q.hospital)||'상담 후 매칭'}<br>
+    ${q.doctor?`지정 의료진: <b style="color:#0a7d55;">👩‍⚕️ ${escapeHtml(q.doctor)}${q.doctor_title?' '+escapeHtml(q.doctor_title):''}</b><br>`:''}
     방한일정: ${q.arrival_date||'-'} ~ ${q.departure_date||'-'}<br>
     희망시술: ${escapeHtml(q.procedures)||'-'}<br>
     소개자 코드: <b style="color:#7c3aed;">${escapeHtml(q.introducer_code)||'-'}</b><br>
