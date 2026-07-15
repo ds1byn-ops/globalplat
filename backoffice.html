@@ -149,6 +149,7 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
     <a onclick="showPage('ad_settings')"><span class="ic">📢</span>병원 광고 설정</a>
+    <a onclick="showPage('cat_rec')"><span class="ic">🏅</span>분야별 추천 병원</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('members')"><span class="ic">👤</span>회원가입 관리</a>
     <a onclick="showPage('banners')"><span class="ic">🖼️</span>메인 배너 관리</a>
@@ -189,6 +190,7 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals');toggleDrawer()"><span class="ic">🏥</span>병원 관리</a>
     <a onclick="showPage('ad_settings');toggleDrawer()"><span class="ic">📢</span>병원 광고 설정</a>
+    <a onclick="showPage('cat_rec');toggleDrawer()"><span class="ic">🏅</span>분야별 추천 병원</a>
     <a onclick="showPage('wanghongs');toggleDrawer()"><span class="ic">👑</span>왕홍·소개자</a>
     <a onclick="showPage('members');toggleDrawer()"><span class="ic">👤</span>회원가입 관리</a>
     <a onclick="showPage('banners');toggleDrawer()"><span class="ic">🖼️</span>메인 배너 관리</a>
@@ -410,6 +412,20 @@ tr:hover td{background:#fafaf8;}
   </div>
   <div style="margin-top:20px;padding:14px 18px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:12px;color:#92400e;max-width:600px;">
     ⚠️ 같은 병원을 여러 칸에 중복 지정할 수 없습니다. 칸을 비워두면(선택 안 함) 해당 순번은 사용하지 않습니다.
+  </div>
+</div>
+
+<!-- 분야별 추천 병원 설정 -->
+<div class="page" id="page-cat_rec">
+  <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">🏅 분야별 추천 병원</h2>
+  <p style="font-size:13px;color:#888;margin-bottom:24px;">
+    병원 목록의 <b>분야별 아코디언</b>과 <b>가격비교 '추천순'</b>에서 각 분야마다 상단에 고정 노출할 추천 병원을 최대 3곳까지 지정합니다.
+    지정 순서대로 위쪽에 "추천" 뱃지와 함께 표시됩니다. (중국 gnfollow·글로벌 followkorea 공통 적용, 가격은 글로벌 전용)
+  </p>
+  <div class="card" style="max-width:760px;">
+    <div id="catrec-wrap" style="display:flex;flex-direction:column;gap:22px;"></div>
+    <button class="btn primary" onclick="saveCatRec()" style="margin-top:20px;">저장하기</button>
+    <div id="catrec-save-msg" style="font-size:13px;color:#15803d;display:none;margin-top:8px;">✓ 저장되었습니다. 사이트에 바로 반영됩니다.</div>
   </div>
 </div>
 
@@ -1780,6 +1796,70 @@ async function saveAdSettings(){
   }
 }
 
+// ── 분야별 추천 병원 (분야마다 최대 3곳, 지정 순서 = 노출 우선순위) ──
+// 카테고리 키는 프론트(index.html)의 CATORD와 반드시 동일해야 매칭됨.
+const CATREC_CATS=['성형외과','피부','줄기세포','항노화','체형','여성의학','안과','한방'];
+const CATREC_SLOTS=3;
+async function loadCatRecPage(){
+  const wrap=document.getElementById('catrec-wrap');
+  if(!HD.length) HD=await dbLoadHospitals();
+  const optionsHtml='<option value="">- 선택 안 함 -</option>'+HD.map(h=>`<option value="${h.name}">${h.name}</option>`).join('');
+  wrap.innerHTML=CATREC_CATS.map(cat=>`
+    <div style="border:1px solid #eee;border-radius:12px;padding:16px 18px;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#222;">${cat}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;">
+        ${Array.from({length:CATREC_SLOTS},(_,i)=>i+1).map(n=>`
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">${n}순위</label>
+            <select data-cat="${cat}" data-slot="${n}" style="width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:8px;font-size:13.5px;">${optionsHtml}</select>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/cat_recommendations?select=data&order=id.desc&limit=1`,{headers});
+    if(r.ok){
+      const all=await r.json();
+      if(Array.isArray(all)&&all.length>0&&all[0].data){
+        const data=all[0].data;
+        for(const cat of CATREC_CATS){
+          const arr=Array.isArray(data[cat])?data[cat]:[];
+          arr.slice(0,CATREC_SLOTS).forEach((name,idx)=>{
+            const sel=wrap.querySelector(`select[data-cat="${cat}"][data-slot="${idx+1}"]`);
+            if(sel) sel.value=name;
+          });
+        }
+      }
+    }
+  }catch(e){ console.warn('[FK] 분야별 추천 로드 실패(최초 설정 시 정상)',e); }
+}
+async function saveCatRec(){
+  const wrap=document.getElementById('catrec-wrap');
+  const data={};
+  for(const cat of CATREC_CATS){
+    const vals=[];
+    for(let n=1;n<=CATREC_SLOTS;n++){
+      const sel=wrap.querySelector(`select[data-cat="${cat}"][data-slot="${n}"]`);
+      const v=sel&&sel.value;
+      if(v&&!vals.includes(v)) vals.push(v); // 같은 분야 내 중복은 무시
+    }
+    if(vals.length) data[cat]=vals;
+  }
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/cat_recommendations`,{
+      method:'POST',
+      headers:{...headers,'Prefer':'return=minimal'},
+      body:JSON.stringify({data})
+    });
+    if(res.ok){
+      const msg=document.getElementById('catrec-save-msg');
+      msg.style.display='block';
+      setTimeout(()=>{msg.style.display='none';},3000);
+    }else{
+      alert('저장 실패 (상태코드 '+res.status+'). cat_recommendations 테이블이 생성되어 있는지 확인해주세요.');
+    }
+  }catch(e){ alert('저장 중 오류가 발생했습니다: '+e.message); }
+}
+
 // ── 왕홍 관리 ──
 function renderWanghongs(){
   document.getElementById('wm-tbody').innerHTML=WM.map(w=>{
@@ -1996,6 +2076,7 @@ function showPage(id){
   if(id==='wanghong_rev')renderWanghongRev();
   if(id==='hospitals')renderHospitals();
   if(id==='ad_settings')loadAdSettingsPage();
+  if(id==='cat_rec')loadCatRecPage();
   if(id==='wanghongs')renderWanghongs();
   if(id==='quote_requests')loadQuoteRequests().then(renderQuoteRequests);
   if(id==='members')loadMembers();

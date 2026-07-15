@@ -506,6 +506,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 #hosp-grid .hcl-dept{font-size:12px;color:var(--gray);margin-top:4px;}
 #hosp-grid .hcl-btns{display:flex;gap:7px;flex-shrink:0;}
 #hosp-grid .hcl-btns .btn-detail,#hosp-grid .hcl-btns .btn-book{white-space:nowrap;padding:8px 15px;font-size:12.5px;border-radius:20px;}
+#hosp-grid .hcl-row-rec{background:linear-gradient(90deg,#fffdf5,transparent);}
+#hosp-grid .hcl-recbadge{font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#f59e0b,#f6b93b);padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.3px;}
 </style>
 <section class="section" id="sec-hosps" style="background:var(--lgray);">
   <div class="section-inner">
@@ -2317,6 +2319,36 @@ async function fkhLoadRecommendedSetting(){
   }
 }
 
+// ── 분야(카테고리)별 추천병원 설정 (백오피스 "분야별 추천 병원") ──
+// CAT_REC = { '성형외과':['병원kr', ...], '피부':[...] }  (관리자 지정 순서 = 노출 우선순위)
+let CAT_REC = {};
+async function fkhLoadCatRec(){
+  try{
+    const r = await fetch(`${SUPA_URL}/rest/v1/cat_recommendations?select=data&order=id.desc&limit=1`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if(!r.ok) return;
+    const all = await r.json();
+    if(Array.isArray(all) && all.length > 0 && all[0].data && typeof all[0].data === 'object'){
+      // 백오피스가 포털 저장명으로 지정해도 B2C 목록(HOSPS.kr)과 매칭되도록 kr로 정규화
+      const raw = all[0].data, norm = {};
+      for(const c in raw){ if(Array.isArray(raw[c])){ norm[c] = raw[c].filter(Boolean).map(n => (typeof PORTAL_TO_KR!=='undefined' && PORTAL_TO_KR[n]) ? PORTAL_TO_KR[n] : n); } }
+      CAT_REC = norm;
+    }
+  }catch(e){
+    console.warn('[FK] 분야별 추천 설정 로드 실패', e);
+  }
+}
+// 특정 병원(kr)이 추천 지정돼 있으면 그 우선순위(작을수록 상위), 아니면 큰 값 반환.
+// cat 지정 시 해당 분야만, 미지정 시 전체 분야 통합에서 최소 순위.
+function catRecRank(kr, cat){
+  if(!kr) return 9999;
+  if(cat){ var a=CAT_REC[cat]; if(Array.isArray(a)){ var i=a.indexOf(kr); return i<0?9999:i; } return 9999; }
+  var best=9999;
+  for(var c in CAT_REC){ var arr=CAT_REC[c]; if(Array.isArray(arr)){ var j=arr.indexOf(kr); if(j>=0&&j<best) best=j; } }
+  return best;
+}
+
 // ── 병원 목록 정렬 (별점순 / 최신등록순 / 추천순) ──
 let hospSortMode='default';
 const SORT_LABELS={
@@ -2479,13 +2511,18 @@ function filterHosps(){
   if(sortBar){ const allL={ko:'전체 병원 · 분야별로 보기',zh:'全部医院 · 按科室查看',en:'All Hospitals · by Field'}; sortBar.innerHTML=`<div class="hosp-list-title">${allL[lang]||allL.en}</div><div class="hosp-list-title" style="color:var(--gn2)">${others.length}</div>`; }
   const _gridEl = document.getElementById('hosp-grid');
   if(_gridEl){
+    const REC_BADGE={ko:'추천',zh:'推荐',en:'Pick',vi:'Đề xuất',th:'แนะนำ',ja:'おすすめ',ru:'Топ',mn:'Санал',id:'Pilihan',ar:'موصى'};
     _gridEl.innerHTML = gcats.map((c,ci)=>{
-      const rows=groups[c].map(h=>{
+      // 분야 내: 관리자 지정 추천병원을 지정 순서대로 최상단 고정, 나머지는 기존 순서 유지
+      const sortedRows=groups[c].slice().sort((a,b)=>catRecRank(a.kr,c)-catRecRank(b.kr,c));
+      const rows=sortedRows.map(h=>{
         const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
         const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
         const rt=hospRatingInfo(h.kr);
         const rHTML=rt?`<span class="hcl-rate">★ ${rt.avg}</span>`:'';
-        return `<div class="hcl-row" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
+        const isRec=catRecRank(h.kr,c)<9999;
+        const recB=isRec?`<span class="hcl-recbadge">${REC_BADGE[lang]||REC_BADGE.en}</span>`:'';
+        return `<div class="hcl-row${isRec?' hcl-row-rec':''}" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${recB}${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
       }).join('');
       return `<div class="hcl-group"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
     }).join('') || ('<div style="text-align:center;padding:30px;color:var(--gray);font-size:13px;">'+(lang==='zh'?'该科室合作医院准备中':lang==='ko'?'해당 분야 병원 준비 중':'No hospitals in this field yet')+'</div>');
@@ -2648,7 +2685,7 @@ var SUBCAT_RULES={
 var SUBCAT_I18N={'눈':{zh:'眼部',en:'Eyes'},'코':{zh:'鼻部',en:'Nose'},'안면윤곽':{zh:'面部轮廓',en:'Contouring'},'양악·돌출입':{zh:'正颌·突嘴',en:'Jaw'},'가슴':{zh:'胸部',en:'Breast'},'지방·체형':{zh:'吸脂·体型',en:'Liposuction/Body'},'리프팅·거상':{zh:'提升·除皱',en:'Lifting'},'리프팅':{zh:'提升',en:'Lifting'},'레이저':{zh:'激光',en:'Laser'},'필러':{zh:'填充',en:'Filler'},'보톡스':{zh:'肉毒素',en:'Botox'},'스킨부스터·재생':{zh:'水光·再生',en:'Skin booster'},'제모':{zh:'脱毛',en:'Hair removal'},'여드름·흉터':{zh:'痘痘·疤痕',en:'Acne/Scar'},'줄기세포·재생':{zh:'干细胞·再生',en:'Stem cell'},'여성성형':{zh:'女性整形',en:'Women'},'하이푸·자궁':{zh:'海扶·子宫',en:'HIFU/Uterus'},'검진':{zh:'检查',en:'Checkup'},'기타':{zh:'其他',en:'Others'}};
 function subLbl(s){ if(lang==='ko')return s; var m=SUBCAT_I18N[s]; return m?(m[lang]||m.en||s):s; }
 function subcatOf(cat,ko){ var rules=SUBCAT_RULES[cat]; if(!rules) return null; var s=(ko||'').toLowerCase(); for(var i=0;i<rules.length;i++){ var kws=rules[i][1]; for(var j=0;j<kws.length;j++){ var k=kws[j]; if((ko||'').indexOf(k)>=0||s.indexOf(k)>=0) return rules[i][0]; } } return '기타'; }
-function sortItems(arr){ var a=arr.slice(); if(priceSort==='lo') a.sort(function(x,y){return (x.kn||9e9)-(y.kn||9e9);}); else if(priceSort==='hi') a.sort(function(x,y){return (y.kn||0)-(x.kn||0);}); return a; }
+function sortItems(arr){ var a=arr.slice(); if(priceSort==='lo') a.sort(function(x,y){return (x.kn||9e9)-(y.kn||9e9);}); else if(priceSort==='hi') a.sort(function(x,y){return (y.kn||0)-(x.kn||0);}); else { /* 추천순: 관리자 지정 추천병원 시술을 상단으로(원래 순서 안정 유지) */ a=a.map(function(it,i){return {it:it,i:i,r:catRecRank(priceHospKr(it.h))};}).sort(function(x,y){return (x.r-y.r)||(x.i-y.i);}).map(function(o){return o.it;}); } return a; }
 function renderPriceCats(){ // 정렬 칩(추천순/가격순)
   var el=document.getElementById('price-cats'); if(!el) return; el.style.display='flex';
   var S=(PRICE_SORT_I18N[lang]||PRICE_SORT_I18N.en);
@@ -3447,9 +3484,10 @@ loadReviews();
 // 병원 목록은 가벼운 데이터(추천설정 + 동적병원, 수십 KB)만 준비되면 즉시 렌더 → 목록이 바로 뜸.
 // 무거운 병원소개 이미지(loadHospIntros, 약 3.8MB)는 목록 렌더를 막지 않도록 백그라운드로 로드하고,
 // 로드 완료되면 카드 썸네일만 업그레이드하는 재렌더 수행.
-Promise.all([fkhLoadRecommendedSetting(), loadDynamicHospitals()]).then(()=>{
+Promise.all([fkhLoadRecommendedSetting(), fkhLoadCatRec(), loadDynamicHospitals()]).then(()=>{
   renderCats();
   filterHosps();
+  if(typeof renderPrice==='function'){ var _sp=document.getElementById('sec-price'); if(_sp&&_sp.style.display!=='none') renderPrice(); }
 });
 loadHospIntros().then(()=>{ filterHosps(); }).catch(()=>{});
 
