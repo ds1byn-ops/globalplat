@@ -594,6 +594,12 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 #sec-price .pr-gbody{display:none;border-top:1px solid var(--border);padding:6px 10px 10px;}
 #sec-price .pr-group.open .pr-gbody{display:block;}
 #sec-price .pr-group .pr-row{margin-bottom:6px;}
+#sec-price .pr-sub{border:1px solid var(--border);border-radius:10px;margin:8px 4px;overflow:hidden;background:var(--lgray);}
+#sec-price .pr-subhead{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--dark);}
+#sec-price .pr-subhead b{color:var(--gn2);margin-left:4px;}
+#sec-price .pr-subbody{display:none;padding:8px;background:#fff;border-top:1px solid var(--border);}
+#sec-price .pr-sub.open .pr-subbody{display:block;}
+#sec-price .pr-sub.open .pr-subhead .pr-arrow{transform:rotate(180deg);}
 </style>
 <section class="section" id="sec-price" style="background:var(--lgray);display:none;">
   <div class="section-inner">
@@ -2629,25 +2635,54 @@ function priceRowHTML(it){
   var arr=hk?'<span style="color:var(--gn2);font-weight:700;margin-left:5px">›</span>':'';
   return '<div class="pr-row"'+click+'><div class="pr-main"><div class="pr-name">'+cEsc(nm)+'</div>'+(sub?'<div class="pr-zh">'+cEsc(sub)+'</div>':'')+'<div class="pr-hosp">'+cEsc(it.h)+arr+'</div></div><div class="pr-price"><div class="pr-krw">'+range+'</div>'+(krwSub?'<div class="pr-cny">'+krwSub+'</div>':'')+'</div></div>';
 }
-function renderPriceCats(){ var el=document.getElementById('price-cats'); if(el) el.style.display='none'; } // 칩 대신 분야 아코디언 사용
+var priceSort='rec'; // rec(추천순) | lo(가격↓) | hi(가격↑)
+var PRICE_SORT_I18N={ko:{rec:'추천순',lo:'가격 낮은순',hi:'가격 높은순'},zh:{rec:'推荐顺序',lo:'价格从低到高',hi:'价格从高到低'},en:{rec:'Recommended',lo:'Price ↑',hi:'Price ↓'}};
+// 세부 카테고리 자동 분류(시술명 키워드) — 데이터엔 세부분류가 없어 프론트에서 분류
+var SUBCAT_RULES={
+  '성형외과':[['눈',['쌍꺼풀','눈매','트임','안검','눈밑','눈성형','눈']],['코',['코성형','융비','비중격','매부리','코']],['안면윤곽',['윤곽','광대','사각턱','턱끝','v라인','이마']],['양악·돌출입',['양악','돌출입','주걱턱']],['가슴',['가슴','유방','유두','여유증']],['지방·체형',['지방흡입','지방이식','지방','바디','복부','허벅지','팔뚝']],['리프팅·거상',['거상','실리프팅','리프팅']]],
+  '피부과':[['리프팅',['울쎄라','써마지','슈링크','인모드','올리지오','텐써마','튠','덴서티','볼뉴머','온다','onda','타이트닝','리프팅']],['레이저',['레이저','토닝','제네시스','피코','프락셔널','ipl','옥시','탄산']],['필러',['필러','볼륨']],['보톡스',['보톡스','보툴']],['스킨부스터·재생',['스킨부스터','물광','리쥬란','쥬베룩','엑소좀','pdrn','스킨','부스터','재생','앰플']],['제모',['제모','왁싱']],['여드름·흉터',['여드름','흉터','모공']]],
+  '줄기세포':[['줄기세포·재생',['줄기세포','재생','세포','stem']]],
+  '여성의원':[['여성성형',['소음순','질','음핵','이쁘니','회음','여성','대음순']],['하이푸·자궁',['하이푸','자궁','근종','hifu']]],
+  '건강검진':[['검진',['검진','검사','체크']]]
+};
+var SUBCAT_I18N={'눈':{zh:'眼部',en:'Eyes'},'코':{zh:'鼻部',en:'Nose'},'안면윤곽':{zh:'面部轮廓',en:'Contouring'},'양악·돌출입':{zh:'正颌·突嘴',en:'Jaw'},'가슴':{zh:'胸部',en:'Breast'},'지방·체형':{zh:'吸脂·体型',en:'Liposuction/Body'},'리프팅·거상':{zh:'提升·除皱',en:'Lifting'},'리프팅':{zh:'提升',en:'Lifting'},'레이저':{zh:'激光',en:'Laser'},'필러':{zh:'填充',en:'Filler'},'보톡스':{zh:'肉毒素',en:'Botox'},'스킨부스터·재생':{zh:'水光·再生',en:'Skin booster'},'제모':{zh:'脱毛',en:'Hair removal'},'여드름·흉터':{zh:'痘痘·疤痕',en:'Acne/Scar'},'줄기세포·재생':{zh:'干细胞·再生',en:'Stem cell'},'여성성형':{zh:'女性整形',en:'Women'},'하이푸·자궁':{zh:'海扶·子宫',en:'HIFU/Uterus'},'검진':{zh:'检查',en:'Checkup'},'기타':{zh:'其他',en:'Others'}};
+function subLbl(s){ if(lang==='ko')return s; var m=SUBCAT_I18N[s]; return m?(m[lang]||m.en||s):s; }
+function subcatOf(cat,ko){ var rules=SUBCAT_RULES[cat]; if(!rules) return null; var s=(ko||'').toLowerCase(); for(var i=0;i<rules.length;i++){ var kws=rules[i][1]; for(var j=0;j<kws.length;j++){ var k=kws[j]; if((ko||'').indexOf(k)>=0||s.indexOf(k)>=0) return rules[i][0]; } } return '기타'; }
+function sortItems(arr){ var a=arr.slice(); if(priceSort==='lo') a.sort(function(x,y){return (x.kn||9e9)-(y.kn||9e9);}); else if(priceSort==='hi') a.sort(function(x,y){return (y.kn||0)-(x.kn||0);}); return a; }
+function renderPriceCats(){ // 정렬 칩(추천순/가격순)
+  var el=document.getElementById('price-cats'); if(!el) return; el.style.display='flex';
+  var S=(PRICE_SORT_I18N[lang]||PRICE_SORT_I18N.en);
+  el.innerHTML=[['rec',S.rec],['lo',S.lo],['hi',S.hi]].map(function(o){return '<span class="pr-chip'+(priceSort===o[0]?' on':'')+'" onclick="priceSort=\''+o[0]+'\';renderPriceCats();renderPrice()">'+cEsc(o[1])+'</span>';}).join('');
+}
 function renderPrice(){
   if(typeof PRICE_DATA==='undefined') return;
   var L=priceL(), listEl=document.getElementById('price-list');
   var q=(document.getElementById('price-search').value||'').trim().toLowerCase();
   if(q){ // 검색: 전 분야 flat
     var pool=[]; PRICE_DATA.forEach(function(c){ c.items.forEach(function(it){ pool.push(it); }); });
-    var filtered=pool.filter(function(it){ return (it.ko&&it.ko.toLowerCase().includes(q))||(it.zh&&it.zh.includes(q))||(it.h&&it.h.toLowerCase().includes(q)); });
+    var filtered=sortItems(pool.filter(function(it){ return (it.ko&&it.ko.toLowerCase().includes(q))||(it.zh&&it.zh.includes(q))||(it.h&&it.h.toLowerCase().includes(q)); }));
     var shown=filtered.slice(0,priceLimit);
     listEl.innerHTML=shown.length?shown.map(priceRowHTML).join(''):'<div style="text-align:center;color:var(--gray);padding:24px;">'+L.none+'</div>';
     document.getElementById('price-more').style.display=filtered.length>priceLimit?'':'none';
     document.getElementById('price-count').textContent=filtered.length?L.cnt(filtered.length,shown.length):L.none;
-  } else { // 분야 아코디언 (모두닥식): 접힘 → 누르면 펼침
-    listEl.innerHTML=PRICE_DATA.map(function(c,ci){
-      return '<div class="pr-group'+(ci===0?' open':'')+'"><div class="pr-head" onclick="this.parentNode.classList.toggle(\'open\')"><span class="pr-catname">'+cEsc(priceCatLbl(c.cat))+' <b>'+c.items.length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-gbody">'+c.items.map(priceRowHTML).join('')+'</div></div>';
-    }).join('');
-    document.getElementById('price-more').style.display='none';
-    document.getElementById('price-count').textContent='';
+    return;
   }
+  // 2단계 아코디언: 분야 → 펼치면 세부 카테고리 → 펼치면 시술
+  listEl.innerHTML=PRICE_DATA.map(function(c,ci){
+    var body;
+    if(SUBCAT_RULES[c.cat]){
+      var subs={}, order=[];
+      SUBCAT_RULES[c.cat].forEach(function(r){subs[r[0]]=[];order.push(r[0]);});
+      c.items.forEach(function(it){ var sc=subcatOf(c.cat,it.ko)||'기타'; if(!subs[sc]){subs[sc]=[];order.push(sc);} subs[sc].push(it); });
+      if(order.indexOf('기타')<0&&subs['기타']) order.push('기타');
+      body=order.filter(function(k){return subs[k]&&subs[k].length;}).map(function(k){
+        return '<div class="pr-sub"><div class="pr-subhead" onclick="event.stopPropagation();this.parentNode.classList.toggle(\'open\')"><span>'+cEsc(subLbl(k))+' <b>'+subs[k].length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-subbody">'+sortItems(subs[k]).map(priceRowHTML).join('')+'</div></div>';
+      }).join('');
+    } else { body=sortItems(c.items).map(priceRowHTML).join(''); }
+    return '<div class="pr-group'+(ci===0?' open':'')+'"><div class="pr-head" onclick="this.parentNode.classList.toggle(\'open\')"><span class="pr-catname">'+cEsc(priceCatLbl(c.cat))+' <b>'+c.items.length+'</b></span><span class="pr-arrow">▾</span></div><div class="pr-gbody">'+body+'</div></div>';
+  }).join('');
+  document.getElementById('price-more').style.display='none';
+  document.getElementById('price-count').textContent='';
 }
 function initPrice(){
   if(typeof SITE!=='undefined' && SITE==='gnfollow') return; // 중국(gnfollow) 제외 — 의료광고법: 가격 미표기
@@ -2776,7 +2811,7 @@ function renderDetail(kr){
   const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
   const overview=lang==='ko'?h.overview_ko:lang==='zh'?h.overview_zh:h.overview_en;
   const treats=lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en;
-  document.getElementById('d-icon').textContent=h.icon;
+  (function(){ var di=document.getElementById('d-icon'); if(!di)return; var im=(typeof HOSP_INTROS!=='undefined'&&HOSP_INTROS[kr]&&HOSP_INTROS[kr].images&&HOSP_INTROS[kr].images[0])||h.dynamicImage||''; if(im){ di.textContent=''; di.style.backgroundImage="url('"+String(im).replace(/'/g,'%27')+"')"; di.style.backgroundSize='cover'; di.style.backgroundPosition='center'; di.style.borderRadius='16px'; } else { di.textContent=h.icon; di.style.backgroundImage=''; } })();
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-en').textContent=h.en;
   document.getElementById('d-loc').textContent=h.locMap?(h.locMap[lang]||h.locMap.zh||h.locMap.en):t(h.loc);
