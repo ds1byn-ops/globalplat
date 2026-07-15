@@ -2840,10 +2840,11 @@ function openDoc(kr,di){
     +'<div style="font-size:13px;color:var(--gn2);font-weight:600;margin-top:4px;">'+cEsc(docTitle(d.title))+(hname?' · '+cEsc(hname):'')+'</div>'
     +'<div style="text-align:left;margin-top:22px;"><div style="font-size:12px;color:var(--gray);font-weight:700;margin-bottom:9px;">'+L.field+'</div><div>'+chips+'</div></div>'
     +'<div style="text-align:left;font-size:12px;color:var(--gray);line-height:1.7;margin-top:18px;background:var(--lgray);border-radius:10px;padding:12px 14px;">'+L.note+'</div>'
-    +'<button onclick="closeDocModal();showMain();openModal(\''+String(kr).replace(/\x27/g,"\\x27")+'\',{name:'+JSON.stringify(d.name)+',title:'+JSON.stringify(d.title||'')+'})" style="margin-top:18px;width:100%;padding:13px;background:var(--gn2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">'+L.book+'</button>'
+    +'<button onclick="docBook(\''+String(kr).replace(/\x27/g,"\\x27")+'\','+di+')" style="margin-top:18px;width:100%;padding:13px;background:var(--gn2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">'+L.book+'</button>'
     +'</div>';
   document.getElementById('doc-modal-bg').classList.add('open');
 }
+function docBook(kr,di){ var d=(DOCTORS[kr]||[])[di]; closeDocModal(); showMain(); openModal(kr, d?{name:d.name,title:d.title||''}:null); }
 var HOSP_THUMB={"원진성형외과피부과의원":"hthumb/wonjin.jpg","지유의원 (사적인아름다움)":"hthumb/gu.jpg","신상성형외과":"hthumb/shinsang.jpg","드림성형외과":"hthumb/dream.jpg","셀리닉의원":"hthumb/cellinique.jpg","차움":"hthumb/chaum.jpg","원셀의원":"hthumb/onecell.jpg","글로비성형외과":"hthumb/glovi.jpg","라미체의원":"hthumb/lamiche.jpg","뷰성형외과":"hthumb/view.jpg","바른길산부인과":"hthumb/barunhifu.jpg","강남다움의원":"hthumb/gangnamdaum.jpg","더뷰티성형외과":"hthumb/thebeauty.jpg","신소애여성의원":"hthumb/sinsoa.jpg","히어피부과":"hthumb/heerskin.jpg","히어산부인과":"hthumb/heerwomen.jpg","셀로라의원 (with 지유)":"hthumb/cellora.jpg","리프톤의원":"hthumb/lifton.jpg","청담서클의원":"hthumb/cheongdamcircle.jpg","루비성형외과(신사점)":"hthumb/ruby.jpg","벤자민의원":"hthumb/benjamin.jpg","고운몸의원":"hthumb/gowoonmom.jpg","티알 트리니티라파엘로 청담의원":"hthumb/tr.jpg","GV 성형외과":"hthumb/gv.jpg","페이스라인성형외과의원":"hthumb/faceline.jpg","강남서울안과의원":"hthumb/kseye.jpg"};
 function renderDetail(kr){
   const h=HOSPS.find(x=>x.kr===kr);if(!h)return;
