@@ -2425,7 +2425,8 @@ function filterHosps(){
   // 분야(카테고리) 선택 시엔 추천/전체 분리 없이 그 분야 병원 전부를 목록에 표시.
   // (기본 화면=추천 강조+나머지 / 분야 선택=평면 목록)
   const recommended = activeCat ? [] : recKrNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean).filter(h => filtered.indexOf(h) >= 0);
-  const others = activeCat ? filtered.slice() : filtered.filter(h => !recKrNames.includes(h.kr));
+  // '전체 병원 · 분야별'은 항상 전체(추천 포함) 표시 — 추천 제외로 목록이 0으로 비던 문제 해결
+  const others = filtered.slice();
 
   // ── 병원 리스트카드 공통 템플릿 (MTK 스타일: 썸네일+정보 가로배치, 전체폭 버튼) ──
   function hlcCardHTML(h, isRec){
