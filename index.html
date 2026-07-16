@@ -2422,8 +2422,10 @@ function filterHosps(){
   // 매칭되도록 kr 이름으로 정규화. (포털명↔kr 표기가 다른 병원을 추천 지정하면 정확일치 실패로
   //  추천에서 누락되던 문제 방지) — others 제외도 정규화된 kr 기준으로 수행해 중복 노출 방지
   const recKrNames = recommendNames.map(n => (typeof PORTAL_TO_KR!=='undefined' && PORTAL_TO_KR[n]) ? PORTAL_TO_KR[n] : n);
-  const recommended = recKrNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean).filter(h => filtered.indexOf(h) >= 0);
-  const others = filtered.filter(h => !recKrNames.includes(h.kr));
+  // 분야(카테고리) 선택 시엔 추천/전체 분리 없이 그 분야 병원 전부를 목록에 표시.
+  // (기본 화면=추천 강조+나머지 / 분야 선택=평면 목록)
+  const recommended = activeCat ? [] : recKrNames.map(n => HOSPS.find(h => h.kr === n)).filter(Boolean).filter(h => filtered.indexOf(h) >= 0);
+  const others = activeCat ? filtered.slice() : filtered.filter(h => !recKrNames.includes(h.kr));
 
   // ── 병원 리스트카드 공통 템플릿 (MTK 스타일: 썸네일+정보 가로배치, 전체폭 버튼) ──
   function hlcCardHTML(h, isRec){
@@ -2499,6 +2501,7 @@ function filterHosps(){
   if(recGrid){
     recGrid.innerHTML = recommended.map(h=>hlcCardHTML(h,true)).join('');
     hlcBindClicks(recGrid);
+    const _rw=document.getElementById('hosp-recommend-wrap'); if(_rw) _rw.style.display=recommended.length?'':'none';
   }
 
   // 나머지 병원: 분야(카테고리)별 아코디언 — 썸네일 없이 텍스트 목록(3.8MB 이미지 미사용)
@@ -2525,7 +2528,7 @@ function filterHosps(){
         const recB=isRec?`<span class="hcl-recbadge">${REC_BADGE[lang]||REC_BADGE.en}</span>`:'';
         return `<div class="hcl-row${isRec?' hcl-row-rec':''}" data-kr="${h.kr}"><div class="hcl-info"><div class="hcl-name">${recB}${name}${rHTML}</div><div class="hcl-dept">${dept||''}</div></div><div class="hcl-btns"><button class="btn-detail" data-action="detail" data-kr="${h.kr}">${t('detail_btn')}</button><button class="btn-book" data-action="modal" data-kr="${h.kr}">${t('reserve_btn')}</button></div></div>`;
       }).join('');
-      return `<div class="hcl-group"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
+      return `<div class="hcl-group${activeCat?' open':''}"><div class="hcl-head" onclick="this.parentNode.classList.toggle('open')"><span class="hcl-cat">${catLbl(c)} <b>${groups[c].length}</b></span><span class="hcl-arrow">▾</span></div><div class="hcl-body">${rows}</div></div>`;
     }).join('') || ('<div style="text-align:center;padding:30px;color:var(--gray);font-size:13px;">'+(lang==='zh'?'该科室合作医院准备中':lang==='ko'?'해당 분야 병원 준비 중':'No hospitals in this field yet')+'</div>');
     hlcBindClicks(_gridEl);
   }
