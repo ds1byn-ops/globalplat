@@ -2231,16 +2231,11 @@ function applyI18n(){
 function renderCats(){
   const cats=t('cats');
   const grid=document.getElementById('cat-grid');
-  // 병원이 실제로 있는 분야만 타일 노출 (치과·에스테틱 등 데이터 없는 분야 숨김)
-  const _hasCat={}; HOSPS.forEach(h=>String(h.cat||'').split('/').forEach(cc=>{if(cc)_hasCat[cc]=true;}));
-  const _canon=['성형외과','피부','줄기세포','체형','여성의학','안과','항노화'];
-  const _hanja=['한방','韩医','Korean Medicine','韓方','Đông y','แพทย์แผนเกาหลี','Корейская медицина','Pengobatan Tradisional','Зүүн анагаах','الطب الكوري'];
-  const _tileHas=(c,i)=>{ if(i===0)return true; if(i===cats.length-1)return true; if((typeof EXTRA_CATS_KR!=='undefined')&&EXTRA_CATS_KR.includes(c))return true; if(_hanja.indexOf(c)>=0)return !!_hasCat['한방']; const k=_canon[i-1]; return k?!!_hasCat[k]:false; };
-  grid.innerHTML=cats.map((c,i)=> _tileHas(c,i) ? `
+  grid.innerHTML=cats.map((c,i)=>`
     <div class="cat-card${activeCat===c?' active':''}" data-cat="${i}" title="${c}">
       <div class="ci">${CAT_ICONS[c]||(i===0?ICON_SVGS.all:ICON_SVGS.esthetic)}</div>
       <div class="cn">${c}</div>
-    </div>` : '').join('');
+    </div>`).join('');
   // data-cat 인덱스로 클릭 이벤트 등록 (따옴표 문제 방지)
   grid.querySelectorAll('.cat-card').forEach(el=>{
     el.onclick=function(){setCat(cats[parseInt(this.dataset.cat)],this);};
