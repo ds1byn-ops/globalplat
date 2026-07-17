@@ -2247,6 +2247,8 @@ function renderCats(){
 function setCat(cat,el){
   const all=t('cats')[0];
   activeCat=cat===all?'':cat;
+  // 카테고리 전환 시 이전 검색어 초기화 (검색어 잔류 + 분야필터가 겹쳐 목록이 0으로 비던 문제 방지)
+  { const _si=document.getElementById('s-input'); if(_si) _si.value=''; }
   const isExtra=EXTRA_CATS_KR.includes(cat);
   const extraSec=document.getElementById('sec-extra');
   const hospSec=document.getElementById('sec-hosps');
@@ -2513,7 +2515,10 @@ function filterHosps(){
   const CATI18N={'성형외과':{zh:'整形外科',en:'Plastic Surgery'},'피부':{zh:'皮肤科',en:'Dermatology'},'줄기세포':{zh:'干细胞',en:'Stem Cell'},'항노화':{zh:'抗衰老',en:'Anti-aging'},'체형':{zh:'体型管理',en:'Body'},'여성의학':{zh:'女性医学',en:"Women's Health"},'안과':{zh:'眼科',en:'Eye'},'한방':{zh:'韩医',en:'Korean Medicine'},'기타':{zh:'其他',en:'Others'}};
   const catLbl=c=>{ if(lang==='ko')return c; const m=CATI18N[c]; return m?(m[lang]||m.en||c):c; };
   const groups={};
-  others.forEach(h=>{ const c=(h.cat||'').split('/')[0]||'기타'; (groups[c]=groups[c]||[]).push(h); });
+  // 특정 분야 선택 시: 매칭된 병원을 '그 분야' 그룹으로 묶어 표시.
+  // (기존엔 cat 첫 조각으로만 그룹핑돼, 예: cat '줄기세포/한방' 병원이 韩医 선택 시에도 '干细胞' 그룹에 묻히던 문제)
+  const _activeKey = activeCat ? (catMap[activeCat]||null) : null;
+  others.forEach(h=>{ const c=_activeKey || ((h.cat||'').split('/')[0]||'기타'); (groups[c]=groups[c]||[]).push(h); });
   const gcats=Object.keys(groups).sort((a,b)=>{const ia=CATORD.indexOf(a),ib=CATORD.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
   const sortBar=document.getElementById('hosp-sort-bar');
   if(sortBar){ const allL={ko:'전체 병원 · 분야별로 보기',zh:'全部医院 · 按科室查看',en:'All Hospitals · by Field'}; sortBar.innerHTML=`<div class="hosp-list-title">${allL[lang]||allL.en}</div><div class="hosp-list-title" style="color:var(--gn2)">${others.length}</div>`; }
