@@ -655,11 +655,11 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   <div class="section-inner">
     <div class="sec-head">
       <div class="sec-eyebrow">INFO</div>
-      <h2 class="sec-title">资讯 · 攻略</h2>
-      <p class="sec-sub">江南FOLLOW 官方信息与就医攻略</p>
+      <h2 class="sec-title" id="content-title">资讯 · 攻略</h2>
+      <p class="sec-sub" id="content-sub">江南FOLLOW 官方信息与就医攻略</p>
     </div>
     <div id="content-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:8px;"></div>
-    <div id="content-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);"><div style="font-size:36px;margin-bottom:10px;">📄</div><p>内容即将上线</p></div>
+    <div id="content-empty" style="display:none;text-align:center;padding:32px;color:var(--gray);"><div style="font-size:36px;margin-bottom:10px;">📄</div><p id="content-empty-txt">内容即将上线</p></div>
   </div>
 </section>
 <div class="modal-bg" id="content-modal-bg" onmousedown="window._mdTgt=event.target" onclick="if(event.target===this&&window._mdTgt===this){closeContentModal()}">
@@ -2182,6 +2182,7 @@ function setLang(l){
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
   renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides(); renderHeroBadge();
+  try{ if(typeof renderContentPosts==='function' && CONTENT.length) renderContentPosts(); }catch(e){}
   if(currentHosp) renderDetail(currentHosp);
   if(typeof applyPriceI18n==='function'){ var _sp=document.getElementById('sec-price'); if(_sp&&_sp.style.display!=='none'){ applyPriceI18n(); renderPriceCats(); renderPrice(); } }
   initSvcButtons();
@@ -2599,13 +2600,61 @@ function treatIconSvg(krTag){
 }
 /* ── 资讯·攻略 정보 콘텐츠 (content_posts, 공개 로드) ── */
 let CONTENT=[];
+const FN_TRANSLATE=SUPA_URL+'/functions/v1/translate-content';
+// 섹션 헤더/빈상태 다국어 (中 소스 → 보는 언어)
+const CONTENT_I18N={
+  title:{zh:'资讯 · 攻略',ko:'정보 · 가이드',en:'Info · Guides',ja:'情報・ガイド',vi:'Thông tin · Hướng dẫn',th:'ข้อมูล · ไกด์',ru:'Информация · Гид',mn:'Мэдээлэл · Гарын авлага',id:'Info · Panduan',ar:'معلومات · أدلة'},
+  sub:{zh:'江南FOLLOW 官方信息与就医攻略',ko:'강남FOLLOW 공식 정보와 진료 가이드',en:'Official info & treatment guides by Gangnam FOLLOW',ja:'江南FOLLOW公式情報と診療ガイド',vi:'Thông tin chính thức & hướng dẫn điều trị từ Gangnam FOLLOW',th:'ข้อมูลและไกด์การรักษาอย่างเป็นทางการโดย Gangnam FOLLOW',ru:'Официальная информация и гид по лечению от Gangnam FOLLOW',mn:'Gangnam FOLLOW-ийн албан ёсны мэдээлэл ба эмчилгээний заавар',id:'Info resmi & panduan perawatan oleh Gangnam FOLLOW',ar:'معلومات رسمية وأدلة علاجية من Gangnam FOLLOW'},
+  empty:{zh:'内容即将上线',ko:'콘텐츠 준비 중입니다',en:'Content coming soon',ja:'コンテンツは近日公開',vi:'Nội dung sắp ra mắt',th:'เนื้อหาเร็วๆ นี้',ru:'Скоро появится',mn:'Удахгүй нэмэгдэнэ',id:'Konten segera hadir',ar:'المحتوى قريبًا'}
+};
+function _cl(){ return (typeof lang!=='undefined')?lang:'zh'; }
 function cEsc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function cLang(c,f){ return ((typeof lang!=='undefined'&&lang==='ko')?(c[f+'_ko']||c[f+'_zh']):(c[f+'_zh']||c[f+'_ko']||c[f+'_en']))||''; }
+// 보는 언어값: 직접 입력 컬럼(_ko/_en) → 캐시 번역(translations[lang]) → 원문(zh) 폴백
+function cLang(c,f){
+  var L=_cl();
+  if(L==='zh') return c[f+'_zh']||c[f+'_ko']||c[f+'_en']||'';
+  var col=c[f+'_'+L]; if(col) return col;
+  var tr=c.translations&&c.translations[L]; if(tr&&tr[f]) return tr[f];
+  return c[f+'_zh']||c[f+'_ko']||c[f+'_en']||'';
+}
+function _hasSrc(c,f){ return !!(c[f+'_zh']||c[f+'_ko']||c[f+'_en']); }
+function _needTr(c,f){
+  var L=_cl(); if(L==='zh') return false;
+  if(c[f+'_'+L]) return false;
+  if(c.translations&&c.translations[L]&&c.translations[L][f]!=null) return false;
+  return _hasSrc(c,f);
+}
+var _trPending={};
+// Edge Function(translate-content)에 번역 요청 + CONTENT 캐시 갱신
+async function ensureTr(c,mode){
+  var L=_cl(); if(L==='zh') return false;
+  var full=(mode==='full');
+  if(!(_needTr(c,'title')||(full&&_needTr(c,'body')))) return false;
+  var key=c.id+'|'+L+'|'+(full?'f':'t');
+  if(_trPending[key]) return false; _trPending[key]=1;
+  try{
+    var r=await fetch(FN_TRANSLATE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:c.id,target:L,mode:full?'full':'title'})});
+    if(r.ok){ var j=await r.json();
+      c.translations=c.translations||{}; c.translations[L]=c.translations[L]||{};
+      if(j.title) c.translations[L].title=j.title;
+      if(full&&j.body!=null) c.translations[L].body=j.body;
+      return true;
+    }
+  }catch(e){}finally{ delete _trPending[key]; }
+  return false;
+}
+function applyContentI18n(){
+  var L=_cl();
+  var tEl=document.getElementById('content-title'); if(tEl) tEl.textContent=CONTENT_I18N.title[L]||CONTENT_I18N.title.en;
+  var sEl=document.getElementById('content-sub'); if(sEl) sEl.textContent=CONTENT_I18N.sub[L]||CONTENT_I18N.sub.en;
+  var eEl=document.getElementById('content-empty-txt'); if(eEl) eEl.textContent=CONTENT_I18N.empty[L]||CONTENT_I18N.empty.en;
+}
 async function loadContentPosts(){
   try{ const r=await fetch(`${SUPA_URL}/rest/v1/content_posts?select=*&status=eq.active&order=sort_order.desc,id.desc&limit=30`,{headers:{'apikey':SUPA_KEY}}); CONTENT=r.ok?await r.json():[]; }catch(e){ CONTENT=[]; }
   renderContentPosts();
 }
-function renderContentPosts(){
+function renderContentPosts(){ paintContentList(); applyContentI18n(); translateVisibleTitles(); }
+function paintContentList(){
   const grid=document.getElementById('content-grid'), empty=document.getElementById('content-empty'); if(!grid) return;
   if(!CONTENT.length){ grid.innerHTML=''; if(empty)empty.style.display=''; return; }
   if(empty)empty.style.display='none';
@@ -2626,8 +2675,15 @@ function renderContentPosts(){
     </div>`;
   }).join('');
 }
-function openContentPost(id){
-  const c=CONTENT.find(x=>x.id===id); if(!c) return;
+// 목록 제목: 보는 언어로 없는 것만 번역 요청 후 다시 그림
+async function translateVisibleTitles(){
+  var L=_cl(); if(L==='zh') return;
+  var todo=CONTENT.filter(function(c){ return _needTr(c,'title'); });
+  if(!todo.length) return;
+  var res=await Promise.all(todo.map(function(c){ return ensureTr(c,'title'); }));
+  if(res.some(Boolean) && _cl()===L) paintContentList();
+}
+function paintContentModal(c){
   const t=cLang(c,'title'), body=cLang(c,'body');
   let html='';
   if(c.cover_url) html+=`<img src="${cEsc(c.cover_url)}" style="width:100%;display:block;border-radius:14px 14px 0 0;">`;
@@ -2639,7 +2695,15 @@ function openContentPost(id){
   if(Array.isArray(c.images)&&c.images.length) html+='<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">'+c.images.map(u=>`<img src="${cEsc(u)}" loading="lazy" style="width:100%;border-radius:10px;display:block;">`).join('')+'</div>';
   html+='</div>';
   document.getElementById('content-modal-body').innerHTML=html;
+}
+function openContentPost(id){
+  const c=CONTENT.find(x=>x.id===id); if(!c) return;
+  paintContentModal(c);
   document.getElementById('content-modal-bg').classList.add('open');
+  // 본문까지 보는 언어로 번역(없으면) 후 모달 다시 그림
+  if(_needTr(c,'title')||_needTr(c,'body')){
+    ensureTr(c,'full').then(function(ch){ var bg=document.getElementById('content-modal-bg'); if(ch&&bg&&bg.classList.contains('open')) paintContentModal(c); });
+  }
 }
 function closeContentModal(){ const m=document.getElementById('content-modal-bg'); if(m){m.classList.remove('open'); const v=m.querySelector('video'); if(v)v.pause();} }
 if(document.readyState!=='loading') loadContentPosts(); else document.addEventListener('DOMContentLoaded',loadContentPosts);
