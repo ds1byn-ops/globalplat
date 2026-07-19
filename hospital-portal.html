@@ -389,7 +389,11 @@ async function dbLoad(){
   const res=await hpost('hosp_bookings',{p_token:HTOKEN});
   if(hpNoSession(res))return [];
   const rows=(res&&res.rows)||[];
-  return rows.filter(x=>x&&x.data).map(x=>Object.assign({},x.data,{_rowid:x.id}));
+  // 포털 스키마 행만 사용: datetime(문자열)·만원단위 amount 구조.
+  // 강남펄스 동기화 행(source:'gangnam_pulse')은 스키마가 달라(원단위 amount, datetime 없음)
+  // 대시보드/정산 화면을 깨뜨리므로 제외 — 해당 매출은 강남펄스 ERP에서 자체 정산됨.
+  return rows.filter(x=>x&&x.data&&typeof x.data.datetime==='string'&&x.data.source!=='gangnam_pulse')
+    .map(x=>Object.assign({},x.data,{_rowid:x.id}));
 }
 // dbSaveAll(전체삭제→재삽입) 제거: 타 병원 데이터까지 날리는 위험 패턴이라 폐기.
 // 등록/수정/삭제는 본인 병원 것만 처리하는 단건 RPC로 대체됨.
@@ -576,7 +580,8 @@ async function saveNewBooking(){
 
 // ── 정산 ──
 function renderSettlement(){
-  const hbk=hospBK();
+  // 정산 대상 = 실제 내원 건만 (취소·노쇼·대기 제외 — 펄스 수수료정산 기준과 동일)
+  const hbk=hospBK().filter(b=>b.status!=='취소'&&b.status!=='노쇼'&&b.status!=='대기');
   const rate=currentHosp.rate;
   const map={};
   hbk.forEach(b=>{
