@@ -406,7 +406,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
       <a onclick="showMain();fkhShowExtraSection();" data-i18n="nav_concierge">컨시어지</a>
       <a id="nav-price" style="display:none" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-price').scrollIntoView({behavior:'smooth'}),100)">가격비교</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-review').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_review">후기</a>
-      <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-content').scrollIntoView({behavior:'smooth'}),100)">资讯</a>
+      <a id="nav-content-link" onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-content').scrollIntoView({behavior:'smooth'}),100)">资讯</a>
       <a onclick="showMain();fkhRestoreHospSection();setTimeout(()=>document.getElementById('sec-faq').scrollIntoView({behavior:'smooth'}),100)" data-i18n="nav_faq">FAQ</a>
     </div>
     <div class="nav-right">
@@ -2218,6 +2218,9 @@ function applyI18n(){
     if(el.tagName!=='INPUT'&&el.tagName!=='TEXTAREA') el.innerHTML=v;
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  // 상단 네비 '资讯'(정보) 링크 — data-i18n 미부여라 언어 무관 중국어로 고정되던 것 보정
+  var navContent=document.getElementById('nav-content-link');
+  if(navContent){const ncL={zh:'资讯',ko:'정보',en:'Info',ja:'情報',vi:'Thông tin',th:'ข้อมูล',ru:'Инфо',mn:'Мэдээлэл',id:'Info',ar:'معلومات'};navContent.textContent=ncL[lang]||ncL.zh;}
   // svc 확인 버튼 텍스트
   const confirmLabels={zh:'申请',ko:'신청',en:'Apply',vi:'Đăng ký',th:'สมัคร',ja:'申し込む',ru:'Подать',mn:'Бүртгэх',id:'Daftar',ar:'إرسال'};
   const confirmTxt=confirmLabels[lang]||'신청';
