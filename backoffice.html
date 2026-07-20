@@ -915,19 +915,50 @@ async function ensureFreshAuth(){
 async function dbLoad(table){
   const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=id.asc`,{headers});
   const d=await r.json();
-  return Array.isArray(d)?d.map(x=>x.data).filter(Boolean):[];
+  // _rowid = 실제 DB PK. 단건 수정/삭제 시 이 값으로 해당 행만 건드린다.
+  return Array.isArray(d)?d.filter(x=>x&&x.data).map(x=>Object.assign({},x.data,{_rowid:x.id})):[];
 }
-async function dbSave(table,rows){
-  await fetch(`${SUPA_URL}/rest/v1/${table}?id=gt.0`,{
-    method:'DELETE',
-    headers:{...headers}
-  });
-  if(!rows.length)return;
-  await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+// dbSave(테이블 전체 DELETE→메모리 재삽입) 폐기: 동시 편집자 간 데이터 유실 +
+// bookings의 타 소스 행(source=B2C_WEB, gangnam_pulse) id 재발급·유실 위험.
+// 병원포털과 동일하게(dbSaveAll 제거 참고) _rowid 기반 단건 INSERT/PATCH/DELETE로 전환.
+function rowPayload(row){ const {_rowid,...data}=row; return data; }
+async function dbInsertRow(table,row){
+  if(!await ensureFreshAuth()) throw new Error('세션이 만료되었습니다');
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{
     method:'POST',
-    headers:{...headers,'Prefer':'return=minimal'},
-    body:JSON.stringify(rows.map(r=>({data:r})))
+    headers:{...headers,'Prefer':'return=representation'},
+    body:JSON.stringify({data:rowPayload(row)})
   });
+  const d=await r.json().catch(()=>null);
+  if(!r.ok||!Array.isArray(d)||!d[0]) throw new Error('등록 실패 ('+((d&&d.message)||r.status)+')');
+  row._rowid=d[0].id;
+  return row;
+}
+async function dbUpdateRow(table,row){
+  if(!row._rowid) return dbInsertRow(table,row); // DB에 아직 없던 행이면 신규 등록
+  if(!await ensureFreshAuth()) throw new Error('세션이 만료되었습니다');
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${row._rowid}`,{
+    method:'PATCH',
+    headers:{...headers,'Prefer':'return=representation'},
+    body:JSON.stringify({data:rowPayload(row)})
+  });
+  const d=await r.json().catch(()=>null);
+  if(!r.ok) throw new Error('수정 실패 ('+((d&&d.message)||r.status)+')');
+  if(!Array.isArray(d)||!d.length){
+    // 0행 갱신: 다른 편집자가 지웠거나 RLS에 UPDATE 정책이 없는 경우 →
+    // 해당 행만 지우고 다시 넣는 단건 폴백 (다른 행은 건드리지 않음)
+    console.warn(`PATCH 0행(${table} id=${row._rowid}) — 단건 재삽입 폴백`);
+    await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${row._rowid}`,{method:'DELETE',headers:{...headers}});
+    delete row._rowid;
+    return dbInsertRow(table,row);
+  }
+  return row;
+}
+async function dbDeleteRow(table,row){
+  if(!row||!row._rowid) return; // DB에 저장된 적 없는 행
+  if(!await ensureFreshAuth()) throw new Error('세션이 만료되었습니다');
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${row._rowid}`,{method:'DELETE',headers:{...headers}});
+  if(!r.ok) throw new Error('삭제 실패 ('+r.status+')');
 }
 // ── hospitals 전용 로드/저장 ──
 // ⚠️ hospitals 테이블은 bookings/wanghongs와 달리 {data:jsonb} 구조가 아니라
@@ -1003,7 +1034,8 @@ async function dbLoadHospitals(){
   return rows.map((row,i)=>dbRowToHd(row,i));
 }
 async function dbSaveHospitals(rows){
-  // 전체를 지우고 다시 넣는 기존 dbSave 패턴과 동일하게 동작
+  // ⚠️ 아직 전체 삭제→재삽입 패턴(폐기된 구 dbSave 방식). hospitals는 백오피스에서만
+  //    편집하는 테이블이라 유지 중 — bookings/wanghongs는 단건 방식으로 전환됨.
   // ⚠️ DELETE에 조건절이 없으면 PostgREST가 안전상 거부해서 기존 데이터가 안 지워지고
   //    계속 쌓이는 버그가 있었음 — id가 null이 아닌 모든 행을 지우는 조건을 추가
   await fetch(`${SUPA_URL}/rest/v1/hospitals?id=not.is.null`,{
@@ -1390,16 +1422,28 @@ async function saveBk(){
     note:document.getElementById('f-note').value.trim(),
     paid_comm:0,expected:0,
   };
-  if(bkEditId){const i=BK.findIndex(b=>b.id===bkEditId);if(i>=0)BK[i]={...BK[i],...obj};}
-  else{obj.id=BK.reduce((m,b)=>Math.max(m,b.id),0)+1;BK.push(obj);}
   closeBkModal();
-  await dbSave('bookings',BK);
+  try{
+    if(bkEditId){
+      const i=BK.findIndex(b=>b.id===bkEditId);
+      if(i>=0){ const updated={...BK[i],...obj}; await dbUpdateRow('bookings',updated); BK[i]=updated; }
+    }else{
+      obj.id=BK.reduce((m,b)=>Math.max(m,b.id||0),0)+1;
+      await dbInsertRow('bookings',obj);
+      BK.push(obj);
+    }
+  }catch(e){ alert('저장 중 오류가 발생했습니다: '+e.message); }
   renderBk();renderDashboard();
 }
 async function deleteBk(){
   if(!bkEditId||!confirm('삭제하시겠습니까?'))return;
-  BK=BK.filter(b=>b.id!==bkEditId);
-  closeBkModal();await dbSave('bookings',BK);renderBk();renderDashboard();
+  const target=BK.find(b=>b.id===bkEditId);
+  closeBkModal();
+  try{
+    await dbDeleteRow('bookings',target);
+    BK=BK.filter(b=>b.id!==bkEditId);
+  }catch(e){ alert('삭제 중 오류가 발생했습니다: '+e.message); }
+  renderBk();renderDashboard();
 }
 
 // ── 캘린더 ──
@@ -1899,16 +1943,28 @@ async function saveWm(){
   const name=document.getElementById('wm-name').value.trim();
   if(!name){alert('이름을 입력하세요');return;}
   const obj={name,type:document.getElementById('wm-type').value,channel:document.getElementById('wm-ch').value.trim(),contact:document.getElementById('wm-contact').value.trim(),rate:parseInt(document.getElementById('wm-rate').value)||0,note:document.getElementById('wm-note').value.trim()};
-  if(wmEditId!==null){const i=WM.findIndex(w=>w.id===wmEditId);if(i>=0)WM[i]={...WM[i],...obj};}
-  else{obj.id=WM.reduce((m,w)=>Math.max(m,w.id||0),0)+1;WM.push(obj);}
   document.getElementById('wm-modal').classList.remove('open');
-  await dbSave('wanghongs',WM);renderWanghongs();updateInflowSel();
+  try{
+    if(wmEditId!==null){
+      const i=WM.findIndex(w=>w.id===wmEditId);
+      if(i>=0){ const updated={...WM[i],...obj}; await dbUpdateRow('wanghongs',updated); WM[i]=updated; }
+    }else{
+      obj.id=WM.reduce((m,w)=>Math.max(m,w.id||0),0)+1;
+      await dbInsertRow('wanghongs',obj);
+      WM.push(obj);
+    }
+  }catch(e){ alert('저장 중 오류가 발생했습니다: '+e.message); }
+  renderWanghongs();updateInflowSel();
 }
 async function deleteWm(){
   if(wmEditId===null||!confirm('삭제하시겠습니까?'))return;
-  WM=WM.filter(w=>w.id!==wmEditId);
+  const target=WM.find(w=>w.id===wmEditId);
   document.getElementById('wm-modal').classList.remove('open');
-  await dbSave('wanghongs',WM);renderWanghongs();
+  try{
+    await dbDeleteRow('wanghongs',target);
+    WM=WM.filter(w=>w.id!==wmEditId);
+  }catch(e){ alert('삭제 중 오류가 발생했습니다: '+e.message); }
+  renderWanghongs();
 }
 
 // ── 외국인환자 보고 ──
