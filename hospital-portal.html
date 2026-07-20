@@ -390,9 +390,10 @@ async function dbLoad(){
   if(hpNoSession(res))return [];
   const rows=(res&&res.rows)||[];
   // 포털 스키마 행만 사용: datetime(문자열)·만원단위 amount 구조.
-  // 강남펄스 동기화 행(source:'gangnam_pulse')은 스키마가 달라(원단위 amount, datetime 없음)
-  // 대시보드/정산 화면을 깨뜨리므로 제외 — 해당 매출은 강남펄스 ERP에서 자체 정산됨.
-  return rows.filter(x=>x&&x.data&&typeof x.data.datetime==='string'&&x.data.source!=='gangnam_pulse')
+  // 강남펄스 동기화 행(source:'gangnam_pulse')은 hosp_sync_booking RPC가 포털 스키마로
+  // 변환 저장함(원→만원, 영문상태→한글, KST datetime, FK소개 건만 수수료율 부여).
+  // datetime 없는 행(변환 전 레거시/이상 데이터)만 방어적으로 제외.
+  return rows.filter(x=>x&&x.data&&typeof x.data.datetime==='string')
     .map(x=>Object.assign({},x.data,{_rowid:x.id}));
 }
 // dbSaveAll(전체삭제→재삽입) 제거: 타 병원 데이터까지 날리는 위험 패턴이라 폐기.
