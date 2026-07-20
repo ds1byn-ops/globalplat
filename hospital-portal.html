@@ -445,7 +445,11 @@ async function loadAndRender(){
   setTimeout(checkNoticePopup,1500);
 }
 
-function hospBK(){return BK.filter(b=>b.hospital===currentHosp.name);}
+// 서버 RPC(hosp_bookings)가 세션 병원명+별칭(hospital_accounts.aliases)으로 필터링해서 내려줌.
+// 클라이언트에서 이름을 재필터하면 별칭 표기(예: 원진성형외과피부과20/30) 행이 빠지므로 그대로 사용.
+function hospBK(){return BK;}
+// 수수료율: 예약 건에 저장된 요율 우선, 없으면 계정 기본 요율 (한 병원에 20/30% 혼재 가능)
+function bkRate(b){var r=Number(b.hosp_comm_rate);return isFinite(r)&&r>0?r:currentHosp.rate;}
 function r2w(v){return Math.round((v||0)*10000);}
 function fw(w){return w>0?w.toLocaleString()+'원':'-';}
 
@@ -458,7 +462,7 @@ function renderDashboard(){
   const monthBk=hbk.filter(b=>b.datetime&&b.datetime.startsWith(month));
   const newBk=hbk.filter(b=>b.status==='대기');
   const monthRev=monthBk.reduce((s,b)=>s+r2w(b.amount),0);
-  const monthComm=Math.round(monthRev*(currentHosp.rate/100));
+  const monthComm=monthBk.reduce((s,b)=>s+Math.round(r2w(b.amount)*bkRate(b)/100),0);
   document.getElementById('d-monthly').textContent=monthBk.length;
   document.getElementById('d-today').textContent=todayBk.length;
   document.getElementById('d-rev').textContent=monthRev>0?monthRev.toLocaleString():'-';
@@ -582,13 +586,13 @@ async function saveNewBooking(){
 function renderSettlement(){
   // 정산 대상 = 실제 내원 건만 (취소·노쇼·대기 제외 — 펄스 수수료정산 기준과 동일)
   const hbk=hospBK().filter(b=>b.status!=='취소'&&b.status!=='노쇼'&&b.status!=='대기');
-  const rate=currentHosp.rate;
   const map={};
   hbk.forEach(b=>{
     const m=b.datetime.slice(0,7);
-    if(!map[m])map[m]={cnt:0,rev:0,comm:0,paid:0};
-    const won=r2w(b.amount);
-    map[m].cnt++;map[m].rev+=won;map[m].comm+=Math.round(won*rate/100);
+    if(!map[m])map[m]={cnt:0,rev:0,comm:0,paid:0,rates:new Set()};
+    const won=r2w(b.amount);const rr=bkRate(b);
+    map[m].cnt++;map[m].rev+=won;map[m].comm+=Math.round(won*rr/100);
+    if(won>0)map[m].rates.add(rr);
     map[m].paid+=r2w(b.hosp_paidamt||0);
   });
   const totalRev=Object.values(map).reduce((s,v)=>s+v.rev,0);
@@ -602,19 +606,19 @@ function renderSettlement(){
     <tr>
       <td>${m}</td><td style="text-align:center;">${v.cnt}건</td>
       <td style="color:#B8960C;">${fw(v.rev)}</td>
-      <td style="text-align:center;">${rate}%</td>
+      <td style="text-align:center;">${[...v.rates].sort((a,b)=>a-b).join('/')||currentHosp.rate}%</td>
       <td style="color:#dc2626;">${fw(v.comm)}</td>
       <td style="color:var(--gn2);">${fw(v.rev-v.comm)}</td>
       <td><span class="badge ${v.paid>=v.comm?'확정':'대기'}">${v.paid>=v.comm?'정산완료':'미정산'}</span></td>
     </tr>`).join('');
   document.getElementById('st-detail-tbody').innerHTML=hbk.filter(b=>r2w(b.amount)>0).sort((a,b)=>a.datetime.localeCompare(b.datetime)).map(b=>{
-    const won=r2w(b.amount);const comm=Math.round(won*rate/100);const net=won-comm;
+    const won=r2w(b.amount);const rr=bkRate(b);const comm=Math.round(won*rr/100);const net=won-comm;
     return`<tr>
       <td style="font-weight:500;">${escapeHtml(b.name)}</td>
       <td style="color:#555;">${b.datetime.slice(0,10)}</td>
       <td style="font-size:10px;">${escapeHtml(b.treatment)||'-'}</td>
       <td style="color:#B8960C;">${fw(won)}</td>
-      <td style="text-align:center;">${rate}%</td>
+      <td style="text-align:center;">${rr}%</td>
       <td style="color:#dc2626;">${fw(comm)}</td>
       <td style="color:var(--gn2);">${fw(net)}</td>
       <td><span class="badge ${b.hosp_paidamt>0?'확정':'대기'}">${b.hosp_paidamt>0?'완료':'미완료'}</span></td>
