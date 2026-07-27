@@ -470,6 +470,15 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <section class="section" style="background:var(--white);padding-top:18px;padding-bottom:8px;">
   <div class="section-inner">
     <div class="cat-grid-fixed" id="cat-grid"></div>
+    <a id="rquote-banner" href="quote.html" style="display:none;margin-top:14px;text-decoration:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(120deg,#5a82c2,#4a6da3);border-radius:16px;padding:16px 20px;color:#fff;">
+        <div>
+          <div id="rquote-t1" style="font-size:15px;font-weight:800;">Get quotes from multiple clinics</div>
+          <div id="rquote-t2" style="font-size:12.5px;opacity:.9;margin-top:2px;">Upload your desired treatment · compare quotes from verified clinics</div>
+        </div>
+        <div style="font-size:22px;flex:none;">→</div>
+      </div>
+    </a>
   </div>
 </section>
 
@@ -1145,6 +1154,16 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 const SUPA_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
 // ── 유입 도메인 구분: gnfollow.com = 중국어 전용, 그 외(followkorea.kr) = 강남팔로우 ──
 const SITE = location.hostname.includes('gnfollow') ? 'gnfollow' : 'followkorea';
+// 역견적 배너: 가격비교라 글로벌(followkorea)에서만 노출 (중국 gnfollow 의료광고법상 금지)
+function initRquoteBanner(){
+  var b=document.getElementById('rquote-banner'); if(!b)return;
+  if(SITE!=='followkorea'){ b.style.display='none'; return; }
+  b.style.display='block';
+  var T={ko:['여러 병원 견적을 한 번에 비교','희망 시술을 올리면 인증 병원들이 견적을 보내드립니다'],zh:['多家医院一次比价','上传您的需求 · 认证医院为您报价对比'],en:['Get quotes from multiple clinics','Upload your desired treatment · compare quotes from verified clinics']};
+  var t=T[(typeof lang!=='undefined'?lang:'en')]||T.en;
+  var e1=document.getElementById('rquote-t1'),e2=document.getElementById('rquote-t2');
+  if(e1)e1.textContent=t[0]; if(e2)e2.textContent=t[1];
+}
 if(SITE==='gnfollow'){ try{ document.documentElement.classList.add('gnfollow-cn'); document.documentElement.lang='zh'; }catch(e){}
   // 중국 전용: 연락처 입력칸 placeholder를 위챗으로 (글로벌은 WhatsApp/LINE 유지)
   document.addEventListener('DOMContentLoaded',function(){
@@ -2217,6 +2236,7 @@ function applyI18n(){
     const v=t(el.dataset.i18n);
     if(el.tagName!=='INPUT'&&el.tagName!=='TEXTAREA') el.innerHTML=v;
   });
+  try{ initRquoteBanner(); }catch(e){}
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   // 상단 네비 '资讯'(정보) 링크 — data-i18n 미부여라 언어 무관 중국어로 고정되던 것 보정
   var navContent=document.getElementById('nav-content-link');
