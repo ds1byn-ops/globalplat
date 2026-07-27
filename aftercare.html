@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Aftercare Check-in · Follow Korea</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root{ --brand:#5a82c2; --brand-d:#4a6da3; --ink:#1e1e1e; --muted:#6b7280; --line:#e8edf5; --bg:#f6f8fc; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:540px;margin:0 auto;padding:36px 20px}
+  .brand{font-weight:800;color:var(--brand);font-size:13px;letter-spacing:.14em;text-transform:uppercase;text-align:center;margin-bottom:6px}
+  h1{font-size:23px;font-weight:800;text-align:center;margin-bottom:4px}
+  .sub{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:22px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px 22px;box-shadow:0 14px 40px rgba(90,130,194,.08);margin-bottom:14px}
+  .weeks{display:flex;gap:8px;margin-bottom:18px}
+  .weeks button{flex:1;padding:12px 0;border:1px solid var(--line);background:#f8fafc;border-radius:12px;font-weight:800;font-size:14px;color:#475569;cursor:pointer}
+  .weeks button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .weeks button.done{border-color:#86efac;background:#f0fdf4;color:#166534}
+  label{display:block;font-size:12.5px;font-weight:800;color:#475569;margin:14px 0 7px}
+  input[type=range]{width:100%}
+  .rangeval{float:right;color:var(--brand);font-weight:800}
+  textarea,input[type=file]{width:100%;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:inherit}
+  textarea{resize:vertical;min-height:70px}
+  .stars{display:flex;gap:6px}
+  .stars span{font-size:28px;color:#d4d9e2;cursor:pointer}
+  .stars span.on{color:#f5b301}
+  .photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .photos img{width:70px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+  .submit{width:100%;background:var(--brand);color:#fff;font-weight:800;font-size:16px;padding:15px;border:none;border-radius:14px;cursor:pointer;margin-top:18px}
+  .submit:disabled{background:#9aa4b2}
+  .msg{text-align:center;font-weight:700;margin-top:12px;font-size:14px}
+  .msg.err{color:#e5384f}.msg.ok{color:#0f766e}
+  .hist{font-size:12.5px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Follow Korea · Aftercare</div>
+    <h1 id="hi">Recovery Check-in</h1>
+    <p class="sub" id="caseInfo">Loading… 加载中…</p>
+    <div class="card" id="main" style="display:none">
+      <label>Weeks after surgery 术后周数</label>
+      <div class="weeks" id="weeks"></div>
+      <label>Pain 疼痛 <span class="rangeval" id="painV">0</span>/10</label>
+      <input type="range" id="pain" min="0" max="10" value="0" oninput="document.getElementById('painV').textContent=this.value">
+      <label>Swelling 肿胀 <span class="rangeval" id="swV">0</span>/10</label>
+      <input type="range" id="swelling" min="0" max="10" value="0" oninput="document.getElementById('swV').textContent=this.value">
+      <label>Satisfaction 满意度</label>
+      <div class="stars" id="stars"></div>
+      <label>Photos 照片 (optional)</label>
+      <input type="file" id="photos" accept="image/*" multiple>
+      <div class="photos" id="prev"></div>
+      <label>Note 备注 (optional)</label>
+      <textarea id="note" maxlength="500" placeholder="How do you feel? Any concerns? 恢复情况、疑问等"></textarea>
+      <button class="submit" id="btn" onclick="submitCheckin()">Submit Check-in 提交</button>
+      <p class="msg" id="msg" style="display:none"></p>
+    </div>
+  </div>
+<script>
+  var SB_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
+  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
+  var code=new URLSearchParams(location.search).get('c');
+  var week=4, satis=0, files=[], doneWeeks={};
+  function rnd(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  async function rpc(fn,body){ return (await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)})).json(); }
+  document.getElementById('photos').addEventListener('change',function(e){ files=Array.prototype.slice.call(e.target.files).slice(0,5); var p=document.getElementById('prev');p.innerHTML=''; files.forEach(function(f){var i=document.createElement('img');i.src=URL.createObjectURL(f);p.appendChild(i);}); });
+  function renderStars(){ var s=document.getElementById('stars'); s.innerHTML=''; for(var i=1;i<=5;i++){ (function(n){ var el=document.createElement('span'); el.textContent='★'; if(n<=satis)el.className='on'; el.onclick=function(){satis=n;renderStars();}; s.appendChild(el); })(i); } }
+  function renderWeeks(){ var w=document.getElementById('weeks'); w.innerHTML=''; [4,8,12].forEach(function(n){ var b=document.createElement('button'); b.textContent=n+'wk'; if(n===week)b.className='on'; else if(doneWeeks[n])b.className='done'; b.onclick=function(){week=n;renderWeeks();}; w.appendChild(b); }); }
+  async function load(){
+    if(!code){ document.getElementById('caseInfo').textContent='Invalid link. 链接无效。'; return; }
+    var d=await rpc('aftercare_get',{p_code:code});
+    if(!d||d.error){ document.getElementById('caseInfo').textContent='Not found. 未找到。'; return; }
+    document.getElementById('hi').textContent=d.patient+' — Recovery Check-in';
+    document.getElementById('caseInfo').textContent=(d.procedure||'')+' · '+(d.hosp||'')+' · surgery '+(d.surgery_date||'')+' ('+d.weeks_since+' weeks ago)';
+    (d.checkins||[]).forEach(function(c){doneWeeks[c.week]=true;});
+    // 현재 경과에 가장 가까운 미완료 주차 기본 선택
+    var cand=[4,8,12].filter(function(n){return !doneWeeks[n] && d.weeks_since>=n-1;});
+    week=cand.length?cand[0]:(d.weeks_since>=12?12:(d.weeks_since>=8?8:4));
+    document.getElementById('main').style.display='';
+    renderWeeks(); renderStars();
+  }
+  async function submitCheckin(){
+    var btn=document.getElementById('btn'), msg=document.getElementById('msg');
+    btn.disabled=true; var orig=btn.textContent; btn.textContent='Uploading…';
+    try{
+      var urls=[];
+      for(var i=0;i<files.length;i++){ var f=files[i]; var ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'; var path=rnd()+'.'+ext;
+        var up=await fetch(SB_URL+'/storage/v1/object/aftercare-photos/'+path,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':f.type||'image/jpeg'},body:f});
+        if(up.ok)urls.push(SB_URL+'/storage/v1/object/public/aftercare-photos/'+path); }
+      var r=await rpc('aftercare_submit',{p_code:code,p_week:week,p_pain:Number(document.getElementById('pain').value),p_swelling:Number(document.getElementById('swelling').value),p_satis:satis||null,p_photos:urls,p_note:(document.getElementById('note').value||'').trim()});
+      if(!r||r.error)throw new Error((r&&r.error)||'fail');
+      msg.className='msg ok'; msg.textContent='Check-in submitted. Thank you! 已提交，谢谢！'; msg.style.display='block';
+      doneWeeks[week]=true; renderWeeks(); btn.textContent='Submitted ✓';
+    }catch(ex){ msg.className='msg err'; msg.textContent='Failed. Please try again. 提交失败，请重试。'; msg.style.display='block'; btn.disabled=false; btn.textContent=orig; }
+  }
+  load();
+</script>
+</body>
+</html>

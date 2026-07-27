@@ -124,10 +124,30 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('intro')">병원 소개 관리</a>
     <a onclick="showPage('profile')">병원 기본 정보</a>
     <a onclick="showPage('notice')">공지사항</a>
+    <a onclick="showPage('aftercare')">사후관리 (경과 리포트)</a>
   </div>
 </div>
 
 <div class="main">
+
+<!-- 사후관리 -->
+<div class="page" id="page-aftercare">
+  <div class="card">
+    <div class="card-title">사후관리 케이스 등록 — 시술 후 환자에게 경과 체크 링크 발송</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+      <div><label style="font-size:11px;color:#888;">환자명</label><input id="ac-name" style="padding:8px;border:1px solid #ddd;border-radius:7px;font-size:13px;width:120px"></div>
+      <div><label style="font-size:11px;color:#888;">시술명</label><input id="ac-proc" style="padding:8px;border:1px solid #ddd;border-radius:7px;font-size:13px;width:150px"></div>
+      <div><label style="font-size:11px;color:#888;">시술일</label><input type="date" id="ac-date" style="padding:8px;border:1px solid #ddd;border-radius:7px;font-size:13px"></div>
+      <div><label style="font-size:11px;color:#888;">연락처</label><input id="ac-contact" style="padding:8px;border:1px solid #ddd;border-radius:7px;font-size:13px;width:130px"></div>
+      <button class="btn" onclick="acCreate()">케이스 생성 + 링크</button>
+    </div>
+    <div id="ac-newlink" style="margin-top:10px;font-size:12px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">경과 리포트</div>
+    <div id="ac-list"></div>
+  </div>
+</div>
 
 <!-- 역견적 요청 -->
 <div class="page" id="page-quotes">
@@ -770,6 +790,38 @@ function showPage(id){
   if(id==='notice')renderNotice();
   if(id==='intro')loadIntro();
   if(id==='quotes')renderReverseQuotes();
+  if(id==='aftercare')renderAftercare();
+}
+async function acCreate(){
+  var name=(document.getElementById('ac-name').value||'').trim();
+  var date=document.getElementById('ac-date').value;
+  if(!name||!date){ alert('환자명과 시술일을 입력하세요.'); return; }
+  var res=await hpost('aftercare_create',{p_token:HTOKEN,p_name:name,p_proc:(document.getElementById('ac-proc').value||'').trim(),p_surgery:date,p_contact:(document.getElementById('ac-contact').value||'').trim()});
+  if(!res||res.error){ if(hpNoSession(res))return; alert('생성 실패: '+((res&&res.error)||'')); return; }
+  var link=location.origin+'/aftercare.html?c='+res.code;
+  document.getElementById('ac-newlink').innerHTML='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">환자에게 이 링크를 보내세요: <a href="'+link+'" target="_blank" style="color:var(--gn2,#0f4d34);font-weight:700;word-break:break-all;">'+link+'</a> <button class="btn sm" onclick="navigator.clipboard.writeText(\''+link+'\');this.textContent=\'복사됨\'">복사</button></div>';
+  document.getElementById('ac-name').value='';document.getElementById('ac-proc').value='';document.getElementById('ac-contact').value='';
+  renderAftercare();
+}
+async function renderAftercare(){
+  var box=document.getElementById('ac-list'); if(box)box.innerHTML='<div style="color:#888;font-size:12px;padding:10px;">불러오는 중…</div>';
+  var res=await hpost('portal_aftercare_list',{p_token:HTOKEN});
+  if(!res||res.error){ if(hpNoSession(res))return; if(box)box.innerHTML='<div style="color:#888;font-size:12px;">불러오기 실패</div>'; return; }
+  var cases=res.cases||[];
+  if(!cases.length){ box.innerHTML='<div style="color:#888;font-size:12px;padding:16px;text-align:center;">등록된 사후관리 케이스가 없습니다.</div>'; return; }
+  box.innerHTML=cases.map(function(c){
+    var ck=c.checkins||[];
+    var rows=[4,8,12].map(function(w){
+      var k=ck.find(function(x){return x.week===w;});
+      if(!k)return '<td style="text-align:center;color:#ccc;font-size:11px;">'+w+'wk<br>-</td>';
+      var photos=(k.photos||[]).map(function(u){return '<a href="'+escapeHtml(u)+'" target="_blank"><img src="'+escapeHtml(u)+'" style="width:30px;height:30px;object-fit:cover;border-radius:5px;margin:1px"></a>';}).join('');
+      return '<td style="text-align:center;font-size:11px;background:#f0fdf4;border-radius:6px;">'+w+'wk<br>통증 '+(k.pain!=null?k.pain:'-')+' · 부기 '+(k.swelling!=null?k.swelling:'-')+'<br>만족 '+(k.satisfaction!=null?'★'+k.satisfaction:'-')+'<br>'+photos+(k.note?'<div style="color:#555;margin-top:2px;">'+escapeHtml(k.note)+'</div>':'')+'</td>';
+    }).join('');
+    var done=ck.length;
+    return '<div style="border:1px solid #eee;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
+      +'<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><b>'+escapeHtml(c.patient_name)+'</b> <span style="color:#888;">'+escapeHtml(c.procedure_name||'')+' · 시술 '+c.surgery_date+' ('+c.weeks_since+'주차) · 체크인 '+done+'/3</span></div>'
+      +'<table style="width:100%;table-layout:fixed;"><tr>'+rows+'</tr></table></div>';
+  }).join('');
 }
 async function renderReverseQuotes(){
   const box=document.getElementById('quotes-list'); if(box)box.innerHTML='<div style="color:#888;font-size:12px;padding:10px;">불러오는 중…</div>';
