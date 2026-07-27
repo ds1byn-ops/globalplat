@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>My Quotes · Follow Korea</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root{ --brand:#5a82c2; --ink:#1e1e1e; --muted:#6b7280; --line:#e8edf5; --bg:#f6f8fc; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:620px;margin:0 auto;padding:40px 20px}
+  .brand{font-weight:800;color:var(--brand);font-size:14px;letter-spacing:.14em;text-transform:uppercase;text-align:center;margin-bottom:8px}
+  h1{font-size:24px;font-weight:800;text-align:center;margin-bottom:4px}
+  .sub{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:24px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-bottom:14px;box-shadow:0 10px 30px rgba(90,130,194,.07)}
+  .qcard .hosp{font-size:17px;font-weight:800;margin-bottom:6px}
+  .qcard .price{font-size:20px;font-weight:800;color:var(--brand)}
+  .qcard .msg{font-size:13.5px;color:#475569;margin-top:8px;white-space:pre-wrap}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;background:#fff;border:1px solid var(--line);border-radius:18px}
+  .refresh{display:block;margin:18px auto 0;background:#fff;border:1px solid var(--line);color:var(--muted);font-weight:700;padding:11px 22px;border-radius:12px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Follow Korea</div>
+    <h1>My Clinic Quotes</h1>
+    <p class="sub" id="reqInfo">Loading… 加载中…</p>
+    <div id="list"></div>
+    <button class="refresh" onclick="load()">Refresh 刷新</button>
+  </div>
+<script>
+  var SB_URL='https://qfncxamqeiyxkbjxwtoi.supabase.co';
+  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbmN4YW1xZWl5eGtianh3dG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjQzMjksImV4cCI6MjA5Njc0MDMyOX0.TOG3HuidoVHfVq4_ru4aU_9WclBgkv5gSvWnF6PK4NE';
+  var rid=new URLSearchParams(location.search).get('r');
+  var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  async function load(){
+    if(!rid){ document.getElementById('reqInfo').textContent='Invalid link. 链接无效。'; return; }
+    var r=await fetch(SB_URL+'/rest/v1/rpc/public_quote_responses',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_request:rid})});
+    var d=await r.json();
+    if(!d||d.error){ document.getElementById('reqInfo').textContent='Not found. 未找到。'; return; }
+    document.getElementById('reqInfo').textContent=(d.procedures||'')+' · requested '+((d.created_at||'').slice(0,10));
+    var resp=d.responses||[];
+    var box=document.getElementById('list');
+    if(!resp.length){ box.innerHTML='<div class="empty">No quotes yet. Clinics usually respond within 1–2 days.<br>暂无报价，医院通常在1-2天内回复。</div>'; return; }
+    box.innerHTML=resp.map(function(x){
+      var price=(x.min?Number(x.min).toLocaleString():'')+(x.max?(' ~ '+Number(x.max).toLocaleString()):'')+' KRW';
+      return '<div class="qcard"><div class="hosp">'+esc(x.hosp||'Clinic')+'</div><div class="price">'+price+'</div>'+(x.message?'<div class="msg">'+esc(x.message)+'</div>':'')+'</div>';
+    }).join('');
+  }
+  load();
+</script>
+</body>
+</html>

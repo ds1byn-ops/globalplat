@@ -112,6 +112,7 @@ tr:hover td{background:#fafaf8;}
     <a onclick="showPage('bookings')">예약 목록</a>
     <a onclick="showPage('calendar')">일정 캘린더</a>
     <a onclick="showPage('new-booking')">예약 직접 등록</a>
+    <a onclick="showPage('quotes')">역견적 요청 <span class="navdot" id="q-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--red,#dc2626);margin-left:4px"></span></a>
   </div>
   <div class="sidebar-section">정산</div>
   <div class="sidebar-menu">
@@ -127,6 +128,15 @@ tr:hover td{background:#fafaf8;}
 </div>
 
 <div class="main">
+
+<!-- 역견적 요청 -->
+<div class="page" id="page-quotes">
+  <div class="card">
+    <div class="card-title">역견적 요청 — 환자가 올린 희망시술에 견적을 회신하세요</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px;">회신하면 환자가 여러 병원 견적을 비교합니다. 환자가 우리 병원을 선택하면 상담 리드가 됩니다.</div>
+    <div id="quotes-list"></div>
+  </div>
+</div>
 
 <!-- 대시보드 -->
 <div class="page active" id="page-dashboard">
@@ -759,6 +769,46 @@ function showPage(id){
   if(id==='profile')renderProfile();
   if(id==='notice')renderNotice();
   if(id==='intro')loadIntro();
+  if(id==='quotes')renderReverseQuotes();
+}
+async function renderReverseQuotes(){
+  const box=document.getElementById('quotes-list'); if(box)box.innerHTML='<div style="color:#888;font-size:12px;padding:10px;">불러오는 중…</div>';
+  const res=await hpost('portal_reverse_quotes',{p_token:HTOKEN});
+  if(!res||res.error){ if(hpNoSession(res))return; if(box)box.innerHTML='<div style="color:#888;font-size:12px;padding:10px;">불러오기 실패</div>'; return; }
+  const jobs=res.jobs||[];
+  const dot=document.getElementById('q-dot');
+  const openN=jobs.filter(j=>!j.my_response).length;
+  if(dot)dot.style.display=openN>0?'inline-block':'none';
+  if(!jobs.length){ box.innerHTML='<div style="color:#888;font-size:12px;padding:16px;text-align:center;">현재 역견적 요청이 없습니다.</div>'; return; }
+  box.innerHTML=jobs.map(function(j){
+    const photos=(j.photos||[]).map(function(u){return '<a href="'+escapeHtml(u)+'" target="_blank"><img src="'+escapeHtml(u)+'" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #eee;margin-right:6px"></a>';}).join('');
+    const mr=j.my_response;
+    const respBlock = mr && mr.status==='sent'
+      ? '<div style="background:#dcfce7;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534;">회신 완료: '+(mr.min||0).toLocaleString()+'~'+(mr.max||0).toLocaleString()+'원'+(mr.message?' · '+escapeHtml(mr.message):'')+' <button class="btn sm" style="margin-left:6px" onclick="quoteRespond(\''+j.id+'\',true)">회신 취소</button></div>'
+      : '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'
+        +'<input type="number" id="qmin-'+j.id+'" placeholder="최소(원)" style="width:110px;padding:7px;border:1px solid #ddd;border-radius:7px;font-size:12px">'
+        +'<input type="number" id="qmax-'+j.id+'" placeholder="최대(원)" style="width:110px;padding:7px;border:1px solid #ddd;border-radius:7px;font-size:12px">'
+        +'<input id="qmsg-'+j.id+'" placeholder="메시지(선택)" style="flex:1;min-width:140px;padding:7px;border:1px solid #ddd;border-radius:7px;font-size:12px">'
+        +'<button class="btn sm" onclick="quoteRespond(\''+j.id+'\',false)">견적 회신</button></div>';
+    return '<div style="border:1px solid #eee;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:6px;"><span>'+escapeHtml(j.nationality||'국적 미상')+' · '+(j.created_at||'').slice(0,10)+'</span><span>회신 '+(j.response_count||0)+'곳</span></div>'
+      +'<div style="font-weight:700;font-size:14px;margin-bottom:6px;">'+escapeHtml(j.procedures||'희망시술 미기재')+'</div>'
+      +(j.note?'<div style="font-size:12px;color:#555;margin-bottom:6px;">'+escapeHtml(j.note)+'</div>':'')
+      +(photos?'<div style="margin-bottom:8px;">'+photos+'</div>':'')
+      +respBlock+'</div>';
+  }).join('');
+}
+async function quoteRespond(reqId,withdraw){
+  var body={p_token:HTOKEN,p_request:reqId,p_withdraw:!!withdraw};
+  if(!withdraw){
+    body.p_min=Number((document.getElementById('qmin-'+reqId)||{}).value)||null;
+    body.p_max=Number((document.getElementById('qmax-'+reqId)||{}).value)||null;
+    body.p_msg=((document.getElementById('qmsg-'+reqId)||{}).value||'').trim()||null;
+    if(!body.p_min&&!body.p_max){ alert('견적 금액을 입력하세요.'); return; }
+  }
+  const res=await hpost('portal_quote_respond',body);
+  if(!res||res.error){ if(hpNoSession(res))return; alert('처리 실패: '+((res&&res.error)||'')); return; }
+  renderReverseQuotes();
 }
 
 
