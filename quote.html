@@ -39,6 +39,8 @@
     <p class="sub">Share your desired treatment and photos. Verified Korean clinics send you quotes to compare. 上传您的需求，多家医院为您报价对比。</p>
     <div class="card">
       <div id="formview">
+        <div class="field"><label>Name 姓名 <span class="req">*</span></label>
+          <input id="q_name" maxlength="60" placeholder="Your name 您的姓名" /></div>
         <div class="field"><label>Nationality 国籍</label>
           <input id="q_nat" maxlength="40" placeholder="China / Vietnam / ..." /></div>
         <div class="field"><label>Desired treatment 希望项目 <span class="req">*</span></label>
@@ -73,10 +75,11 @@
   });
   function rnd(){ return (Date.now().toString(36)+Math.random().toString(36).slice(2,8)); }
   async function submitQuote(){
+    var pname=(document.getElementById('q_name').value||'').trim();
     var proc=(document.getElementById('q_proc').value||'').trim();
     var contact=(document.getElementById('q_contact').value||'').trim();
     var err=document.getElementById('q_err');
-    if(!proc||!contact){ err.textContent='Please enter desired treatment and contact. 请填写希望项目和联系方式。'; err.style.display='block'; return; }
+    if(!pname||!proc||!contact){ err.textContent='Please enter name, treatment and contact. 请填写姓名、希望项目和联系方式。'; err.style.display='block'; return; }
     err.style.display='none';
     var btn=document.getElementById('q_btn'); btn.disabled=true; var orig=btn.textContent; btn.textContent='Uploading…';
     try{
@@ -87,11 +90,10 @@
         var up=await fetch(SB_URL+'/storage/v1/object/quote-photos/'+path,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':f.type||'image/jpeg'},body:f});
         if(up.ok) urls.push(SB_URL+'/storage/v1/object/public/quote-photos/'+path);
       }
-      var payload={ nationality:(document.getElementById('q_nat').value||'').trim()||null, procedures:proc, contact:contact, note:(document.getElementById('q_note').value||'').trim()||null, photos:urls, want_reverse:true, status:'open', source:'reverse_quote' };
-      var res=await fetch(SB_URL+'/rest/v1/quote_requests',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(payload)});
+      var res=await fetch(SB_URL+'/rest/v1/rpc/submit_reverse_quote',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({ p_name:pname, p_nat:(document.getElementById('q_nat').value||'').trim(), p_proc:proc, p_contact:contact, p_note:(document.getElementById('q_note').value||'').trim(), p_photos:urls })});
       if(!res.ok) throw new Error(await res.text());
-      var row=(await res.json())[0];
-      document.getElementById('viewLink').href='quote-view.html?r='+row.id;
+      var newId=await res.json();
+      document.getElementById('viewLink').href='quote-view.html?r='+newId;
       document.getElementById('formview').style.display='none';
       document.getElementById('done').style.display='block';
     }catch(ex){ err.textContent='Submit failed. Please try again. 提交失败，请重试。'; err.style.display='block'; btn.disabled=false; btn.textContent=orig; }
