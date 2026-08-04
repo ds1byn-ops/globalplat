@@ -2479,7 +2479,7 @@ function filterHosps(){
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const treats=(lang==='ko'?h.treats_kr:lang==='zh'?h.treats_zh:h.treats_en);
     const intro=HOSP_INTROS[h.kr];
-    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||'';
+    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||(typeof HOSP_THUMB!=='undefined'&&HOSP_THUMB[h.kr])||'';
     const cardImg=imgSrc?
       `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     const rating=hospRatingInfo(h.kr);
@@ -2507,7 +2507,7 @@ function filterHosps(){
     const name=lang==='ko'?h.kr:lang==='zh'?h.zh:h.en;
     const dept=lang==='ko'?h.dept_kr:lang==='zh'?h.dept_zh:h.dept_en;
     const intro=HOSP_INTROS[h.kr];
-    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||'';
+    const imgSrc=(intro&&intro.images&&intro.images[0])||h.dynamicImage||(typeof HOSP_THUMB!=='undefined'&&HOSP_THUMB[h.kr])||'';
     const cardImg=imgSrc?
       `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`:'';
     const rating=hospRatingInfo(h.kr);
