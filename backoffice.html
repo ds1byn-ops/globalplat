@@ -890,7 +890,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY); // 로그인 세션 기반 인증 (기존 평문 계정/정적 키 제거)
 
 let BK=[], WM=[], HD=[], bkEditId=null, hdEditId=null, wmEditId=null;
-let calY=2026, calM=5;
+const _calNow=new Date();let calY=_calNow.getFullYear(), calM=_calNow.getMonth();
 
 // ── Supabase ──
 // 보안: DB의 RLS 정책이 이 헤더를 확인해서 직원 전용 데이터 접근을 허용함 (공개 사이트 index.html에는 절대 넣지 않음)
