@@ -325,10 +325,11 @@ tr:hover td{background:#fafaf8;}
 
 <!-- 캘린더 -->
 <div class="page" id="page-calendar">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-    <button class="btn" onclick="calChange(-1)">◀ 이전달</button>
-    <h2 style="font-size:14px;font-weight:700;" id="cal-title"></h2>
-    <button class="btn" onclick="calChange(1)">다음달 ▶</button>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+    <button class="btn" onclick="calGoToday()">오늘</button>
+    <button class="btn" onclick="calChange(-1)">〈</button>
+    <button class="btn" onclick="calChange(1)">〉</button>
+    <h2 style="font-size:16px;font-weight:700;margin-left:6px;" id="cal-title"></h2>
   </div>
   <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px;">
     <div style="text-align:center;font-size:11px;color:#dc2626;padding:3px;">일</div>
@@ -1459,12 +1460,13 @@ function renderCalendar(){
   for(let i=0;i<first;i++){const d=document.createElement('div');d.style.minHeight='64px';grid.appendChild(d);}
   for(let d=1;d<=days;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const items=byDay[ds]||[];
+    const items=(byDay[ds]||[]).slice().sort((a,b)=>String(a.datetime).localeCompare(String(b.datetime)));
+    const isToday=(ds===today);
     const div=document.createElement('div');
-    div.style.cssText=`padding:5px;min-height:64px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:${items.length?'#f0fff8':'var(--white)'};${ds===today?'border-color:var(--gn2);':''}`;
-    div.innerHTML=`<div style="font-size:11px;font-weight:600;margin-bottom:3px;">${d}</div>`+
-    items.slice(0,2).map(b=>`<div style="font-size:9px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(b.name)}</div>`).join('')+
-    (items.length>2?`<div style="font-size:9px;color:var(--gray);">+${items.length-2}건</div>`:'');
+    div.style.cssText=`padding:5px;min-height:80px;border:1px solid ${isToday?'var(--gn2)':'var(--border)'};border-radius:6px;cursor:pointer;background:${isToday?'#eefaf3':'var(--white)'};${isToday?'box-shadow:0 0 0 1px var(--gn2);':''}overflow:hidden;`;
+    div.innerHTML=`<div style="margin-bottom:3px;"><span style="display:inline-block;min-width:18px;height:18px;line-height:18px;text-align:center;font-size:11px;font-weight:${isToday?800:600};${isToday?'background:var(--gn2);color:#fff;border-radius:9px;padding:0 4px;':''}">${d}</span></div>`+
+    items.slice(0,3).map(b=>{const tm=(b.datetime.split(' ')[1]||'').slice(0,5);return`<div style="font-size:9.5px;background:var(--gn2);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tm?tm+' ':''}${escapeHtml(b.hospital||b.name||'')}</div>`;}).join('')+
+    (items.length>3?`<div style="font-size:9.5px;color:#4f86c6;font-weight:700;">+${items.length-3}건</div>`:'');
     div.onclick=()=>{
       document.getElementById('cal-detail').style.display='block';
       document.getElementById('cal-detail').innerHTML=`<div class="card"><div class="card-title">${ds} — ${items.length}건</div>`+
@@ -1476,6 +1478,7 @@ function renderCalendar(){
   }
 }
 function calChange(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCalendar();}
+function calGoToday(){const n=new Date();calY=n.getFullYear();calM=n.getMonth();renderCalendar();}
 
 // ── 매출 ──
 function renderRevenue(){
