@@ -148,6 +148,7 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-section">👥 관리</div>
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals')"><span class="ic">🏥</span>병원 관리</a>
+    <a onclick="showPage('pricelists')"><span class="ic"></span>수가표 검색</a>
     <a onclick="showPage('ad_settings')"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('cat_rec')"><span class="ic">🏅</span>분야별 추천 병원</a>
     <a onclick="showPage('wanghongs')"><span class="ic">👑</span>왕홍·소개자</a>
@@ -189,6 +190,7 @@ tr:hover td{background:#fafaf8;}
   <div class="sidebar-section">👥 관리</div>
   <div class="sidebar-menu">
     <a onclick="showPage('hospitals');toggleDrawer()"><span class="ic">🏥</span>병원 관리</a>
+    <a onclick="showPage('pricelists');toggleDrawer()"><span class="ic"></span>수가표 검색</a>
     <a onclick="showPage('ad_settings');toggleDrawer()"><span class="ic">📢</span>병원 광고 설정</a>
     <a onclick="showPage('cat_rec');toggleDrawer()"><span class="ic">🏅</span>분야별 추천 병원</a>
     <a onclick="showPage('wanghongs');toggleDrawer()"><span class="ic">👑</span>왕홍·소개자</a>
@@ -215,6 +217,25 @@ tr:hover td{background:#fafaf8;}
 
 <!-- 정보 콘텐츠 관리 -->
 <style>.cpl{display:block;font-size:12px;font-weight:600;color:#555;margin:10px 0 4px;}.cpi{width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;font-family:inherit;}</style>
+<!-- 수가표 검색 (펄스 pricelists · pricelist-api 엣지함수 경유 · 다운로드 없음) -->
+<div class="page" id="page-pricelists">
+  <div class="card" style="padding:14px 16px;margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div><b style="font-size:15px;">수가표 검색</b> <span style="font-size:12px;color:var(--gray);">병원별·항목별 검색 — 펄스에 등록된 수가표를 그대로 조회합니다 (파일 다운로드 없음)</span></div>
+      <span id="pl-grade-note" style="font-size:11.5px;color:var(--gray);"></span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <select id="pl-hosp" onchange="plSearch()" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;min-width:250px;"></select>
+      <input id="pl-q" oninput="plDebounce()" placeholder="항목 검색 — 한국어 · 中文 · 분류 (예: 울쎄라 / 双眼皮 / 보톡스)" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;">
+    </div>
+    <div id="pl-note" style="font-size:11.5px;color:#92700c;margin-top:8px;"></div>
+  </div>
+  <div class="card" style="padding:0;overflow:auto;">
+    <div id="pl-meta" style="font-size:11.5px;color:var(--gray);padding:10px 14px 0;"></div>
+    <div id="pl-body" style="padding:8px 14px 14px;"></div>
+  </div>
+</div>
+
 <div class="page" id="page-content">
   <div class="card" style="padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
     <div><b style="font-size:15px;">📝 정보 콘텐츠</b> <span style="font-size:12px;color:var(--gray);">가이드·정보성 글을 이미지·영상과 함께 게시 — gnfollow.com 資訊 섹션에 노출됩니다</span></div>
@@ -2143,6 +2164,68 @@ function showPage(id){
   if(id==='foreign')renderForeign();
   if(id==='reviews'){loadReviews().then(renderAdminReviews);}
   if(id==='content')cpLoad();
+  if(id==='pricelists')plLoadIndex();
+}
+
+// ══ 수가표 검색 ═══════════════════════════════════════════════
+// 데이터 원본은 펄스(tbrtfccvsvtusfkqdyow)의 pricelists 테이블. 백오피스는 다른 Supabase 프로젝트라
+// 직접 읽을 수 없으므로, 로그인 세션의 access_token을 pricelist-api 엣지함수에 넘겨 검증받고 조회한다.
+// 내부(백오피스) 조회는 등급 제한 없이 전체를 본다 — 등급 제한은 파트너 포털에만 적용된다.
+const PL_API='https://tbrtfccvsvtusfkqdyow.supabase.co/functions/v1/pricelist-api';
+let PL_INDEX=null, _plTimer=null;
+async function plApi(body){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){return {error:'unauthorized'};}
+  const r=await fetch(PL_API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({gp_token:session.access_token},body))});
+  return r.json();
+}
+async function plLoadIndex(){
+  const meta=document.getElementById('pl-meta');
+  if(PL_INDEX){plSearch();return;}
+  meta.textContent='불러오는 중…';
+  const res=await plApi({action:'index'});
+  if(!res||!res.ok){meta.textContent='수가표를 불러오지 못했습니다'+(res&&res.error?' ('+res.error+')':'');return;}
+  PL_INDEX=res.hospitals||[];
+  const total=PL_INDEX.reduce(function(s,h){return s+(h.items||0);},0);
+  document.getElementById('pl-hosp').innerHTML='<option value="">전체 병원 통합검색 ('+PL_INDEX.length+'개 · '+total.toLocaleString()+'항목)</option>'
+    +PL_INDEX.map(function(h){return '<option value="'+escapeHtml(h.hospital)+'">'+escapeHtml(h.hospital)+' — '+(h.items||0)+'항목</option>';}).join('');
+  document.getElementById('pl-grade-note').textContent='내부 조회 · 전체 '+PL_INDEX.length+'개 병원';
+  plSearch();
+}
+function plDebounce(){clearTimeout(_plTimer);_plTimer=setTimeout(plSearch,280);}
+async function plSearch(){
+  const meta=document.getElementById('pl-meta'), body=document.getElementById('pl-body');
+  const hospital=document.getElementById('pl-hosp').value;
+  const q=document.getElementById('pl-q').value.trim();
+  const hit=(PL_INDEX||[]).find(function(h){return h.hospital===hospital;});
+  document.getElementById('pl-note').textContent=hit?(hit.note||''):'';
+  meta.textContent='불러오는 중…';
+  const res=await plApi({action:'search',hospital:hospital,q:q,limit:500});
+  if(!res||!res.ok){meta.textContent='조회 실패'+(res&&res.error?' ('+res.error+')':'');return;}
+  const rows=res.rows||[];
+  meta.textContent=(res.total||0).toLocaleString()+'건'+(res.limited?' 중 상위 '+rows.length+'건 표시 — 검색어를 좁혀주세요':'')
+    +(hit&&hit.updated?' · 기준 '+hit.updated:'');
+  if(!rows.length){body.innerHTML='<div style="padding:26px;text-align:center;color:var(--gray);font-size:12.5px;">검색 결과가 없습니다.</div>';return;}
+  const won=function(n){return n!=null?Number(n).toLocaleString()+'원':'-';};
+  const cols=hit?hit.cols:['가격','가격2'];
+  let html='<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #e5e7eb;">'
+    +(hospital?'':'<th style="text-align:left;padding:6px 8px;">병원</th>')
+    +'<th style="text-align:left;padding:6px 8px;">분류</th><th style="text-align:left;padding:6px 8px;">항목</th><th style="text-align:left;padding:6px 8px;">中文</th>'
+    +'<th style="text-align:right;padding:6px 8px;">'+escapeHtml(cols[0])+'</th><th style="text-align:right;padding:6px 8px;">'+escapeHtml(cols[1])+'</th>'
+    +'<th style="text-align:right;padding:6px 8px;">CNY</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    html+='<tr style="border-bottom:1px solid #f1f5f9;">'
+      +(hospital?'':'<td style="padding:5px 8px;color:#555;white-space:nowrap;">'+escapeHtml(r.hospital)+'</td>')
+      +'<td style="padding:5px 8px;color:#777;font-size:11px;">'+escapeHtml(r.cat)+'</td>'
+      +'<td style="padding:5px 8px;">'+escapeHtml(r.ko)+(r.ev?' <span style="font-size:10px;color:#B8960C;">('+escapeHtml(r.ev)+')</span>':'')+'</td>'
+      +'<td style="padding:5px 8px;color:#666;font-size:11px;">'+escapeHtml(r.zh)+'</td>'
+      +'<td style="padding:5px 8px;text-align:right;font-weight:600;white-space:nowrap;">'+won(r.krw)+'</td>'
+      +'<td style="padding:5px 8px;text-align:right;white-space:nowrap;">'+won(r.krw2)+'</td>'
+      +'<td style="padding:5px 8px;text-align:right;color:#B8960C;white-space:nowrap;">'+(r.cny!=null?'¥'+Number(r.cny).toLocaleString()+(r.cny2!=null?'~'+Number(r.cny2).toLocaleString():''):'-')+'</td>'
+      +'</tr>';
+  });
+  body.innerHTML=html+'</tbody></table>';
 }
 
 // ── 정보 콘텐츠 관리 (content_posts + content-media 스토리지) ──
