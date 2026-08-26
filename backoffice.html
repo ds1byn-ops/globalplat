@@ -1115,11 +1115,14 @@ async function showCaptcha(){
   });
 }
 
+// 2026-08-26: followkorea.kr 도메인 한정 로그인 차단(사용자 지시). gnfollow.com은 그대로 동작.
+function isFkKrHost(){ return /(^|\.)followkorea\.kr$/.test(location.hostname); }
 async function doLogin(){
   const errEl=document.getElementById('l-err');
   const email=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
   errEl.textContent='';
+  if(isFkKrHost()){ errEl.textContent='서비스가 종료되어 로그인이 중단되었습니다. 문의사항은 기존 담당자에게 연락해 주세요.'; return; }
 
   // 5회 이상 실패 시 게이트: 유효 키 있으면 캡차, 없으면 60초 잠금
   if(gateActive()){

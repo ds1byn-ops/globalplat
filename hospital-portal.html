@@ -432,11 +432,14 @@ async function dbLoad(){
 // 등록/수정/삭제는 본인 병원 것만 처리하는 단건 RPC로 대체됨.
 
 // ── 로그인 (서버 측 RPC로 비밀번호 해시 검증) ──
+// 2026-08-26: followkorea.kr 도메인 한정 로그인 차단(사용자 지시). gnfollow.com은 그대로 동작.
+function isFkKrHost(){ return /(^|\.)followkorea\.kr$/.test(location.hostname); }
 async function doLogin(){
   const id=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
   const errEl=document.getElementById('l-err');
   errEl.textContent='';
+  if(isFkKrHost()){ errEl.textContent='서비스가 종료되어 로그인이 중단되었습니다. 문의사항은 기존 담당자에게 연락해 주세요.'; return; }
   if(!id||!pw){ errEl.textContent='아이디와 비밀번호를 입력해주세요.'; return; }
   let res;
   try{
