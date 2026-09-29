@@ -739,7 +739,7 @@ tr:hover td{background:#fafaf8;}
     <div class="fitem"><label>예약 병원</label><select id="f-hosp"></select></div>
     <div class="fitem"><label>예약 일시</label><input type="datetime-local" id="f-dt"></div>
     <div class="fitem"><label>진료과목</label>
-      <select id="f-dept"><option>피부</option><option>성형외과</option><option>줄기세포</option><option>체형</option><option>산부인과</option><option>안과</option><option>기타</option></select>
+      <select id="f-dept"><option>피부·성형</option><option>줄기세포</option><option>체형</option><option>산부인과</option><option>안과</option><option>기타</option></select>
     </div>
     <div class="fitem"><label>성별</label><select id="f-gender"><option value="F">여성(F)</option><option value="M">남성(M)</option></select></div>
     <div class="fitem"><label>생년월일</label><input type="text" id="f-dob" placeholder="19900101" maxlength="10" oninput="fmtDob(this)"></div>
@@ -822,12 +822,12 @@ tr:hover td{background:#fafaf8;}
     <div class="fg">
       <div class="fitem"><label>중문명</label><input type="text" id="hd-name-zh" placeholder="中文 이름"></div>
       <div class="fitem"><label>영문명</label><input type="text" id="hd-name-en" placeholder="English Name"></div>
-      <div class="fitem"><label>진료부서(한)</label><input type="text" id="hd-dept-kr" placeholder="예: 성형외과/피부과"></div>
+      <div class="fitem"><label>진료부서(한)</label><input type="text" id="hd-dept-kr" placeholder="예: 피부·성형"></div>
       <div class="fitem"><label>진료부서(중)</label><input type="text" id="hd-dept-zh"></div>
       <div class="fitem"><label>진료부서(영)</label><input type="text" id="hd-dept-en"></div>
       <div class="fitem"><label>카테고리</label>
         <select id="hd-cat">
-          <option value="성형외과">성형외과</option><option value="피부">피부</option><option value="줄기세포">줄기세포</option>
+          <option value="피부·성형">피부·성형</option><option value="줄기세포">줄기세포</option>
           <option value="체형">체형</option><option value="여성의학">여성의학</option><option value="안과">안과</option>
           <option value="항노화">항노화</option><option value="치과">치과</option><option value="에스테틱">에스테틱</option>
           <option value="기타서비스">기타서비스</option>
@@ -1038,7 +1038,7 @@ function dbRowToHd(row, idx){
     showMain: !!row.show_on_main,
     nameZh: d.name_zh||'', nameEn: d.name_en||'',
     deptKr: d.dept_kr||'', deptZh: d.dept_zh||'', deptEn: d.dept_en||'',
-    cat: d.cat||'성형외과', icon: d.icon||'', badge: d.badge||'', badgePk: !!d.badge_pk,
+    cat: d.cat||'피부·성형', icon: d.icon||'', badge: d.badge||'', badgePk: !!d.badge_pk,
     treatsKr: d.treats_kr||[], treatsZh: d.treats_zh||[], treatsEn: d.treats_en||[],
     hoursMain: d.hours||'',
     locKr: d.loc_kr||'', locZh: d.loc_zh||'', locEn: d.loc_en||'',
@@ -1642,7 +1642,7 @@ function openHdModal(no){
     document.getElementById('hd-dept-kr').value=h.deptKr||'';
     document.getElementById('hd-dept-zh').value=h.deptZh||'';
     document.getElementById('hd-dept-en').value=h.deptEn||'';
-    document.getElementById('hd-cat').value=h.cat||'성형외과';
+    document.getElementById('hd-cat').value=h.cat||'피부·성형';
     document.getElementById('hd-icon').value=h.icon||'';
     document.getElementById('hd-badge').value=h.badge||'';
     document.getElementById('hd-badge-pk').checked=!!h.badgePk;
@@ -1664,7 +1664,7 @@ function openHdModal(no){
      'hd-treats-kr','hd-treats-zh','hd-treats-en','hd-hours','hd-loc-kr','hd-loc-zh','hd-loc-en',
      'hd-overview-kr','hd-overview-zh','hd-overview-en'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('hd-contract').value='미정';
-    document.getElementById('hd-cat').value='성형외과';
+    document.getElementById('hd-cat').value='피부·성형';
     document.getElementById('hd-show-main').checked=false;
     document.getElementById('hd-main-section').style.display='none';
     document.getElementById('hd-badge-pk').checked=false;
@@ -1869,7 +1869,7 @@ async function saveAdSettings(){
 
 // ── 분야별 추천 병원 (분야마다 최대 3곳, 지정 순서 = 노출 우선순위) ──
 // 카테고리 키는 프론트(index.html)의 CATORD와 반드시 동일해야 매칭됨.
-const CATREC_CATS=['성형외과','피부','줄기세포','항노화','체형','여성의학','안과','한방'];
+const CATREC_CATS=['피부·성형','줄기세포','항노화','체형','여성의학','안과','한방'];
 const CATREC_SLOTS=3;
 async function loadCatRecPage(){
   const wrap=document.getElementById('catrec-wrap');
