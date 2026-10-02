@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /backoffice.html
+Disallow: /hospital-portal.html
+Disallow: /quote-view.html
+Disallow: /aftercare.html
+Disallow: /renewal-preview.html
+Disallow: /lunch/
