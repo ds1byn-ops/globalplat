@@ -6,6 +6,6 @@ Disallow: /quote-view.html
 Disallow: /aftercare.html
 Disallow: /renewal-preview.html
 Disallow: /lunch/
-Disallow: /cn/
+Disallow: /info/
 
-Sitemap: https://followkorea.kr/sitemap.xml
+Sitemap: https://gnfollow.com/sitemap.xml

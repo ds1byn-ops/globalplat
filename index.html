@@ -377,6 +377,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   #fk-ai-trigger-fab{bottom:78px;}
 }
 </style>
+<!-- GEO:org-jsonld -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["Organization","TravelAgency"],"@id":"https://followkorea.co.kr/#org","name":"Follow Korea Co., Ltd.","alternateName":["주식회사 팔로우코리아","팔로우코리아","Gangnam Follow","江南FOLLOW","강남팔로우"],"url":"https://followkorea.co.kr/","email":"contact@followkorea.co.kr","logo":"https://followkorea.co.kr/fk-logo-r.png","description":"Foreign patient attraction agency registered with the Korean Ministry of Health and Welfare (Reg. No. A-2026-01-01-06622). Connects international patients with licensed partner clinics in Gangnam, Seoul, with multilingual consultation, interpretation and concierge services.","address":{"@type":"PostalAddress","streetAddress":"373 Gangnam-daero, 13F-116","addressLocality":"Seocho-gu","addressRegion":"Seoul","addressCountry":"KR"},"areaServed":"Worldwide","identifier":[{"@type":"PropertyValue","name":"Foreign Patient Attraction Agency Registration (Ministry of Health and Welfare, Korea)","value":"A-2026-01-01-06622"},{"@type":"PropertyValue","name":"General Travel Agency Registration","value":"2026-000022"}],"sameAs":["https://followkorea.co.kr/","https://followkorea.kr/","https://gnfollow.com/","https://pf.kakao.com/_xfZxjiX","https://www.xiaohongshu.com/user/profile/Followkorea_kr"]}</script>
 </head>
 <body>
 <div class="fk-app-shell">
@@ -746,7 +748,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
     <div class="footer-col">
       <h4 data-i18n="f_h2">关于我们</h4>
       <a onclick="document.getElementById('about-modal-bg').classList.add('open')" style="cursor:pointer;" data-i18n="f_about">公司介绍</a>
-      <a data-i18n="f_partner">合作医院</a>
+      <a id="fk-geo-clinics" href="info/clinics-en.html" data-i18n="f_partner">合作医院</a>
+      <a id="fk-geo-faq" href="info/faq-en.html" data-i18n="nav_faq">常见问题</a>
       <a data-i18n="f_contact">联系我们</a>
     </div>
     <div class="footer-col">
@@ -787,6 +790,8 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
   </div>
   <div class="footer-bottom">© 2026 <span data-i18n="brand_name">江南FOLLOW</span> · FOLLOW KOREA Co., Ltd. All rights reserved.</div>
 </footer>
+<!-- GEO:footer-links -->
+<script>(function(){var c=document.getElementById("fk-geo-clinics"),q=document.getElementById("fk-geo-faq");if(!c||!q)return;if(location.hostname.indexOf("gnfollow")>=0){c.href="/cn/clinics.html";q.href="/cn/faq.html";return;}var l=(navigator.language||"en").slice(0,2).toLowerCase();var F={en:1,zh:1,ja:1,vi:1,th:1,ru:1,mn:1,id:1};if(F[l]){q.href="info/faq-"+l+".html";}if(l==="zh"){c.href="info/clinics-zh.html";}})();</script>
 </div><!-- /main-view -->
 
 <!-- 병원 상세 -->

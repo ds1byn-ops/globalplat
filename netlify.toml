@@ -16,3 +16,27 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=()"
+
+# GEO(AI 검색) — gnfollow.com은 중국어 전용 robots·사이트맵·llms.txt를 쓴다 (followkorea.kr=GitHub Pages는 기본 파일 사용)
+# 파일 생성: node tools/build_geo_pages.cjs
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots-gnfollow.txt"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap-gnfollow.xml"
+  status = 200
+  force = true
+[[redirects]]
+  from = "/llms.txt"
+  to = "/llms-gnfollow.txt"
+  status = 200
+  force = true
+
+# followkorea.kr용 외국어 정보 페이지(info/)는 gnfollow.com에서 색인 제외 — 중국판은 cn/ 사용
+[[headers]]
+  for = "/info/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
