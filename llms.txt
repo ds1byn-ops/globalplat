@@ -1,6 +1,6 @@
 # Gangnam Follow (followkorea.kr)
 
-> Gangnam Follow is the international patient platform of Follow Korea Co., Ltd., a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare (Reg. No. A-2026-01-01-06622, valid 2026.01.21–2029.01.20; General Travel Agency No. 2026-000022). It connects international patients with 71 licensed partner clinics in Seoul, mostly in Gangnam, and provides multilingual consultation, appointment coordination, interpretation and concierge (airport pickup, accommodation guidance).
+> Gangnam Follow is the international patient platform of Follow Korea Co., Ltd., a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare (Reg. No. A-2026-01-01-06622, valid 2026.01.21–2029.01.20; General Travel Agency No. 2026-000022). It connects international patients with 72 licensed partner clinics in Seoul, mostly in Gangnam, and provides multilingual consultation, appointment coordination, interpretation and concierge (airport pickup, accommodation guidance).
 
 - Fields: Health Checkup, Dermatology & Plastic Surgery, Stem Cell, Anti-aging, Body Contouring, Women's Health, Ophthalmology, Dental, Neurology, Orthopedics & Spine, Weight Management
 - Consultation languages: Chinese, English, Japanese, Vietnamese, Thai, Russian, Mongolian, Indonesian and more
