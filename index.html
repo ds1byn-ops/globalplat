@@ -478,6 +478,7 @@ html[dir="rtl"] .fitem label,html[dir="rtl"] .fkq-field label{text-align:right;}
 <section class="section" style="background:var(--white);padding-top:18px;padding-bottom:8px;">
   <div class="section-inner">
     <div class="cat-grid-fixed" id="cat-grid"></div>
+    <div id="region-grid" style="display:none;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;"></div>
     <a id="rquote-banner" href="quote.html" style="display:none;margin-top:14px;text-decoration:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(120deg,#5a82c2,#4a6da3);border-radius:16px;padding:16px 20px;color:#fff;">
         <div>
@@ -2291,7 +2292,7 @@ function setLang(l){
     vi:'Nhập câu hỏi...',th:'พิมพ์คำถาม...',ja:'質問を入力...',ru:'Введите вопрос...',mn:'Асуулт оруулна уу...',id:'Ketik pertanyaan Anda...'};
     aiPh.placeholder=phs[l]||phs.zh;}
   applyI18n();
-  renderCats(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides(); renderHeroBadge();
+  renderCats(); renderRegions(); filterHosps(); renderSteps(); renderReviews(); renderFaq(); renderBannerSlides(); renderHeroBadge();
   try{ if(typeof renderContentPosts==='function' && CONTENT.length) renderContentPosts(); }catch(e){}
   if(currentHosp) renderDetail(currentHosp);
   if(typeof applyPriceI18n==='function'){ var _sp=document.getElementById('sec-price'); if(_sp&&_sp.style.display!=='none'){ applyPriceI18n(); renderPriceCats(); renderPrice(); } }
@@ -2343,6 +2344,42 @@ function applyI18n(){
   }
 }
 
+// ── 지역 필터 (2026-10-24 신설) ──
+// 병원 loc/locMap(한국어)에서 지역을 자동 추출해, 병원이 있는 지역만 칩으로 표시한다.
+// 분야(activeCat)와 지역(activeRegion)은 AND로 결합. 지역이 1곳뿐이면 행을 숨긴다(대부분 서울일 때 불필요한 UI 제거).
+let activeRegion='';
+const REGION_ORDER=['서울','경기·인천','부산','제주','대구','기타'];
+const REGION_L10N={
+  '서울':{ko:'서울',zh:'首尔',en:'Seoul',vi:'Seoul',th:'โซล',ja:'ソウル',ru:'Сеул',mn:'Сөүл',id:'Seoul',ar:'سيول'},
+  '경기·인천':{ko:'경기·인천',zh:'京畿·仁川',en:'Gyeonggi·Incheon',vi:'Gyeonggi·Incheon',th:'คยองกี·อินชอน',ja:'京畿·仁川',ru:'Кёнгидо·Инчхон',mn:'Гёнги',id:'Gyeonggi·Incheon',ar:'كيونغي·إنتشون'},
+  '부산':{ko:'부산',zh:'釜山',en:'Busan',vi:'Busan',th:'ปูซาน',ja:'釜山',ru:'Пусан',mn:'Бусан',id:'Busan',ar:'بوسان'},
+  '제주':{ko:'제주',zh:'济州',en:'Jeju',vi:'Jeju',th:'เชจู',ja:'済州',ru:'Чеджу',mn:'Жэжү',id:'Jeju',ar:'جيجو'},
+  '대구':{ko:'대구',zh:'大邱',en:'Daegu',vi:'Daegu',th:'แทกู',ja:'大邱',ru:'Тэгу',mn:'Дэгү',id:'Daegu',ar:'دايغو'},
+  '기타':{ko:'기타',zh:'其他',en:'Other',vi:'Khác',th:'อื่นๆ',ja:'その他',ru:'Другое',mn:'Бусад',id:'Lainnya',ar:'أخرى'}
+};
+function regionOf(h){
+  const s=(((h&&h.locMap&&h.locMap.ko)||'')+' '+((h&&h.loc)||'')).toLowerCase();
+  if(/부산|busan/.test(s))return '부산';
+  if(/제주|jeju/.test(s))return '제주';
+  if(/대구|daegu/.test(s))return '대구';
+  if(/부천|경기|인천|수원|성남|고양|용인|안양|김포|화성|의정부|광명|시흥|평택|bucheon|gyeonggi|incheon|suwon|seongnam|goyang|yongin|anyang|gimpo|hwaseong|pyeongtaek/.test(s))return '경기·인천';
+  return '서울'; // 기본값: 대부분 서울·강남
+}
+function regionLabel(r){ const m=REGION_L10N[r]; return (m&&(m[lang]||m.en))||r; }
+function renderRegions(){
+  const grid=document.getElementById('region-grid'); if(!grid||typeof HOSPS==='undefined')return;
+  const present={}; HOSPS.forEach(h=>{ if(!/기타서비스/.test(h.cat||'')) present[regionOf(h)]=1; });
+  const regions=REGION_ORDER.filter(r=>present[r]);
+  if(regions.length<=1){ grid.innerHTML=''; grid.style.display='none'; activeRegion=''; return; }
+  grid.style.display='flex';
+  const L=lang;
+  const allLabel=({ko:'전국',zh:'全国',en:'All',vi:'Toàn quốc',th:'ทั้งหมด',ja:'全国',ru:'Все',mn:'Бүх',id:'Semua',ar:'الكل'})[L]||'All';
+  const lbl=({ko:'지역',zh:'地区',en:'Region',vi:'Khu vực',th:'ภูมิภาค',ja:'地域',ru:'Регион',mn:'Бүс',id:'Wilayah',ar:'المنطقة'})[L]||'Region';
+  const chip=(r,label)=>{const on=activeRegion===r;return `<button type="button" class="region-chip" data-r="${r}" style="padding:6px 14px;border-radius:999px;border:1px solid ${on?'#5a82c2':'#d5deeb'};background:${on?'#5a82c2':'#fff'};color:${on?'#fff':'#44546a'};font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">${label}</button>`;};
+  grid.innerHTML='<span style="font-size:12px;color:#8a97a8;font-weight:700;margin-right:2px;">'+lbl+'</span>'+chip('',allLabel)+regions.map(r=>chip(r,regionLabel(r))).join('');
+  grid.querySelectorAll('.region-chip').forEach(el=>{ el.onclick=function(){ setRegion(this.dataset.r); }; });
+}
+function setRegion(r){ activeRegion=r||''; renderRegions(); filterHosps(); const hs=document.getElementById('sec-hosps'); if(hs) setTimeout(()=>hs.scrollIntoView({behavior:'smooth',block:'start'}),90); }
 function renderCats(){
   const cats=t('cats');
   const grid=document.getElementById('cat-grid');
@@ -2538,7 +2575,8 @@ function filterHosps(){
     //  재호출되면 어떤 병원의 cat에도 없어 전체병원 목록이 통째로 비던 문제 근본 차단)
     const isExtraActive=(typeof EXTRA_CATS_KR!=='undefined')&&EXTRA_CATS_KR.includes(activeCat);
     const mc=!activeCat||isExtraActive||h.cat.split('/').includes(catMap[activeCat]||activeCat);
-    return mq&&mc;
+    const mr=!activeRegion||regionOf(h)===activeRegion;
+    return mq&&mc&&mr;
   });
 
   // 추천(광고) 병원 최대 10개 분리 (백오피스 설정값, 없으면 HOSPS 맨 앞 2개 기본값)
@@ -2631,8 +2669,8 @@ function filterHosps(){
   }
 
   // 나머지 병원: 분야(카테고리)별 아코디언 — 썸네일 없이 텍스트 목록(3.8MB 이미지 미사용)
-  const CATORD=['피부·성형','줄기세포','항노화','체형','다이어트','여성의학','안과','한방','치과','검진','신경과','정형·척추','기타서비스'];
-  const CATI18N={'정형·척추':{zh:'骨科·脊柱',en:'Orthopedics & Spine',ja:'整形外科・脊椎',vi:'Chỉnh hình & Cột sống',th:'กระดูกและกระดูกสันหลัง',ru:'Ортопедия и позвоночник'},'다이어트':{zh:'减重管理',en:'Weight Management',ja:'ダイエット',vi:'Giảm cân',th:'ลดน้ำหนัก',ru:'Снижение веса'},'기타서비스':{zh:'其他服务',en:'Other Services',ja:'その他サービス',vi:'Dịch vụ khác',th:'บริการอื่นๆ',ru:'Другие услуги'},'피부·성형':{zh:'皮肤·整形',en:'Skin & Plastic Surgery',ja:'皮膚・整形',vi:'Da liễu & Phẫu thuật',th:'ผิวพรรณ & ศัลยกรรม',ru:'Кожа и пластика'},'줄기세포':{zh:'干细胞',en:'Stem Cell'},'항노화':{zh:'抗衰老',en:'Anti-aging'},'체형':{zh:'体型管理',en:'Body'},'여성의학':{zh:'女性医学',en:"Women's Health"},'안과':{zh:'眼科',en:'Eye'},'한방':{zh:'韩医',en:'Korean Medicine'},'치과':{zh:'牙科',en:'Dental',vi:'Nha khoa',th:'ทันตกรรม',ja:'歯科',ru:'Стоматология'},'검진':{zh:'健康体检',en:'Health Checkup',vi:'Khám sức khỏe',th:'ตรวจสุขภาพ',ja:'健康診断',ru:'Чекап'},'신경과':{zh:'神经内科',en:'Neurology',vi:'Thần kinh',th:'ประสาทวิทยา',ja:'神経内科',ru:'Неврология'},'기타':{zh:'其他',en:'Others'}};
+  const CATORD=['피부·성형','줄기세포','항노화','체형','다이어트','여성의학','안과','한방','치과','검진','신경과','정형·척추','하지정맥류','기타서비스'];
+  const CATI18N={'정형·척추':{zh:'骨科·脊柱',en:'Orthopedics & Spine',ja:'整形外科・脊椎',vi:'Chỉnh hình & Cột sống',th:'กระดูกและกระดูกสันหลัง',ru:'Ортопедия и позвоночник'},'다이어트':{zh:'减重管理',en:'Weight Management',ja:'ダイエット',vi:'Giảm cân',th:'ลดน้ำหนัก',ru:'Снижение веса'},'기타서비스':{zh:'其他服务',en:'Other Services',ja:'その他サービス',vi:'Dịch vụ khác',th:'บริการอื่นๆ',ru:'Другие услуги'},'피부·성형':{zh:'皮肤·整形',en:'Skin & Plastic Surgery',ja:'皮膚・整形',vi:'Da liễu & Phẫu thuật',th:'ผิวพรรณ & ศัลยกรรม',ru:'Кожа и пластика'},'줄기세포':{zh:'干细胞',en:'Stem Cell'},'항노화':{zh:'抗衰老',en:'Anti-aging'},'체형':{zh:'体型管理',en:'Body'},'여성의학':{zh:'女性医学',en:"Women's Health"},'안과':{zh:'眼科',en:'Eye'},'한방':{zh:'韩医',en:'Korean Medicine'},'치과':{zh:'牙科',en:'Dental',vi:'Nha khoa',th:'ทันตกรรม',ja:'歯科',ru:'Стоматология'},'검진':{zh:'健康体检',en:'Health Checkup',vi:'Khám sức khỏe',th:'ตรวจสุขภาพ',ja:'健康診断',ru:'Чекап'},'신경과':{zh:'神经内科',en:'Neurology',vi:'Thần kinh',th:'ประสาทวิทยา',ja:'神経内科',ru:'Неврология'},'하지정맥류':{zh:'下肢静脉曲张',en:'Varicose Veins',ja:'下肢静脈瘤',vi:'Suy giãn tĩnh mạch',th:'เส้นเลือดขอด',ru:'Варикоз'},'기타':{zh:'其他',en:'Others'}};
   const catLbl=c=>{ if(lang==='ko')return c; const m=CATI18N[c]; return m?(m[lang]||m.en||c):c; };
   const groups={};
   // 특정 분야 선택 시: 매칭된 병원을 '그 분야' 그룹으로 묶어 표시.
@@ -3726,6 +3764,7 @@ loadReviews();
 // 로드 완료되면 카드 썸네일만 업그레이드하는 재렌더 수행.
 Promise.all([fkhLoadRecommendedSetting(), fkhLoadCatRec(), loadDynamicHospitals()]).then(()=>{
   renderCats();
+  renderRegions();
   filterHosps();
   if(typeof renderPrice==='function'){ var _sp=document.getElementById('sec-price'); if(_sp&&_sp.style.display!=='none') renderPrice(); }
 });
