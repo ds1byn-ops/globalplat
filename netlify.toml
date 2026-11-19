@@ -11,43 +11,24 @@
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    # 검색엔진·AI 색인 차단 (2026-11-19)
+    X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate"
     # 보안 헤더 (클릭재킹/MIME 스니핑/레퍼러). 병원포털·백오피스 포함 프레이밍 차단.
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=()"
 
-# GEO(AI 검색) — 이 Netlify 사이트는 followkorea.kr과 gnfollow.com을 함께 서빙한다.
-# gnfollow.com에서만 중국어 전용 robots·사이트맵·llms.txt로 바꾼다(도메인 지정 규칙). followkorea.kr은 기본 파일 그대로.
-# 헤더는 도메인별로 나눌 수 없으므로 noindex 헤더는 쓰지 않는다 — info/ 페이지는 canonical이 followkorea.kr이고 gnfollow robots가 /info/를 막는다.
-# 파일 생성: node tools/build_geo_pages.cjs
+# 이 Netlify 사이트는 followkorea.kr과 gnfollow.com을 함께 서빙한다.
+# 2026-11-19: 두 도메인 모두 검색·AI 색인 차단으로 전환 — sitemap.xml·llms.txt 삭제, robots는 차단본.
+# 헤더는 도메인 구분이 안 되지만 양쪽 다 차단 대상이라 /* 에 X-Robots-Tag를 건다(위 headers 블록).
 [[redirects]]
   from = "https://gnfollow.com/robots.txt"
   to = "/robots-gnfollow.txt"
   status = 200
   force = true
 [[redirects]]
-  from = "https://gnfollow.com/sitemap.xml"
-  to = "/sitemap-gnfollow.xml"
-  status = 200
-  force = true
-[[redirects]]
-  from = "https://gnfollow.com/llms.txt"
-  to = "/llms-gnfollow.txt"
-  status = 200
-  force = true
-[[redirects]]
   from = "https://www.gnfollow.com/robots.txt"
   to = "/robots-gnfollow.txt"
-  status = 200
-  force = true
-[[redirects]]
-  from = "https://www.gnfollow.com/sitemap.xml"
-  to = "/sitemap-gnfollow.xml"
-  status = 200
-  force = true
-[[redirects]]
-  from = "https://www.gnfollow.com/llms.txt"
-  to = "/llms-gnfollow.txt"
   status = 200
   force = true
