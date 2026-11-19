@@ -4,6 +4,18 @@
 // 출력: info/(followkorea.kr용 외국어 페이지), cn/(gnfollow.com용 중문 페이지), sitemap·llms·robots
 // 환자 대상 페이지는 한국어판을 만들지 않는다 — 외국인환자 유치 광고의 국내 노출 금지(의료해외진출법 제15조).
 // gnfollow.com(중국)은 가격·효과 언급 금지 원칙에 따라 가격·회복기간 문항을 뺀다.
+
+// =====================================================================
+// ⛔ 2026-11-19: 이 사이트는 검색·AI 색인을 전면 차단한 상태다.
+//    (robots.txt 차단본 · X-Robots-Tag: noindex · 모든 HTML meta robots noindex)
+//    이 스크립트는 robots.txt·sitemap.xml·llms.txt를 다시 만들어 그 차단을 되돌린다.
+//    색인을 다시 켜려는 게 아니면 실행하지 말 것. 의도한 것이라면 ALLOW_GEO=1 로 실행한다.
+// =====================================================================
+if (process.env.ALLOW_GEO !== '1') {
+  console.error('중단: 이 사이트는 검색·AI 색인 차단 상태입니다(2026-11-19). 되돌리려면 ALLOW_GEO=1 로 실행하세요.');
+  process.exit(1);
+}
+
 const fs = require('fs');
 const path = require('path');
 
