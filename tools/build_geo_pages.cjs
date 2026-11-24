@@ -250,7 +250,7 @@ function orgLd(siteUrl, brand) {
       { '@type': 'PropertyValue', name: 'Foreign Patient Attraction Agency Registration (Ministry of Health and Welfare, Korea)', value: ORG.regNo },
       { '@type': 'PropertyValue', name: 'General Travel Agency Registration', value: ORG.travelNo },
     ],
-    sameAs: [ORG.corp, 'https://followkorea.kr/', 'https://gnfollow.com/', ORG.kakao, 'https://www.xiaohongshu.com/user/profile/' + ORG.xhs],
+    sameAs: [ORG.corp, 'https://followkorea.kr/', 'https://gnfollow.com/', 'https://www.xiaohongshu.com/user/profile/' + ORG.xhs],
     subjectOf: siteUrl,
   };
 }
