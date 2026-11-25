@@ -58,7 +58,7 @@ function grab(name) {
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const nl2br = (s) => esc(s).split('\n').join('<br>');
-const jsonld = (o) => '<script type="application/ld+json">' + JSON.stringify(o).split('</').join('<\\/') + '</script>';
+const jsonld = (o) => '';  // 구조화 데이터(ld+json) 제거 (2026-11-25)
 
 const CAT = {
   '검진': { en: 'Health Checkup', zh: '健康体检' },
