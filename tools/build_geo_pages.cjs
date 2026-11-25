@@ -28,9 +28,6 @@ const ORG = {
   nameEn: 'Follow Korea Co., Ltd.',
   nameKo: '주식회사 팔로우코리아',
   nameZh: 'Follow Korea（株式会社 팔로우코리아）',
-  regNo: 'A-2026-01-01-06622',
-  regPeriod: '2026.01.21–2029.01.20',
-  travelNo: '2026-000022',
   addrEn: '13F-116, 373 Gangnam-daero, Seocho-gu, Seoul, Republic of Korea',
   street: '373 Gangnam-daero, 13F-116',
   email: 'contact@followkorea.co.kr',
@@ -141,14 +138,14 @@ const EXTRA_FAQ = [
       id: 'Apakah Follow Korea agen resmi berizin?',
     },
     a: {
-      en: `Yes. ${ORG.nameEn} is registered with Korea's Ministry of Health and Welfare as a foreign patient attraction agency (Reg. No. ${ORG.regNo}) and holds a general travel agency license (No. ${ORG.travelNo}). We refer patients only to licensed medical institutions in Korea.`,
-      zh: `是的。Follow Korea 已在韩国保健福祉部登记为外国患者招揽机构（登记号 ${ORG.regNo}），并持有综合旅行业执照（第 ${ORG.travelNo} 号）。我们只对接韩国正规医疗机构。`,
-      ja: `はい。株式会社Follow Koreaは韓国保健福祉部に外国人患者誘致事業者として登録されており（登録番号 ${ORG.regNo}）、総合旅行業（第${ORG.travelNo}号）の登録も行っています。ご案内先は韓国の正規医療機関のみです。`,
-      vi: `Có. Công ty Follow Korea đã đăng ký với Bộ Y tế và Phúc lợi Hàn Quốc là đơn vị thu hút bệnh nhân nước ngoài (số đăng ký ${ORG.regNo}) và có giấy phép kinh doanh lữ hành tổng hợp (số ${ORG.travelNo}). Chúng tôi chỉ giới thiệu đến các cơ sở y tế hợp pháp tại Hàn Quốc.`,
-      th: `ใช่ บริษัท Follow Korea จดทะเบียนกับกระทรวงสาธารณสุขและสวัสดิการเกาหลีเป็นผู้ประกอบการจัดหาผู้ป่วยต่างชาติ (เลขทะเบียน ${ORG.regNo}) และมีใบอนุญาตธุรกิจนำเที่ยว (เลขที่ ${ORG.travelNo}) เราแนะนำเฉพาะสถานพยาบาลที่ได้รับอนุญาตในเกาหลีเท่านั้น`,
-      ru: `Да. Компания Follow Korea зарегистрирована Министерством здравоохранения и социального обеспечения Кореи как агентство по привлечению иностранных пациентов (рег. № ${ORG.regNo}) и имеет лицензию туроператора (№ ${ORG.travelNo}). Мы направляем пациентов только в лицензированные медицинские учреждения Кореи.`,
-      mn: `Тийм. Follow Korea компани нь Солонгосын Эрүүл мэнд, нийгмийн хамгааллын яаманд гадаад өвчтөн татах байгууллагаар бүртгэлтэй (бүртгэлийн дугаар ${ORG.regNo}) бөгөөд аялал жуулчлалын тусгай зөвшөөрөлтэй (№ ${ORG.travelNo}). Бид зөвхөн Солонгосын албан ёсны эмнэлгүүдтэй холбож өгдөг.`,
-      id: `Ya. ${ORG.nameEn} terdaftar di Kementerian Kesehatan dan Kesejahteraan Korea sebagai agen penarik pasien asing (No. Reg. ${ORG.regNo}) dan memiliki izin biro perjalanan umum (No. ${ORG.travelNo}). Kami hanya merujuk ke fasilitas medis berizin di Korea.`,
+      en: `Yes. ${ORG.nameEn} is registered with Korea's Ministry of Health and Welfare as a foreign patient attraction agency and holds a general travel agency license. We refer patients only to licensed medical institutions in Korea.`,
+      zh: `是的。Follow Korea 已在韩国保健福祉部登记为外国患者招揽机构，并持有综合旅行业执照。我们只对接韩国正规医疗机构。`,
+      ja: `はい。株式会社Follow Koreaは韓国保健福祉部に外国人患者誘致事業者として登録されており、総合旅行業の登録も行っています。ご案内先は韓国の正規医療機関のみです。`,
+      vi: `Có. Công ty Follow Korea đã đăng ký với Bộ Y tế và Phúc lợi Hàn Quốc là đơn vị thu hút bệnh nhân nước ngoài và có giấy phép kinh doanh lữ hành tổng hợp. Chúng tôi chỉ giới thiệu đến các cơ sở y tế hợp pháp tại Hàn Quốc.`,
+      th: `ใช่ บริษัท Follow Korea จดทะเบียนกับกระทรวงสาธารณสุขและสวัสดิการเกาหลีเป็นผู้ประกอบการจัดหาผู้ป่วยต่างชาติ และมีใบอนุญาตธุรกิจนำเที่ยว เราแนะนำเฉพาะสถานพยาบาลที่ได้รับอนุญาตในเกาหลีเท่านั้น`,
+      ru: `Да. Компания Follow Korea зарегистрирована Министерством здравоохранения и социального обеспечения Кореи как агентство по привлечению иностранных пациентов и имеет лицензию туроператора. Мы направляем пациентов только в лицензированные медицинские учреждения Кореи.`,
+      mn: `Тийм. Follow Korea компани нь Солонгосын Эрүүл мэнд, нийгмийн хамгааллын яаманд гадаад өвчтөн татах байгууллагаар бүртгэлтэй бөгөөд аялал жуулчлалын тусгай зөвшөөрөлтэй. Бид зөвхөн Солонгосын албан ёсны эмнэлгүүдтэй холбож өгдөг.`,
+      id: `Ya. ${ORG.nameEn} terdaftar di Kementerian Kesehatan dan Kesejahteraan Korea sebagai agen penarik pasien asing dan memiliki izin biro perjalanan umum. Kami hanya merujuk ke fasilitas medis berizin di Korea.`,
     },
   },
   {
@@ -224,7 +221,7 @@ ${ld.map(jsonld).join('\n')}
 ${body}
 </main>
 <footer>
-${esc(ORG.nameEn)} · Foreign Patient Attraction Agency Reg. No. ${ORG.regNo} (${ORG.regPeriod}) · General Travel Agency No. ${ORG.travelNo}<br>
+${esc(ORG.nameEn)}<br>
 ${esc(ORG.addrEn)} · <a href="mailto:${ORG.email}">${ORG.email}</a> · <a href="${ORG.corp}">followkorea.co.kr</a><br>
 LINE ${ORG.line} · WhatsApp ${ORG.whatsapp} · WeChat ${ORG.wechat} · 小红书 ${ORG.xhs}<br>
 Updated ${TODAY}
@@ -246,10 +243,6 @@ function orgLd(siteUrl, brand) {
     logo: 'https://followkorea.co.kr/fk-logo-r.png',
     address: { '@type': 'PostalAddress', streetAddress: ORG.street, addressLocality: 'Seocho-gu', addressRegion: 'Seoul', addressCountry: 'KR' },
     areaServed: 'Worldwide',
-    identifier: [
-      { '@type': 'PropertyValue', name: 'Foreign Patient Attraction Agency Registration (Ministry of Health and Welfare, Korea)', value: ORG.regNo },
-      { '@type': 'PropertyValue', name: 'General Travel Agency Registration', value: ORG.travelNo },
-    ],
     sameAs: [ORG.corp, 'https://followkorea.kr/', 'https://gnfollow.com/', 'https://www.xiaohongshu.com/user/profile/' + ORG.xhs],
     subjectOf: siteUrl,
   };
@@ -269,8 +262,8 @@ function clinicsPage({ lang, site, base, hosps, alternates }) {
     ? `韩国首尔合作医院一览（${n}家）| ${site === 'gnfollow' ? '江南FOLLOW' : 'Follow Korea'}`
     : `Partner clinics in Seoul, Korea (${n}) – Gangnam dermatology, plastic surgery & health checkups | Follow Korea`;
   const intro = isZh
-    ? `以下是 Follow Korea（韩国政府登记外国患者招揽机构，登记号 ${ORG.regNo}）合作的 ${n} 家韩国医疗机构，主要位于首尔江南一带，涵盖${cats.map((c) => CAT[c].zh).join('、')}等领域。可提供中文咨询、预约协调及翻译陪同。`
-    : `These are the ${n} licensed medical institutions in Korea that partner with Follow Korea, a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare (Reg. No. ${ORG.regNo}). Most are in Gangnam, Seoul, covering ${cats.map((c) => CAT[c].en).join(', ')}. Follow Korea provides multilingual consultation, appointment coordination and medical interpretation.`;
+    ? `以下是 Follow Korea（韩国政府登记外国患者招揽机构）合作的 ${n} 家韩国医疗机构，主要位于首尔江南一带，涵盖${cats.map((c) => CAT[c].zh).join('、')}等领域。可提供中文咨询、预约协调及翻译陪同。`
+    : `These are the ${n} licensed medical institutions in Korea that partner with Follow Korea, a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare. Most are in Gangnam, Seoul, covering ${cats.map((c) => CAT[c].en).join(', ')}. Follow Korea provides multilingual consultation, appointment coordination and medical interpretation.`;
   let body = `<h1>${isZh ? '韩国首尔合作医院一览' : 'Partner Clinics in Seoul, Korea'}</h1>\n<p class="intro">${esc(intro)}</p>\n`;
   if (alternates.length > 1) body += `<p class="langs">${alternates.filter((a) => a.hreflang !== 'x-default').map((a) => `<a href="${a.href}">${LANG_NAME[a.hreflang.slice(0, 2)] || a.hreflang}</a>`).join('')}</p>\n`;
   const items = [];
@@ -379,7 +372,7 @@ function write(rel, content) {
   const catsEn = CAT_ORDER.filter((c) => hosps.some((h) => String(h.cat).split('/')[0] === c)).map((c) => CAT[c].en);
   write('llms.txt', `# Gangnam Follow (followkorea.kr)
 
-> Gangnam Follow is the international patient platform of ${ORG.nameEn}, a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare (Reg. No. ${ORG.regNo}, valid ${ORG.regPeriod}; General Travel Agency No. ${ORG.travelNo}). It connects international patients with ${hosps.length} licensed partner clinics in Seoul, mostly in Gangnam, and provides multilingual consultation, appointment coordination, interpretation and concierge (airport pickup, accommodation guidance).
+> Gangnam Follow is the international patient platform of ${ORG.nameEn}, a foreign patient attraction agency registered with Korea's Ministry of Health and Welfare. It connects international patients with ${hosps.length} licensed partner clinics in Seoul, mostly in Gangnam, and provides multilingual consultation, appointment coordination, interpretation and concierge (airport pickup, accommodation guidance).
 
 - Fields: ${catsEn.join(', ')}
 - Consultation languages: Chinese, English, Japanese, Vietnamese, Thai, Russian, Mongolian, Indonesian and more
@@ -398,7 +391,7 @@ ${FAQ_LANGS.filter((l) => l !== 'en').map((l) => `- [FAQ (${LANG_NAME[l]})](${FK
 `);
   write('llms-gnfollow.txt', `# 江南FOLLOW (gnfollow.com)
 
-> 江南FOLLOW 是韩国 ${ORG.nameEn}（韩国保健福祉部登记外国患者招揽机构，登记号 ${ORG.regNo}；综合旅行业 第${ORG.travelNo}号）面向中文用户的韩国医疗旅游服务平台，为顾客对接首尔江南等地 ${hosps.length} 家正规合作医疗机构，并提供中文咨询、预约协调、翻译陪同与接送等服务。
+> 江南FOLLOW 是韩国 ${ORG.nameEn}（韩国保健福祉部登记外国患者招揽机构）面向中文用户的韩国医疗旅游服务平台，为顾客对接首尔江南等地 ${hosps.length} 家正规合作医疗机构，并提供中文咨询、预约协调、翻译陪同与接送等服务。
 
 - 联系方式：微信 ${ORG.wechat} · 小红书 ${ORG.xhs} · 抖音 ${ORG.douyin} · ${ORG.email}
 - 公司地址：${ORG.addrEn}
